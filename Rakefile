@@ -33,13 +33,7 @@ Jeweler::Tasks.new do |gem|
   gem.email                 = "adrian.webb@coraltech.net"
   gem.authors               = ["Adrian Webb"]
   gem.summary               = %Q{Provides core data elements and utilities used in other Coral gems}
-  gem.description           = %Q{
-    The Coral core library contains functionality that is utilized by other
-    Coral gems by providing basic utilities like Git, Shell, Disk, and Data
-    manipulation libraries, a UI system, and a core data model that supports
-    Events, Commands, Repositories, and Memory (version controlled JSON 
-    objects).  This library is only used as a starting point for other systems.
-  }  
+  gem.description           = File.read('README.rdoc')  
   gem.required_ruby_version = '>= 1.8.1'
   gem.has_rdoc              = true
   gem.rdoc_options << '--title' << 'Coral Core library' <<
