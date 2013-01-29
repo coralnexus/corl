@@ -166,10 +166,3 @@ class Event < Core
   end
 end
 end
-
-#-------------------------------------------------------------------------------
-# Include all child events automatically
-
-Dir.glob(File.join(File.dirname(__FILE__), 'event', '*.rb')).each do |file|
-  require file
-end

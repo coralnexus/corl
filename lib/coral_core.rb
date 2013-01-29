@@ -10,17 +10,27 @@ require 'rubygems'
 
 # Include core
 [ :ui, :core ].each do |name| 
-  require File.join('coral_core', name.to_s) 
+  require File.join('coral_core', name.to_s + ".rb") 
 end
 
 # Include utilities
-[ :data, :disk, :gitlib, :shell ].each do |name| 
-  require File.join('coral_core', 'util', name.to_s) 
+[ :git, :data, :disk, :shell ].each do |name| 
+  require File.join('coral_core', 'util', name.to_s + ".rb") 
+end
+
+# Include Git overrides
+Dir.glob(File.join('coral_core', 'util', 'git', '*.rb')).each do |file|
+  require file
 end
 
 # Include data model
 [ :event, :command, :repository, :memory ].each do |name| 
-  require File.join('coral_core', name.to_s) 
+  require File.join('coral_core', name.to_s + ".rb") 
+end
+
+# Include specialized events
+Dir.glob(File.join('coral_core', 'event', '*.rb')).each do |file|
+  require file
 end
 
 #*******************************************************************************
