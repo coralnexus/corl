@@ -88,7 +88,7 @@ class Core
   #---
   
   def symbol_map(data)
-    return self.symbol_map(data)
+    return self.class.symbol_map(data)
   end
   
   #---
@@ -111,7 +111,7 @@ class Core
   #---
   
   def string_map(data)
-    return self.string_map(data)
+    return self.class.string_map(data)
   end
   
   #-----------------------------------------------------------------------------
@@ -127,7 +127,7 @@ class Core
   #---
   
   def filter(data, method = false)
-    return self.filter(data, method)
+    return self.class.filter(data, method)
   end
     
   #-----------------------------------------------------------------------------
@@ -150,7 +150,7 @@ class Core
   #---
   
   def array(data, default = [], split_string = false)
-    return self.array(data, default, split_string)
+    return self.class.array(data, default, split_string)
   end
     
   #---
@@ -171,7 +171,7 @@ class Core
   #---
   
   def hash(data, default = {})
-    return self.hash(data, default)
+    return self.class.hash(data, default)
   end
     
   #---
@@ -192,7 +192,7 @@ class Core
   #---
   
   def string(data, default = '')
-    return self.string(data, default)
+    return self.class.string(data, default)
   end
     
   #---
@@ -215,7 +215,7 @@ class Core
   #---
   
   def symbol(data, default = '')
-    return self.symbol(data, default)
+    return self.class.symbol(data, default)
   end
      
   #---
@@ -229,7 +229,7 @@ class Core
   #---
   
   def test(data)
-    return self.test(data)
+    return self.class.test(data)
   end  
 end
 end
