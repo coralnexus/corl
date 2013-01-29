@@ -67,6 +67,8 @@ class Repository < Core
       
       if ! hosts.empty?
         remote = git.remote(name)
+        
+        options[:add] = true
       
         hosts.each do |host|
           git_url = Git.url(host, options[:repo], options)
