@@ -1,6 +1,8 @@
 
-$:.unshift(File.dirname(__FILE__)) unless
-  $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
+home = File.dirname(__FILE__)
+
+$:.unshift(home) unless
+  $:.include?(home) || $:.include?(File.expand_path(home))
   
 #-------------------------------------------------------------------------------
   
@@ -19,7 +21,7 @@ end
 end
 
 # Include Git overrides
-Dir.glob(File.join('coral_core', 'util', 'git', '*.rb')).each do |file|
+Dir.glob(File.join(home, 'coral_core', 'util', 'git', '*.rb')).each do |file|
   require file
 end
 
@@ -29,7 +31,7 @@ end
 end
 
 # Include specialized events
-Dir.glob(File.join('coral_core', 'event', '*.rb')).each do |file|
+Dir.glob(File.join(home, 'coral_core', 'event', '*.rb')).each do |file|
   require file
 end
 
