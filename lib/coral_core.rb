@@ -32,6 +32,6 @@ end
 # License::   GPLv3
 module Coral
   
-  VERSION = '0.1.0'
+  VERSION = File.read(File.join('..', 'VERSION'))
  
 end
