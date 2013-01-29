@@ -22,7 +22,7 @@ class Base
       if File.file?(options[:repository])
         File.read(options[:repository]).each_line do |line|
           matches = line.match(/^\s*gitdir:\s*(.+)\s*/)
-          if matches.length == 1 && matches[1]
+          if matches.length && matches[1]
             options[:repository] = matches[1]
             break
           end
