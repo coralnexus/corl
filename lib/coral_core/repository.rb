@@ -1,12 +1,6 @@
 
 module Coral
 class Repository < Core
-
-  #-----------------------------------------------------------------------------
-  # Properties
-  
-  attr_accessor :name, :remote_dir
-  attr_reader :directory, :submodule, :git
     
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
@@ -24,17 +18,24 @@ class Repository < Core
     
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
+  
+  attr_accessor :name, :remote_dir
+  attr_reader :directory, :submodule, :git
+
+  #---
    
   def ensure_git(reset = false)
     if reset || ! @git
       if @directory.empty?
         @git = nil
       else
+        directory = @directory
         if ! @submodule.empty?
-          @git = Coral::Util::GitLib.open(@directory, @submodule) 
-        else
-          @git = Coral::Util::GitLib.open(@directory)
+          directory = File.join(@directory, @submodule) 
         end
+        @git = Git.open(directory, {
+          :log => @logger,
+        })
       end
     end
     return self
@@ -62,13 +63,13 @@ class Repository < Core
         options[:repo] = @remote_dir
       end
       
-      git.add_remote(name, Coral::Util::GitLib.url(hosts.shift, options[:repo], options))
+      git.add_remote(name, Git.url(hosts.shift, options[:repo], options))
       
       if ! hosts.empty?
         remote = git.remote(name)
       
         hosts.each do |host|
-          git_url = Coral::Util::GitLib.url(host, options[:repo], options)
+          git_url = Git.url(host, options[:repo], options)
           remote.set_url(git_url, options)
         end
       end
@@ -81,7 +82,7 @@ class Repository < Core
   def delete_remote(name)
     if can_persist?
       remote = @git.remote(name)
-      if remote && ! remote.url.empty?
+      if remote && remote.url && ! remote.url.empty?
         remote.remove
       end
     end
