@@ -34,7 +34,7 @@ class Repository < Core
           directory = File.join(@directory, @submodule) 
         end
         @git = Git.open(directory, {
-          :log => @logger,
+          :log => logger,
         })
       end
     end

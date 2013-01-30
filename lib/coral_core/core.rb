@@ -1,70 +1,35 @@
 
-require "log4r"
-
 module Coral
 class Core
-
-  #-----------------------------------------------------------------------------
-  # Properties
-    
-  @@logger = Log4r::Logger.new("coral::core")
  
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
   def initialize(options = {})
-    class_name = self.class.to_s.downcase
-    
-    # Logger setup
-    if options.has_key?(:logger)
-      if options[:logger].is_a?(String)
-        @logger = Log4r::Logger.new(options[:logger])
-      else
-        @logger = options[:logger] 
-      end
-    else
-      @logger = Log4r::Logger.new("coral::#{class_name}")
-    end
-    
-    # UI setup
-    if options.has_key?(:ui)
-      if options[:ui].is_a?(String)
-        @ui = Coral::UI::Color.new(options[:ui])
-      else
-        @ui = options[:ui] 
-      end
-    else
-      @ui = Coral::UI::Color.new(class_name)
-    end
+    @ui = Coral::Interface.new(options)
   end
   
   #-----------------------------------------------------------------------------
   # Accessor / Modifiers
   
-  attr_accessor :logger, :ui
+  attr_accessor :ui
   
-  #---
+  #-----------------------------------------------------------------------------
   
   def self.logger
-    return @@logger
+    return @ui.class.logger
   end
   
-  #---  
-    
-  def self.logger=logger
-    @@logger = logger
-  end
-  
-  #---
-  
-  def self.ui
-    return @@ui
+  #--- 
+   
+  def logger
+    return @ui.logger
   end
   
   #---
-  
-  def self.ui=ui
-    @@ui = ui
+ 
+  def logger=logger
+    @ui.logger = logger
   end
  
   #-----------------------------------------------------------------------------

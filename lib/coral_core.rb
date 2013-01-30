@@ -11,7 +11,7 @@ require 'rubygems'
 #---
 
 # Include core
-[ :ui, :core ].each do |name| 
+[ :interface, :core ].each do |name| 
   require File.join('coral_core', name.to_s + ".rb") 
 end
 
