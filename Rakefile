@@ -1,11 +1,12 @@
 # encoding: utf-8
 
 require 'rubygems'
-require 'bundler'
 require 'rake'
+require 'bundler'
+require 'jeweler'
 require 'rspec/core/rake_task'
 require 'rdoc/task'
-require 'jeweler'
+require 'yard'
 
 require './lib/coral_core.rb'
 
@@ -58,11 +59,19 @@ task :default => :spec
 #-------------------------------------------------------------------------------
 # Documentation
 
-Rake::RDocTask.new do |rdoc|
-  version = Coral::VERSION
+version   = Coral::VERSION
+doc_title = "coral_core #{version}"
 
+Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = "coral_core #{version}"
+  rdoc.title    = doc_title
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+#---
+
+YARD::Rake::YardocTask.new do |ydoc|
+  ydoc.files   = [ 'README*', 'lib/**/*.rb' ]
+  ydoc.options = [ "--output-dir yardoc", "--title '#{doc_title}'" ]
 end
