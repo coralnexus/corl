@@ -145,7 +145,7 @@ class Interface
         message = "#{COLOR_MAP[type]}#{message}#{COLORS[:clear]}" if COLOR_MAP[type]
       end
     end
-    return message    
+    return message.strip    
   end
 
   #---
