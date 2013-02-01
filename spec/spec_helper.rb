@@ -1,6 +1,10 @@
 
 require 'rspec'
+require 'stringio'
 require 'coral_core'
+
+require 'coral_test_kernel'
+require 'coral_mock_input'
 
 #-------------------------------------------------------------------------------
 
