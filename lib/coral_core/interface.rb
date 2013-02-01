@@ -30,6 +30,10 @@ class Interface
   def initialize(options = {})
     class_name = self.class.to_s.downcase
     
+    if options.is_a?(String)
+      options = { :resource => options, :logger => options }
+    end
+    
     if options.has_key?(:logger)
       if options[:logger].is_a?(String)
         @logger = Log4r::Logger.new(options[:logger])
@@ -42,6 +46,8 @@ class Interface
     
     @resource  = ( options.has_key?(:resource) ? options[:resource] : '' )
     @color     = ( options.has_key?(:color) ? options[:color] : true )
+    
+    @printer   = ( options.has_key?(:printer) ? options[:printer] : :puts )
     
     @input     = ( options.has_key?(:input) ? options[:input] : $stdin )
     @output    = ( options.has_key?(:output) ? options[:output] : $stdout )
@@ -80,8 +86,6 @@ class Interface
 
   def ask(message, options = {})
     return @delegate.ask(message, options) if check_delegate('ask')
-
-    raise Errors::UIExpectsTTY if ! @input.tty?
 
     options[:new_line] = false if ! options.has_key?(:new_line)
     options[:prefix]   = false if ! options.has_key?(:prefix)
@@ -135,7 +139,7 @@ class Interface
     if @resource && ! @resource.empty? && options[:prefix]
       prefix = "[#{@resource}]"    
     end
-    message = "#{prefix} #{message}"
+    message = "#{prefix} #{message}".strip
     
     if @color
       if options.has_key?(:color)
@@ -145,7 +149,7 @@ class Interface
         message = "#{COLOR_MAP[type]}#{message}#{COLORS[:clear]}" if COLOR_MAP[type]
       end
     end
-    return message.strip    
+    return message
   end
 
   #---
@@ -155,8 +159,8 @@ class Interface
     
     message ||= ""
     options   = {
-      :channel  => @output,
-      :printer => :puts
+      :channel => @output,
+      :printer => @printer,
     }.merge(options)
 
     begin
