@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "coral_core.gemspec",
     "lib/coral_core.rb",
     "lib/coral_core/command.rb",
     "lib/coral_core/core.rb",
