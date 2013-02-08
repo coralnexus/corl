@@ -1,7 +1,7 @@
 source "http://rubygems.org"
 
 gem "git", "= 1.2.5"
-gem "json", "~> 1.7"
+gem "json", ">= 1.4"
 gem "log4r", "~> 1.1"
 
 group :development do
