@@ -143,7 +143,7 @@ class Core
          
   def self.string(data, default = '')
     result = default    
-    if data && ! data.empty?
+    if data
       case data
       when String
         result = data
@@ -164,7 +164,7 @@ class Core
          
   def self.symbol(data, default = :undefined)
     result = default    
-    if data && ! data.empty?
+    if data
       case data
       when Symbol
         result = data
