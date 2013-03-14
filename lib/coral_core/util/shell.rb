@@ -16,6 +16,8 @@ class Shell < Core
     error_prefix = ( options[:error_prefix] ? options[:error_prefix] : '' )
     error_suffix = ( options[:error_suffix] ? options[:error_suffix] : '' )
     
+    ui           = ( options[:ui] ? options[:ui] : @@ui )
+    
     conditions   = Coral::Event.instance(options[:exit], true)
     
     $stdout.sync = true

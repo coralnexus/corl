@@ -1,7 +1,12 @@
 
 module Coral
 class Core
- 
+  
+  #-----------------------------------------------------------------------------
+  # Properties
+  
+  @@ui = Coral::Interface.new("coral::core")
+  
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
@@ -16,8 +21,14 @@ class Core
   
   #-----------------------------------------------------------------------------
   
+  def self.ui
+    return @@ui
+  end
+  
+  #---
+  
   def self.logger
-    return @ui.class.logger
+    return @@ui.logger
   end
   
   #--- 
