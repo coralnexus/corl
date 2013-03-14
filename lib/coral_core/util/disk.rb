@@ -78,7 +78,7 @@ class Disk < Core
   def self.close(file_names = [])
     file_names = @@files.keys unless file_names && ! file_names.empty?
     array(file_names).each do |file_name|
-      @@files[file_name][:file].close if @@files[file_name][:file]
+      @@files[file_name][:file].close if @@files[file_name] && @@files[file_name][:file]
       @@files.delete(file_name)
     end
   end
