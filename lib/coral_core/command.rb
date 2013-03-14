@@ -206,6 +206,7 @@ class Command < Core
   #-----------------------------------------------------------------------------
     
   def exec!(options = {}, overrides = nil)
+    options[:ui] = @ui
     success = Coral::Util::Shell.exec!(build(export, overrides), options) do |line|
       block_given? ? yield(line) : true
     end    
