@@ -95,7 +95,7 @@ class Command < Core
   
   def subcommand=subcommand
     @properties[:subcommand] = hash(subcommand)
-    @subcommand = Module.const_get("Coral").const_get(self.class).new(@properties[:subcommand])
+    @subcommand = self.class.new(@properties[:subcommand])
   end
 
   #-----------------------------------------------------------------------------
