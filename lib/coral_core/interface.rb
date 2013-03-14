@@ -41,7 +41,7 @@ class Interface
         @logger = options[:logger] 
       end
     else
-      @logger = Log4r::Logger.new("coral::#{class_name}")
+      @logger = Log4r::Logger.new(class_name)
     end
     
     @resource  = ( options.has_key?(:resource) ? options[:resource] : '' )
