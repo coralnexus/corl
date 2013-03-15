@@ -139,9 +139,8 @@ class Command < Core
       end
     end
     flags.each do |flag|
-      if flag && ! flag.empty?
-        flag = string(flag)
-        
+      flag = string(flag)
+      if ! flag.empty?        
         if flag.match(dash_pattern)
           dashes = $1
         else
