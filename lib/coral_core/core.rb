@@ -110,7 +110,7 @@ class Core
           
   def self.array(data, default = [], split_string = false)
     result = default    
-    if data && ! data.empty?
+    if data
       case data
       when Array
         result = data
@@ -133,7 +133,7 @@ class Core
         
   def self.hash(data, default = {})
     result = default    
-    if data && ! data.empty?
+    if data
       case data
       when Hash
         result = data
