@@ -27,30 +27,30 @@ class Shell < Core
       ui.info(">> running: #{command}")
       
       begin
-        t1, output_new, output_orig = pipe_exec_stream!($stdout, conditions, { 
+        t1, output_new, output_orig, output_reader = pipe_exec_stream!($stdout, conditions, { 
           :prefix => info_prefix, 
           :suffix => info_suffix, 
-        }) do |line|
+        }, 'output') do |line|
           block_given? ? yield(line) : true
         end
       
-        t2, error_new, error_orig = pipe_exec_stream!($stderr, conditions, { 
+        t2, error_new, error_orig, error_reader = pipe_exec_stream!($stderr, conditions, { 
           :prefix => error_prefix, 
           :suffix => error_suffix, 
-        }) do |line|
+        }, 'error') do |line|
           block_given? ? yield(line) : true
         end
       
         system_success = system(command)
       
       ensure
-        output_success = close_exec_pipe(t1, $stdout, output_orig, output_new)
-        error_success  = close_exec_pipe(t2, $stderr, error_orig, error_new)
+        output_success = close_exec_pipe(t1, $stdout, output_orig, output_new, 'output')
+        error_success  = close_exec_pipe(t2, $stderr, error_orig, error_new, 'error')
       end
       ui.info('')
       
       success = ( system_success && output_success && error_success )
-      
+                  
       min -= 1
       break if success && min <= 0 && conditions.empty?
     end
@@ -69,13 +69,13 @@ class Shell < Core
   
   #---
   
-  def self.pipe_exec_stream!(output, conditions, options)
+  def self.pipe_exec_stream!(output, conditions, options, label)
     original     = output.dup
     read, write  = IO.pipe
     
     match_prefix = ( options[:match_prefix] ? options[:match_prefix] : 'EXIT' )
             
-    thread = process_stream!(read, original, options) do |line|
+    thread = process_stream!(read, original, options, label) do |line|
       check_conditions!(line, conditions, match_prefix) do
         block_given? ? yield(line) : true
       end
@@ -84,17 +84,16 @@ class Shell < Core
     thread.abort_on_exception = false
     
     output.reopen(write)    
-    return thread, write, original
+    return thread, write, original, read
   end
   
   #---
   
-  def self.close_exec_pipe(thread, output, original, write)
+  def self.close_exec_pipe(thread, output, original, write, label)
     output.reopen(original)
-    
+     
     write.close
     success = thread.value
-    Thread.kill(thread) # Die bastard, die!
     
     original.close
     return success
@@ -132,7 +131,7 @@ class Shell < Core
   
   #---
   
-  def self.process_stream!(input, output, options)
+  def self.process_stream!(input, output, options, label)
     return Thread.new do
       success        = true      
       default_prefix = ( options[:prefix] ? options[:prefix] : '' )
@@ -171,7 +170,7 @@ class Shell < Core
       rescue EOFError
       end
       
-      input.close
+      input.close()
       success
     end
   end
