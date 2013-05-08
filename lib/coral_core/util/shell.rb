@@ -148,22 +148,24 @@ class Shell < Core
               prefix  = default_prefix
               suffix  = default_suffix
               
-              if block_given?
-                result = yield(line)
+              unless line.empty?
+                if block_given?
+                  result = yield(line)
                                           
-                if result && result.is_a?(Hash)
-                  prefix = result[:prefix]
-                  suffix = result[:suffix]
-                  result = result[:success]                 
+                  if result && result.is_a?(Hash)
+                    prefix = result[:prefix]
+                    suffix = result[:suffix]
+                    result = result[:success]                 
+                  end
+                  success = result if success
                 end
-                success = result if success
+            
+                prefix = ( prefix && ! prefix.empty? ? "#{prefix}: " : '' )
+                suffix = ( suffix && ! suffix.empty? ? suffix : '' )            
+                eol    = ( index < lines.length - 1 || newline ? "\n" : ' ' )
+            
+                output.write(prefix.lstrip + line + suffix.rstrip + eol)
               end
-            
-              prefix = ( prefix && ! prefix.empty? ? "#{prefix}: " : '' )
-              suffix = ( suffix && ! suffix.empty? ? suffix : '' )            
-              eol    = ( index < lines.length - 1 || newline ? "\n" : ' ' )
-            
-              output.write(prefix.lstrip + line + suffix.rstrip + eol)
             end
           end
         end
