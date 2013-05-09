@@ -5,13 +5,13 @@ class Core
   #-----------------------------------------------------------------------------
   # Properties
   
-  @@ui = Coral::Interface.new("coral::core")
+  @@ui = Interface.new("coral")
   
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
   def initialize(options = {})
-    @ui = Coral::Interface.new(options)
+    @@ui = Interface.new(options)
   end
   
   #-----------------------------------------------------------------------------
@@ -197,8 +197,7 @@ class Core
   #---
     
   def self.test(data)
-    return false if ! data || data.empty?      
-    return false if data.is_a?(String) && data =~ /^(FALSE|false|False|No|no|N|n)$/      
+    return false if Util::Data.empty?(data)
     return true
   end
   
