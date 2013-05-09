@@ -12,7 +12,8 @@ class Repository < Core
     @directory  = ( options.has_key?(:directory) ? string(options[:directory]) : '' )
     @submodule  = ( options.has_key?(:submodule) ? string(options[:submodule]) : '' )
     @remote_dir = ( options.has_key?(:remote_dir) ? string(options[:remote_dir]) : '' )
-            
+    
+    dbg(options, 'options')        
     ensure_git(true) 
   end
     
@@ -30,7 +31,7 @@ class Repository < Core
         @git = nil
       else
         directory = @directory
-        if ! @submodule.empty?
+        unless Util::Data.empty?(@submodule)
           directory = File.join(@directory, @submodule) 
         end
         @git = Git.open(directory, {
