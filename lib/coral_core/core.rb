@@ -34,13 +34,13 @@ class Core
   #--- 
    
   def logger
-    return @ui.logger
+    return self.class.logger
   end
   
   #---
  
   def logger=logger
-    @ui.logger = logger
+    self.class.logger = logger
   end
  
   #-----------------------------------------------------------------------------
