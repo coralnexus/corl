@@ -13,7 +13,6 @@ class Repository < Core
     @submodule  = ( options.has_key?(:submodule) ? string(options[:submodule]) : '' )
     @remote_dir = ( options.has_key?(:remote_dir) ? string(options[:remote_dir]) : '' )
     
-    dbg(options, 'options')        
     ensure_git(true) 
   end
     
