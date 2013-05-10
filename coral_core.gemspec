@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".document",
+    ".gitmodules",
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
