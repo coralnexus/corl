@@ -165,7 +165,7 @@ class Config
         if item.is_a?(String) || item.is_a?(Symbol)
           item = Config.lookup(item.to_s, {}, config)
         end
-        unless undef?(item)
+        unless Util::Data.undef?(item)
           results = Util::Data.merge([ results, item ], config)
         end
       end
