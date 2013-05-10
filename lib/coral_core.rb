@@ -16,7 +16,10 @@ begin
   require 'log4r'
     
 rescue LoadError
-  require File.join(dependencies, 'log4r', 'lib', 'log4r.rb')  
+  log4r_lib = File.join(dependencies, 'log4r', 'lib')
+  
+  $LOAD_PATH << log4r_lib
+  require File.join(log4r_lib, 'log4r.rb')  
 end
 
 #---
@@ -25,7 +28,10 @@ begin
   require 'json'
     
 rescue LoadError
-  require File.join(dependencies, 'json', 'lib', 'json.rb')  
+  json_lib = File.join(dependencies, 'json', 'lib')
+  
+  $LOAD_PATH << json_lib
+  require File.join(json_lib, 'json.rb')  
 end
 
 #---
@@ -34,7 +40,10 @@ begin
   require 'git'
     
 rescue LoadError
-  require File.join(dependencies, 'git', 'lib', 'git.rb')  
+  git_lib = File.join(dependencies, 'git', 'lib')
+  
+  $LOAD_PATH << git_lib
+  require File.join(git_lib, 'git.rb')  
 end
 
 #---
