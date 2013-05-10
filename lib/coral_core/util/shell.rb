@@ -18,7 +18,7 @@ class Shell < Core
     error_prefix = config.get(:error_prefix, '')
     error_suffix = config.get(:error_suffix, '')
     
-    ui           = config.get(:ui, @@ui)
+    ui           = config.get(:ui, Coral.ui)
     
     conditions   = Coral::Event.instance(config.get(:exit, {}), true)
     

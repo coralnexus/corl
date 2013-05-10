@@ -59,6 +59,10 @@ module Coral
   
   @@ui = Coral::Core.ui
   
+  def self.ui
+    return @@ui
+  end
+  
   #-----------------------------------------------------------------------------
   # Initialization
   
