@@ -1,13 +1,49 @@
 
+#-------------------------------------------------------------------------------
+# Global namespace
+
+module Kernel
+   
+  def dbg(data, label = '')
+    require 'pp'
+    
+    puts '>>----------------------'
+    unless label.empty?
+      puts label
+      puts '---'
+    end
+    pp data
+    puts '<<'
+  end
+  
+  #---  
+    
+  def locate(command)
+    exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+    ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
+      exts.each do |ext|
+        exe = File.join(path, "#{command}#{ext}")
+        return exe if File.executable?(exe)
+      end
+    end
+    return nil
+  end
+end
+
+#-------------------------------------------------------------------------------
+# Properties and 
+
 home         = File.dirname(__FILE__)
 dependencies = File.join(home, 'dependency')
 
-git_location = Coral.location('git')
+git_location = locate('git')
+ 
+#-------------------------------------------------------------------------------
 
 $:.unshift(home) unless
   $:.include?(home) || $:.include?(File.expand_path(home))
-  
-#-------------------------------------------------------------------------------
+
+#---
   
 require 'rubygems'
 require 'hiera_backend.rb'
@@ -166,36 +202,6 @@ module Coral
       ui.warning(Util::Data.to_yaml(error.backtrace))
       raise
     end
-  end
-  
-  #---  
-    
-  def self.location(command)
-    exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
-    ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
-      exts.each do |ext|
-        exe = File.join(path, "#{command}#{ext}")
-        return exe if File.executable?(exe)
-      end
-    end
-    return nil
-  end 
-end
-
-#-------------------------------------------------------------------------------
-# Global namespace
-
-module Kernel  
-  def dbg(data, label = '')
-    require 'pp'
-    
-    puts '>>----------------------'
-    unless label.empty?
-      puts label
-      puts '---'
-    end
-    pp data
-    puts '<<'
   end
 end
 
