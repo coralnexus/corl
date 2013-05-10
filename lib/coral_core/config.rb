@@ -33,7 +33,7 @@ class Config
     if File.exist?(config_file)
       config = Hiera::Config.load(config_file)
     else
-      Coral.ui.warning "Config file #{config_file} not found, using Hiera defaults"
+      Coral.ui.warn("Config file #{config_file} not found, using Hiera defaults")
     end
 
     config[:logger] = 'puppet'

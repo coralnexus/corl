@@ -206,8 +206,8 @@ module Coral
       yield
       
     rescue Exception => error
-      ui.warning(error.inspect)
-      ui.warning(Util::Data.to_yaml(error.backtrace))
+      ui.warn(error.inspect)
+      ui.warn(Util::Data.to_yaml(error.backtrace))
       raise
     end
   end
