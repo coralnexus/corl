@@ -13,6 +13,7 @@ class Memory < Repository
     super(config)
     
     @absolute_config_file = ''
+    @config_file          = ''
     
     @properties     = config.get(:properties, {})
     
@@ -22,7 +23,6 @@ class Memory < Repository
     @commit_message = config.get(:commit_message, 'Saving state')
     
     self.config_file = config.get(:config_file, '')
-    dbg(self, 'memory')
   end
   
   #---
@@ -53,9 +53,9 @@ class Memory < Repository
  
   #---
   
-  def config_file=config_file
-    unless Util::Data.empty?(config_file)
-      @config_file = ( config_file.is_a?(Array) ? config_file.join(File::SEPARATOR) : string(config_file) )
+  def config_file=file
+    unless Util::Data.empty?(file)
+      @config_file = ( file.is_a?(Array) ? file.join(File::SEPARATOR) : string(file) )
     end
     
     set_absolute_config_file

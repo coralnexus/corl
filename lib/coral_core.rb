@@ -87,8 +87,11 @@ module Coral
   
   @@ui = Coral::Core.ui
   
+<<<<<<< HEAD
   #---
   
+=======
+>>>>>>> d2d7bd0e5cd169c561a319ccc27fb49cd5110fd8
   def self.ui
     return @@ui
   end

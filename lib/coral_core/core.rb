@@ -13,7 +13,7 @@ class Core
   def initialize(options = {})
     config = Config.ensure(options)
     
-    @@ui = Interface.new(config)
+    @ui = Interface.new(config)
   end
   
   #-----------------------------------------------------------------------------
