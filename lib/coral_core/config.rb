@@ -145,7 +145,7 @@ class Config
     config  = Config.ensure(options)
     results = {}
     
-    unless undef?(override)
+    unless Util::Data.undef?(override)
       case data
       when String, Symbol
         data = [ data, override ] if data != override
