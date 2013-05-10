@@ -1,6 +1,4 @@
 
-require "log4r"
-
 module Coral
 class Interface
   

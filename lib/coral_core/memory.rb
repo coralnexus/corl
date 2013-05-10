@@ -1,6 +1,4 @@
 
-require 'json'
-
 module Coral
 class Memory < Repository
    

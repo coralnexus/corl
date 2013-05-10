@@ -50,9 +50,9 @@ class Data
   def self.to_json(data)
     output = ''
     begin
-      require 'json'
       output = data.to_json
-    rescue LoadError
+      
+    rescue Exception
     end
     return output
   end
@@ -64,7 +64,8 @@ class Data
     begin
       require 'yaml'
       output = YAML.dump(data)
-    rescue LoadError
+      
+    rescue Exception
     end
     return output
   end
@@ -116,6 +117,7 @@ class Data
           begin
             require 'deep_merge'
             value = force ? value.deep_merge!(item) : value.deep_merge(item)
+            
           rescue LoadError
             if item.is_a?(Hash) # Non recursive top level by default.
               value = value.merge(item)                
