@@ -49,7 +49,7 @@ module Template
     end
     
     if normalize && interpolate
-      data = Util::Data.interpolate(data, data, config)
+      data = Util::Data.interpolate(data, data, config.options)
       #dbg(data, 'template data -> post interpolation')
     end
     
