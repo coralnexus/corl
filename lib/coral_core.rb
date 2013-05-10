@@ -54,7 +54,6 @@ $:.unshift(home) unless
 #---
   
 require 'rubygems'
-require 'hiera_backend.rb'
 
 #---
 
@@ -141,6 +140,10 @@ end
 Dir.glob(File.join(home, 'coral_core', 'template', '*.rb')).each do |file|
   require file
 end
+
+#---
+
+require 'hiera_backend.rb'
 
 #*******************************************************************************
 # Coral Core Library
