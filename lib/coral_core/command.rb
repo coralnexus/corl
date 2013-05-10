@@ -12,22 +12,24 @@ class Command < Core
   # Constructor / Destructor
 
   def initialize(options = {})
-  
+      
     if options.is_a?(String) || options.is_a?(Symbol)
       options = string(options)
       options = { :name => options, :command => options }
     end
+    
+    config = Config.ensure(options)
   
-    super(options)
+    super(config)
     
     @properties           = {}
     
-    self.subcommand       = options[:subcommand] if options.has_key?(:subcommand)
+    self.subcommand       = config.get(:subcommand, nil)
     
-    @name                 = ( options.has_key?(:name) ? string(options[:name]) : '' )
+    @name                 = config.get(:name, '')
     
-    @properties           = options
-    @properties[:command] = executable(options)   
+    @properties           = config.options
+    @properties[:command] = executable(config)   
   end
      
   #-----------------------------------------------------------------------------
@@ -94,8 +96,10 @@ class Command < Core
   #---
   
   def subcommand=subcommand
-    @properties[:subcommand] = hash(subcommand)
-    @subcommand = self.class.new(@properties[:subcommand])
+    unless Util::Data.empty?(subcommand)
+      @properties[:subcommand] = hash(subcommand)
+      @subcommand = self.class.new(@properties[:subcommand])
+    end
   end
 
   #-----------------------------------------------------------------------------
@@ -205,8 +209,10 @@ class Command < Core
   #-----------------------------------------------------------------------------
     
   def exec!(options = {}, overrides = nil)
-    options[:ui] = @ui
-    success = Coral::Util::Shell.exec!(build(export, overrides), options) do |line|
+    config = Config.ensure(options)
+    
+    config[:ui] = @ui
+    success = Coral::Util::Shell.exec!(build(export, overrides), config) do |line|
       block_given? ? yield(line) : true
     end    
     return success
@@ -222,14 +228,16 @@ class Command < Core
   # Utilities
   
   def executable(options)
-    if options.has_key?(:coral)
-      return 'vagrant coral ' + options[:coral]
+    config = Config.ensure(options)
+    
+    if config.get(:coral, false)
+      return 'vagrant coral ' + config[:coral]
         
-    elsif options.has_key?(:vagrant)
-      return 'vagrant ' + options[:vagrant]
+    elsif config.get(:vagrant, false)
+      return 'vagrant ' + config[:vagrant]
         
-    elsif options.has_key?(:command)
-      return options[:command]
+    elsif config.get(:command, false)
+      return config[:command]
     end
   end
 end

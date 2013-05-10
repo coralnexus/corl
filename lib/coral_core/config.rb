@@ -1,6 +1,6 @@
 
 module Coral
-class Config < Core
+class Config
   
   #-----------------------------------------------------------------------------
   # Global configuration
@@ -33,7 +33,7 @@ class Config < Core
     if File.exist?(config_file)
       config = Hiera::Config.load(config_file)
     else
-      ui.warning "Config file #{config_file} not found, using Hiera defaults"
+      Coral.ui.warning "Config file #{config_file} not found, using Hiera defaults"
     end
 
     config[:logger] = 'puppet'
@@ -139,6 +139,44 @@ class Config < Core
     return value  
   end
   
+  #---
+
+  def self.normalize(data, override = nil, options = {})
+    config  = Config.ensure(options)
+    results = {}
+    
+    unless undef?(override)
+      case data
+      when String, Symbol
+        data = [ data, override ] if data != override
+      when Array
+        data << override unless data.include?(override)
+      when Hash
+        data = [ data, override ]
+      end
+    end
+    
+    case data
+    when String, Symbol
+      results = Config.lookup(data.to_s, {}, config)
+      
+    when Array
+      data.each do |item|
+        if item.is_a?(String) || item.is_a?(Symbol)
+          item = Config.lookup(item.to_s, {}, config)
+        end
+        unless undef?(item)
+          results = Util::Data.merge([ results, item ], config)
+        end
+      end
+  
+    when Hash
+      results = data
+    end
+    
+    return results
+  end
+    
   #-----------------------------------------------------------------------------
   # Instance generator
   

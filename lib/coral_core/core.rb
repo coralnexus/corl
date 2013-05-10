@@ -11,7 +11,9 @@ class Core
   # Constructor / Destructor
   
   def initialize(options = {})
-    @@ui = Interface.new(options)
+    config = Config.ensure(options)
+    
+    @@ui = Interface.new(config)
   end
   
   #-----------------------------------------------------------------------------

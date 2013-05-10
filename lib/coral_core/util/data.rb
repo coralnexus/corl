@@ -1,7 +1,7 @@
 
 module Coral
 module Util
-class Data < Core
+class Data
   
   #-----------------------------------------------------------------------------
   # Type checking
@@ -136,53 +136,14 @@ class Data < Core
     #dbg(value, 'value')            
     return value
   end
-  
-  #---
 
-  def self.normalize(data, override = nil, options = {})
-    config  = Config.ensure(options)
-    results = {}
-    
-    unless undef?(override)
-      case data
-      when String, Symbol
-        data = [ data, override ] if data != override
-      when Array
-        data << override unless data.include?(override)
-      when Hash
-        data = [ data, override ]
-      end
-    end
-    
-    case data
-    when String, Symbol
-      results = Config.lookup(data.to_s, {}, config)
-      
-    when Array
-      data.each do |item|
-        if item.is_a?(String) || item.is_a?(Symbol)
-          item = Config.lookup(item.to_s, {}, config)
-        end
-        unless undef?(item)
-          results = merge([ results, item ], config)
-        end
-      end
-  
-    when Hash
-      results = data
-    end
-    
-    return results
-  end
-  
   #---
   
   def self.interpolate(value, scope, options = {})    
-    config  = Config.ensure(options)
-  
-    pattern = config.get(:pattern, '\$(\{)?([a-zA-Z0-9\_\-]+)(\})?')
-    group   = config.get(:var_group, 2)
-    flags   = config.get(:flags, '')
+    
+    pattern = ( options.has_key?(:pattern) ? options[:pattern] : '\$(\{)?([a-zA-Z0-9\_\-]+)(\})?' )
+    group   = ( options.has_key?(:var_group) ? options[:var_group] : 2 )
+    flags   = ( options.has_key?(:flags) ? options[:flags] : '' )
     
     if scope.is_a?(Hash)
       regexp = Regexp.new(pattern, flags.split(''))
@@ -195,7 +156,7 @@ class Data < Core
         #dbg(matches, 'matches')
         
         unless matches.nil?
-          replacement = scope.search(matches[group], config)
+          replacement = scope.search(matches[group], options)
           result      = item.gsub(matches[0], replacement) unless replacement.nil?
         end
         return result
@@ -213,7 +174,7 @@ class Data < Core
         #dbg(value, 'interpolate (hash) -> init')
         value.each do |key, data|
           #dbg(data, "interpolate (#{key}) -> data")
-          value[key] = interpolate(data, scope, config)
+          value[key] = interpolate(data, scope, options)
         end
       end
     end
@@ -222,33 +183,4 @@ class Data < Core
   end
 end
 end
-end
-
-#-------------------------------------------------------------------------------
-# Data type alterations
-
-class Hash
-  def search(search_key, options = {})
-    config = Coral::Config.ensure(options)
-    value  = nil
-    
-    recurse       = config.get(:recurse, false)
-    recurse_level = config.get(:recurse_level, -1)
-        
-    self.each do |key, data|
-      if key == search_key
-        value = data
-        
-      elsif data.is_a?(Hash) && 
-        recurse && (recurse_level == -1 || recurse_level > 0)
-        
-        recurse_level -= 1 unless recurse_level == -1
-        value = value.search(search_key, 
-          Coral::Config.new(config).set(:recurse_level, recurse_level)
-        )
-      end
-      break unless value.nil?
-    end
-    return value
-  end
 end

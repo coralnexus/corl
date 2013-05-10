@@ -33,27 +33,28 @@ class Interface
     if options.is_a?(String)
       options = { :resource => options, :logger => options }
     end
+    config = Config.ensure(options)
     
-    if options.has_key?(:logger)
-      if options[:logger].is_a?(String)
-        @logger = Log4r::Logger.new(options[:logger])
+    if config.get(:logger, false)
+      if config[:logger].is_a?(String)
+        @logger = Log4r::Logger.new(config[:logger])
       else
-        @logger = options[:logger] 
+        @logger = config[:logger] 
       end
     else
       @logger = Log4r::Logger.new(class_name)
     end
     
-    @resource  = ( options.has_key?(:resource) ? options[:resource] : '' )
-    @color     = ( options.has_key?(:color) ? options[:color] : true )
+    @resource  = config.get(:resource, '')
+    @color     = config.get(:color, true)
     
-    @printer   = ( options.has_key?(:printer) ? options[:printer] : :puts )
+    @printer   = config.get(:printer, :puts)
     
-    @input     = ( options.has_key?(:input) ? options[:input] : $stdin )
-    @output    = ( options.has_key?(:output) ? options[:output] : $stdout )
-    @error     = ( options.has_key?(:error) ? options[:error] : $stderr )
+    @input     = config.get(:input, $stdin)
+    @output    = config.get(:output, $stdout)
+    @error     = config.get(:error, $stderr)
     
-    @delegate  = ( options.has_key?(:ui_delegate) ? options[:ui_delegate] : nil )    
+    @delegate  = config.get(:ui_delegate, nil)    
   end
 
   #-----------------------------------------------------------------------------

@@ -11,19 +11,27 @@ require 'hiera_backend.rb'
 
 #---
 
-# Include core
-[ :interface, :core ].each do |name| 
-  require File.join('coral_core', name.to_s + ".rb") 
-end
-
-# Include utilities
-[ :git, :data, :disk, :shell ].each do |name| 
+# Include pre core utilities (no internal dependencies)
+[ :git, :data ].each do |name| 
   require File.join('coral_core', 'util', name.to_s + ".rb") 
 end
 
 # Include Git overrides
 Dir.glob(File.join(home, 'coral_core', 'util', 'git', '*.rb')).each do |file|
   require file
+end
+
+# Include core
+[ :config, :interface, :core, :resource, :template ].each do |name| 
+  require File.join('coral_core', name.to_s + ".rb") 
+end
+
+# Include post core utilities 
+# ( normally inherit from core and have no reverse dependencies with 
+#   core classes )
+#
+[ :disk, :shell ].each do |name| 
+  require File.join('coral_core', 'util', name.to_s + ".rb") 
 end
 
 # Include data model
@@ -115,5 +123,34 @@ module Kernel
     end
     pp data
     puts '<<'
+  end
+end
+
+#-------------------------------------------------------------------------------
+# Data type alterations
+
+class Hash
+  def search(search_key, options = {})
+    config = Coral::Config.ensure(options)
+    value  = nil
+    
+    recurse       = config.get(:recurse, false)
+    recurse_level = config.get(:recurse_level, -1)
+        
+    self.each do |key, data|
+      if key == search_key
+        value = data
+        
+      elsif data.is_a?(Hash) && 
+        recurse && (recurse_level == -1 || recurse_level > 0)
+        
+        recurse_level -= 1 unless recurse_level == -1
+        value = value.search(search_key, 
+          Coral::Config.new(config).set(:recurse_level, recurse_level)
+        )
+      end
+      break unless value.nil?
+    end
+    return value
   end
 end

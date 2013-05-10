@@ -7,18 +7,20 @@ class Shell < Core
   # Utilities
   
   def self.exec!(command, options = {})
-    min          = ( options[:min] ? options[:min].to_i : 1 )
-    tries        = ( options[:tries] ? options[:tries].to_i : min )
-    tries        = ( min > tries ? min : tries )
+    config = Config.ensure(options)
     
-    info_prefix  = ( options[:info_prefix] ? options[:info_prefix] : '' )
-    info_suffix  = ( options[:info_suffix] ? options[:info_suffix] : '' )
-    error_prefix = ( options[:error_prefix] ? options[:error_prefix] : '' )
-    error_suffix = ( options[:error_suffix] ? options[:error_suffix] : '' )
+    min   = config.get(:min, 1).to_i
+    tries = config.get(:tries, min).to_i
+    tries = ( min > tries ? min : tries )
     
-    ui           = ( options[:ui] ? options[:ui] : @@ui )
+    info_prefix  = config.get(:info_prefix, '')
+    info_suffix  = config.get(:info_suffix, '')
+    error_prefix = config.get(:error_prefix, '')
+    error_suffix = config.get(:error_suffix, '')
     
-    conditions   = Coral::Event.instance(options[:exit], true)
+    ui           = config.get(:ui, @@ui)
+    
+    conditions   = Coral::Event.instance(config.get(:exit, {}), true)
     
     $stdout.sync = true
     $stderr.sync = true  

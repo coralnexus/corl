@@ -5,9 +5,9 @@ class Event < Core
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
-  def self.instance!(options = {}, build_hash = false, keep_array = false)
+  def self.instance!(data = {}, build_hash = false, keep_array = false)
     group  = ( build_hash ? {} : [] )    
-    events = build_info(options)
+    events = build_info(data)
     
     index = 1
     events.each do |info|
@@ -41,11 +41,13 @@ class Event < Core
   #---
   
   def initialize(options = {})
-    super(options)
+    config = Config.ensure(options)
     
-    @name       = ( options.has_key?(:name) ? options[:name] : '' )
-    @delegate   = ( options.has_key?(:delegate) ? options[:delegate] : nil )  
-    @properties = options
+    super(config)
+    
+    @name       = config.get(:name, '')
+    @delegate   = config.get(:delegate, nil)  
+    @properties = config.options
   end
     
   #-----------------------------------------------------------------------------

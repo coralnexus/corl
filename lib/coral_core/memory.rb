@@ -8,19 +8,21 @@ class Memory < Repository
   # Constructor / Destructor
   
   def initialize(options = {})
-    super(options)
+    config = Config.ensure(options)
+    
+    super(config)
     
     @absolute_config_file = ''
     
-    @properties     = ( options.has_key?(:properties) ? hash(options[:properties]) : {} )
-    @config_file    = ( options.has_key?(:config_file) ? string(options[:config_file]) : '' )
-    @autoload       = ( options.has_key?(:autoload) ? options[:autoload] : true )
-    @autosave       = ( options.has_key?(:autosave) ? options[:autosave] : true )
-    @autocommit     = ( options.has_key?(:autocommit) ? options[:autocommit] : true )
-    @commit_message = ( options.has_key?(:commit_message) ? string(options[:commit_message]) : 'Saving state' )
-      
-    set_absolute_config_file
-    load if @autoload
+    @properties     = config.get(:properties, {})
+    
+    @autoload       = config.get(:autoload, true)
+    @autosave       = config.get(:autosave, true)
+    @autocommit     = config.get(:autocommit, true)
+    @commit_message = config.get(:commit_message, 'Saving state')
+    
+    self.config_file = config.get(:config_file, '')
+    dbg(self, 'memory')
   end
   
   #---
@@ -52,7 +54,9 @@ class Memory < Repository
   #---
   
   def config_file=config_file
-    @config_file = string(config_file)
+    unless Util::Data.empty?(config_file)
+      @config_file = ( config_file.is_a?(Array) ? config_file.join(File::SEPARATOR) : string(config_file) )
+    end
     
     set_absolute_config_file
     load if @autoload
