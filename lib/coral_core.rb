@@ -1,5 +1,6 @@
 
-home = File.dirname(__FILE__)
+home         = File.dirname(__FILE__)
+dependencies = File.join(home, 'dependency')
 
 $:.unshift(home) unless
   $:.include?(home) || $:.include?(File.expand_path(home))
@@ -8,6 +9,33 @@ $:.unshift(home) unless
   
 require 'rubygems'
 require 'hiera_backend.rb'
+
+#---
+
+begin
+  require 'log4r'
+    
+rescue LoadError
+  require File.join(dependencies, 'log4r', 'lib', 'log4r.rb')  
+end
+
+#---
+
+begin
+  require 'json'
+    
+rescue LoadError
+  require File.join(dependencies, 'json', 'lib', 'json.rb')  
+end
+
+#---
+
+begin
+  require 'git'
+    
+rescue LoadError
+  require File.join(dependencies, 'git', 'lib', 'git.rb')  
+end
 
 #---
 
@@ -58,6 +86,12 @@ module Coral
   #---
   
   @@ui = Coral::Core.ui
+  
+  #---
+  
+  def self.ui
+    return @@ui
+  end
   
   #-----------------------------------------------------------------------------
   # Initialization
