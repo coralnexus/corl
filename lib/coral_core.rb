@@ -1,4 +1,12 @@
 
+#*******************************************************************************
+# Coral Core Library
+#
+# This provides core data elements and utilities used in the Coral gems.
+#
+# Author::    Adrian Webb (mailto:adrian.webb@coraltech.net)
+# License::   GPLv3
+
 #-------------------------------------------------------------------------------
 # Global namespace
 
