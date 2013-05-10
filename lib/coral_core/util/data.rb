@@ -39,9 +39,9 @@ class Data
   
   def self.empty?(value)
     if undef?(value) || false?(value) || (value.respond_to?('empty?') && value.empty?)
-      return false
+      return true
     end
-    return true
+    return false
   end
    
   #-----------------------------------------------------------------------------
