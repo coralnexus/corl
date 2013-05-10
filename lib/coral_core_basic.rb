@@ -36,26 +36,9 @@ end
 
 #---
 
-begin
-  require 'git'
-    
-rescue LoadError
-  git_lib = File.join(dependencies, 'git', 'lib')
-  
-  $:.push(git_lib)
-  require File.join(git_lib, 'git.rb')  
-end
-
-#---
-
 # Include pre core utilities (no internal dependencies)
-[ :git, :data ].each do |name| 
+[ :data ].each do |name| 
   require File.join('coral_core', 'util', name.to_s + ".rb") 
-end
-
-# Include Git overrides
-Dir.glob(File.join(home, 'coral_core', 'util', 'git', '*.rb')).each do |file|
-  require file
 end
 
 # Include core
@@ -72,7 +55,7 @@ end
 end
 
 # Include data model
-[ :event, :command, :repository, :memory ].each do |name| 
+[ :event, :command ].each do |name| 
   require File.join('coral_core', name.to_s + ".rb") 
 end
 
