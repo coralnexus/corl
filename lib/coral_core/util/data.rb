@@ -104,14 +104,11 @@ class Data
     
     # Special case because this method is called from within Config.new so we 
     # can not use Config.ensure, as that would cause an infinite loop.
-    force = force.is_a?(Coral::Config) ? force.get(:force, force) : force
-    
-    #dbg(data, 'data')
+    force = force.is_a?(Coral::Config) ? force.get(:force, true) : force
     
     if data.is_a?(Array)
       value = data.shift
       data.each do |item|
-        #dbg(item, 'item')
         case value
         when Hash
           begin
@@ -120,7 +117,7 @@ class Data
             
           rescue LoadError
             if item.is_a?(Hash) # Non recursive top level by default.
-              value = value.merge(item)                
+              value = value.merge(item)              
             elsif force
               value = item
             end
@@ -131,11 +128,13 @@ class Data
           elsif force
             value = item
           end
+                
+        when String, Symbol
+          value = item if item.is_a?(String) || item.is_a?(Symbol) || force 
         end
       end  
     end
     
-    #dbg(value, 'value')            
     return value
   end
 
