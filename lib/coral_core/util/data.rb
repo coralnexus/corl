@@ -107,8 +107,11 @@ class Data
     force = force.is_a?(Coral::Config) ? force.get(:force, true) : force
     
     if data.is_a?(Array)
-      value = data.shift
+      value = data.shift.clone
+      
       data.each do |item|
+        item = item.clone
+        
         case value
         when Hash
           begin
