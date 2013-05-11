@@ -70,6 +70,18 @@ end
 #---
 
 begin
+  require 'deep_merge'
+    
+rescue LoadError
+  deep_merge_lib = File.join(dependencies, 'deep_merge', 'lib')
+  
+  $:.push(deep_merge_lib)
+  require File.join(deep_merge_lib, 'deep_merge.rb')  
+end
+
+#---
+
+begin
   require 'json'
     
 rescue LoadError
