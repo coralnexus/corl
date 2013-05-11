@@ -6,7 +6,7 @@ class JSON < Base
   # Renderers  
    
   def render(input)
-    return Data.to_yaml(input)    
+    return Util::Data.to_yaml(input)    
   end
 end
 end

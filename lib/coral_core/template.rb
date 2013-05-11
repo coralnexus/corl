@@ -44,7 +44,7 @@ module Template
     #dbg(data, 'template data -> init')
     
     if normalize
-      data = Config.normalize(data, config)
+      data = Config.normalize(data, nil, config)
       #dbg(data, 'template data -> post normalization')
     end
     

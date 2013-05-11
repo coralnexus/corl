@@ -6,7 +6,7 @@ class JSON < Base
   # Renderers  
    
   def render(input)
-    return Data.to_json(input)    
+    return Util::Data.to_json(input)    
   end
 end
 end
