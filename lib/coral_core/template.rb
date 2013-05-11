@@ -13,21 +13,31 @@ module Template
   
   def self.process(value)
     case value
-    when String
-      return ''         if Util::Data.undef?(value)
+    when String, Symbol
+      return nil        if Util::Data.undef?(value)
       return 'false'    if value == false
       return 'true'     if value == true      
       return value.to_s if value.is_a?(Symbol)
       
     when Hash
+      results = {}
       value.each do |key, item|
-        value[key] = process(item)
+        result = process(item)
+        unless result.nil?
+          results[key] = result  
+        end
+        value = results
       end
       
     when Array
+      results = []
       value.each_with_index do |item, index|
-        value[index] = process(item)
+        result = process(item)
+        unless result.nil?
+          results << result  
+        end        
       end
+      value = results
     end
     return value
   end
