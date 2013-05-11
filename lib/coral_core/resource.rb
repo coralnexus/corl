@@ -91,11 +91,15 @@ module Resource
   #---
   
   def self.render(resource, options = {})
-    config = Config.ensure(options)
+    resource = Core.string_map(resource.clone)
+    config   = Config.ensure(options)
     
-    Core.string_map(resource).keys.each do |name|
+    resource.keys.each do |name|
       if match = name.match(/^(.+)_template$/)
         target = match.captures[0]
+        
+        #dbg(name, 'name')
+        #dbg(target, 'target')
         
         config.set(:noralize_template, config.get("normalize_#{target}", true))
         config.set(:interpolate_template, config.get("interpolate_#{target}", true))
@@ -105,6 +109,7 @@ module Resource
       end
     end
     
+    #dbg(resource, 'render exit')
     return resource
   end
   
