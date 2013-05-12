@@ -101,7 +101,7 @@ module Resource
         #dbg(name, 'name')
         #dbg(target, 'target')
         
-        config.set(:noralize_template, config.get("normalize_#{target}", true))
+        config.set(:normalize_template, config.get("normalize_#{target}", true))
         config.set(:interpolate_template, config.get("interpolate_#{target}", true))
         
         resource[target] = Template.render(resource[name], resource[target], config)
