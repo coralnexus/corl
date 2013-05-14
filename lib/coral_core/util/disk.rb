@@ -1,7 +1,7 @@
 
 module Coral
 module Util
-class Disk < Core
+class Disk
   
   #-----------------------------------------------------------------------------
   # Properties
@@ -15,7 +15,7 @@ class Disk < Core
   # Utilities
   
   def self.open(file_name, options = {}, reset = false)
-    mode          = string(options[:mode])
+    mode          = options[:mode].to_s
     
     @@separator   = ( options[:separator] ? options[:separator] : false )
     @@description = ( options[:description] ? options[:description] : '' )
@@ -77,7 +77,12 @@ class Disk < Core
   
   def self.close(file_names = [])
     file_names = @@files.keys unless file_names && ! file_names.empty?
-    array(file_names).each do |file_name|
+    
+    unless file_names.is_a?(Array)
+      file_names = [ file_names ]
+    end
+    
+    file_names.each do |file_name|
       @@files[file_name][:file].close if @@files[file_name] && @@files[file_name][:file]
       @@files.delete(file_name)
     end
