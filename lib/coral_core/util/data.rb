@@ -185,6 +185,35 @@ class Data
     #dbg(value, 'interpolate -> result')
     return value  
   end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def self.prefix(prefix, data)
+    result = nil
+    
+    unless prefix.is_a?(String) && ! empty?(prefix)
+      prefix = ''
+    end
+    
+    case data
+    when String, Symbol
+      result = ( prefix.empty? ? data.to_s : prefix + '_' + data.to_s )
+      
+    when Array
+      result = []
+      data.each do |value|
+        result << prefix(prefix, value)
+      end
+      
+    when Hash
+      result = {}
+      data.each do |key, value|
+        result[prefix(prefix, key)] = value  
+      end      
+    end
+    return result
+  end
 end
 end
 end
