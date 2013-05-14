@@ -4,8 +4,47 @@ class Config
   
   #-----------------------------------------------------------------------------
   # Global configuration
+  
+  @@options = {}
+  
+  #---
+  
+  def self.options(contexts, force = true)
+    options = {}
+    
+    unless contexts.is_a?(Array)
+      contexts = [ contexts ]
+    end
+    contexts.each do |name|
+      if @@options.has_key?(name)
+        options = Util::Data.merge([ options, @@options[name] ], force)
+      end
+    end
+    return options
+  end
+  
+  #---
+  
+  def self.set_options(context, options, force = true)    
+    current_options = ( @@options.has_key?(context) ? @@options[context] : {} )
+    @@options[context] = Util::Data.merge([ current_options, options ], force)  
+  end
+  
+  #---
+  
+  def self.clear_options(contexts)
+    unless contexts.is_a?(Array)
+      contexts = [ contexts ]
+    end
+    contexts.each do |name|
+      @@options.delete(name)
+    end
+  end
+  
+  #-----------------------------------------------------------------------------
 
   @@properties = {}
+  @@mutex      = false
   
   #---
   
@@ -16,7 +55,29 @@ class Config
   #---
   
   def self.set_property(name, value)
-    @@properties[name] = value  
+    #dbg(value, "result -> #{name}")
+    @@properties[name] = value
+    save_properties  
+  end
+  
+  #---
+  
+  def self.clear_property(name)
+    @@properties.delete(name)
+    save_properties
+  end
+  
+  #---
+  
+  def self.save_properties
+    log_options = options('coral_log')
+    
+    unless Util::Data.empty?(log_options['config_log'])
+      config_log = log_options['config_log']
+      
+      Util::Disk.write(config_log, JSON.generate(@@properties))
+      Util::Disk.close(config_log)
+    end
   end
   
   #-----------------------------------------------------------------------------
@@ -178,7 +239,7 @@ class Config
   end
     
   #-----------------------------------------------------------------------------
-  # Instance generator
+  # Instance generators
   
   def self.ensure(config)
     case config
@@ -190,11 +251,20 @@ class Config
     return Config.new
   end
   
+  #---
+  
+  def self.init(options, contexts = [], defaults = {})
+    config = Coral::Config.new(Coral::Config.options(contexts), defaults)
+    config.import(options) unless Coral::Util::Data.empty?(options)
+    return config
+  end
+  
   #-----------------------------------------------------------------------------
   # Configuration instance
     
   def initialize(data = {}, defaults = {}, force = true)
-    @force = force
+    @force   = force
+    @options = {}
     
     if defaults.is_a?(Hash) && ! defaults.empty?
       symbolized = {}
