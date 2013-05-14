@@ -108,7 +108,9 @@ end
 #---
 
 # Include pre core utilities (no internal dependencies)
-require File.join('coral_core', 'util', 'data.rb') 
+[ :data, :disk ].each do |name| 
+  require File.join('coral_core', 'util', name.to_s + ".rb") 
+end
 
 if git_location
   require File.join('coral_core', 'util', 'git.rb') 
@@ -128,7 +130,7 @@ end
 # ( normally inherit from core and have no reverse dependencies with 
 #   core classes )
 #
-[ :disk, :shell ].each do |name| 
+[ :shell ].each do |name| 
   require File.join('coral_core', 'util', name.to_s + ".rb") 
 end
 
