@@ -44,7 +44,6 @@ class Config
   #-----------------------------------------------------------------------------
 
   @@properties = {}
-  @@mutex      = false
   
   #---
   
@@ -159,19 +158,20 @@ class Config
     prefix      = config.get(:prefix, true)    
     prefix_text = prefix ? sep : ''
     
-    search_name = config.get(:search_name, true)
+    search_name    = config.get(:search_name, true)
+    reverse_lookup = config.get(:reverse_lookup, true)
     
     #dbg(default, "lookup -> #{name}")
     
     if Config.initialized?(options)
-      unless scope.respond_to?("[]")
+      unless scope.respond_to?('[]')
         scope = Hiera::Scope.new(scope)
       end
       value = hiera.lookup(name, default, scope, override, context)
       #dbg(value, "hiera -> #{name}")
     end 
     
-    if Util::Data.undef?(value) && scope.respond_to?('lookupvar')
+    if Util::Data.undef?(value) && scope.respond_to?('[]')
       log_level = Puppet::Util::Log.level
       Puppet::Util::Log.level = :err # Don't want failed parameter lookup warnings here.
       
@@ -179,14 +179,16 @@ class Config
         if base_names.is_a?(String)
           base_names = [ base_names ]
         end
+        base_names = base_names.reverse if reverse_lookup
+                
         base_names.each do |item|
-          value = scope.lookupvar("#{prefix_text}#{item}#{sep}#{name}")
+          value = scope["#{prefix_text}#{item}#{sep}#{name}"]
           #dbg(value, "#{prefix_text}#{item}#{sep}#{name}")
           break unless Util::Data.undef?(value)  
         end
       end
       if Util::Data.undef?(value) && search_name
-        value = scope.lookupvar("#{prefix_text}#{name}")
+        value = scope["#{prefix_text}#{name}"]
         #dbg(value, "#{prefix_text}#{name}")
       end
       Puppet::Util::Log.level = log_level
@@ -194,7 +196,9 @@ class Config
     value = default if Util::Data.undef?(value)
     value = Util::Data.value(value)
     
-    set_property(name, value)
+    if ! @@properties.has_key?(name) || ! Util::Data.undef?(value)
+      set_property(name, value)
+    end
     
     #dbg(value, "result -> #{name}")    
     return value  
