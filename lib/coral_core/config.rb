@@ -131,8 +131,8 @@ class Config
       coral_fact  = prefix_text + config.get(:coral_fact, 'coral_exists') 
       
       if Puppet::Parser::Functions.function('hiera')
-        if scope.respond_to?('lookupvar')
-          return true if Util::Data.true?(scope.lookupvar(init_fact)) && Util::Data.true?(scope.lookupvar(coral_fact))
+        if scope.respond_to?('[]')
+          return true if Util::Data.true?(scope[init_fact]) && Util::Data.true?(scope[coral_fact])
         else
           return true
         end
@@ -164,14 +164,14 @@ class Config
     #dbg(default, "lookup -> #{name}")
     
     if Config.initialized?(options)
-      unless scope.respond_to?('[]')
+      unless scope.respond_to?("[]")
         scope = Hiera::Scope.new(scope)
       end
       value = hiera.lookup(name, default, scope, override, context)
       #dbg(value, "hiera -> #{name}")
     end 
     
-    if Util::Data.undef?(value) && scope.respond_to?('[]')
+    if Util::Data.undef?(value) && ( scope.respond_to?("[]") || scope.respond_to?("lookupvar") )
       log_level = Puppet::Util::Log.level
       Puppet::Util::Log.level = :err # Don't want failed parameter lookup warnings here.
       
@@ -180,15 +180,24 @@ class Config
           base_names = [ base_names ]
         end
         base_names = base_names.reverse if reverse_lookup
-                
+        
+        #bg(base_names, 'search path')        
         base_names.each do |item|
-          value = scope["#{prefix_text}#{item}#{sep}#{name}"]
+          if scope.respond_to?("lookupvar")
+            value = scope.lookupvar("#{prefix_text}#{item}#{sep}#{name}")  
+          else
+            value = scope["#{prefix_text}#{item}#{sep}#{name}"]
+          end
           #dbg(value, "#{prefix_text}#{item}#{sep}#{name}")
           break unless Util::Data.undef?(value)  
         end
       end
       if Util::Data.undef?(value) && search_name
-        value = scope["#{prefix_text}#{name}"]
+        if scope.respond_to?("lookupvar")
+          value = scope.lookupvar("#{prefix_text}#{name}")
+        else
+          value = scope["#{prefix_text}#{name}"]
+        end
         #dbg(value, "#{prefix_text}#{name}")
       end
       Puppet::Util::Log.level = log_level
