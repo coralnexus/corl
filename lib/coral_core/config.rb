@@ -74,7 +74,7 @@ class Config
     unless Util::Data.empty?(log_options['config_log'])
       config_log = log_options['config_log']
       
-      Util::Disk.write(config_log, JSON.generate(@@properties))
+      Util::Disk.write(config_log, JSON.pretty_generate(@@properties))
       Util::Disk.close(config_log)
     end
   end
