@@ -38,7 +38,9 @@ Jeweler::Tasks.new do |gem|
   gem.has_rdoc              = true
   gem.rdoc_options << '--title' << 'Coral Core library' <<
                       '--main' << 'README.rdoc' <<
-                      '--line-numbers' 
+                      '--line-numbers'
+                      
+  gem.files.exclude 'lib/dependency' 
   
   # Dependencies defined in Gemfile
 end
