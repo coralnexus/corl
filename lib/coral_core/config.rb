@@ -74,8 +74,10 @@ class Config
     unless Util::Data.empty?(log_options['config_log'])
       config_log = log_options['config_log']
       
-      Util::Disk.write(config_log, JSON.pretty_generate(@@properties))
-      Util::Disk.close(config_log)
+      if log_options['config_store']
+        Util::Disk.write(config_log, JSON.pretty_generate(@@properties))
+        Util::Disk.close(config_log)
+      end
     end
   end
   
@@ -158,17 +160,19 @@ class Config
     prefix      = config.get(:prefix, true)    
     prefix_text = prefix ? sep : ''
     
+    debug       = config.get(:debug, false)
+    
     search_name    = config.get(:search_name, true)
     reverse_lookup = config.get(:reverse_lookup, true)
     
-    #dbg(default, "lookup -> #{name}")
+    dbg(default, "lookup -> #{name}") if debug
     
     if Config.initialized?(options)
       unless scope.respond_to?("[]")
         scope = Hiera::Scope.new(scope)
       end
-      value = hiera.lookup(name, default, scope, override, context)
-      #dbg(value, "hiera -> #{name}")
+      value = hiera.lookup(name, nil, scope, override, context)
+      dbg(value, "hiera lookup -> #{name}") if debug
     end 
     
     if Util::Data.undef?(value) && ( scope.respond_to?("[]") || scope.respond_to?("lookupvar") )
@@ -181,14 +185,14 @@ class Config
         end
         base_names = base_names.reverse if reverse_lookup
         
-        #bg(base_names, 'search path')        
+        dbg(base_names, 'lookup search path') if debug        
         base_names.each do |item|
           if scope.respond_to?("lookupvar")
             value = scope.lookupvar("#{prefix_text}#{item}#{sep}#{name}")  
           else
             value = scope["#{prefix_text}#{item}#{sep}#{name}"]
           end
-          #dbg(value, "#{prefix_text}#{item}#{sep}#{name}")
+          dbg(value, "scope lookup #{prefix_text}#{item}#{sep}#{name}") if debug
           break unless Util::Data.undef?(value)  
         end
       end
@@ -198,7 +202,7 @@ class Config
         else
           value = scope["#{prefix_text}#{name}"]
         end
-        #dbg(value, "#{prefix_text}#{name}")
+        dbg(value, "scope lookup #{prefix_text}#{name}") if debug
       end
       Puppet::Util::Log.level = log_level
     end    
@@ -209,7 +213,7 @@ class Config
       set_property(name, value)
     end
     
-    #dbg(value, "result -> #{name}")    
+    dbg(value, "lookup result -> #{name}") if debug    
     return value  
   end
   
@@ -218,6 +222,8 @@ class Config
   def self.normalize(data, override = nil, options = {})
     config  = Config.ensure(options)
     results = {}
+    
+    debug   = config.get(:debug, false)
     
     unless Util::Data.undef?(override)
       case data
@@ -229,6 +235,9 @@ class Config
         data = [ data, override ]
       end
     end
+    
+    dbg(data, 'config normalize data') if debug
+    dbg(override, 'config normalize override') if debug
     
     case data
     when String, Symbol
@@ -247,6 +256,8 @@ class Config
     when Hash
       results = data
     end
+    
+    dbg(results, 'config normalize results') if debug
     
     return results
   end
