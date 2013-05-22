@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2013-05-20"
+  s.date = "2013-05-22"
   s.description = "= coral_core\n\nThis library provides core data elements and utilities used in other Coral gems.\n\nThe Coral core library contains functionality that is utilized by other\nCoral gems by providing basic utilities like Git, Shell, Disk, and Data\nmanipulation libraries, a UI system, and a core data model that supports\nEvents, Commands, Repositories, and Memory (version controlled JSON \nobjects).  This library is only used as a starting point for other systems.\n\nNote:  This library is still very early in development!\n\n== Contributing to coral_core\n \n* Check out the latest {major}.{minor} branch to make sure the feature hasn't \n  been implemented or the bug hasn't been fixed yet.\n* Check out the issue tracker to make sure someone already hasn't requested \n  it and/or contributed it.\n* Fork the project.\n* Start a feature/bugfix branch.\n* Commit and push until you are happy with your contribution.\n* Make sure to add tests for it. This is important so I don't break it in a \n  future version unintentionally.\n* Please try not to mess with the Rakefile, version, or history. If you want \n  to have your own version, or is otherwise necessary, that is fine, but \n  please isolate to its own commit so I can cherry-pick around it.\n\n== Copyright\n\nLicensed under GPLv3.  See LICENSE.txt for further details.\n\nCopyright (c) 2013  Adrian Webb <adrian.webb@coraltech.net>\nCoral Technology Group LLC"
   s.email = "adrian.webb@coraltech.net"
   s.extra_rdoc_files = [
