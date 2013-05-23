@@ -67,6 +67,13 @@ class Lib
     command('remote', ['rm', name])
   end
   
+  #---
+  
+  def pull(remote, branch = 'master', tags = false)
+    command('pull', [remote, branch])
+    command('pull', ['--tags', remote]) if tags
+  end
+    
   #-----------------------------------------------------------------------------
   # Utilities
   

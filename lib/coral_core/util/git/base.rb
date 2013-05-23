@@ -54,5 +54,12 @@ class Base
   def add(path = '.', opts = {})
     self.lib.add(path, opts)
   end
+  
+  #-----------------------------------------------------------------------------
+  # Remote extensions
+  
+  def pull(remote = 'origin', branch = 'master')
+    self.lib.pull(remote, branch)
+  end
 end
 end
