@@ -7,3 +7,6 @@
 [submodule "lib/dependency/deep_merge"]
 	path = lib/dependency/deep_merge
 	url = git://github.com/danielsdeleo/deep_merge.git
+[submodule "lib/dependency/grit"]
+	path = lib/dependency/grit
+	url = git://github.com/mojombo/grit.git
