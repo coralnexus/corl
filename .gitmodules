@@ -1,6 +1,3 @@
-[submodule "lib/dependency/git"]
-	path = lib/dependency/git
-	url = git://github.com/schacon/ruby-git.git
 [submodule "lib/dependency/json"]
 	path = lib/dependency/json
 	url = git://github.com/flori/json.git
