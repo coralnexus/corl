@@ -95,13 +95,13 @@ end
 
 if git_location
   begin
-    require 'git'
+    require 'grit'
     
   rescue LoadError
-    git_lib = File.join(dependencies, 'git', 'lib')
+    git_lib = File.join(dependencies, 'grit', 'lib')
   
     $:.push(git_lib)
-    require File.join(git_lib, 'git.rb')  
+    require File.join(git_lib, 'grit.rb')  
   end
 end
 
@@ -110,15 +110,6 @@ end
 # Include pre core utilities (no internal dependencies)
 [ :data, :disk ].each do |name| 
   require File.join('coral_core', 'util', name.to_s + ".rb") 
-end
-
-if git_location
-  require File.join('coral_core', 'util', 'git.rb') 
-
-  # Include Git overrides
-  Dir.glob(File.join(home, 'coral_core', 'util', 'git', '*.rb')).each do |file|
-    require file
-  end
 end
 
 # Include core
@@ -157,6 +148,7 @@ end
 
 #---
 
+require 'hiera'
 require 'hiera_backend.rb'
 
 #*******************************************************************************

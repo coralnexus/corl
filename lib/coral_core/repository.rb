@@ -22,22 +22,20 @@ class Repository < Core
   # Property accessors / modifiers
   
   attr_accessor :name, :remote_dir
-  attr_reader :directory, :submodule, :git
+  attr_reader :directory, :submodule, :lib
 
   #---
    
   def ensure_git(reset = false)
-    if reset || ! @git
+    if reset || ! @lib
       if @directory.empty?
-        @git = nil
+        @lib = nil
       else
         directory = @directory
         unless Util::Data.empty?(@submodule)
           directory = File.join(@directory, @submodule) 
         end
-        @git = Git.open(directory, {
-          :log => logger,
-        })
+        @lib = Grit::Repo.init_bare_or_open(directory)
       end
     end
     return self
@@ -67,16 +65,15 @@ class Repository < Core
         config[:repo] = @remote_dir
       end
       
-      git.add_remote(name, Git.url(hosts.shift, config[:repo], options))
+      lib.remote_add(name, Git.url(hosts.shift, config[:repo], options))
       
       if ! hosts.empty?
-        remote = git.remote(name)
-        
-        config[:add] = true
-      
         hosts.each do |host|
-          git_url = Git.url(host, config[:repo], config.options)
-          remote.set_url(git_url, config.options)
+          lib.remote_set_url(name, Git.url(host, config[:repo], config.options), {
+            :add    => true,
+            :delete => config.get(:delete, false),
+            :push   => config.get(:push, false)
+          })
         end
       end
     end
@@ -87,10 +84,7 @@ class Repository < Core
   
   def delete_remote(name)
     if can_persist?
-      remote = git.remote(name)
-      if remote && remote.url && ! remote.url.empty?
-        remote.remove
-      end
+      lib.remote_rm(name)
     end
     return self  
   end
@@ -106,39 +100,63 @@ class Repository < Core
       user    = ENV['USER']
       message = config.get(:message, 'Saving state')
       
-      config[:author]      = config.get(:author, '')
-      config[:allow_empty] = config.get(:allow_empty, false)
-      
       unless user && ! user.empty?
         user = 'UNKNOWN'
       end
+      
+      files = array(files)
+      lib.add(files)                          # Get all added and updated files
+      lib.git.add({ :update => true }, files) # Get all deleted files
     
-      array(files).each do |file|
-        git.add(file)                      # Get all added and updated files
-        git.add(file, { :update => true }) # Get all deleted files
-      end
-        
-      git.commit("#{time} by <#{user}> - #{message}", config.options)                
+      lib.git.commit({ 
+        :m           => "#{time} by <#{user}> - #{message}",
+        :author      => config.get(:author, false),
+        :allow_empty => config.get(:allow_empty, false) 
+      })                
     end
     return self      
   end
   
   #-----------------------------------------------------------------------------
+  # SSH operations
+ 
+  def pull!(remote = 'origin', options = {})
+    config = Config.ensure(options)
+    
+    if can_persist?
+      return Coral::Command.new({
+        :command => :git,
+        :data    => { 'git-dir=' => lib.path },
+        :subcommand => {
+          :command => :pull,
+          :flags   => ( config.get(:tags, false) ? :tags : '' ),
+          :args    => [ remote, config.get(:branch, 'master') ]
+        }
+      }).exec!(config) do |line|
+        block_given? ? yield(line) : true
+      end
+    end
+  end
   
+  #---
+  
+  def pull(remote = 'origin', options = {})
+    return pull!(remote, options)
+  end  
+  
+  #---
+    
   def push!(remote = 'origin', options = {})
     config = Config.ensure(options)
     
     if can_persist?
-      branch = config.get(:branch, 'master')
-      tags   = config.get(:tags, false)
-    
       return Coral::Command.new({
         :command => :git,
-        :data => { 'git-dir=' => git.repo.to_s },
+        :data => { 'git-dir=' => lib.path },
         :subcommand => {
           :command => :push,
-          :flags => ( tags ? :tags : '' ),
-          :args => [ remote, branch ]
+          :flags => ( config.get(:tags, false) ? :tags : '' ),
+          :args => [ remote, config.get(:branch, 'master') ]
         }
       }).exec!(config) do |line|
         block_given? ? yield(line) : true
@@ -157,7 +175,7 @@ class Repository < Core
   
   def can_persist?
     ensure_git
-    return true if @git
+    return true if @lib
     return false
   end
 end
