@@ -1,96 +1,285 @@
 
 module Coral
 class Repository < Core
-    
+  
+  @@repositories = {}
+  
+  #---
+  
+  def self.collection
+    return @@repositories
+  end
+     
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
+  
+  def self.init(directory, url, revision, options = {})
+    config = Config.ensure(options)
+    
+    return new(config.import({
+      :directory => directory,
+      :origin    => url,
+      :revision  => revision
+    }))
+  end
+  
+  #---
+  
+  def self.open(directory, options = {})
+    config = Config.ensure(options)
+    
+    if ! @@repositories.has_key?(directory) || config.get(:reset, false)
+      return new(config.import({
+        :directory => directory
+      }))
+    end
+    return @@repositories[directory]
+  end
+  
+  #-----------------------------------------------------------------------------
   
   def initialize(options = {})
     config = Config.ensure(options)
     
     super(config)
     
-    @name       = config.get(:name, '')
-    @directory  = config.get(:directory, '')
-    @submodule  = config.get(:submodule, '')
-    @remote_dir = config.get(:remote_dir, '')
+    set_location(config.get(:directory, Dir.pwd))
     
-    ensure_git(true) 
+    @origin   = config.get(:origin, nil)
+    @revision = config.get(:revision, nil)
+    
+    set_origin(@origin) unless @origin.nil?
+    checkout(@revision) unless @revision.nil?
+    
+    pull if config.get(:pull, false)
+    
+    @@repositories[directory] = self
   end
-    
-  #-----------------------------------------------------------------------------
-  # Property accessors / modifiers
   
-  attr_accessor :name, :remote_dir
-  attr_reader :directory, :submodule, :lib
+  #-----------------------------------------------------------------------------
+  # Location information
+      
+  def self.git_dir(path, require_top_level = false)
+    path    = File.expand_path(path)
+    git_dir = File.join(path, '.git')
 
+    if File.exist?(git_dir)
+      if File.directory?(git_dir)
+        return git_dir
+      elsif ! require_top_level
+        git_dir = Util::Disk.read(git_dir)        
+        unless git_dir.nil?
+          git_dir = git_dir.gsub(/^gitdir\:\s*/, '').strip
+          return git_dir if File.directory?(git_dir)
+        end  
+      end
+    elsif File.exist?(path) && (path =~ /\.git$/ && File.exist?(File.join(path, 'HEAD')))
+      return path
+    end
+    return nil
+  end
+
+  #-----------------------------------------------------------------------------
+  # URLs
+
+  def self.url(host, repo, options = {})
+    config = Config.ensure(options)
+    
+    user   = config.get(:user, 'git')
+    auth   = config.get(:auth, true)    
+    return user + (auth ? '@' : '://') + host + (auth ? ':' : '/') + repo
+  end
+  
+  #---
+  
+  def self.edit_url(url, options = {})
+    config = Config.ensure(options)
+    
+    if matches = url.strip.match(/^(https?|git)\:\/\/([^\/]+)\/(.+)/)
+      host, path = matches.captures      
+      return url(host, path, config.import({ :auth => true }))
+    end
+    return url
+  end
+       
+  #-----------------------------------------------------------------------------
+  # Checks
+  
+  protected :ensure_git
+  
   #---
    
   def ensure_git(reset = false)
-    if reset || ! @lib
-      if @directory.empty?
-        @lib = nil
-      else
-        directory = @directory
-        unless Util::Data.empty?(@submodule)
-          directory = File.join(@directory, @submodule) 
-        end
-        @lib = Grit::Repo.init_bare_or_open(directory)
+    if reset || ! @git_lib
+      @git_lib = nil
+      unless directory.empty?
+        @git_lib = Git.new(directory)
       end
     end
     return self
   end
   
   #---
+   
+  def can_persist?
+    ensure_git
+    return true if @git_lib
+    return false
+  end
+ 
+  #---
+          
+  def self.top?(path)
+    git_dir = File.join(path, '.git')
+    if File.exist?(git_dir)
+      return true if File.directory?(git_dir)
+    elsif File.exist?(path) && (path =~ /\.git$/ && File.exist?(File.join(path, 'HEAD')))
+      return true
+    end
+    return false
+  end
+  
+  #---
+  
+  def top?
+    return self.class.top?(directory)
+  end
     
-  def set_repository(directory = '', submodule = '')
-    @directory = string(directory)
-    @submodule = string(submodule)
-    ensure_git(true)
-    return self
+  #---
+          
+  def self.submodule?(path)
+    git_dir = File.join(path, '.git')
+    if File.exist?(git_dir)
+      unless File.directory?(git_dir)
+        git_dir = Util::Disk.read(git_dir)        
+        unless git_dir.nil?
+          git_dir = git_dir.gsub(/^gitdir\:\s*/, '').strip
+          return true if File.directory?(git_dir)
+        end  
+      end
+    end
+    return false
+  end
+  
+  #---
+  
+  def submodule?
+    return self.class.submodule?(directory)  
   end
       
   #-----------------------------------------------------------------------------
-    
-  def set_remote(name, hosts, options = {})
+  # Property accessors / modifiers
+  
+  attr_reader :directory
+  protected :git
+ 
+  #---
+  
+  def path
+    if parent.nil?
+      return directory  
+    end
+    return directory.gsub(parent.directory + File::SEPARATOR, '')
+  end
+ 
+  #---
+  
+  def git
+    return @git_lib.git if can_persist?
+    return nil
+  end
+  
+  #---
+  
+  def config(name, options = {})
+    config = Config.ensure(options) # Just in case we throw a configuration in
+    return git.config(config.options, name) if can_persist?
+    return nil
+  end
+  
+  #---
+  
+  def set_config(name, value, options = {})
+    config = Config.ensure(options) # Just in case we throw a configuration in
+    git.config(config.options, name, string(value)) if can_persist?
+    return self
+  end
+  
+  #---
+  
+  def delete_config(name, options = {})
     config = Config.ensure(options)
-    
-    if can_persist?
-      hosts = array(hosts)
-      
-      delete_remote(name)
-      return self if hosts.empty?
-      
-      if @remote_dir && ! config.get(:repo, false)
-        config[:repo] = @remote_dir
-      end
-      
-      lib.remote_add(name, Git.url(hosts.shift, config[:repo], options))
-      
-      if ! hosts.empty?
-        hosts.each do |host|
-          lib.remote_set_url(name, Git.url(host, config[:repo], config.options), {
-            :add    => true,
-            :delete => config.get(:delete, false),
-            :push   => config.get(:push, false)
-          })
-        end
-      end
-    end
+    git.config(config.import({ :remove_section => true }).options, name) if can_persist?
     return self
   end
   
   #---
-  
-  def delete_remote(name)
-    if can_persist?
-      lib.remote_rm(name)
+   
+  def set_location(directory)
+    if Util::Data.empty?(directory)
+      @directory = Dir.pwd
+    else
+      @directory = ( directory.is_a?(Array) ? directory.join(File::SEPARATOR) : string(directory) )
     end
-    return self  
+    
+    ensure_git(true)
+    
+    init_parent
+    init_remotes    
+    load_revision    
+    return self
+  end
+
+  #-----------------------------------------------------------------------------
+  # Basic Git operations
+  
+  attr_reader :parent, :revision
+  protected :init_parent, :load_revision
+  
+  #---
+  
+  def init_parent
+    @parent = nil
+        
+    unless top?(directory)
+      search_dir = directory
+      
+      while File.directory?((search_dir = File.expand_path("..", search_dir)))
+        if git_dir(search_dir)
+          @parent = open(search_dir)                
+          break;
+        end        
+      end      
+    end
+    return self       
+  end
+
+  #---
+  
+  def load_revision
+    if can_persist?
+      @revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD')
+    
+      if @revision.empty?
+        @revision = git.native(:rev_parse, {}, 'HEAD')
+      end
+      load_submodules
+    end
+    return self
+  end
+
+  #---
+  
+  def checkout(revision)
+    if can_persist?
+      git.checkout({}, revision) unless @git_lib.bare
+      @revision = revision
+      load_submodules
+    end
+    return self 
   end
   
-  #-----------------------------------------------------------------------------
-  # Git operations
+  #---
   
   def commit(files = '.', options = {})
     config = Config.ensure(options)
@@ -100,42 +289,212 @@ class Repository < Core
       user    = ENV['USER']
       message = config.get(:message, 'Saving state')
       
-      unless user && ! user.empty?
-        user = 'UNKNOWN'
-      end
+      user = 'UNKNOWN' unless user && ! user.empty?
+            
+      git.reset({}, 'HEAD') # Clear the index so we get a clean commit
       
       files = array(files)
-      lib.add(files)                          # Get all added and updated files
-      lib.git.add({ :update => true }, files) # Get all deleted files
+      git.add(files)                      # Get all added and updated files
+      git.add({ :update => true }, files) # Get all deleted files
     
-      lib.git.commit({ 
+      git.commit({ 
         :m           => "#{time} by <#{user}> - #{message}",
         :author      => config.get(:author, false),
         :allow_empty => config.get(:allow_empty, false) 
-      })                
+      })
+      
+      if ! parent.nil? && config.get(:propogate, true)
+        parent.commit(directory, config.import({
+          :message => "Updating submodule #{path} with: #{message}"
+        }))
+      end                
     end
     return self      
   end
+
+  #-----------------------------------------------------------------------------
+  # Submodule operations
   
+  attr_reader :submodules
+  protected :load_submodules, :update_submodules
+  
+  #---
+  
+  def load_submodules
+    @submodules = {}
+    
+    if can_persist?
+      # Returns a Hash of { <path:String> => { 'url' => <url:String>, 'id' => <id:String> } }
+      # Returns {} if no .gitmodules file was found
+      Grit::Submodule.config(@git_lib, revision).each do |path, data|
+        repo = open(File.join(directory, path))
+        repo.set_origin(data['url']) # Just a sanity check (might disapear)
+        
+        @submodules[path] = repo    
+      end
+    end
+    return self  
+  end
+  
+  #---
+  
+  def add_submodule(path, url, revision, options = {})
+    if can_persist?
+      git.submodule({ :branch => revision }, 'add', url, path)
+      commit([ '.gitmodules', path ], { :message => "Adding submodule #{url} to #{path}" })      
+      load_submodules
+    end  
+  end
+  
+  #---
+  
+  def delete_submodule(path)
+    if can_persist?
+      submodule_key = "submodule.#{path}"
+      
+      delete_config(submodule_key)
+      delete_config(submodule_key, { :file => '.gitmodules' })
+      
+      git.rm({ :cached => true }, path)
+      FileUtils.rm_rf(File.join(directory, path))
+      FileUtils.rm_rf(File.join(git.git_dir, 'modules', path))
+      
+      commit([ '.gitmodules', path ], { :message => "Removing submodule #{url} from #{path}" })      
+      load_submodules
+    end  
+  end
+ 
+  #---
+   
+  def update_submodules
+    git.submodule({ :init => true, :recursive => true }, 'update') if can_persist?
+    return self
+  end
+  
+  #---
+  
+  def foreach!
+    if can_persist?
+      submodules.each do |path, repo|
+        yield(path, repo)  
+      end
+    end
+    return self
+  end 
+         
+  #-----------------------------------------------------------------------------
+  # Remote operations
+  
+  attr_reader :origin, :edit
+  protected :init_remotes
+  
+  #---
+  
+  def init_remotes
+    @origin = config('remote.origin.url')
+    set_edit(edit_url(@origin)) unless config('remote.edit.url')
+    return self 
+  end
+
+  #---
+  
+  def set_origin(url)
+    set_remote('origin', url)
+    @origin = url
+    return self
+  end
+
+  #---
+  
+  def set_edit(url)
+    set_remote('edit', url)
+    @edit = url
+    return self
+  end
+  
+  #---
+  
+  def set_remote(name, url)
+    delete_remote(name)
+    git.remote({}, 'add', name, url) if can_persist?
+    return self
+  end
+  
+  #---
+  
+  def add_remote_url(name, url, options = {})
+    config = Config.ensure(options)
+    
+    if can_persist?
+      git.remote({
+        :add    => true,
+        :delete => config.get(:delete, false),
+        :push   => config.get(:push, false)
+      }, 'set-url', name, url)
+    end
+    return self  
+  end
+  
+  #---
+    
+  def set_host_remote(name, hosts, path, options = {})
+    config = Config.ensure(options)
+    
+    if can_persist?
+      hosts = array(hosts)
+      
+      return self if hosts.empty?
+      
+      set_remote(name, url(hosts.shift, path, config.options))
+      
+      unless hosts.empty?
+        hosts.each do |host|
+          add_remote_url(name, url(host, path, config.options), config)
+        end
+      end
+    end
+    return self
+  end
+  
+  #---
+  
+  def delete_remote(name)
+    if can_persist? && git.list_remotes.include?(name)
+      git.remote({}, 'rm', name)
+    end
+    return self  
+  end
+ 
   #-----------------------------------------------------------------------------
   # SSH operations
  
   def pull!(remote = 'origin', options = {})
-    config = Config.ensure(options)
+    config  = Config.ensure(options)
+    success = false
     
     if can_persist?
-      return Coral::Command.new({
+      success = Command.new({
         :command => :git,
-        :data    => { 'git-dir=' => lib.path },
+        :data    => { 'git-dir=' => git.git_dir },
         :subcommand => {
           :command => :pull,
-          :flags   => ( config.get(:tags, false) ? :tags : '' ),
-          :args    => [ remote, config.get(:branch, 'master') ]
+          :flags   => ( config.get(:tags, true) ? :tags : '' ),
+          :args    => [ remote, config.get(:branch, '') ]
         }
       }).exec!(config) do |line|
         block_given? ? yield(line) : true
       end
+      
+      update_submodules
+      
+      if success && ! parent.nil? && config.get(:propogate, true)
+        parent.commit(directory, config.import({
+          :message     => "Pulling updates for submodule #{path}",
+          :allow_empty => true
+        }))
+      end      
     end
+    return success
   end
   
   #---
@@ -146,37 +505,36 @@ class Repository < Core
   
   #---
     
-  def push!(remote = 'origin', options = {})
-    config = Config.ensure(options)
+  def push!(remote = 'edit', options = {})
+    config  = Config.ensure(options)
+    success = false
     
     if can_persist?
-      return Coral::Command.new({
+      success = Command.new({
         :command => :git,
-        :data => { 'git-dir=' => lib.path },
+        :data => { 'git-dir=' => git.git_dir },
         :subcommand => {
           :command => :push,
-          :flags => ( config.get(:tags, false) ? :tags : '' ),
-          :args => [ remote, config.get(:branch, 'master') ]
+          :flags => ( config.get(:tags, true) ? :tags : '' ),
+          :args => [ remote, config.get(:branch, '') ]
         }
       }).exec!(config) do |line|
         block_given? ? yield(line) : true
       end
+      
+      if success && config.get(:propogate, true)
+        foreach! do |path, repo|
+          repo.push(remote, config)
+        end
+      end
     end
+    return success
   end
   
   #---
   
-  def push(remote = 'origin', options = {})
+  def push(remote = 'edit', options = {})
     return push!(remote, options)
-  end  
-     
-  #-----------------------------------------------------------------------------
-  # Checks
-  
-  def can_persist?
-    ensure_git
-    return true if @lib
-    return false
-  end
+  end 
 end
 end
