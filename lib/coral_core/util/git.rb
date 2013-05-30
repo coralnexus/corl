@@ -1,35 +1,41 @@
 
-module Git
-
+module Coral
+class Git < ::Grit::Repo
+  
   #-----------------------------------------------------------------------------
-  # Utilities
+  # Constructor / Destructor
 
-  def self.url(host, repo, options = {})
-    options[:user] = ( options[:user] ? options[:user] : 'git' )
-    options[:auth] = ( options[:auth] ? options[:auth] : true )
+  def initialize(path, options = {})
+    epath   = File.expand_path(path)
+    git_dir = File.join(epath, '.git')
     
-    return options[:user] + ( options[:auth] ? '@' : '://' ) + host + ( options[:auth] ? ':' : '/' ) + repo
+    @bare = (options[:is_bare] ? true : false)
+
+    if File.exist?(git_dir)
+      self.working_dir = epath
+      
+      if File.directory?(git_dir)        
+        self.path = git_dir        
+      else
+        git_dir = Util::Disk.read(git_dir)        
+        unless git_dir.nil?
+          git_dir = git_dir.gsub(/^gitdir\:\s*/, '').strip
+          self.path = git_dir if File.directory?(git_dir)
+        end  
+      end
+      
+    elsif File.directory?(epath) && (options[:is_bare] || (epath =~ /\.git$/ && File.exist?(File.join(epath, 'HEAD'))))
+      self.path = epath
+      @bare     = true
+    end
+
+    self.git           = ::Grit::Git.new(self.path)
+    self.git.work_tree = epath
+    
+    unless File.directory?(epath) && self.git.exist?
+      FileUtils.mkdir_p(epath) unless File.directory?(epath)
+      self.git.init({ :bare => @bare })
+    end
   end
 end
-
-#---
-
-module Grit
-  class Repo
-    
-    #---------------------------------------------------------------------------
-    # Remotes
-    
-    def remote_set_url(name, url, opts = {})
-      self.git.remote(opts, 'set-url', name, url)
-    end
-    
-    #---
-    
-    def remote_rm(name)
-      if self.list_remotes.include?(name)
-        self.git.remote({}, 'rm', name)
-      end
-    end
-  end
 end
