@@ -54,6 +54,8 @@ $:.unshift(home) unless
 #---
   
 require 'rubygems'
+require 'puppet'
+require 'hiera'
 
 #---
 
@@ -131,7 +133,7 @@ end
 end
 
 if git_location
-  [ :repository, :memory ].each do |name| 
+  [ :repository, :configuration ].each do |name| 
     require File.join('coral_core', name.to_s + ".rb") 
   end  
 end
@@ -148,7 +150,6 @@ end
 
 #---
 
-require 'hiera'
 require 'hiera_backend.rb'
 
 #*******************************************************************************
