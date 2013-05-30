@@ -132,8 +132,8 @@ class Data
             value = item
           end
                 
-        when String, Symbol
-          value = item if item.is_a?(String) || item.is_a?(Symbol) || force 
+        else
+          value = item if force || item.is_a?(String) || item.is_a?(Symbol)
         end
       end  
     end
