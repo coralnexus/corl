@@ -1,6 +1,7 @@
 source "http://rubygems.org"
 
 gem "log4r", "~> 1.1"
+gem "i18n", "~> 0.6"
 gem "deep_merge", "~> 1.0"
 gem "json", ">= 1.4"
 gem "grit", "~> 2.5"
