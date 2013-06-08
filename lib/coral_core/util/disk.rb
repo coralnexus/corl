@@ -14,6 +14,12 @@ class Disk
   #-----------------------------------------------------------------------------
   # Utilities
   
+  def self.filename(file_name)
+    return ( file_name.is_a?(Array) ? file_name.join(File::SEPARATOR) : file_name.to_s )
+  end
+  
+  #---
+  
   def self.open(file_name, options = {}, reset = false)
     mode          = options[:mode].to_s
     
