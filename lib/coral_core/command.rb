@@ -108,6 +108,12 @@ class Command < Core
   def export
     return symbol_map(@properties)
   end
+  
+  #---
+  
+  def to_s
+    return build(export)
+  end
  
   #-----------------------------------------------------------------------------
   # Command functions
