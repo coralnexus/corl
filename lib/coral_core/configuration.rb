@@ -92,13 +92,12 @@ class Configuration < Core
   
   attr_accessor :autoload, :autosave, :autocommit, :commit_message
   attr_reader :repo, :config_file, :absolute_config_file
-  protected :set_absolute_config_file
- 
+   
   #---
   
   def config_file=file
     unless Util::Data.empty?(file)
-      @config_file = ( file.is_a?(Array) ? file.join(File::SEPARATOR) : string(file) )
+      @config_file = Util::Disk.filename(file)
     end
     
     set_absolute_config_file
@@ -116,12 +115,9 @@ class Configuration < Core
     end
     return self
   end
+  protected :set_absolute_config_file
   
   #-----------------------------------------------------------------------------
-  
-  protected :fetch, :modify
-  
-  #---
   
   def fetch(data, keys, default = nil, format = false)    
     if keys.is_a?(String) || keys.is_a?(Symbol)
@@ -140,6 +136,7 @@ class Configuration < Core
     end
     return filter(default, format)
   end
+  protected :fetch
   
   #---
   
@@ -162,6 +159,7 @@ class Configuration < Core
       modify(data[key], keys, value)  
     end
   end
+  protected :modify
   
   #---
   
@@ -218,7 +216,7 @@ class Configuration < Core
   def load(options = {})
     config = Config.ensure(options)
     
-    if can_persist?
+    if can_persist? && File.exists?(@absolute_config_file)
       json_text = Util::Disk.read(@absolute_config_file)    
       if json_text && ! json_text.empty?
         if config.get(:override, false)
@@ -256,6 +254,46 @@ class Configuration < Core
       File.delete(@absolute_config_file)
       repo.commit(@absolute_config_file, config) if autocommit
     end  
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def parse(statement, options = {})
+    config = Config.ensure(options)
+    
+    # statement = 'common->php::apache::memory_limit = 32M'
+    # statement = 'identity -> test -> users::user[admin][shell]'
+    # statement = 'servers->development->dev.loc->facts[server_environment]=vagrant'
+    # statement = 'cloud->settings[debug][puppet][options] = ["--debug"]'
+    
+    reference, new_value = statement.split(/\=/)
+    new_value            = new_value.join('=').strip if new_value && new_value.is_a?(Array)
+    
+    config_elements = reference.gsub(/\s+/, '').split(/\-\>/)
+    property        = config_elements.pop
+    config_file     = config_elements.pop
+    
+    if config_directory = config.get(:directory, nil)
+      config_path = File.join(repo.directory, config_directory, *config_elements)
+    else
+      config_path = File.join(repo.directory, *config_elements)
+    end
+    
+    return nil unless property && config_file
+    
+    config_file = "#{config_file}." + config.get(:ext, 'json')
+    property    = property.gsub(/\]$/, '').split(/\]?\[/)
+    data        = open(config_path, config_file, config)
+       
+    return { 
+      :path          => config_path, 
+      :file          => config_file, 
+      :property      => property,
+      :conf          => data,
+      :current_value => (data ? data.get(property) : nil), 
+      :new_value     => eval(new_value) 
+    }    
   end
 end
 end
