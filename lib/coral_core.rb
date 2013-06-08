@@ -57,6 +57,8 @@ require 'rubygems'
 require 'puppet'
 require 'hiera'
 
+require 'i18n'
+
 #---
 
 begin
@@ -110,31 +112,31 @@ end
 #---
 
 # Include pre core utilities (no internal dependencies)
-[ :data, :disk ].each do |name| 
-  require File.join('coral_core', 'util', name.to_s + ".rb") 
+[ :data, :disk, :process ].each do |name| 
+  require File.join('coral_core', 'util', name.to_s + '.rb') 
 end
 
 # Include core
 [ :config, :interface, :core, :resource, :template ].each do |name| 
-  require File.join('coral_core', name.to_s + ".rb") 
+  require File.join('coral_core', name.to_s + '.rb') 
 end
 
 # Include post core utilities 
 # ( normally inherit from core and have no reverse dependencies with 
 #   core classes )
 #
-[ :shell ].each do |name| 
-  require File.join('coral_core', 'util', name.to_s + ".rb") 
+[ :option, :shell ].each do |name| 
+  require File.join('coral_core', 'util', name.to_s + '.rb') 
 end
 
 # Include data model
 [ :event, :command ].each do |name| 
-  require File.join('coral_core', name.to_s + ".rb") 
+  require File.join('coral_core', name.to_s + '.rb') 
 end
 
 if git_location
   [ :repository, :configuration ].each do |name| 
-    require File.join('coral_core', name.to_s + ".rb") 
+    require File.join('coral_core', name.to_s + '.rb') 
   end  
 end
 
