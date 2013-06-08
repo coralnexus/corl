@@ -365,6 +365,18 @@ class Config
   
   #---
   
+  def rm(name, default = nil)
+    name = name.to_sym
+    if @options.has_key(name)
+      value = @options[name]
+      @options.delete(name)
+      return value
+    end
+    return default
+  end
+  
+  #---
+  
   def options
     return @options
   end
