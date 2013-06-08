@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2013-05-26"
+  s.date = "2013-06-08"
   s.description = "= coral_core\n\nThis library provides core data elements and utilities used in other Coral gems.\n\nThe Coral core library contains functionality that is utilized by other\nCoral gems by providing basic utilities like Git, Shell, Disk, and Data\nmanipulation libraries, a UI system, and a core data model that supports\nEvents, Commands, Repositories, and Memory (version controlled JSON \nobjects).  This library is only used as a starting point for other systems.\n\nNote:  This library is still very early in development!\n\n== Contributing to coral_core\n \n* Check out the latest {major}.{minor} branch to make sure the feature hasn't \n  been implemented or the bug hasn't been fixed yet.\n* Check out the issue tracker to make sure someone already hasn't requested \n  it and/or contributed it.\n* Fork the project.\n* Start a feature/bugfix branch.\n* Commit and push until you are happy with your contribution.\n* Make sure to add tests for it. This is important so I don't break it in a \n  future version unintentionally.\n* Please try not to mess with the Rakefile, version, or history. If you want \n  to have your own version, or is otherwise necessary, that is fine, but \n  please isolate to its own commit so I can cherry-pick around it.\n\n== Copyright\n\nLicensed under GPLv3.  See LICENSE.txt for further details.\n\nCopyright (c) 2013  Adrian Webb <adrian.webb@coraltech.net>\nCoral Technology Group LLC"
   s.email = "adrian.webb@coraltech.net"
   s.extra_rdoc_files = [
@@ -29,11 +29,11 @@ Gem::Specification.new do |s|
     "lib/coral_core.rb",
     "lib/coral_core/command.rb",
     "lib/coral_core/config.rb",
+    "lib/coral_core/configuration.rb",
     "lib/coral_core/core.rb",
     "lib/coral_core/event.rb",
     "lib/coral_core/event/regexp_event.rb",
     "lib/coral_core/interface.rb",
-    "lib/coral_core/memory.rb",
     "lib/coral_core/repository.rb",
     "lib/coral_core/resource.rb",
     "lib/coral_core/template.rb",
@@ -44,6 +44,8 @@ Gem::Specification.new do |s|
     "lib/coral_core/util/data.rb",
     "lib/coral_core/util/disk.rb",
     "lib/coral_core/util/git.rb",
+    "lib/coral_core/util/option.rb",
+    "lib/coral_core/util/process.rb",
     "lib/coral_core/util/shell.rb",
     "lib/hiera_backend.rb",
     "spec/coral_core/interface_spec.rb",
@@ -65,6 +67,7 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<log4r>, ["~> 1.1"])
+      s.add_runtime_dependency(%q<i18n>, ["~> 0.6"])
       s.add_runtime_dependency(%q<deep_merge>, ["~> 1.0"])
       s.add_runtime_dependency(%q<json>, [">= 1.4"])
       s.add_runtime_dependency(%q<grit>, ["~> 2.5"])
@@ -75,6 +78,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<yard>, ["~> 0.8"])
     else
       s.add_dependency(%q<log4r>, ["~> 1.1"])
+      s.add_dependency(%q<i18n>, ["~> 0.6"])
       s.add_dependency(%q<deep_merge>, ["~> 1.0"])
       s.add_dependency(%q<json>, [">= 1.4"])
       s.add_dependency(%q<grit>, ["~> 2.5"])
@@ -86,6 +90,7 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<log4r>, ["~> 1.1"])
+    s.add_dependency(%q<i18n>, ["~> 0.6"])
     s.add_dependency(%q<deep_merge>, ["~> 1.0"])
     s.add_dependency(%q<json>, [">= 1.4"])
     s.add_dependency(%q<grit>, ["~> 2.5"])
