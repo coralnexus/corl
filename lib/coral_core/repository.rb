@@ -28,6 +28,8 @@ class Repository < Core
   def self.open(directory, options = {})
     config = Config.ensure(options)
     
+    directory = Util::Disk.filename(directory)
+    
     if ! @@repositories.has_key?(directory) || config.get(:reset, false)
       return new(config.import({
         :directory => directory
@@ -104,10 +106,6 @@ class Repository < Core
        
   #-----------------------------------------------------------------------------
   # Checks
-  
-  protected :ensure_git
-  
-  #---
    
   def ensure_git(reset = false)
     if reset || ! @git_lib
@@ -118,6 +116,7 @@ class Repository < Core
     end
     return self
   end
+  protected :ensure_git
   
   #---
    
@@ -171,8 +170,7 @@ class Repository < Core
   # Property accessors / modifiers
   
   attr_reader :directory
-  protected :git
- 
+   
   #---
   
   def path
@@ -188,6 +186,7 @@ class Repository < Core
     return @git_lib.git if can_persist?
     return nil
   end
+  protected :git
   
   #---
   
@@ -219,7 +218,7 @@ class Repository < Core
     if Util::Data.empty?(directory)
       @directory = Dir.pwd
     else
-      @directory = ( directory.is_a?(Array) ? directory.join(File::SEPARATOR) : string(directory) )
+      @directory = Util::Disk.filename(directory)
     end
     
     ensure_git(true)
@@ -234,7 +233,6 @@ class Repository < Core
   # Basic Git operations
   
   attr_reader :parent, :revision
-  protected :init_parent, :load_revision
   
   #---
   
@@ -244,7 +242,7 @@ class Repository < Core
     unless top?(directory)
       search_dir = directory
       
-      while File.directory?((search_dir = File.expand_path("..", search_dir)))
+      while File.directory?((search_dir = File.expand_path('..', search_dir)))
         if git_dir(search_dir)
           @parent = open(search_dir)                
           break;
@@ -253,6 +251,7 @@ class Repository < Core
     end
     return self       
   end
+  protected :init_parent
 
   #---
   
@@ -267,6 +266,7 @@ class Repository < Core
     end
     return self
   end
+  protected :load_revision
 
   #---
   
@@ -316,7 +316,6 @@ class Repository < Core
   # Submodule operations
   
   attr_reader :submodules
-  protected :load_submodules, :update_submodules
   
   #---
   
@@ -335,6 +334,7 @@ class Repository < Core
     end
     return self  
   end
+  protected :load_submodules
   
   #---
   
@@ -370,6 +370,7 @@ class Repository < Core
     git.submodule({ :init => true, :recursive => true }, 'update') if can_persist?
     return self
   end
+  protected :update_submodules
   
   #---
   
@@ -386,8 +387,7 @@ class Repository < Core
   # Remote operations
   
   attr_reader :origin, :edit
-  protected :init_remotes
-  
+    
   #---
   
   def init_remotes
@@ -395,6 +395,7 @@ class Repository < Core
     set_edit(edit_url(@origin)) unless config('remote.edit.url')
     return self 
   end
+  protected :init_remotes
 
   #---
   
@@ -416,7 +417,7 @@ class Repository < Core
   
   def set_remote(name, url)
     delete_remote(name)
-    git.remote({}, 'add', name, url) if can_persist?
+    git.remote({}, 'add', name.to_s, url) if can_persist?
     return self
   end
   
@@ -430,7 +431,7 @@ class Repository < Core
         :add    => true,
         :delete => config.get(:delete, false),
         :push   => config.get(:push, false)
-      }, 'set-url', name, url)
+      }, 'set-url', name.to_s, url)
     end
     return self  
   end
@@ -445,11 +446,11 @@ class Repository < Core
       
       return self if hosts.empty?
       
-      set_remote(name, url(hosts.shift, path, config.options))
+      set_remote(name.to_s, url(hosts.shift, path, config.options))
       
       unless hosts.empty?
         hosts.each do |host|
-          add_remote_url(name, url(host, path, config.options), config)
+          add_remote_url(name.to_s, url(host, path, config.options), config)
         end
       end
     end
@@ -460,7 +461,7 @@ class Repository < Core
   
   def delete_remote(name)
     if can_persist? && git.list_remotes.include?(name)
-      git.remote({}, 'rm', name)
+      git.remote({}, 'rm', name.to_s)
     end
     return self  
   end
@@ -468,7 +469,7 @@ class Repository < Core
   #-----------------------------------------------------------------------------
   # SSH operations
  
-  def pull!(remote = 'origin', options = {})
+  def pull!(remote = :origin, options = {})
     config  = Config.ensure(options)
     success = false
     
@@ -499,13 +500,13 @@ class Repository < Core
   
   #---
   
-  def pull(remote = 'origin', options = {})
+  def pull(remote = :origin, options = {})
     return pull!(remote, options)
   end  
   
   #---
     
-  def push!(remote = 'edit', options = {})
+  def push!(remote = :edit, options = {})
     config  = Config.ensure(options)
     success = false
     
@@ -533,7 +534,7 @@ class Repository < Core
   
   #---
   
-  def push(remote = 'edit', options = {})
+  def push(remote = :edit, options = {})
     return push!(remote, options)
   end 
 end
