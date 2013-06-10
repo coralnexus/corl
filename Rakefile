@@ -45,8 +45,6 @@ Jeweler::Tasks.new do |gem|
   # Dependencies defined in Gemfile
 end
 
-Jeweler::RubygemsDotOrgTasks.new
-
 #-------------------------------------------------------------------------------
 # Testing
 
