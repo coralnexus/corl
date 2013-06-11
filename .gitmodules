@@ -19,3 +19,6 @@
 [submodule "lib/dependency/mime-types"]
 	path = lib/dependency/mime-types
 	url = git://github.com/halostatue/mime-types.git
+[submodule "lib/dependency/diff-lcs"]
+	path = lib/dependency/diff-lcs
+	url = git://github.com/halostatue/diff-lcs.git
