@@ -68,7 +68,7 @@ rescue LoadError
   log4r_lib = File.join(dependencies, 'log4r', 'lib')
   
   $:.push(log4r_lib)
-  require File.join(log4r_lib, 'log4r.rb')  
+  require 'log4r'  
 end
 
 #---
@@ -80,7 +80,7 @@ rescue LoadError
   deep_merge_lib = File.join(dependencies, 'deep_merge', 'lib')
   
   $:.push(deep_merge_lib)
-  require File.join(deep_merge_lib, 'deep_merge.rb')  
+  require 'deep_merge'
 end
 
 #---
@@ -95,7 +95,43 @@ rescue LoadError
   
   json_lib = File.join(dependencies, 'multi_json', 'lib')  
   $:.push(json_lib)
-  require File.join(json_lib, 'multi_json.rb')  
+  require 'multi_json'
+end
+
+#---
+
+begin
+  require 'posix-spawn'
+    
+rescue LoadError
+  posix_spawn_lib = File.join(dependencies, 'posix-spawn', 'lib')
+  
+  $:.push(posix_spawn_lib)
+  require 'posix-spawn'
+end
+
+#---
+
+begin
+  require 'mime-types'
+    
+rescue LoadError
+  mime_types_lib = File.join(dependencies, 'mime-types', 'lib')
+  
+  $:.push(mime_types_lib)
+  require 'mime-types'
+end
+
+#---
+
+begin
+  require 'diff-lcs'
+    
+rescue LoadError
+  diff_lcs_lib = File.join(dependencies, 'diff-lcs', 'lib')
+  
+  $:.push(diff_lcs_lib)
+  require 'diff-lcs'
 end
 
 #---
@@ -108,7 +144,7 @@ if git_location
     git_lib = File.join(dependencies, 'grit', 'lib')
   
     $:.push(git_lib)
-    require File.join(git_lib, 'grit.rb')  
+    require 'grit'
   end
 end
 
