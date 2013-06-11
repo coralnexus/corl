@@ -13,3 +13,6 @@
 [submodule "lib/dependency/json"]
 	path = lib/dependency/json
 	url = git://github.com/flori/json.git
+[submodule "lib/dependency/posix-spawn"]
+	path = lib/dependency/posix-spawn
+	url = git://github.com/rtomayko/posix-spawn.git
