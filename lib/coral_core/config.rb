@@ -76,7 +76,7 @@ class Config
       config_log = log_options['config_log']
       
       if log_options['config_store']
-        Util::Disk.write(config_log, JSON.pretty_generate(@@properties))
+        Util::Disk.write(config_log, MultiJson.dump(@@properties, :pretty => true))
         Util::Disk.close(config_log)
       end
     end

@@ -86,13 +86,13 @@ end
 #---
 
 begin
-  require 'json'
+  require 'multi_json'
     
 rescue LoadError
-  json_lib = File.join(dependencies, 'json', 'lib')
+  json_lib = File.join(dependencies, 'multi_json', 'lib')
   
   $:.push(json_lib)
-  require File.join(json_lib, 'json.rb')  
+  require File.join(json_lib, 'multi_json.rb')  
 end
 
 #---

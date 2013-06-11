@@ -220,9 +220,9 @@ class Configuration < Core
       json_text = Util::Disk.read(@absolute_config_file)    
       if json_text && ! json_text.empty?
         if config.get(:override, false)
-          @properties = JSON.parse(json_text)
+          @properties = MultiJson.load(json_text)
         else
-          @properties = Util::Data.merge([ @properties, JSON.parse(json_text) ], config)
+          @properties = Util::Data.merge([ @properties, MultiJson.load(json_text) ], config)
         end
       end
     end
@@ -235,7 +235,7 @@ class Configuration < Core
     config = Config.ensure(options)
     
     if can_persist?
-      json_text = JSON.generate(@properties)
+      json_text = MultiJson.dump(@properties, :pretty => true)
       if json_text && ! json_text.empty?
         Util::Disk.write(@absolute_config_file, json_text)
         repo.commit(@absolute_config_file, config) if autocommit

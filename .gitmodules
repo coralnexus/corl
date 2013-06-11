@@ -1,6 +1,3 @@
-[submodule "lib/dependency/json"]
-	path = lib/dependency/json
-	url = git://github.com/flori/json.git
 [submodule "lib/dependency/log4r"]
 	path = lib/dependency/log4r
 	url = git://github.com/colbygk/log4r.git
@@ -10,3 +7,6 @@
 [submodule "lib/dependency/grit"]
 	path = lib/dependency/grit
 	url = git://github.com/mojombo/grit.git
+[submodule "lib/dependency/multi_json"]
+	path = lib/dependency/multi_json
+	url = git://github.com/intridea/multi_json.git

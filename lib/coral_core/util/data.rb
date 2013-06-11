@@ -50,7 +50,7 @@ class Data
   def self.to_json(data)
     output = ''
     begin
-      output = data.to_json
+      output = MultiJson.load(data)
       
     rescue Exception
     end

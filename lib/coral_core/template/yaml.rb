@@ -1,7 +1,7 @@
 
 module Coral
 module Template
-class JSON < Base
+class YAML < Base
   #-----------------------------------------------------------------------------
   # Renderers  
    
