@@ -10,3 +10,6 @@
 [submodule "lib/dependency/multi_json"]
 	path = lib/dependency/multi_json
 	url = git://github.com/intridea/multi_json.git
+[submodule "lib/dependency/json"]
+	path = lib/dependency/json
+	url = git://github.com/flori/json.git
