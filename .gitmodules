@@ -16,3 +16,6 @@
 [submodule "lib/dependency/posix-spawn"]
 	path = lib/dependency/posix-spawn
 	url = git://github.com/rtomayko/posix-spawn.git
+[submodule "lib/dependency/mime-types"]
+	path = lib/dependency/mime-types
+	url = git://github.com/halostatue/mime-types.git
