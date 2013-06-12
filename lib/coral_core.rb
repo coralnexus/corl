@@ -139,13 +139,14 @@ end
 if git_location
   begin
     require 'grit'
-    
+
   rescue LoadError
     git_lib = File.join(dependencies, 'grit', 'lib')
   
     $:.push(git_lib)
     require 'grit'
   end
+  require File.join('coral_core', 'util', 'git.rb') 
 end
 
 #---
