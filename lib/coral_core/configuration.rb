@@ -98,10 +98,8 @@ class Configuration < Core
   def config_file=file
     unless Util::Data.empty?(file)
       @config_file = Util::Disk.filename(file)
-    end
-    
+    end    
     set_absolute_config_file
-    load if autoload
   end
 
   #---
@@ -113,9 +111,21 @@ class Configuration < Core
       @absolute_config_file = File.join(repo.directory, @config_file)
       ObjectSpace.define_finalizer(self, self.class.finalize(@absolute_config_file))
     end
+    load if autoload
     return self
   end
   protected :set_absolute_config_file
+  
+  #---
+  
+  def set_location(directory)
+    if directory && directory.is_a?(Coral::Repository)
+      repo.set_location(directory.directory)
+    elsif directory && directory.is_a?(String) || directory.is_a?(Symbol)
+      repo.set_location(directory.to_s)
+    end
+    set_absolute_config_file if directory
+  end
   
   #-----------------------------------------------------------------------------
   
@@ -164,14 +174,14 @@ class Configuration < Core
   #---
   
   def get(keys, default = nil, format = false)
-    return fetch(@properties, keys, default, format)
+    return fetch(@properties, keys.flatten, default, format)
   end
   
   #---
   
   def set(keys, value = '', options = {})
     config = Config.ensure(options) 
-    modify(@properties, keys, value)
+    modify(@properties, keys.flatten, value)
     save(config) if autosave
     return self
   end
@@ -180,7 +190,7 @@ class Configuration < Core
   
   def delete(keys, options = {})
     config = Config.ensure(options) 
-    modify(@properties, keys, nil)
+    modify(@properties, keys.flatten, nil)
     save(config) if autosave
     return self
   end
