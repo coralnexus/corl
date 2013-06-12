@@ -67,6 +67,7 @@ class Configuration < Core
     
     self.config_file = config.get(:config_file, '')
     
+    @@configurations[repo.directory] = {} unless @@configurations[repo.directory].is_a?(Hash)
     @@configurations[repo.directory][config_file] = self
   end
   
@@ -174,14 +175,26 @@ class Configuration < Core
   #---
   
   def get(keys, default = nil, format = false)
-    return fetch(@properties, keys.flatten, default, format)
+    return fetch(@properties, array(keys).flatten, default, format)
+  end
+  
+  #---
+  
+  def get_array(keys, default = [])
+    return get(keys, default, :array)
+  end
+  
+  #---
+  
+  def get_hash(keys, default = {})
+    return get(keys, default, :hash)
   end
   
   #---
   
   def set(keys, value = '', options = {})
     config = Config.ensure(options) 
-    modify(@properties, keys.flatten, value)
+    modify(@properties, array(keys).flatten, value)
     save(config) if autosave
     return self
   end
@@ -190,7 +203,7 @@ class Configuration < Core
   
   def delete(keys, options = {})
     config = Config.ensure(options) 
-    modify(@properties, keys.flatten, nil)
+    modify(@properties, array(keys).flatten, nil)
     save(config) if autosave
     return self
   end
