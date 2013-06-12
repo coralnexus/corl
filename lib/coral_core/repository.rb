@@ -140,8 +140,9 @@ class Repository < Core
   
   #---
   
-  def top?
-    return self.class.top?(directory)
+  def top?(path = nil)
+    path = directory if path.nil?
+    return self.class.top?(path)
   end
     
   #---
@@ -162,8 +163,9 @@ class Repository < Core
   
   #---
   
-  def submodule?
-    return self.class.submodule?(directory)  
+  def submodule?(path = nil)
+    path = directory if path.nil?
+    return self.class.submodule?(path)  
   end
       
   #-----------------------------------------------------------------------------
@@ -257,10 +259,10 @@ class Repository < Core
   
   def load_revision
     if can_persist?
-      @revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD')
+      @revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip
     
       if @revision.empty?
-        @revision = git.native(:rev_parse, {}, 'HEAD')
+        @revision = git.native(:rev_parse, {}, 'HEAD').strip
       end
       load_submodules
     end
