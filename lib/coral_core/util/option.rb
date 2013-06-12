@@ -5,16 +5,16 @@ module Coral
       #-------------------------------------------------------------------------
       # Utilities
         
-      def message(name, default = nil)
+      def self.message(name, default = nil)
         if default.nil?
           default = :none
         end
-        return I18n.t(name.to_s, :default => default.to_s)
+        return I18n.t(name.to_s, :default_value => default.to_s)
       end
         
       #---
         
-      def parse(parser, options, name, default, option_str, allowed_values, message_id, config = {})
+      def self.parse(parser, options, name, default, option_str, allowed_values, message_id, config = {})
         config        = Config.ensure(config)
         name          = name.to_sym
         options[name] = config.get(name, default)
@@ -39,7 +39,7 @@ module Coral
         
       #---
         
-      def bool(parser, options, name, default, option_str, message_id, config = {})
+      def self.bool(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, nil, message_id, config) do |value|
           yield(value) if block_given?
         end  
@@ -47,7 +47,7 @@ module Coral
         
       #---
         
-      def int(parser, options, name, default, option_str, message_id, config = {})
+      def self.int(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, Integer, message_id, config) do |value|
           yield(value) if block_given?  
         end 
@@ -55,7 +55,7 @@ module Coral
         
       #---
         
-      def float(parser, options, name, default, option_str, message_id, config = {})
+      def self.float(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, Float, message_id, config) do |value|
           yield(value) if block_given?  
         end  
@@ -63,7 +63,7 @@ module Coral
           
       #---
         
-      def str(parser, options, name, default, option_str, message_id, config = {})
+      def self.str(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, nil, message_id, config) do |value|
           yield(value) if block_given?  
         end  
@@ -71,7 +71,7 @@ module Coral
          
       #---
         
-      def array(parser, options, name, default, option_str, message_id, config = {})
+      def self.array(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, Array, message_id, config) do |value|
           yield(value) if block_given?  
         end  
