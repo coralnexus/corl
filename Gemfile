@@ -5,6 +5,7 @@ gem "i18n", "~> 0.6"
 gem "deep_merge", "~> 1.0"
 gem "multi_json", "~> 1.7"
 gem "grit", "~> 2.5"
+gem "puppet", "~> 3.2"
 
 group :development do
   gem "bundler", "~> 1.2"
