@@ -41,7 +41,7 @@ module Coral
         
       def self.bool(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, nil, message_id, config) do |value|
-          yield(value) if block_given?
+          block_given? ? yield(value) : value 
         end  
       end
         
@@ -49,7 +49,7 @@ module Coral
         
       def self.int(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, Integer, message_id, config) do |value|
-          yield(value) if block_given?  
+          block_given? ? yield(value) : value 
         end 
       end
         
@@ -57,7 +57,7 @@ module Coral
         
       def self.float(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, Float, message_id, config) do |value|
-          yield(value) if block_given?  
+          block_given? ? yield(value) : value 
         end  
       end
           
@@ -65,7 +65,7 @@ module Coral
         
       def self.str(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, nil, message_id, config) do |value|
-          yield(value) if block_given?  
+          block_given? ? yield(value) : value 
         end  
       end
          
@@ -73,7 +73,7 @@ module Coral
         
       def self.array(parser, options, name, default, option_str, message_id, config = {})
         parse(parser, options, name, default, option_str, Array, message_id, config) do |value|
-          yield(value) if block_given?  
+          block_given? ? yield(value) : value 
         end  
       end        
     end
