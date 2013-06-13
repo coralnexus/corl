@@ -45,7 +45,11 @@ class Repository < Core
     
     super(config)
     
-    set_location(config.get(:directory, Dir.pwd))
+    directory = Util::Disk.filename(config.get(:directory, Dir.pwd))
+    
+    @@repositories[directory] = self
+    
+    set_location(directory)
     
     @origin   = config.get(:origin, nil)
     @revision = config.get(:revision, nil)
@@ -53,9 +57,7 @@ class Repository < Core
     set_origin(@origin) unless @origin.nil?
     checkout(@revision) unless @revision.nil?
     
-    pull if config.get(:pull, false)
-    
-    @@repositories[directory] = self
+    pull if config.get(:pull, false)    
   end
   
   #-----------------------------------------------------------------------------
@@ -245,8 +247,8 @@ class Repository < Core
       search_dir = directory
       
       while File.directory?((search_dir = File.expand_path('..', search_dir)))
-        if git_dir(search_dir)
-          @parent = open(search_dir)                
+        if self.class.git_dir(search_dir)
+          @parent = self.class.open(search_dir)                
           break;
         end        
       end      
@@ -318,6 +320,35 @@ class Repository < Core
   # Submodule operations
   
   attr_reader :submodules
+
+  #---
+  
+  def submodule_config(ref = 'master')
+    commit = @git_lib.commit(ref)
+    blob   = commit.tree/'.gitmodules' unless commit.nil?
+    
+    return {} unless blob
+
+    lines = blob.data.gsub(/\r\n?/, "\n" ).split("\n")
+
+    config  = {}
+    current = nil
+
+    lines.each do |line|
+      if line =~ /^\[submodule "(.+)"\]$/
+        current         = $1
+        config[current] = {}
+        config[current]['id'] = (commit.tree/current).id
+      
+      elsif line =~ /^\t(\w+) = (.+)$/
+        config[current][$1]   = $2
+        config[current]['id'] = (commit.tree/$2).id if $1 == 'path'
+      end
+    end
+
+    return config
+  end
+  protected :submodule_config
   
   #---
   
@@ -327,11 +358,14 @@ class Repository < Core
     if can_persist?
       # Returns a Hash of { <path:String> => { 'url' => <url:String>, 'id' => <id:String> } }
       # Returns {} if no .gitmodules file was found
-      Grit::Submodule.config(@git_lib, revision).each do |path, data|
-        repo = open(File.join(directory, path))
-        repo.set_origin(data['url']) # Just a sanity check (might disapear)
+      submodule_config(revision).each do |path, data|
+        repo_path = File.join(directory, path)
+        if File.directory?(repo_path) && File.exist?(File.join(repo_path, '.git'))
+          repo = self.class.open(repo_path)
+          repo.set_origin(data['url']) # Just a sanity check (might disapear)
         
-        @submodules[path] = repo    
+          @submodules[path] = repo
+        end
       end
     end
     return self  
@@ -369,7 +403,7 @@ class Repository < Core
   #---
    
   def update_submodules
-    git.submodule({ :init => true, :recursive => true }, 'update') if can_persist?
+    git.submodule({ :timeout => false }, 'update', '--init', '--recursive') if can_persist?
     return self
   end
   protected :update_submodules
