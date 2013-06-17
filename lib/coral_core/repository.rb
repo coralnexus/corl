@@ -60,6 +60,12 @@ class Repository < Core
     pull if config.get(:pull, false)    
   end
   
+  #---
+  
+  def inspect
+    "#<#{self.class}: #{directory} (#{revision} from #{origin})>"
+  end
+  
   #-----------------------------------------------------------------------------
   # Location information
       
@@ -71,7 +77,7 @@ class Repository < Core
       if File.directory?(git_dir)
         return git_dir
       elsif ! require_top_level
-        git_dir = Util::Disk.read(git_dir)        
+        git_dir = Util::Disk.read(git_dir)
         unless git_dir.nil?
           git_dir = git_dir.gsub(/^gitdir\:\s*/, '').strip
           return git_dir if File.directory?(git_dir)
@@ -89,8 +95,9 @@ class Repository < Core
   def self.url(host, repo, options = {})
     config = Config.ensure(options)
     
-    user   = config.get(:user, 'git')
-    auth   = config.get(:auth, true)    
+    user = config.get(:user, 'git')
+    auth = config.get(:auth, true)
+    
     return user + (auth ? '@' : '://') + host + (auth ? ':' : '/') + repo
   end
   
@@ -100,7 +107,7 @@ class Repository < Core
     config = Config.ensure(options)
     
     if matches = url.strip.match(/^(https?|git)\:\/\/([^\/]+)\/(.+)/)
-      host, path = matches.captures      
+      protocol, host, path = matches.captures
       return url(host, path, config.import({ :auth => true }))
     end
     return url
@@ -423,12 +430,12 @@ class Repository < Core
   # Remote operations
   
   attr_reader :origin, :edit
-    
+      
   #---
   
   def init_remotes
     @origin = config('remote.origin.url')
-    set_edit(edit_url(@origin)) unless config('remote.edit.url')
+    set_edit(self.class.edit_url(@origin)) #if Util::Data.empty?(config('remote.edit.url'))
     return self 
   end
   protected :init_remotes
@@ -482,11 +489,11 @@ class Repository < Core
       
       return self if hosts.empty?
       
-      set_remote(name.to_s, url(hosts.shift, path, config.options))
+      set_remote(name.to_s, self.class.url(hosts.shift, path, config.options))
       
       unless hosts.empty?
         hosts.each do |host|
-          add_remote_url(name.to_s, url(host, path, config.options), config)
+          add_remote_url(name.to_s, self.class.url(host, path, config.options), config)
         end
       end
     end
@@ -496,7 +503,7 @@ class Repository < Core
   #---
   
   def delete_remote(name)
-    if can_persist? && git.list_remotes.include?(name)
+    if can_persist?
       git.remote({}, 'rm', name.to_s)
     end
     return self  
