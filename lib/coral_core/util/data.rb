@@ -107,10 +107,10 @@ class Data
     force = force.is_a?(Coral::Config) ? force.get(:force, true) : force
     
     if data.is_a?(Array)
-      value = data.shift.clone
+      value = undef?(data[0]) ? nil : data.shift.clone
       
       data.each do |item|
-        item = item.clone
+        item = undef?(item) ? nil : item.clone
         
         case value
         when Hash
