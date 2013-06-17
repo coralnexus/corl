@@ -66,7 +66,7 @@ class Interface
   #-----------------------------------------------------------------------------
   # Accessors / Modifiers
   
-  attr_accessor :logger, :resource, :color, :delegate
+  attr_accessor :logger, :resource, :color, :input, :output, :error, :delegate
   
   #-----------------------------------------------------------------------------
   
