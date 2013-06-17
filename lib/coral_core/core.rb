@@ -16,6 +16,12 @@ class Core
     @ui = Interface.new(config)
   end
   
+  #---
+  
+  def inspect
+    "#<#{self.class}: >"
+  end
+  
   #-----------------------------------------------------------------------------
   # Accessor / Modifiers
   

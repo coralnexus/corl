@@ -49,6 +49,12 @@ class Event < Core
     @delegate   = config.get(:delegate, nil)  
     @properties = config.options
   end
+  
+  #---
+  
+  def inspect
+    "#<#{self.class}: #{name} (#{type})>"
+  end
     
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers

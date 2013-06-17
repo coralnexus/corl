@@ -31,7 +31,13 @@ class Command < Core
     @properties           = config.options
     @properties[:command] = executable(config)   
   end
-     
+
+  #---
+  
+  def inspect
+    "#<#{self.class}: #{name} (#{self.to_s})>"
+  end
+  
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
  

@@ -57,10 +57,16 @@ class Interface
     @delegate  = config.get(:ui_delegate, nil)    
   end
 
+  #---
+  
+  def inspect
+    "#<#{self.class}: #{resource} >"
+  end
+  
   #-----------------------------------------------------------------------------
   # Accessors / Modifiers
   
-  attr_accessor :logger, :resource, :color, :input, :output, :error, :delegate
+  attr_accessor :logger, :resource, :color, :delegate
   
   #-----------------------------------------------------------------------------
   

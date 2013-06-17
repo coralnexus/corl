@@ -78,6 +78,12 @@ class Configuration < Core
       Util::Disk.close(file_name)
     end
   end
+  
+  #---
+  
+  def inspect
+    "#<#{self.class}: #{@absolute_config_file}>"
+  end
      
   #-----------------------------------------------------------------------------
   # Checks
