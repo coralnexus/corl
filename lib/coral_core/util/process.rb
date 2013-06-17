@@ -16,6 +16,14 @@ class Process
   
   attr_reader :name
   
+  #---
+  
+  def provider_options
+    return {
+      :parallel => true
+    }
+  end
+  
   #-----------------------------------------------------------------------------
   # Actions
   
