@@ -50,6 +50,7 @@ class Disk
     file           = open(file_name, options)
     
     if file
+      file.pos = 0 if options[:mode] == 'r'
       return file.read
     end
     return nil
