@@ -1,27 +1,27 @@
 [submodule "lib/dependency/log4r"]
 	path = lib/dependency/log4r
-	url = git://github.com/colbygk/log4r.git
+	url = https://github.com/colbygk/log4r.git
 [submodule "lib/dependency/deep_merge"]
 	path = lib/dependency/deep_merge
-	url = git://github.com/danielsdeleo/deep_merge.git
+	url = https://github.com/danielsdeleo/deep_merge.git
 [submodule "lib/dependency/grit"]
 	path = lib/dependency/grit
-	url = git://github.com/mojombo/grit.git
+	url = https://github.com/mojombo/grit.git
 [submodule "lib/dependency/multi_json"]
 	path = lib/dependency/multi_json
-	url = git://github.com/intridea/multi_json.git
+	url = https://github.com/intridea/multi_json.git
 [submodule "lib/dependency/json"]
 	path = lib/dependency/json
-	url = git://github.com/flori/json.git
+	url = https://github.com/flori/json.git
 [submodule "lib/dependency/posix-spawn"]
 	path = lib/dependency/posix-spawn
-	url = git://github.com/rtomayko/posix-spawn.git
+	url = https://github.com/rtomayko/posix-spawn.git
 [submodule "lib/dependency/mime-types"]
 	path = lib/dependency/mime-types
-	url = git://github.com/halostatue/mime-types.git
+	url = https://github.com/halostatue/mime-types.git
 [submodule "lib/dependency/diff-lcs"]
 	path = lib/dependency/diff-lcs
-	url = git://github.com/halostatue/diff-lcs.git
+	url = https://github.com/halostatue/diff-lcs.git
 [submodule "lib/dependency/i18n"]
 	path = lib/dependency/i18n
 	url = https://github.com/svenfuchs/i18n.git
