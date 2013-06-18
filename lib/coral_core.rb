@@ -42,8 +42,6 @@ end
 # Properties and 
 
 home         = File.dirname(__FILE__)
-dependencies = File.join(home, 'dependency')
-
 git_location = locate('git')
  
 #-------------------------------------------------------------------------------
@@ -58,103 +56,15 @@ require 'puppet'
 
 #---
 
-begin
-  require 'i18n'
-    
-rescue LoadError
-  i18n_lib = File.join(dependencies, 'i18n', 'lib')
-  
-  $:.push(i18n_lib)
-  require 'i18n'  
-end
-
-#---
-
-begin
-  require 'log4r'
-    
-rescue LoadError
-  log4r_lib = File.join(dependencies, 'log4r', 'lib')
-  
-  $:.push(log4r_lib)
-  require 'log4r'  
-end
-
-#---
-
-begin
-  require 'deep_merge'
-    
-rescue LoadError
-  deep_merge_lib = File.join(dependencies, 'deep_merge', 'lib')
-  
-  $:.push(deep_merge_lib)
-  require 'deep_merge'
-end
-
-#---
-
-begin
-  require 'multi_json'
-    
-rescue LoadError
-  json_lib = File.join(dependencies, 'json', 'lib')
-  $:.push(json_lib)
-  require File.join(json_lib, 'json', 'pure.rb')  
-  
-  json_lib = File.join(dependencies, 'multi_json', 'lib')  
-  $:.push(json_lib)
-  require 'multi_json'
-end
-
-#---
-
-begin
-  require 'posix-spawn'
-    
-rescue LoadError
-  posix_spawn_lib = File.join(dependencies, 'posix-spawn', 'lib')
-  
-  $:.push(posix_spawn_lib)
-  require 'posix-spawn'
-end
-
-#---
-
-begin
-  require 'mime-types'
-    
-rescue LoadError
-  mime_types_lib = File.join(dependencies, 'mime-types', 'lib')
-  
-  $:.push(mime_types_lib)
-  require 'mime-types'
-end
-
-#---
-
-begin
-  require 'diff-lcs'
-    
-rescue LoadError
-  diff_lcs_lib = File.join(dependencies, 'diff-lcs', 'lib')
-  
-  $:.push(diff_lcs_lib)
-  require 'diff-lcs'
-end
+require 'i18n'
+require 'log4r'
+require 'deep_merge'
+require 'multi_json'
 
 #---
 
 if git_location
-  begin
-    require 'grit'
-
-  rescue LoadError
-    git_lib = File.join(dependencies, 'grit', 'lib')
-  
-    $:.push(git_lib)
-    require 'grit'
-  end
+  require 'grit'
   require File.join('coral_core', 'util', 'git.rb') 
 end
 
