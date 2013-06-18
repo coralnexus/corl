@@ -55,7 +55,6 @@ $:.unshift(home) unless
   
 require 'rubygems'
 require 'puppet'
-require 'hiera'
 
 require 'i18n'
 
