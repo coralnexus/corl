@@ -22,3 +22,6 @@
 [submodule "lib/dependency/diff-lcs"]
 	path = lib/dependency/diff-lcs
 	url = git://github.com/halostatue/diff-lcs.git
+[submodule "lib/dependency/i18n"]
+	path = lib/dependency/i18n
+	url = https://github.com/svenfuchs/i18n.git
