@@ -56,7 +56,17 @@ $:.unshift(home) unless
 require 'rubygems'
 require 'puppet'
 
-require 'i18n'
+#---
+
+begin
+  require 'i18n'
+    
+rescue LoadError
+  i18n_lib = File.join(dependencies, 'i18n', 'lib')
+  
+  $:.push(i18n_lib)
+  require 'i18n'  
+end
 
 #---
 
