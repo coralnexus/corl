@@ -46,6 +46,40 @@ class Data
    
   #-----------------------------------------------------------------------------
   # Translation
+
+  def self.symbol_map(data)
+    results = {}
+    return data unless data
+    
+    case data
+    when Hash
+      data.each do |key, value|
+        results[key.to_sym] = symbol_map(value)
+      end
+    else
+      results = data
+    end    
+    return results
+  end
+  
+  #---
+  
+  def self.string_map(data)
+    results = {}
+    return data unless data
+    
+    case data
+    when Hash
+      data.each do |key, value|
+        results[key.to_s] = string_map(value)
+      end
+    else
+      results = data
+    end    
+    return results
+  end
+    
+  #---
   
   def self.to_json(data)
     output = ''
@@ -95,7 +129,88 @@ class Data
     end
     return value  
   end
- 
+  
+  #---
+      
+  def self.filter(data, method = false)
+    if method && method.is_a?(Symbol) && 
+      [ :array, :hash, :string, :symbol, :test ].include?(method.to_sym)
+      return send(method, data)
+    end
+    return data
+  end
+  
+  #---
+          
+  def self.array(data, default = [], split_string = false)
+    result = default    
+    if data
+      case data
+      when Array
+        result = data
+      when String
+        result = [ ( split_string ? data.split(/\s*,\s*/) : data ) ]
+      else
+        result = [ data ]
+      end
+    end
+    return result
+  end
+    
+  #---
+        
+  def self.hash(data, default = {})
+    result = default    
+    if data
+      case data
+      when Hash
+        result = data
+      else
+        result = {}
+      end
+    end
+    return result
+  end
+    
+  #---
+         
+  def self.string(data, default = '')
+    result = default    
+    if data
+      case data
+      when String
+        result = data
+      else
+        result = data.to_s
+      end
+    end
+    return result
+  end
+    
+  #---
+         
+  def self.symbol(data, default = :undefined)
+    result = default    
+    if data
+      case data
+      when Symbol
+        result = data
+      when String
+        result = data.to_sym
+      else
+        result = data.class.to_sym
+      end
+    end
+    return result
+  end
+     
+  #---
+    
+  def self.test(data)
+    return false if Util::Data.empty?(data)
+    return true
+  end
+    
   #-----------------------------------------------------------------------------
   # Operations
   

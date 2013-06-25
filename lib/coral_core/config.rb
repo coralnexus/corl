@@ -313,15 +313,7 @@ class Config
   # Utilities
   
   def self.symbol_map(data)
-    results = {}
-    data.each do |key, value|
-      if value.is_a?(Hash)
-        results[key.to_sym] = symbol_map(value)  
-      else
-        results[key.to_sym] = value  
-      end      
-    end
-    return results  
+    return Util::Data.symbol_map(data)
   end
   
   #---
