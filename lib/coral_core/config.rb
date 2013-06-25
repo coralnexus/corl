@@ -31,9 +31,10 @@ class Config
       
   def self.initialized?(options = {})
     config   = Config.ensure(options)
-    provider = config.get(:provisioner, :puppet)
+    provider = config.get(:provisioner, nil)
     begin
-      require 'hiera'      
+      require 'hiera'
+      return true unless provider      
       return Coral.provisioner(provider).initialized?(config)
     
     rescue Exception # Prevent abortions.
