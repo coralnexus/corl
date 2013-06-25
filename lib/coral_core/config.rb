@@ -5,141 +5,36 @@ class Config
   #-----------------------------------------------------------------------------
   # Global configuration
   
-  @@options = {}
+  @@hiera = {}
   
   #---
   
-  def self.options(contexts, force = true)
-    options = {}
-    
-    unless contexts.is_a?(Array)
-      contexts = [ contexts ]
-    end
-    contexts.each do |name|
-      if @@options.has_key?(name)
-        options = Util::Data.merge([ options, @@options[name] ], force)
-      end
-    end
-    return options
-  end
-  
-  #---
-  
-  def self.set_options(context, options, force = true)    
-    current_options = ( @@options.has_key?(context) ? @@options[context] : {} )
-    @@options[context] = Util::Data.merge([ current_options, options ], force)  
-  end
-  
-  #---
-  
-  def self.clear_options(contexts)
-    unless contexts.is_a?(Array)
-      contexts = [ contexts ]
-    end
-    contexts.each do |name|
-      @@options.delete(name)
-    end
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Property log
-
-  @@properties = {}
-  
-  #---
-  
-  def self.properties
-    return @@properties
-  end
-  
-  #---
-  
-  def self.set_property(name, value)
-    #dbg(value, "result -> #{name}")
-    @@properties[name] = value
-    save_properties  
-  end
-  
-  #---
-  
-  def self.clear_property(name)
-    @@properties.delete(name)
-    save_properties
-  end
-  
-  #---
-  
-  def self.save_properties
-    log_options = options('coral_log')
-    
-    unless Util::Data.empty?(log_options['config_log'])
-      config_log = log_options['config_log']
-      
-      if log_options['config_store']
-        Util::Disk.write(config_log, MultiJson.dump(@@properties, :pretty => true))
-        Util::Disk.close(config_log)
-      end
-    end
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Hiera configuration
-  
-  @@hiera = nil
-  
-  #---
-  
-  def self.hiera_config
-    config_file = Puppet.settings[:hiera_config]
-    config      = {}
-
-    if File.exist?(config_file)
-      config = Hiera::Config.load(config_file)
-    else
-      Coral.ui.warn("Config file #{config_file} not found, using Hiera defaults")
-    end
-
-    config[:logger] = 'puppet'
-    return config
+  def self.hiera_config(provider = :puppet)
+    return Coral.provisioner(provider).hiera_config
   end
   
   #---
 
-  def self.hiera
-    @@hiera = Hiera.new(:config => hiera_config) unless @@hiera
-    return @@hiera
+  def self.hiera(provider = :puppet)
+    @@hiera[provider] = Hiera.new(:config => hiera_config(provider)) unless @@hiera.has_key?(provider)
+    return @@hiera[provider]
   end
   
   #---
 
-  def hiera
-    return self.class.hiera
+  def hiera(provider = :puppet)
+    return self.class.hiera(provider)
   end
   
   #-----------------------------------------------------------------------------
   # Configuration lookup
       
   def self.initialized?(options = {})
-    config = Config.ensure(options)
+    config   = Config.ensure(options)
+    provider = config.get(:provisioner, :puppet)
     begin
-      require 'hiera_puppet'
-      
-      scope       = config.get(:scope, {})
-      
-      sep         = config.get(:sep, '::')
-      prefix      = config.get(:prefix, true)    
-      prefix_text = prefix ? sep : ''
-      
-      init_fact   = prefix_text + config.get(:init_fact, 'hiera_ready')
-      coral_fact  = prefix_text + config.get(:coral_fact, 'coral_exists') 
-      
-      if Puppet::Parser::Functions.function('hiera')
-        if scope.respond_to?('[]')
-          return true if Util::Data.true?(scope[init_fact]) && Util::Data.true?(scope[coral_fact])
-        else
-          return true
-        end
-      end
+      require 'hiera'      
+      return Coral.provisioner(provider).initialized?(config)
     
     rescue Exception # Prevent abortions.
     end    
@@ -148,74 +43,91 @@ class Config
   
   #---
     
-  def self.lookup(name, default = nil, options = {})
-    config = Config.ensure(options)
-    value  = nil
+  def self.lookup(properties, default = nil, options = {})
+    config          = Config.ensure(options)
+    value           = nil
     
-    context     = config.get(:context, :priority)
-    scope       = config.get(:scope, {})
-    override    = config.get(:override, nil)
+    provider        = config.get(:provisioner, :puppet)
     
-    base_names  = config.get(:search, nil)
-    sep         = config.get(:sep, '::')
-    prefix      = config.get(:prefix, true)    
-    prefix_text = prefix ? sep : ''
+    hiera_scope     = config.get(:hiera_scope, {})
+    context         = config.get(:context, :priority)    
+    override        = config.get(:override, nil)
     
-    debug       = config.get(:debug, false)
+    return_property = config.get(:return_property, false)
     
-    search_name    = config.get(:search_name, true)
-    reverse_lookup = config.get(:reverse_lookup, true)
-    
-    dbg(default, "lookup -> #{name}") if debug
-    
-    if Config.initialized?(options)
-      unless scope.respond_to?("[]")
-        scope = Hiera::Scope.new(scope)
-      end
-      value = hiera.lookup(name, nil, scope, override, context)
-      dbg(value, "hiera lookup -> #{name}") if debug
-    end 
-    
-    if Util::Data.undef?(value) && ( scope.respond_to?("[]") || scope.respond_to?("lookupvar") )
-      log_level = Puppet::Util::Log.level
-      Puppet::Util::Log.level = :err # Don't want failed parameter lookup warnings here.
-      
-      if base_names
-        if base_names.is_a?(String)
-          base_names = [ base_names ]
+    unless properties.is_a?(Array)
+      properties = [ properties ].flatten
+    end
+
+    first_property = nil
+    properties.each do |property|
+      first_property = property unless first_property
+          
+      if initialized?(config)
+        unless hiera_scope.respond_to?('[]')
+          hiera_scope = Hiera::Scope.new(hiera_scope)
         end
-        base_names = base_names.reverse if reverse_lookup
-        
-        dbg(base_names, 'lookup search path') if debug        
-        base_names.each do |item|
-          if scope.respond_to?("lookupvar")
-            value = scope.lookupvar("#{prefix_text}#{item}#{sep}#{name}")  
-          else
-            value = scope["#{prefix_text}#{item}#{sep}#{name}"]
-          end
-          dbg(value, "scope lookup #{prefix_text}#{item}#{sep}#{name}") if debug
-          break unless Util::Data.undef?(value)  
-        end
+        value = hiera(provider).lookup(property, nil, hiera_scope, override, context)
+      end 
+    
+      if Util::Data.undef?(value)
+        value = Coral.provisioner(provider).lookup(property, default, config)
       end
-      if Util::Data.undef?(value) && search_name
-        if scope.respond_to?("lookupvar")
-          value = scope.lookupvar("#{prefix_text}#{name}")
-        else
-          value = scope["#{prefix_text}#{name}"]
-        end
-        dbg(value, "scope lookup #{prefix_text}#{name}") if debug
-      end
-      Puppet::Util::Log.level = log_level
-    end    
+    end
     value = default if Util::Data.undef?(value)
     value = Util::Data.value(value)
     
-    if ! @@properties.has_key?(name) || ! Util::Data.undef?(value)
-      set_property(name, value)
+    if ! @@properties.has_key?(first_property) || ! Util::Data.undef?(value)
+      PropertyCollection.set(first_property, value)
+    end
+    return value, first_property if return_property
+    return value
+  end
+    
+  #---
+  
+  def self.lookup_array(properties, default = [], options = {})
+    config          = Config.ensure(options) 
+    value, property = lookup(properties, nil, config.import({ :return_property => true }))
+    
+    if Util::Data.undef?(value)
+      value = default
+        
+    elsif ! Util::Data.empty?(default)
+      if config.get(:merge, false)
+        value = Util::Data.merge([default, value], config)
+      end
     end
     
-    dbg(value, "lookup result -> #{name}") if debug    
-    return value  
+    unless value.is_a?(Array)
+      value = ( Util::Data.empty?(value) ? [] : [ value ] )
+    end
+    
+    PropertyCollection.set(property, value)
+    return value
+  end
+    
+  #---
+  
+  def self.lookup_hash(properties, default = {}, options = {})
+    config          = Config.ensure(options) 
+    value, property = lookup(properties, nil, config.import({ :return_property => true }))
+    
+    if Util::Data.undef?(value)
+      value = default
+        
+    elsif ! Util::Data.empty?(default)
+      if config.get(:merge, false)
+        value = Util::Data.merge([default, value], config)
+      end
+    end
+    
+    unless value.is_a?(Hash)
+      value = ( Util::Data.empty?(value) ? {} : { :value => value } )
+    end
+    
+    PropertyCollection.set(property, value)
+    return value
   end
   
   #---
@@ -223,8 +135,6 @@ class Config
   def self.normalize(data, override = nil, options = {})
     config  = Config.ensure(options)
     results = {}
-    
-    debug   = config.get(:debug, false)
     
     unless Util::Data.undef?(override)
       case data
@@ -237,17 +147,14 @@ class Config
       end
     end
     
-    dbg(data, 'config normalize data') if debug
-    dbg(override, 'config normalize override') if debug
-    
     case data
     when String, Symbol
-      results = Config.lookup(data.to_s, {}, config)
+      results = lookup(data.to_s, {}, config)
       
     when Array
       data.each do |item|
         if item.is_a?(String) || item.is_a?(Symbol)
-          item = Config.lookup(item.to_s, {}, config)
+          item = lookup(item.to_s, {}, config)
         end
         unless Util::Data.undef?(item)
           results = Util::Data.merge([ results, item ], config)
@@ -258,9 +165,34 @@ class Config
       results = data
     end
     
-    dbg(results, 'config normalize results') if debug
-    
     return results
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Configuration options
+  
+  def self.contexts(contexts = [], hierarchy = [])
+    return Options.contexts(contexts, hierarchy)  
+  end
+  
+  #---
+  
+  def self.get_options(contexts, force = true)
+    return Options.get(contexts, force)  
+  end
+  
+  #---
+  
+  def self.set_options(contexts, options, force = true)
+    Options.set(contexts, options, force)
+    return self  
+  end
+  
+  #---
+  
+  def self.clear_options(contexts)
+    Options.clear(contexts)
+    return self  
   end
     
   #-----------------------------------------------------------------------------
@@ -271,17 +203,24 @@ class Config
     when Coral::Config
       return config
     when Hash
-      return Config.new(config) 
+      return new(config) 
     end
-    return Config.new
+    return new
   end
   
   #---
   
-  def self.init(options, contexts = [], defaults = {})
-    config = Coral::Config.new(Coral::Config.options(contexts), defaults)
-    config.import(options) unless Coral::Util::Data.empty?(options)
+  def self.init(options, contexts = [], hierarchy = [], defaults = {})
+    contexts = contexts(contexts, hierarchy)
+    config   = new(get_options(contexts), defaults)
+    config.import(options) unless Util::Data.empty?(options)
     return config
+  end
+  
+  #---
+  
+  def self.init_flat(options, contexts = [], defaults = {})
+    return init(options, contexts, [], defaults)
   end
   
   #-----------------------------------------------------------------------------
@@ -292,11 +231,7 @@ class Config
     @options = {}
     
     if defaults.is_a?(Hash) && ! defaults.empty?
-      symbolized = {}
-      defaults.each do |key, value|
-        symbolized[key.to_sym] = value
-      end
-      defaults = symbolized
+      defaults = symbol_map(defaults)
     end
     
     case data
@@ -305,11 +240,7 @@ class Config
     when Hash
       @options = {}
       if data.is_a?(Hash)
-        symbolized = {}
-        data.each do |key, value|
-          symbolized[key.to_sym] = value
-        end
-        @options = Util::Data.merge([ defaults, symbolized ], force)
+        @options = Util::Data.merge([ defaults, symbol_map(data) ], force)
       end  
     end
   end
@@ -321,14 +252,10 @@ class Config
     
     case data
     when Hash
-      symbolized = {}
-      data.each do |key, value|
-        symbolized[key.to_sym] = value
-      end
-      @options = Util::Data.merge([ @options, symbolized ], config)
+      @options = Util::Data.merge([ @options, symbol_map(data) ], config)
     
     when String      
-      data = Util::Data.lookup(data, {}, config)
+      data = lookup(data, {}, config)
       Util::Data.merge([ @options, data ], config)
      
     when Array
@@ -380,5 +307,27 @@ class Config
   def options
     return @options
   end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def self.symbol_map(data)
+    results = {}
+    data.each do |key, value|
+      if value.is_a?(Hash)
+        results[key.to_sym] = symbol_map(value)  
+      else
+        results[key.to_sym] = value  
+      end      
+    end
+    return results  
+  end
+  
+  #---
+  
+  def symbol_map(data)
+    return self.class.symbol_map(data)
+  end
+  protected :symbol_map
 end
 end
