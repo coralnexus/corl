@@ -3,14 +3,9 @@ Facter.add(:coral_exists) do
   confine :kernel => :linux
   
   setcode do
-    coral_exists = false
-    
     begin
       Facter::Util::Resolution::exec('gem list coral_core -i 2> /dev/null')
-      
-      if $?.exitstatus == 0
-        coral_exists = true
-      end
+      coral_exists = true if $?.exitstatus == 0
       
     rescue Exception # Prevent abortions.
     end
