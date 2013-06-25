@@ -14,7 +14,7 @@ This function returns a standardized form of a given resource name.
       raise(Puppet::ParseError, "name(): Must have a resource name specified; " +
         "given (#{args.size} for 1)") if args.size < 1
       
-      name = Coral::Resource.to_name(args[0], :puppet)
+      name = Coral.provisioner(:puppet).to_name(args[0])
     end
     return name
   end
