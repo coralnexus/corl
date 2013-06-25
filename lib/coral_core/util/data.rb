@@ -214,6 +214,26 @@ class Data
     end
     return result
   end
+  
+  #---
+  
+  def self.ensure(test, success_value = nil, failure_value = nil)
+    success_value = (success_value ? success_value : test)
+    failure_value = (failure_value ? failure_value : nil)
+      
+    if empty?(test)
+      value = failure_value
+    else
+      value = success_value
+    end
+    return value
+  end
+  
+  #---
+  
+  def self.ensure_value(value, failure_value = nil)
+    return self.ensure(value, nil, failure_value)
+  end
 end
 end
 end
