@@ -14,6 +14,12 @@ class Disk
   #-----------------------------------------------------------------------------
   # Utilities
   
+  def self.exists?(file)
+    return File.exists?(File.expand_path(file))  
+  end
+  
+  #---
+  
   def self.filename(file_name)
     return ( file_name.is_a?(Array) ? file_name.join(File::SEPARATOR) : file_name.to_s )
   end
