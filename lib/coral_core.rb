@@ -158,7 +158,7 @@ module Coral
         specs.each do |spec|
           lib_path = File.join(spec.full_gem_path, 'lib', 'coral')
           if File.directory?(lib_path)
-            load(lib_path) unless spec.name == 'coral_core'
+            load(lib_path)
             @@gems[spec.name] = {
               :lib_dir => lib_path,
               :spec    => spec
