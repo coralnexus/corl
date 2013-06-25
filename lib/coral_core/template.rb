@@ -6,7 +6,7 @@ module Template
   # General template utilities
   
   def self.instance(class_name, options = {}, defaults = {}, force = true)
-    return Template::const_get(class_name).new(options, defaults, force)
+    return Template::const_get(class_name.strip.capitalize).new(options, defaults, force)
   end
   
   #---
