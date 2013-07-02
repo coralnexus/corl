@@ -1,12 +1,13 @@
 
 module Coral
 module Template
-class YAML < Base
+class YAML < Plugin::Template
+  
   #-----------------------------------------------------------------------------
   # Renderers  
    
-  def render(input)
-    return Util::Data.to_yaml(input)    
+  def render_processed(data)
+    return Util::Data.to_yaml(data)    
   end
 end
 end

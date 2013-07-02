@@ -1,16 +1,17 @@
 
 module Coral
 module Template
-class Environment < Base
+class Environment < Plugin::Template
+  
   #-----------------------------------------------------------------------------
   # Renderers  
    
-  def render(input)
+  def render_processed(data)
     output = ''
     
-    case input
+    case data
     when Hash
-      input.each do |name, value|
+      data.each do |name, value|
         output << render_assignment(name, value)
       end
     end              

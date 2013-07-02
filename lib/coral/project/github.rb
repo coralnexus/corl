@@ -2,9 +2,14 @@
 module Coral
 module Project
 class Github < Git
+ 
   #-----------------------------------------------------------------------------
-  # Project information
-   
+  # Project plugin interface
+
+    
+  #-----------------------------------------------------------------------------
+  # Plugin operations
+  
   def normalize    
     if get(:ssh, false)
       protocol  = 'git@'

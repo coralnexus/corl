@@ -39,12 +39,7 @@ class ResourceGroup < Core
     
     unless Util::Data.empty?(resources)
       resources.each do |title, resource|
-        case info[:type]
-        when :type, :define
-          provisioner.add_resource(info, title, resource.properties)
-        when :class
-          provisioner.add_class(info, title, resource.properties)
-        end
+        provisioner.add_resource(info, title, resource.properties)
         @resources[title] = resource
       end
     end

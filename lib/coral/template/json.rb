@@ -1,12 +1,13 @@
 
 module Coral
 module Template
-class JSON < Base
+class JSON < Plugin::Template
+  
   #-----------------------------------------------------------------------------
   # Renderers  
    
-  def render(input)
-    return Util::Data.to_json(input)    
+  def render_processed(data)
+    return Util::Data.to_json(data)    
   end
 end
 end

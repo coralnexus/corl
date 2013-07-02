@@ -1,54 +1,31 @@
 
-#*******************************************************************************
-#*******************************************************************************
-
 module Coral
 module Provisioner
-class Puppet < Base
+class Puppet < Plugin::Provisioner
+  
   #-----------------------------------------------------------------------------
-  # Provisioner initialization
+  # Provisioner plugin interface
   
   def initialized?(options = {})
+    return false unless super(options)
+    
     config       = Config.ensure(options)
     puppet_scope = config.get(:puppet_scope, scope)
     
     prefix_text = '::'  
     init_fact   = prefix_text + config.get(:init_fact, 'hiera_ready')
-    coral_fact  = prefix_text + config.get(:coral_fact, 'coral_exists') 
       
     if Puppet::Parser::Functions.function('hiera') && puppet_scope.respond_to?('[]')
-      return true if Util::Data.true?(puppet_scope[init_fact]) && Util::Data.true?(puppet_scope[coral_fact])
+      return true if Util::Data.true?(puppet_scope[init_fact])
     end
     return false
   end
   
   #---
-   
-  def normalize
-    super
-    
-    unless name
-      @name = :default
-    end
-    
-    @env      = Puppet::Node::Environment.new
-    @compiler = Puppet::Parser::Compiler.new(node)
-    
-    init_scope
-  end
-  
-  #---
-  
-  def load
-    # Include Puppet Coral extensions
-    env.modules.each do |mod|
-      Coral.load(File.join(mod.path, 'lib', 'coral'))
-    end
-  end
-  
-  #---
   
   def hiera_config
+    super
+    
     config_file = Puppet.settings[:hiera_config]
     config      = {}
 
@@ -63,14 +40,53 @@ class Puppet < Base
   end
   
   #-----------------------------------------------------------------------------
+  # Plugin operations
+   
+  def normalize
+    super
+    
+    init(:name, :default)    
+    init(:env, Puppet::Node::Environment.new)
+    init(:compiler, Puppet::Parser::Compiler.new(node))
+    
+    init_scope
+  end
+  
+  #---
+  
+  def register
+    # Register Puppet Coral extensions
+    env.modules.each do |mod|
+      lib_dir = File.join(mod.path, 'lib', 'coral')
+      if File.directory?(lib_dir)
+        Plugin.register(lib_dir)
+      end
+    end
+  end
+  
+  #-----------------------------------------------------------------------------
   # Property accessor / modifiers
   
-  attr_reader :env, :compiler, :scope
+  def env(default = nil)
+    return get(:env, default)
+  end
+  
+  #---
+  
+  def compiler(default = nil)
+    return get(:compiler, default)
+  end
+  
+  #---
+  
+  def scope(default = nil)
+    return get(:scope, default)
+  end
   
   #---
   
   def init_scope
-    @scope       = Puppet::Parser::Scope.new(compiler)
+    set(:scope, Puppet::Parser::Scope.new(compiler))
     scope.source = Puppet::Resource::Type.new(:node, node.name)
     scope.parent = compiler.topscope  
   end
@@ -179,10 +195,10 @@ class Puppet < Base
   #---
            
   def type_info(type_name, reset = false)
+    type_name = type_name.to_s.downcase
+    
     if reset || ! @type_info.has_key?(type_name)    
-      type_name     = type_name.to_s.downcase
       resource_type = nil       
-       
       type_exported, type_virtual = false
         
       if type_name.start_with?('@@')
@@ -242,24 +258,36 @@ class Puppet < Base
     info = type_info(type_name)
     return ResourceGroup.new(self, info, defaults).add(resources, options)
   end
-
+  
   #---
   
-  def add_class(type, title, properties)
-    if type.is_a?(String)
+  def add_resource(type, title, properties)
+    if type_name.is_a?(String)
       type = type_info(type)
     end
     
+    case type[:type]
+    when :type, :define
+      add_definition(type, title, properties)
+    when :class
+      add_class(title, properties)
+    end
+  end
+
+  #---
+  
+  def add_class(title, properties)
     klass = find_hostclass(title)
     if klass
       klass.ensure_in_catalog(scope, properties)
       catalog.add_class(title)
     end  
   end
+  protected :add_class
     
   #---
   
-  def add_resource(type, title, properties)    
+  def add_definition(type, title, properties)    
     if type_name.is_a?(String)
       type = type_info(type)
     end
@@ -279,6 +307,7 @@ class Puppet < Base
     end
     return compiler.add_resource(scope, resource)
   end
+  protected :add_definition
 
   #-----------------------------------------------------------------------------
   # Puppet operations
