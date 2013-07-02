@@ -13,6 +13,7 @@
 module Kernel
    
   def dbg(data, label = '')
+    # Invocations of this function should NOT be committed to the project
     require 'pp'
     
     puts '>>----------------------'
@@ -27,7 +28,8 @@ module Kernel
   #---  
     
   def coral_locate(command)
-    exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+    command = command.to_s
+    exts    = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
     ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
       exts.each do |ext|
         exe = File.join(path, "#{command}#{ext}")
@@ -57,7 +59,12 @@ end
 # Top level properties 
 
 lib_dir      = File.dirname(__FILE__)
-git_location = coral_locate('git')
+core_dir     = File.join(lib_dir, 'coral_core')
+mixin_dir    = File.join(core_dir, 'mixins')
+util_dir     = File.join(core_dir, 'util')
+mod_dir      = File.join(core_dir, 'mod')
+
+git_location = coral_locate(:git)
  
 #-------------------------------------------------------------------------------
 # Core requirements
@@ -82,46 +89,41 @@ require 'digest/sha1'
 
 if git_location
   require 'grit'
-  coral_require(File.join(lib_dir, 'coral_core', 'util'), :git)
+  coral_require(util_dir, :git)
 end
 
 #---
 
-# Include pre core utilities (no internal dependencies)
-[ :data, :disk, :process ].each do |name| 
-  coral_require(File.join(lib_dir, 'coral_core', 'util'), name)
-end
-
-# Include core
-[ :config, :interface, :core, :provisioner ].each do |name| 
-  coral_require(File.join(lib_dir, 'coral_core'), name) 
-end
-
-# Include post core utilities 
-# ( normally inherit from core and have no reverse dependencies with 
-#   core classes )
-#
-[ :option, :shell ].each do |name| 
-  coral_require(File.join(lib_dir, 'coral_core', 'util'), name) 
-end
-
-# Include data model
-[ :event, :command, :template, :project ].each do |name| 
-  coral_require(File.join(lib_dir, 'coral_core'), name) 
-end
-
-if git_location
-  [ :repository, :configuration, :builder ].each do |name| 
-    coral_require(File.join(lib_dir, 'coral_core'), name) 
-  end  
-end
-
-#---
-
-# Extensions or Alterations to other classes
-Dir.glob(File.join(lib_dir, 'coral_core', 'mod', '*.rb')).each do |file|
+# Object modifications
+Dir.glob(File.join(mod_dir, '*.rb')).each do |file|
   require file
 end
+
+#---
+
+# Mixins for classes
+Dir.glob(File.join(mixin_dir, '*.rb')).each do |file|
+  require file
+end
+
+#---
+
+coral_require(util_dir, :data)
+coral_require(core_dir, :config)
+coral_require(core_dir, :interface) 
+coral_require(core_dir, :core) 
+
+# Include core utilities
+[ :cli, :disk, :process, :shell ].each do |name| 
+  coral_require(util_dir, name)
+end
+
+# Include core systems
+[ :plugin, :builder ].each do |name| 
+  coral_require(core_dir, name) 
+end
+
+#---
 
 #*******************************************************************************
 # Coral Core Library
@@ -136,7 +138,7 @@ module Coral
   
   #-----------------------------------------------------------------------------
   
-  @@ui = Coral::Core.ui
+  @@ui = Core.ui
   
   #---
   
@@ -144,134 +146,29 @@ module Coral
     return @@ui
   end
   
+  #---
+  
+  @@logger = Core.logger
+  
+  #---
+  
+  def self.logger
+    return @@logger
+  end
+  
   #-----------------------------------------------------------------------------
-  # Plugins and resources
-
-  @@gems = {}
-  
-  #---
-  
-  def self.gems(reset = false)
-    if reset || Util::Data.empty?(@@gems)
-      if defined?(::Gem) && ! defined?(::Bundler) && Gem::Specification.respond_to?(:latest_specs)
-        specs = Gem::Specification.latest_specs(true)
-        specs.each do |spec|
-          lib_path = File.join(spec.full_gem_path, 'lib', 'coral')
-          if File.directory?(lib_path)
-            load(lib_path)
-            @@gems[spec.name] = {
-              :lib_dir => lib_path,
-              :spec    => spec
-            }
-          end
-        end    
-      end
-    end    
-    return @@gems
-  end
-  
-  #---
-  
-  @@plugins = {}
-  
-  #---
-  
-  def self.init_plugin_type(type)
-    unless @@plugins.has_key?(type) && @@plugins[type]
-      @@plugins[type] = {}
-    end  
-  end
-  protected :init_plugin_type
-  
-  #---
-  
-  def self.plugins(type = nil)
-    type = type.to_sym
-    unless type
-      return @@plugins
-    end
-    init_plugin_type(type)
-    return @@plugins[type]
-  end
-  
-  #---
-  
-  def self.get_class(plugin_type, name, default = nil)
-    name   = default unless name
-    plugin = plugins(plugin_type)[name] if name
-    
-    return nil unless plugin
-    return Coral.class_const(plugin[:class])
-  end
-  
-  #---
-  
-  def self.add_plugin(type, name, directory, file)
-    type = type.to_sym
-    init_plugin_type(type)
-    
-    plugin_data = {
-      :name      => name,
-      :type      => type,
-      :class     => class_name([ :coral, type, name ]),
-      :directory => directory,
-      :file      => file
-    }
-    @@plugins[type][name] = plugin_data unless @@plugins[type].has_key?(name)
-  end
-  protected :add_plugin
-  
-  #---
-  
-  def self.load(base_path)
-    if File.directory?(base_path)
-      Dir.glob(File.join(base_path, '*.rb')).each do |file|
-        require file
-      end
-      load_recursive(base_path, :event)
-      load_recursive(base_path, :template)
-      load_recursive(base_path, :project)
-      load_recursive(base_path, :provisioner)      
-    end  
-  end
-  protected :load
-  
-  #---
-  
-  def self.load_recursive(base_path, plugin_type)
-    base_directory = File.join(base_path, plugin_type)
-    
-    if File.directory?(base_directory)
-      Dir.glob(File.join(base_directory, '*.rb')).each do |file|
-        components = file.split(FILE::SEPARATOR)
-        name       = components.pop.sub(/\.rb/, '')
-        directory  = components.join(FILE::SEPARATOR)
-      
-        coral_require(directory, name)
-        add_plugin(plugin_type, name, directory, file)
-      end
-    end
-  end
-  protected :load_recursive
-    
-  #---
+  # Initialization
   
   @@initialized = false
   
   #---
   
-  def self.initialize(lib_dir)
+  def self.initialize
     unless @@initialized
-      Config.set_property('time', Time.now.to_i)
+      Config.set_property(:time, Time.now.to_i)
       
-      # Include core extensions
-      load(File.join(lib_dir, 'coral_core'))
-      
-      # Include Ruby Coral Gem extensions
-      gems(true)
-            
-      # Load provisioner extensions
-      Provisioner.load
+      # Include Coral plugins
+      Plugin.initialize
             
       @@initialized = true
     end    
@@ -283,6 +180,90 @@ module Coral
     return @@initialized
   end
   
+  #-----------------------------------------------------------------------------
+  # Plugins
+  
+  def self.context(provider, options = {})
+    return Plugin.instance(:context, provider, options)
+  end
+  
+  #---
+  
+  def self.command(options, provider = :shell)
+    return Plugin.instance(:command, provider, options)
+  end
+  
+  #---
+  
+  def self.event(options, provider = :regex)
+    return Plugin.instance(:event, provider, options)
+  end
+  
+  #---
+  
+  def self.events(options, build_hash = false, keep_array = false)
+    group  = ( build_hash ? {} : [] )    
+    events = Plugin::Event.build_info(options)
+    
+    index = 1
+    events.each do |info|
+      type = info[:type]
+      
+      if type && ! type.empty?
+        event = event(info, type)
+                
+        if event
+          if build_hash
+            group[index] = event
+          else
+            group << event
+          end
+        end
+      end
+      index += 1
+    end
+    if ! build_hash && events.length == 1 && ! keep_array
+      return group.shift
+    end
+    return group  
+  end
+  
+  #---
+  
+  def self.template(provider, options = {})
+    return Plugin.instance(:template, provider, options)
+  end
+  
+  #---
+  
+  def self.provisioner(provider = :puppet, options = {})
+    return Plugin.instance(:provisioner, provider, options)
+  end
+  
+  #---
+  
+  def self.project(name, project = {})
+    return nil unless project
+    
+    unless project.is_a?(Hash)
+      project = {
+        :url      => project,
+        :revision => nil
+      }
+    end   
+    
+    project  = Util::Data.symbol_map(project)
+    provider = :git
+    
+    if match = project[:url].match(/^([a-zA-Z0-9_]+)::(.+)$/)
+      type, url     = match.captures
+      provider      = type.strip
+      project[:url] = url
+    end
+    
+    return Plugin.instance(:project, provider, project)
+  end
+
   #-----------------------------------------------------------------------------
   # Build process
   
@@ -307,16 +288,9 @@ module Coral
     builder = builder(options)   
     return builder.build
   end
-  
-  #-----------------------------------------------------------------------------
-  # Provisioner
-  
-  def self.provisioner(provider = :puppet)
-    return Provisioner.instance(:default, { :provider => provider })
-  end
 
   #-----------------------------------------------------------------------------
-  # External execution
+  # Execution
    
   def self.run
     begin
@@ -328,6 +302,19 @@ module Coral
       ui.warn(Util::Data.to_yaml(error.backtrace))
       raise
     end
+  end
+  
+  #---
+  
+  def self.exec(hook, params = {}, context = :type, options = {})
+    return Plugin.exec(hook, params, context, options)
+  end
+  
+  #---
+  
+  def self.exec_type(type, hook, params = {})
+    results = exec(hook, params, :type, { :filter_type => type })
+    return results[type]
   end
   
   #-----------------------------------------------------------------------------
@@ -365,4 +352,4 @@ end
 #-------------------------------------------------------------------------------
 # Initialize the Coral configuration
 
-Coral.initialize(lib_dir)
+Coral.initialize
