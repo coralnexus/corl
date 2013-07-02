@@ -20,7 +20,7 @@ class Shell < Core
     
     ui           = config.get(:ui, Coral.ui)
     
-    conditions   = Coral::Event.instance(config.get(:exit, {}), true)
+    conditions   = Coral.events(config.get(:exit, {}), true)
     
     $stdout.sync = true
     $stderr.sync = true  
