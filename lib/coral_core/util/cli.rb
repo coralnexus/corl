@@ -1,6 +1,6 @@
 module Coral
   module Util
-    module Option
+    module CLI
         
       #-------------------------------------------------------------------------
       # Utilities
@@ -22,7 +22,7 @@ module Coral
         message_name = name.to_s + '_message'
         message      = message(message_id, options[name])
         
-        option_str   = Core.array(option_str)
+        option_str   = Util::Data.array(option_str)
           
         if allowed_values
           parser.on(*option_str, allowed_values, config.get(message_name.to_sym, message)) do |value|
