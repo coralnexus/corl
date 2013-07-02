@@ -26,7 +26,7 @@ This function returns the string-ified form of a given value.
         :force        => true,
         :merge        => true
       })
-      value = Coral::Template.render(class_name, data, config)
+      value = Coral.template(class_name, config).render(data)
     end
     return value
   end
