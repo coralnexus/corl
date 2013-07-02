@@ -3,199 +3,12 @@ module Coral
 class Config
   
   #-----------------------------------------------------------------------------
-  # Global configuration
-  
-  @@hiera = {}
-  
-  #---
-  
-  def self.hiera_config(provider = :puppet)
-    return Coral.provisioner(provider).hiera_config
-  end
-  
-  #---
+  # Global interface
 
-  def self.hiera(provider = :puppet)
-    @@hiera[provider] = Hiera.new(:config => hiera_config(provider)) unless @@hiera.has_key?(provider)
-    return @@hiera[provider]
-  end
+  include Mixins::ConfigOptions
+  include Mixins::ConfigLookup
+  include Mixins::ConfigOps
   
-  #---
-
-  def hiera(provider = :puppet)
-    return self.class.hiera(provider)
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Configuration lookup
-      
-  def self.initialized?(options = {})
-    config   = Config.ensure(options)
-    provider = config.get(:provisioner, nil)
-    begin
-      require 'hiera'
-      return true unless provider      
-      return Coral.provisioner(provider).initialized?(config)
-    
-    rescue Exception # Prevent abortions.
-    end    
-    return false
-  end
-  
-  #---
-    
-  def self.lookup(properties, default = nil, options = {})
-    config          = Config.ensure(options)
-    value           = nil
-    
-    provider        = config.get(:provisioner, :puppet)
-    
-    hiera_scope     = config.get(:hiera_scope, {})
-    context         = config.get(:context, :priority)    
-    override        = config.get(:override, nil)
-    
-    return_property = config.get(:return_property, false)
-    
-    unless properties.is_a?(Array)
-      properties = [ properties ].flatten
-    end
-
-    first_property = nil
-    properties.each do |property|
-      first_property = property unless first_property
-          
-      if initialized?(config)
-        unless hiera_scope.respond_to?('[]')
-          hiera_scope = Hiera::Scope.new(hiera_scope)
-        end
-        value = hiera(provider).lookup(property, nil, hiera_scope, override, context)
-      end 
-    
-      if Util::Data.undef?(value)
-        value = Coral.provisioner(provider).lookup(property, default, config)
-      end
-    end
-    value = default if Util::Data.undef?(value)
-    value = Util::Data.value(value)
-    
-    if ! @@properties.has_key?(first_property) || ! Util::Data.undef?(value)
-      PropertyCollection.set(first_property, value)
-    end
-    return value, first_property if return_property
-    return value
-  end
-    
-  #---
-  
-  def self.lookup_array(properties, default = [], options = {})
-    config          = Config.ensure(options) 
-    value, property = lookup(properties, nil, config.import({ :return_property => true }))
-    
-    if Util::Data.undef?(value)
-      value = default
-        
-    elsif ! Util::Data.empty?(default)
-      if config.get(:merge, false)
-        value = Util::Data.merge([default, value], config)
-      end
-    end
-    
-    unless value.is_a?(Array)
-      value = ( Util::Data.empty?(value) ? [] : [ value ] )
-    end
-    
-    PropertyCollection.set(property, value)
-    return value
-  end
-    
-  #---
-  
-  def self.lookup_hash(properties, default = {}, options = {})
-    config          = Config.ensure(options) 
-    value, property = lookup(properties, nil, config.import({ :return_property => true }))
-    
-    if Util::Data.undef?(value)
-      value = default
-        
-    elsif ! Util::Data.empty?(default)
-      if config.get(:merge, false)
-        value = Util::Data.merge([default, value], config)
-      end
-    end
-    
-    unless value.is_a?(Hash)
-      value = ( Util::Data.empty?(value) ? {} : { :value => value } )
-    end
-    
-    PropertyCollection.set(property, value)
-    return value
-  end
-  
-  #---
-
-  def self.normalize(data, override = nil, options = {})
-    config  = Config.ensure(options)
-    results = {}
-    
-    unless Util::Data.undef?(override)
-      case data
-      when String, Symbol
-        data = [ data, override ] if data != override
-      when Array
-        data << override unless data.include?(override)
-      when Hash
-        data = [ data, override ]
-      end
-    end
-    
-    case data
-    when String, Symbol
-      results = lookup(data.to_s, {}, config)
-      
-    when Array
-      data.each do |item|
-        if item.is_a?(String) || item.is_a?(Symbol)
-          item = lookup(item.to_s, {}, config)
-        end
-        unless Util::Data.undef?(item)
-          results = Util::Data.merge([ results, item ], config)
-        end
-      end
-  
-    when Hash
-      results = data
-    end
-    
-    return results
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Configuration options
-  
-  def self.contexts(contexts = [], hierarchy = [])
-    return Options.contexts(contexts, hierarchy)  
-  end
-  
-  #---
-  
-  def self.get_options(contexts, force = true)
-    return Options.get(contexts, force)  
-  end
-  
-  #---
-  
-  def self.set_options(contexts, options, force = true)
-    Options.set(contexts, options, force)
-    return self  
-  end
-  
-  #---
-  
-  def self.clear_options(contexts)
-    Options.clear(contexts)
-    return self  
-  end
-    
   #-----------------------------------------------------------------------------
   # Instance generators
   
@@ -223,13 +36,13 @@ class Config
   def self.init_flat(options, contexts = [], defaults = {})
     return init(options, contexts, [], defaults)
   end
-  
+   
   #-----------------------------------------------------------------------------
-  # Configuration instance
-    
+  # Constructor / Destructor
+   
   def initialize(data = {}, defaults = {}, force = true)
-    @force   = force
-    @options = {}
+    @force      = force
+    @properties = {}
     
     if defaults.is_a?(Hash) && ! defaults.empty?
       defaults = symbol_map(defaults)
@@ -237,81 +50,164 @@ class Config
     
     case data
     when Coral::Config
-      @options = Util::Data.merge([ defaults, data.options ], force)
+      @properties = Util::Data.merge([ defaults, data.properties ], force)
     when Hash
-      @options = {}
+      @properties = {}
       if data.is_a?(Hash)
-        @options = Util::Data.merge([ defaults, symbol_map(data) ], force)
+        @properties = Util::Data.merge([ defaults, symbol_map(data) ], force)
       end  
     end
   end
   
   #---
   
-  def import(data, options = {})
-    config = Config.new(options, { :force => @force }).set(:context, :hash)
+  def inspect
+    "#<#{self.class}: >"
+  end
+      
+  #-----------------------------------------------------------------------------
+  # Property accessors / modifiers
     
-    case data
+  def fetch(data, keys, default = nil, format = false)    
+    if keys.is_a?(String) || keys.is_a?(Symbol)
+      keys = [ keys ]
+    end    
+    key = keys.shift.to_sym
+    
+    if data.has_key?(key)
+      value = data[key]
+      
+      if keys.empty?
+        return filter(value, format)
+      else
+        return fetch(data[key], keys, default, format)  
+      end
+    end
+    return filter(default, format)
+  end
+  protected :fetch
+  
+  #---
+  
+  def modify(data, keys, value = nil) 
+    if keys.is_a?(String) || keys.is_a?(Symbol)
+      keys = [ keys ]
+    end
+        
+    key      = keys.shift.to_sym
+    has_key  = data.has_key?(key)
+    existing = { 
+      :key   => key, 
+      :value => ( has_key ? data[key] : nil ) 
+    }
+    
+    if keys.empty?      
+      existing[:value] = data[key] if has_kay
+      
+      if value.nil?
+        data.delete(key) if has_key
+      else
+        data[key] = value
+      end
+    else      
+      data[key] = {} unless has_key
+      existing  = modify(data[key], keys, value)  
+    end
+    
+    return existing
+  end
+  protected :modify
+  
+  #---
+  
+  def get(keys, default = nil, format = false)
+    return fetch(@properties, array(keys).flatten, default, format)
+  end
+
+  #---
+ 
+  def [](name, default = nil, format = false)
+    get(name, default, format)
+  end
+  
+  #---
+  
+  def get_array(keys, default = [])
+    return get(keys, default, :array)
+  end
+  
+  #---
+  
+  def get_hash(keys, default = {})
+    return get(keys, default, :hash)
+  end
+  
+  #---
+  
+  def init(keys, default = nil)
+    return set(keys, get(keys, default))
+  end
+
+  #---
+  
+  def set(keys, value)
+    modify(@properties, array(keys).flatten, value)
+    return self
+  end
+  
+  #---
+  
+  def []=(name, value)
+    set(name, value)
+  end
+   
+  #---
+  
+  def delete(keys, default = nil)
+    existing = modify(@properties, array(keys).flatten, nil)
+    return existing[:value] if existing[:value]
+    return default
+  end
+  
+  #---
+  
+  def clear(options = {})
+    @properties = {}
+    return self
+  end
+
+  #-----------------------------------------------------------------------------
+  # Import / Export
+ 
+  def import(properties, options = {})
+    config = new(options, { :force => @force }).set(:context, :hash)
+    
+    case properties
     when Hash
-      @options = Util::Data.merge([ @options, symbol_map(data) ], config)
+      @properties = Util::Data.merge([ @properties, symbol_map(properties) ], config)
     
     when String      
-      data = lookup(data, {}, config)
-      Util::Data.merge([ @options, data ], config)
+      properties = lookup(properties, {}, config)
+      Util::Data.merge([ @properties, properties ], config)
      
     when Array
-      data.each do |item|
+      properties.each do |item|
         import(item, config)
       end
     end
     
     return self
   end
-  
+
   #---
   
-  def set(name, value)
-    @options[name.to_sym] = value
-    return self
-  end
-  
-  def []=(name, value)
-    set(name, value)
-  end
-  
-  #---
-    
-  def get(name, default = nil)
-    name = name.to_sym
-    return @options[name] if @options.has_key?(name)
-    return default
-  end
-  
-  def [](name, default = nil)
-    get(name, default)
-  end
-  
-  #---
-  
-  def rm(name, default = nil)
-    name = name.to_sym
-    if @options.has_key(name)
-      value = @options[name]
-      @options.delete(name)
-      return value
-    end
-    return default
-  end
-  
-  #---
-  
-  def options
-    return @options
+  def export
+    return @properties
   end
   
   #-----------------------------------------------------------------------------
   # Utilities
-  
+
   def self.symbol_map(data)
     return Util::Data.symbol_map(data)
   end
@@ -321,6 +217,89 @@ class Config
   def symbol_map(data)
     return self.class.symbol_map(data)
   end
-  protected :symbol_map
+  
+  #---
+  
+  def self.string_map(data)
+    return Util::Data.string_map(data)
+  end
+  
+  #---
+  
+  def string_map(data)
+    return self.class.string_map(data)
+  end
+  
+  #-----------------------------------------------------------------------------
+      
+  def self.filter(data, method = false)
+    return Util::Data.filter(data, method)
+  end
+  
+  #---
+  
+  def filter(data, method = false)
+    return self.class.filter(data, method)
+  end
+    
+  #-----------------------------------------------------------------------------
+          
+  def self.array(data, default = [], split_string = false)
+    return Util::Data.array(data, default, split_string)
+  end
+  
+  #---
+  
+  def array(data, default = [], split_string = false)
+    return self.class.array(data, default, split_string)
+  end
+    
+  #---
+        
+  def self.hash(data, default = {})
+    return Util::Data.hash(data, default)
+  end
+  
+  #---
+  
+  def hash(data, default = {})
+    return self.class.hash(data, default)
+  end
+    
+  #---
+         
+  def self.string(data, default = '')
+    return Util::Data.string(data, default)
+  end
+  
+  #---
+  
+  def string(data, default = '')
+    return self.class.string(data, default)
+  end
+    
+  #---
+         
+  def self.symbol(data, default = :undefined)
+    return Util::Data.symbol(data, default)
+  end
+  
+  #---
+  
+  def symbol(data, default = '')
+    return self.class.symbol(data, default)
+  end
+     
+  #---
+    
+  def self.test(data)
+    return Util::Data.test(data)
+  end
+  
+  #---
+  
+  def test(data)
+    return self.class.test(data)
+  end  
 end
 end
