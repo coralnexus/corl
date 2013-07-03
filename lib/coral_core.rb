@@ -337,7 +337,7 @@ module Coral
   #---
   
   def self.sha1(data)
-    return Digest::SHA1.hexdigest(Util::Data.to_json(data))
+    return Digest::SHA1.hexdigest(Util::Data.to_json(data, false))
   end  
 end
 

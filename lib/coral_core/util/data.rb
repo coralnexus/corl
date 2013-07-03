@@ -78,13 +78,25 @@ class Data
     end    
     return results
   end
+  
+  #---
+  
+  def self.parse_json(json_text)
+    output = ''
+    begin
+      output = MultiJson.load(json_text)
+      
+    rescue Exception
+    end
+    return output
+  end
     
   #---
   
-  def self.to_json(data)
+  def self.to_json(data, pretty = true)
     output = ''
     begin
-      output = MultiJson.load(data)
+      output = MultiJson.dump(data, :pretty => pretty)
       
     rescue Exception
     end
