@@ -57,6 +57,12 @@ class Project < Base
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
   
+  def url(default = nil)
+    return get(:url, default)
+  end
+  
+  #---
+  
   def directory(default = nil)
     return get(:directory, default)
   end
@@ -73,7 +79,7 @@ class Project < Base
   #---
    
   def set_location(directory)
-    @@projects.delete(get(:directory)) if get(:directory, false)
+    @@projects.delete(get(:directory)) if get(:directory)
     
     if Util::Data.empty?(directory)
       set(:directory, Dir.pwd)
@@ -111,6 +117,12 @@ class Project < Base
   end
   protected :init_parent
   
+  #---
+  
+  def revision(default = nil)
+    return get(:revision, default)
+  end
+   
   #-----------------------------------------------------------------------------
   # Plugin operations
   

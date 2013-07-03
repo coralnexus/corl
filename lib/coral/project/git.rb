@@ -17,7 +17,7 @@ class Git < Plugin::Project
         
     set_location(Util::Disk.filename(get(:directory, Dir.pwd)))
     
-    set_origin(get(:origin)) unless get(:origin, false)
+    set_origin(get(:url)) unless get(:url, false)
     checkout(get(:revision))
     
     pull if get(:pull, false)    
@@ -120,12 +120,6 @@ class Git < Plugin::Project
     load_revision    
     return self
   end
-  
-  #---
-  
-  def revision(default = nil)
-    return get(:revision, default)
-  end
 
   #---
   
@@ -133,7 +127,7 @@ class Git < Plugin::Project
     if can_persist?
       set(:revision, git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip)
     
-      if @revision.empty?
+      if get(:revision, '').empty?
         set(:revision, git.native(:rev_parse, {}, 'HEAD').strip)
       end
       load_submodules
@@ -151,14 +145,14 @@ class Git < Plugin::Project
   #---
   
   def origin(default = nil)
-    return get(:origin, default)
+    return get(:url, default)
   end
 
   #---
   
   def set_origin(url)
-    set(:origin, url)
-    set_remote(:origin, url)
+    set(:url, url)
+    set_remote(:url, url)
     return self
   end
 
@@ -180,7 +174,7 @@ class Git < Plugin::Project
   
   def config(name, options = {})
     config = Config.ensure(options) # Just in case we throw a configuration in
-    return git.config(config.properties, name) if can_persist?
+    return git.config(config.export, name) if can_persist?
     return nil
   end
   
@@ -188,7 +182,7 @@ class Git < Plugin::Project
   
   def set_config(name, value, options = {})
     config = Config.ensure(options) # Just in case we throw a configuration in
-    git.config(config.properties, name, string(value)) if can_persist?
+    git.config(config.export, name, string(value)) if can_persist?
     return self
   end
   
@@ -196,7 +190,7 @@ class Git < Plugin::Project
   
   def delete_config(name, options = {})
     config = Config.ensure(options)
-    git.config(config.import({ :remove_section => true }).properties, name) if can_persist?
+    git.config(config.import({ :remove_section => true }).export, name) if can_persist?
     return self
   end
 
@@ -349,7 +343,7 @@ class Git < Plugin::Project
   # Remote operations
   
   def init_remotes
-    set(:origin, config('remote.origin.url'))
+    set(:url, config('remote.origin.url'))
     set_edit(edit_url(origin))
     return self 
   end
