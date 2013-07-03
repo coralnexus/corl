@@ -410,7 +410,7 @@ class Git < Plugin::Project
     success = false
     
     if can_persist?
-      success = Command.new({
+      success = Coral.command({
         :command => :git,
         :data    => { 'git-dir=' => git.git_dir },
         :subcommand => {
@@ -418,7 +418,7 @@ class Git < Plugin::Project
           :flags   => ( config.get(:tags, true) ? :tags : '' ),
           :args    => [ remote, config.get(:branch, '') ]
         }
-      }).exec!(config) do |line|
+      }, config.get(:provider, :shell)).exec!(config) do |line|
         block_given? ? yield(line) : true
       end
       
@@ -447,7 +447,7 @@ class Git < Plugin::Project
     success = false
     
     if can_persist?
-      success = Command.new({
+      success = Coral.command({
         :command => :git,
         :data => { 'git-dir=' => git.git_dir },
         :subcommand => {
@@ -455,7 +455,7 @@ class Git < Plugin::Project
           :flags => ( config.get(:tags, true) ? :tags : '' ),
           :args => [ remote, config.get(:branch, '') ]
         }
-      }).exec!(config) do |line|
+      }, config.get(:provider, :shell)).exec!(config) do |line|
         block_given? ? yield(line) : true
       end
       
