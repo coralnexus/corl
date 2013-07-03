@@ -113,7 +113,7 @@ class Shell < Plugin::Command
     config = Config.ensure(options)
     
     config[:ui] = @ui
-    success = Coral::Util::Shell.exec!(build(properties, overrides), config) do |line|
+    success = Util::Shell.exec!(build(properties, overrides), config) do |line|
       block_given? ? yield(line) : true
     end    
     return success
