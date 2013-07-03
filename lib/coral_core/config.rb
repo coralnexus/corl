@@ -50,7 +50,7 @@ class Config
     
     case data
     when Coral::Config
-      @properties = Util::Data.merge([ defaults, data.properties ], force)
+      @properties = Util::Data.merge([ defaults, data.export ], force)
     when Hash
       @properties = {}
       if data.is_a?(Hash)
@@ -186,9 +186,9 @@ class Config
     when Hash
       @properties = Util::Data.merge([ @properties, symbol_map(properties) ], config)
     
-    when String      
-      properties = lookup(properties, {}, config)
-      Util::Data.merge([ @properties, properties ], config)
+    when String, Symbol      
+      properties  = lookup(properties.to_s, {}, config)
+      @properties = Util::Data.merge([ @properties, properties ], config)
      
     when Array
       properties.each do |item|

@@ -15,15 +15,17 @@ class Regex < Plugin::Event
   def pattern=pattern
     set(:pattern, string(pattern))  
   end
+  
+  #-----------------------------------------------------------------------------
+  # Plugin operations
+  
+  def normalize
+    super
+    set(:name, "#{type}:#{pattern}")
+  end
  
   #-----------------------------------------------------------------------------
   # Event operations
-  
-  def export
-    return "#{type}:#{pattern}"
-  end
-
-  #---
    
   def check(source)
     if pattern.empty?

@@ -39,7 +39,7 @@ class ResourceGroup < Core
     
     unless Util::Data.empty?(resources)
       resources.each do |title, resource|
-        provisioner.add_resource(info, title, resource.properties)
+        provisioner.add_resource(info, title, resource.export)
         @resources[title] = resource
       end
     end

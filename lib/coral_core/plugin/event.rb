@@ -19,18 +19,16 @@ class Event < Base
   
   #-----------------------------------------------------------------------------
   # Plugin operations
-
+    
+  def normalize
+    super
+    set(:name, "#{type}:base")
+    # Override in sub classes
+  end
 
   #-----------------------------------------------------------------------------
   # Event operations
-  
-  def export
-    # Implement in sub classes
-    return "#{type}:base"
-  end
-  
-  #---
-  
+ 
   def check(source)
     # Implement in sub classes
     return true
