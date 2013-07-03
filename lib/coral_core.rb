@@ -138,22 +138,14 @@ module Coral
   
   #-----------------------------------------------------------------------------
   
-  @@ui = Core.ui
-  
-  #---
-  
   def self.ui
-    return @@ui
+    return Core.ui
   end
   
   #---
   
-  @@logger = Core.logger
-  
-  #---
-  
   def self.logger
-    return @@logger
+    return Core.logger
   end
   
   #-----------------------------------------------------------------------------
@@ -242,7 +234,7 @@ module Coral
   
   #---
   
-  def self.project(name, project = {})
+  def self.project(project = {})
     return nil unless project
     
     unless project.is_a?(Hash)
