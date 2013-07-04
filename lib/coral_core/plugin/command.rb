@@ -6,14 +6,8 @@ class Command < Base
   #-----------------------------------------------------------------------------
   # Command plugin interface
   
-  def initialized?(options = {})
-    return super(options)    
-  end
-  
-  #---
-  
   def to_s
-    return build(properties)
+    return build(export)
   end
   
   #-----------------------------------------------------------------------------
