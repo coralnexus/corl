@@ -3,10 +3,21 @@ module Coral
 module Plugin
   
   #-----------------------------------------------------------------------------
+  # Plugin types
+  
+  define_type :command
+  define_type :context
+  define_type :event
+  define_type :project
+  define_type :provisioner
+  define_type :template
+  
+  #-----------------------------------------------------------------------------
   # Plugin initialization
   
+  @@load_info = {}
+  @@types     = {}
   @@plugins   = {}
-  @@instances = {}
   
   #---
 
@@ -16,37 +27,31 @@ module Plugin
   #---
   
   def self.instance(type, name, options = {})
-    init_plugin_type(type)
+    type = type.to_sym
+    name = name.to_sym
+    return nil unless @@types.has_key?(type)
     
-    name   = name.to_sym if name
-    config = Config.ensure(options)
+    config = Config.ensure(options)    
+    info   = @@load_info[type][name] if @@load_info[type].has_key?(name)
     
-    plugin = @@plugins[type][name] if name && @@plugins[type].has_key?(name)
-    
-    if plugin
+    if info
       group_name    = "#{type}_#{name}"
       instance_name = Coral.sha1(options)
       
-      unless @@instances.has_key?(group_name) && @@instances[group_name]
-        @@instances[group_name] = {}
-      end      
-      unless instance_name && @@instances[group_name].has_key?(instance_name)
-        instance = get(type, name).new(name, config)
-        instance.set_meta(plugin.meta)
+      @@plugins[group_name] = {} unless @@plugins.has_key?(group_name)
+      
+      unless instance_name && @@plugins[group_name].has_key?(instance_name)
+        plugin = Coral.class_const(class_name([ :coral, type, name ])).new(name, config)
+        plugin.set_meta(info) 
         
-        @@instances[group_name][instance_name] = instance 
-      end      
-      return @@instances[group_name][instance_name]
+        @@plugins[group_name][instance_name] = plugin 
+      end
+           
+      return @@plugins[group_name][instance_name]
     end      
     return nil
   end
-  
-  #---
-  
-  def self.get(type, name, default = nil)
-    return get_class(type, name, default)
-  end
-  
+ 
   #-----------------------------------------------------------------------------
   # Plugins and resources
   
@@ -88,76 +93,56 @@ module Plugin
   end
   protected :register_gem
   
+  #-----------------------------------------------------------------------------
+  
+  def self.define_type(type)
+    @@types[type_name] = true
+  end
+  
   #---
   
   def self.types
-    return @@plugins.keys
+    return @@types.keys
   end
-  
-  #---
-   
-  def self.init_plugin_type(type)
-    unless @@plugins.has_key?(type) && @@plugins[type]
-      @@plugins[type] = {}
-    end  
-  end
-  protected :init_plugin_type
   
   #---
   
   def self.plugins(type = nil)
-    type = type.to_sym
+    results = {}
     
     if type
-      init_plugin_type(type)
-      plugins = { type => @@plugins[type] }
+      type = type.to_sym    
+      return results unless @@plugins.has_key?(type)
+      results[type] = @@plugins[type].dup
     else
-      plugins = @@plugins
-    end
-    
-    results = {}
-    plugins.each do |plugin_type, plugin_map|
-      plugin_map.each do |name, info|
-        results[plugin_type][name] = info[:plugin]
-      end
-    end
-    
-    return results unless type
-    return results[type]
+      results = @@plugins.dup 
+    end    
+    return results
   end
-  
+ 
   #---
   
-  def self.get_class(plugin_type, name, default = nil)
-    name   = default unless name
-    plugin = @@plugins[plugin_type][name] if name
-    
-    return nil unless plugin
-    return Coral.class_const(plugin[:class])
-  end
-  
-  #---
-  
-  def self.add_plugin(type, name, directory, file)
+  def self.add_build_info(type, file)
     type = type.to_sym
-    init_plugin_type(type)
     
-    unless @@plugins[type].has_key?(name)
-      plugin_data = {
+    @@load_info[type] = {} unless @@load_info.has_key?(type)
+    
+    components = file.split(File::SEPARATOR)
+    name       = components.pop.sub(/\.rb/, '')
+    directory  = components.join(File::SEPARATOR) 
+        
+    unless @@load_info[type].has_key?(name)
+      data = {
         :name      => name,
         :type      => type,
-        :class     => class_name([ :coral, type, name ]),
         :directory => directory,
         :file      => file
       }
-      if plugin = instance(type, name)
-        plugin.set_meta(plugin_data)   
-        @@plugins[type][name] = plugin
-      end
+      @@load_info[type][name] = data
     end
   end
-  protected :add_plugin
-  
+  protected :add_build_info
+ 
   #-----------------------------------------------------------------------------
   # Plugin autoloading
  
@@ -166,24 +151,23 @@ module Plugin
       Dir.glob(File.join(base_path, '*.rb')).each do |file|
         require file
       end
-      types.each do |type|
-        register_type(base_path, type)
-      end   
+      
+      Dir.entries(base_path).each do |path|
+        if File.directory?(path) && ! path.match(/^\.\.?$/)
+          register_type(base_path, path)          
+        end
+      end
     end  
   end
   
   #---
   
   def self.register_type(base_path, plugin_type)
-    base_directory = File.join(base_path, plugin_type)
+    base_directory = File.join(base_path, plugin_type.to_s)
     
     if File.directory?(base_directory)
       Dir.glob(File.join(base_directory, '*.rb')).each do |file|
-        components = file.split(FILE::SEPARATOR)
-        name       = components.pop.sub(/\.rb/, '')
-        directory  = components.join(FILE::SEPARATOR)      
-        
-        add_plugin(plugin_type, name, directory, file)
+        add_build_info(plugin_type, file)
       end
     end
   end
@@ -207,10 +191,8 @@ module Plugin
   
   def self.initialize
     unless @@initialized
-      # Register Ruby Coral Gem plugins
+      # Register Coral Gem plugins and other plugin defined plugins
       gems(true)
-            
-      # Register plugin defined plugins
       exec(:register)
       
       # Autoload the registered plugins
