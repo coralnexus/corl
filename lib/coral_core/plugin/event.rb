@@ -5,29 +5,24 @@ class Event < Base
 
   #-----------------------------------------------------------------------------
   # Event plugin interface
-  
-  def initialized?(options = {})
-    return super(options)    
-  end
+
   
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
-  
-  def type(default = nil)
-    return get(:type, default)
-  end
-  
+
+ 
   #-----------------------------------------------------------------------------
   # Plugin operations
-    
-  def normalize
-    super
-    set(:name, "#{type}:base")
-    # Override in sub classes
-  end
+
 
   #-----------------------------------------------------------------------------
   # Event operations
+  
+  def render
+    return name
+  end
+  
+  #---
  
   def check(source)
     # Implement in sub classes
@@ -36,7 +31,7 @@ class Event < Base
   
   #-----------------------------------------------------------------------------
   # Utilities
-    
+  
   def self.build_info(data = {})  
     events = []
     
@@ -50,20 +45,15 @@ class Event < Base
       data.each do |element|
         event = {}
         
-        if block_given?
-          event = yield(element)
-        else
-          case element        
-          when String
-            event = split_event_string(element)
-                
-          when Hash          
-            event = element
-          end
+        case element        
+        when String
+          event = split_event_string(element)                
+        when Hash          
+          event = element
         end
-        
+                
         unless event.empty?
-          events << event
+          events << normalize(:event, event, :regex)
         end
       end
     end
@@ -73,11 +63,11 @@ class Event < Base
   #---
   
   def self.split_event_string(data)
-    info          = {}
+    info = {}
        
-    components    = data.split(':')
-    info[:type]   = components.shift
-    info[:string] = components.join(':')
+    components      = data.split(':')
+    info[:provider] = components.shift
+    info[:string]   = components.join(':')
     
     return info
   end

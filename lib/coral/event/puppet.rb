@@ -47,17 +47,21 @@ class Puppet < Plugin::Event
     super
     
     if get(:string)
-      items          = delete(:string).split(':')
+      items          = string(delete(:string)).split(':')
       self.element   = items[0]
       self.operation = items[1]
       self.message   = items[2]
     end
-    
-    set(:name, "#{type}:#{element}:#{operation}:#{message}")
   end
   
   #-----------------------------------------------------------------------------
   # Event operations
+  
+  def render
+    return "#{name}:#{element}:#{operation}:#{message}"
+  end
+  
+  #---
   
   def check(source)
     if source.match(/notice:\s+(.+?):\s+(.+)\s*/i)
