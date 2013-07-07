@@ -31,8 +31,7 @@ module Plugin
     name = name.to_sym
     return nil unless @@types.has_key?(type)
     
-    config = Config.ensure(options)    
-    info   = @@load_info[type][name] if @@load_info[type].has_key?(name)
+    info = @@load_info[type][name] if @@load_info[type].has_key?(name)
     
     if info
       group_name    = "#{type}_#{name}"
@@ -41,7 +40,7 @@ module Plugin
       @@plugins[group_name] = {} unless @@plugins.has_key?(group_name)
       
       unless instance_name && @@plugins[group_name].has_key?(instance_name)
-        plugin = Coral.class_const(class_name([ :coral, type, name ])).new(name, config)
+        plugin = Coral.class_const([ :coral, type, name ]).new(type, name, options)
         plugin.set_meta(info) 
         
         @@plugins[group_name][instance_name] = plugin 
@@ -212,7 +211,7 @@ module Plugin
   # Hook execution
  
   def self.exec(method, params = {}, context = :type, options = {})
-    context = Coral.context(context, options)
+    context = Coral.context(options, context)
     values  = {}
     
     return values unless context
@@ -232,7 +231,9 @@ module Plugin
 class Base < Core
   # All Plugin classes should directly or indirectly extend Base
   
-  def intialize(name, options = {})
+  def intialize(type, name, options = {})
+    options = self.class.translate(type, name, options)
+    
     super(options)
     
     init(:name, name)
@@ -310,6 +311,22 @@ class Base < Core
   #---
   
   def register
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def self.translate(type, provider, info, method = :translate)
+    klass = Coral.class_const([ :coral, type, provider ])          
+    info  = klass.send(method, info) if klass.respond_to?(method)
+    return info  
+  end
+  
+  #---
+    
+  def self.normalize(type, info, default_provider)
+    info[:provider] = default_provider unless info.has_key?(:provider)
+    return translate(type, info[:provider], info, :build_info)
   end
 end
 end
