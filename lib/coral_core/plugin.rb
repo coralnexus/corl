@@ -258,7 +258,7 @@ class Base < Core
   def intialize(type, name, options = {})
     super(options)
     
-    init(:name, name)
+    self.name = name
     normalize
   end
   
@@ -277,8 +277,14 @@ class Base < Core
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
   
-  def name(default = nil)
-    return get(:name, default)
+  def name
+    return get(:name)
+  end
+  
+  #---
+  
+  def name=name
+    set(:name, string(name))
   end
   
   #---

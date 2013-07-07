@@ -11,6 +11,12 @@ module SubConfig
   end
   
   #---
+  
+  def name=name
+    _set(:name, string(name))
+  end
+  
+  #---
     
   def config(default = nil)
     return _get(:config, default)
