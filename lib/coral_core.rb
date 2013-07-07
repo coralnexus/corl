@@ -173,6 +173,7 @@ module Coral
   # Plugins
   
   def self.plugin(type, name, options = {})
+    name = Plugin.type_default(type) unless name # Sanity checking (see plugins)
     return Plugin.instance(type, name, options)
   end
   
@@ -181,20 +182,14 @@ module Coral
   def self.plugins(type, data, build_hash = false, keep_array = false)
     group = ( build_hash ? {} : [] )
     klass = class_const([ :coral, :plugin, type ])    
-    data  = klass.build_info(data) if klass.respond_to?(:build_info)
+    data  = klass.build_info(type, data) if klass.respond_to?(:build_info)
     
-    data.each do |info|
-      provider = info.delete(:provider)
-      
-      unless Util::Data.empty?(provider)
-        plugin = plugin(type, provider, info)
-                
-        if plugin
-          if build_hash
-            group[plugin.name] = plugin
-          else
-            group << plugin
-          end
+    data.each do |options|
+      if plugin = plugin(type, info[:provider], options)
+        if build_hash
+          group[plugin.name] = plugin
+        else
+          group << plugin
         end
       end
     end
