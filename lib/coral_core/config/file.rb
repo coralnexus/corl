@@ -2,6 +2,8 @@
 module Coral
 class Config
 class File < Config
+  
+  include Mixins::SubConfig
 
   #-----------------------------------------------------------------------------
   
@@ -146,79 +148,26 @@ class File < Config
     set_absolute_config_file if directory
   end
   
-  #---
-  
-  def config(default = nil)
-    return _get(:config, default)
-  end
-  
-  #---
-  
-  def config=config
-    _set(:config, config)
-  end
-  
   #-----------------------------------------------------------------------------
-  
-  def _get(keys, default = nil, format = false)
-    return Config.instance_method(:get).bind(self).call(keys, default, format)  
-  end
-  protected :_get
-  
-  #---
-  
-  def get(keys, default = nil, format = false)
-    return config.get(keys, default, format)
-  end
-  
-  #---
-  
-  def _init(keys, default = nil)
-    return _set(keys, _get(keys, default))
-  end
-  protected :_init
-
-  #---
- 
-  def _set(keys, value = '', options = {})
-    return Config.instance_method(:set).bind(self).call(keys, value, options)  
-  end
-  protected :_set
-  
-  #---
     
   def set(keys, value = '', options = {})
-    config.set(keys, value, options)
+    super(keys, value, options)
     save(options) if autosave
     return self
   end
-  
-  #---
- 
-  def _delete(keys, options = {})
-    return Config.instance_method(:delete).bind(self).call(keys, options)  
-  end
-  protected :_delete
-  
+   
   #---
    
   def delete(keys, options = {})
-    config.delete(keys, options)
+    super(keys, options)
     save(options) if autosave
     return self
   end
- 
-  #---
- 
-  def _clear(options = {})
-    return Config.instance_method(:clear).bind(self).call(options)  
-  end
-  protected :_clear
   
   #---
   
   def clear(options = {})
-    config.clear(options)
+    super(options)
     save(options) if autosave
     return self
   end
@@ -227,15 +176,9 @@ class File < Config
   # Import / Export
   
   def import(properties, options = {})
-    config.import(properties, options)
+    super(properties, options)
     save(options) if autosave
     return self
-  end
-  
-  #---
-  
-  def export
-    return config.export
   end
       
   #-----------------------------------------------------------------------------
@@ -271,7 +214,7 @@ class File < Config
   
   #---
   
-  def delete(options = {})
+  def rm(options = {})
     local_config = Config.ensure(options)
     
     if can_persist?
