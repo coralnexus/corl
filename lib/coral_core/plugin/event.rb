@@ -32,44 +32,24 @@ class Event < Base
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def self.build_info(data = {})  
-    events = []
-    
-    if data.is_a?(String)
-      data = data.split(/\s*,\s*/)
-    elsif data.is_a?(Hash)
-      data = [ data ]
-    end
-    
-    if data.is_a?(Array)
-      data.each do |element|
-        event = {}
-        
-        case element        
-        when String
-          event = split_event_string(element)                
-        when Hash          
-          event = element
-        end
-                
-        unless event.empty?
-          events << normalize(:event, event, :regex)
-        end
-      end
-    end
-    return events
+  def self.build_info(data)  
+    data = data.split(/\s*,\s*/) if data.is_a?(String)
+    return super(data)
   end
   
   #---
-  
-  def self.split_event_string(data)
-    info = {}
-       
-    components      = data.split(':')
-    info[:provider] = components.shift
-    info[:string]   = components.join(':')
+   
+  def self.translate(data)
+    info = ( data.is_a?(Hash) ? data : {} )
     
-    return info
+    case data        
+    when String
+      components = data.split(':')
+      
+      info[:provider] = components.shift
+      info[:string]   = components.join(':')
+    end
+    return info  
   end
 end
 end

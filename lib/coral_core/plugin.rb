@@ -3,17 +3,17 @@ module Coral
 module Plugin
   
   #-----------------------------------------------------------------------------
-  # Plugin types
+  # Core plugin types
   
-  define_type :command
-  define_type :context
-  define_type :event
-  define_type :project
-  define_type :provisioner
-  define_type :template
+  define_type :command     => :shell,
+              :context     => :type,
+              :event       => :regex,
+              :project     => :git,
+              :provisioner => :puppet,
+              :template    => :json
   
   #-----------------------------------------------------------------------------
-  # Plugin initialization
+  # Plugin instances
   
   @@load_info = {}
   @@types     = {}
@@ -32,8 +32,10 @@ module Plugin
     return nil unless @@types.has_key?(type)
     
     info = @@load_info[type][name] if @@load_info[type].has_key?(name)
-    
+        
     if info
+      options       = translate(type, name, options)
+      
       group_name    = "#{type}_#{name}"
       instance_name = Coral.sha1(options)
       
@@ -94,8 +96,12 @@ module Plugin
   
   #-----------------------------------------------------------------------------
   
-  def self.define_type(type)
-    @@types[type_name] = true
+  def self.define_type(type_info)
+    if type_info.is_a?(Hash)
+      type_info.each do |type, default_provider|
+        @@types[type.to_sym] = default_provider
+      end
+    end
   end
   
   #---
@@ -106,15 +112,21 @@ module Plugin
   
   #---
   
+  def self.type_default(type)
+    return @@types[type.to_sym]
+  end
+  
+  #---
+  
   def self.plugins(type = nil)
     results = {}
     
     if type
       type = type.to_sym    
       return results unless @@plugins.has_key?(type)
-      results[type] = @@plugins[type].dup
+      results[type] = @@plugins[type]
     else
-      results = @@plugins.dup 
+      results = @@plugins
     end    
     return results
   end
@@ -127,7 +139,7 @@ module Plugin
     @@load_info[type] = {} unless @@load_info.has_key?(type)
     
     components = file.split(File::SEPARATOR)
-    name       = components.pop.sub(/\.rb/, '')
+    name       = components.pop.sub(/\.rb/, '').to_sym
     directory  = components.join(File::SEPARATOR) 
         
     unless @@load_info[type].has_key?(name)
@@ -175,8 +187,8 @@ module Plugin
   #---
   
   def self.autoload
-    types.each do |type|
-      plugins(type).each do |name, plugin|
+    @@load_info.keys.each do |type|
+      @@load_info[type].each do |name, plugin|
         coral_require(plugin[:directory], plugin[:name])
       end      
     end 
@@ -224,6 +236,17 @@ module Plugin
     end
     return values     
   end
+      
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def self.translate(type, provider, info, method = :translate)
+    klass = Coral.class_const([ :coral, type, provider ])          
+    info  = klass.send(method, info) if klass.respond_to?(method)
+    
+    info[:provider] = type_default(type) unless info.has_key?(:provider)
+    return info  
+  end
 
   #-----------------------------------------------------------------------------
   # Base plugin
@@ -232,8 +255,6 @@ class Base < Core
   # All Plugin classes should directly or indirectly extend Base
   
   def intialize(type, name, options = {})
-    options = self.class.translate(type, name, options)
-    
     super(options)
     
     init(:name, name)
@@ -268,7 +289,7 @@ class Base < Core
   #---
   
   def set_meta(meta)
-    @meta = Config.ensure(hash(meta))
+    @meta = Config.ensure(meta)
   end
   protected :set_meta
   
@@ -316,17 +337,27 @@ class Base < Core
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def self.translate(type, provider, info, method = :translate)
-    klass = Coral.class_const([ :coral, type, provider ])          
-    info  = klass.send(method, info) if klass.respond_to?(method)
-    return info  
+  def self.build_info(data)  
+    plugins = []
+    
+    if data.is_a?(Hash)
+      data = [ data ]
+    end
+    
+    if data.is_a?(Array)
+      data.each do |info|
+        unless Util::Data.empty?(info)
+          plugins << info
+        end
+      end
+    end
+    return plugins
   end
   
   #---
-    
-  def self.normalize(type, info, default_provider)
-    info[:provider] = default_provider unless info.has_key?(:provider)
-    return translate(type, info[:provider], info, :build_info)
+
+  def self.translate(data)
+    return data
   end
 end
 end
