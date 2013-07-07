@@ -69,8 +69,7 @@ git_location = coral_locate(:git)
 #-------------------------------------------------------------------------------
 # Core requirements
 
-$:.unshift(lib_dir) unless
-  $:.include?(lib_dir) || $:.include?(File.expand_path(lib_dir))
+$:.unshift(lib_dir) unless $:.include?(lib_dir) || $:.include?(File.expand_path(lib_dir))
 
 #---
   
@@ -123,8 +122,6 @@ end
   coral_require(core_dir, name) 
 end
 
-#---
-
 #*******************************************************************************
 # Coral Core Library
 #
@@ -175,85 +172,121 @@ module Coral
   #-----------------------------------------------------------------------------
   # Plugins
   
-  def self.context(provider, options = {})
-    return Plugin.instance(:context, provider, options)
+  def self.plugin(type, name, options = {})
+    return Plugin.instance(type, name, options)
+  end
+  
+  #---
+  
+  def self.plugins(type, data, build_hash = false, keep_array = false)
+    group = ( build_hash ? {} : [] )
+    klass = class_const([ :coral, :plugin, type ])    
+    data  = klass.build_info(data) if klass.respond_to?(:build_info)
+    
+    data.each do |info|
+      provider = info.delete(:provider)
+      
+      unless Util::Data.empty?(provider)
+        plugin = plugin(type, provider, info)
+                
+        if plugin
+          if build_hash
+            group[plugin.name] = plugin
+          else
+            group << plugin
+          end
+        end
+      end
+    end
+    return group.shift if ! build_hash && group.length == 1 && ! keep_array
+    return group  
+  end
+   
+  #---
+  
+  def self.context(options, provider = :type)
+    return plugin(:context, provider, options)
+  end
+  
+  #---
+  
+  def self.contexts(data, build_hash = false, keep_array = false)
+    return plugins(:context, data, build_hash, keep_array)
   end
   
   #---
   
   def self.command(options, provider = :shell)
-    return Plugin.instance(:command, provider, options)
+    return plugin(:command, provider, options)
+  end
+  
+  #---
+  
+  def self.commands(data, build_hash = false, keep_array = false)
+    return plugins(:command, data, build_hash, keep_array)
   end
   
   #---
   
   def self.event(options, provider = :regex)
-    return Plugin.instance(:event, provider, options)
+    return plugin(:event, provider, options)
   end
   
   #---
   
-  def self.events(options, build_hash = false, keep_array = false)
-    group  = ( build_hash ? {} : [] )    
-    events = Plugin::Event.build_info(options)
-    
-    index = 1
-    events.each do |info|
-      type = info[:type]
-      
-      if type && ! type.empty?
-        event = event(info, type)
-                
-        if event
-          if build_hash
-            group[index] = event
-          else
-            group << event
-          end
-        end
-      end
-      index += 1
-    end
-    if ! build_hash && events.length == 1 && ! keep_array
-      return group.shift
-    end
-    return group  
+  def self.events(data, build_hash = false, keep_array = false)
+    return plugins(:event, data, build_hash, keep_array)
   end
-  
+
   #---
   
   def self.template(provider, options = {})
-    return Plugin.instance(:template, provider, options)
+    return plugin(:template, provider, options)
+  end
+  
+  #---
+  
+  def self.templates(data, build_hash = false, keep_array = false)
+    return plugins(:template, data, build_hash, keep_array)
   end
   
   #---
   
   def self.provisioner(provider = :puppet, options = {})
-    return Plugin.instance(:provisioner, provider, options)
+    return plugin(:provisioner, provider, options)
   end
   
   #---
   
-  def self.project(project = {})
-    return nil unless project
-    
-    unless project.is_a?(Hash)
-      project = {
-        :url      => project,
+  def self.provisioners(data, build_hash = false, keep_array = false)
+    return plugins(:provisioner, data, build_hash, keep_array)
+  end
+  
+  #---
+  
+  def self.project(options, provider = :git)
+    unless options.is_a?(Hash)
+      options = {
+        :url      => options,
         :revision => nil
       }
     end   
     
-    project  = Util::Data.symbol_map(project)
-    provider = :git
+    options = Util::Data.symbol_map(options)
     
-    if match = project[:url].match(/^([a-zA-Z0-9_]+)::(.+)$/)
+    if match = options[:url].match(/^([a-zA-Z0-9_]+)::(.+)$/)
       type, url     = match.captures
       provider      = type.strip
-      project[:url] = url
+      options[:url] = url
     end
     
-    return Plugin.instance(:project, provider, project)
+    return plugin(:project, provider, options)
+  end
+  
+  #---
+  
+  def self.projects(data, build_hash = false, keep_array = false)
+    return plugins(:project, data, build_hash, keep_array)
   end
 
   #-----------------------------------------------------------------------------
@@ -330,8 +363,8 @@ module Coral
   
   #---
   
-  def self.class_const(klass)
-    return Object::const_get(class_name(klass))
+  def self.class_const(name, separator = '::')
+    return Object::const_get(class_name(name, separator))
   end
   
   #---
