@@ -1,7 +1,7 @@
 
 module Coral
 class Config
-class PropertyCollection
+class Collection
 
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
@@ -16,14 +16,26 @@ class PropertyCollection
   
   #---
   
+  def self.get(name)
+    return @@properties[name.to_sym]
+  end
+  
+  #---
+  
   def self.set(name, value)
     @@properties[name.to_sym] = value
   end
   
   #---
   
-  def self.clear(name)
+  def self.delete(name)
     @@properties.delete(name.to_sym)
+  end
+   
+  #---
+  
+  def self.clear
+    @@properties = {}
   end
   
   #---

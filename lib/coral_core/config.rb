@@ -6,9 +6,10 @@ class Config
   # Global interface
 
   include Mixins::ConfigOptions
+  include Mixins::ConfigCollection
   include Mixins::ConfigLookup
   include Mixins::ConfigOps
-  
+    
   #-----------------------------------------------------------------------------
   # Instance generators
   

@@ -79,7 +79,7 @@ module Lookup
     value = Util::Data.value(value)
     
     if ! @@properties.has_key?(first_property) || ! Util::Data.undef?(value)
-      Config::PropertyCollection.set(first_property, value)
+      Config::Collection.set(first_property, value)
     end
     return value, first_property if return_property
     return value
@@ -104,7 +104,7 @@ module Lookup
       value = ( Util::Data.empty?(value) ? [] : [ value ] )
     end
     
-    Config::PropertyCollection.set(property, value)
+    Config::Collection.set(property, value)
     return value
   end
     
@@ -127,7 +127,7 @@ module Lookup
       value = ( Util::Data.empty?(value) ? {} : { :value => value } )
     end
     
-    Config::PropertyCollection.set(property, value)
+    Config::Collection.set(property, value)
     return value
   end
   
