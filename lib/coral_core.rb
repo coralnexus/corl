@@ -185,7 +185,7 @@ module Coral
     data  = klass.build_info(type, data) if klass.respond_to?(:build_info)
     
     data.each do |options|
-      if plugin = plugin(type, info[:provider], options)
+      if plugin = plugin(type, options[:provider], options)
         if build_hash
           group[plugin.name] = plugin
         else
