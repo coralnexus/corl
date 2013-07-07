@@ -34,7 +34,8 @@ module Plugin
     info = @@load_info[type][name] if @@load_info[type].has_key?(name)
         
     if info
-      options       = translate(type, name, options)
+      options = translate(type, name, options)
+      options.delete(:provider)
       
       group_name    = "#{type}_#{name}"
       instance_name = Coral.sha1(options)
@@ -337,7 +338,7 @@ class Base < Core
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def self.build_info(data)  
+  def self.build_info(type, data)  
     plugins = []
     
     if data.is_a?(Hash)
@@ -347,6 +348,12 @@ class Base < Core
     if data.is_a?(Array)
       data.each do |info|
         unless Util::Data.empty?(info)
+          info = translate(info)
+          
+          if Util::Data.empty?(info[:provider])
+            info[:provider] = Plugin.type_default(type)
+          end
+          
           plugins << info
         end
       end
@@ -357,7 +364,7 @@ class Base < Core
   #---
 
   def self.translate(data)
-    return data
+    return ( data.is_a?(Hash) ? data : {} )
   end
 end
 end
