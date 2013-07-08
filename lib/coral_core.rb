@@ -199,7 +199,7 @@ module Coral
    
   #---
   
-  def self.context(options, provider = :type)
+  def self.context(options, provider = nil)
     return plugin(:context, provider, options)
   end
   
@@ -211,7 +211,7 @@ module Coral
   
   #---
   
-  def self.command(options, provider = :shell)
+  def self.command(options, provider = nil)
     return plugin(:command, provider, options)
   end
   
@@ -223,7 +223,7 @@ module Coral
   
   #---
   
-  def self.event(options, provider = :regex)
+  def self.event(options, provider = nil)
     return plugin(:event, provider, options)
   end
   
@@ -247,7 +247,7 @@ module Coral
   
   #---
   
-  def self.provisioner(provider = :puppet, options = {})
+  def self.provisioner(provider = nil, options = {})
     return plugin(:provisioner, provider, options)
   end
   
@@ -259,7 +259,7 @@ module Coral
   
   #---
   
-  def self.project(options, provider = :git)
+  def self.project(options, provider = nil)
     return plugin(:project, provider, options)
   end
   
