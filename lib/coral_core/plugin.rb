@@ -26,24 +26,24 @@ module Plugin
   
   #---
   
-  def self.instance(type, name, options = {})
-    type = type.to_sym
-    name = name.to_sym
+  def self.instance(type, provider, options = {})
+    type     = type.to_sym
+    provider = provider.to_sym
     return nil unless @@types.has_key?(type)
     
-    info = @@load_info[type][name] if @@load_info[type].has_key?(name)
+    info = @@load_info[type][provider] if @@load_info[type].has_key?(provider)
         
     if info
-      options = translate(type, name, options)
+      options = translate(type, provider, options)
       options.delete(:provider)
       
-      group_name    = "#{type}_#{name}"
+      group_name    = "#{type}_#{provider}"
       instance_name = Coral.sha1(options)
       
       @@plugins[group_name] = {} unless @@plugins.has_key?(group_name)
       
       unless instance_name && @@plugins[group_name].has_key?(instance_name)
-        plugin = Coral.class_const([ :coral, type, name ]).new(type, name, options)
+        plugin = Coral.class_const([ :coral, type, provider ]).new(type, provider, options)
         plugin.set_meta(info) 
         
         @@plugins[group_name][instance_name] = plugin 
@@ -140,17 +140,17 @@ module Plugin
     @@load_info[type] = {} unless @@load_info.has_key?(type)
     
     components = file.split(File::SEPARATOR)
-    name       = components.pop.sub(/\.rb/, '').to_sym
+    provider   = components.pop.sub(/\.rb/, '').to_sym
     directory  = components.join(File::SEPARATOR) 
         
-    unless @@load_info[type].has_key?(name)
+    unless @@load_info[type].has_key?(provider)
       data = {
-        :name      => name,
         :type      => type,
+        :provider  => provider,        
         :directory => directory,
         :file      => file
       }
-      @@load_info[type][name] = data
+      @@load_info[type][provider] = data
     end
   end
   protected :add_build_info
@@ -189,8 +189,8 @@ module Plugin
   
   def self.autoload
     @@load_info.keys.each do |type|
-      @@load_info[type].each do |name, plugin|
-        coral_require(plugin[:directory], plugin[:name])
+      @@load_info[type].each do |provider, plugin|
+        coral_require(plugin[:directory], provider)
       end      
     end 
   end
@@ -253,7 +253,9 @@ module Plugin
 class Base < Core
   # All Plugin classes should directly or indirectly extend Base
   
-  def intialize(type, name, options = {})
+  def intialize(type, provider, options)
+    name = Util::Data.ensure_value(options.delete(:name), provider)
+    
     super(options)
     
     self.name = name
@@ -300,20 +302,14 @@ class Base < Core
   
   #---
   
-  def plugin_name
-    return meta.get(:name, :default)
-  end
-  
-  #---
-  
   def plugin_type
     return meta.get(:type)
   end
   
   #---
   
-  def plugin_class
-    return meta.get(:class)
+  def plugin_name
+    return meta.get(:provider)
   end
   
   #---
