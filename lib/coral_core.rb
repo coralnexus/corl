@@ -235,8 +235,8 @@ module Coral
 
   #---
   
-  def self.template(provider, options = {})
-    return plugin(:template, provider, options)
+  def self.template(provider, data)
+    return plugin(:template, provider, data)
   end
   
   #---
@@ -260,21 +260,6 @@ module Coral
   #---
   
   def self.project(options, provider = :git)
-    unless options.is_a?(Hash)
-      options = {
-        :url      => options,
-        :revision => nil
-      }
-    end   
-    
-    options = Util::Data.symbol_map(options)
-    
-    if match = options[:url].match(/^([a-zA-Z0-9_]+)::(.+)$/)
-      type, url     = match.captures
-      provider      = type.strip
-      options[:url] = url
-    end
-    
     return plugin(:project, provider, options)
   end
   

@@ -40,7 +40,7 @@ class Event < Base
   #---
    
   def self.translate(data)
-    info = ( data.is_a?(Hash) ? data : {} )
+    info = super(data)
     
     case data        
     when String
@@ -49,7 +49,7 @@ class Event < Base
       info[:provider] = components.shift
       info[:string]   = components.join(':')
     end
-    return info  
+    return Plugin.translate(plugin_type, info[:provider], info)  
   end
 end
 end

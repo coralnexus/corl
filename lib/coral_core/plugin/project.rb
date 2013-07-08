@@ -148,6 +148,33 @@ class Project < Base
   def delete(options = {})
     # Implement in sub classes
   end
+    
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def self.build_info(data)  
+    data = data.split(/\s*,\s*/) if data.is_a?(String)
+    return super(data)
+  end
+  
+  #---
+   
+  def self.translate(data)
+    info = super(data)
+    
+    case data        
+    when String
+      info = { :url => data }
+    end
+    
+    # ex: github::coralnexus/puppet-coral[v0.3]
+    if info[:url].match(/^([a-zA-Z0-9_-]+)::(.+)\s*(?:\[\s*([a-zA-Z0-9_-.]+)\s*\])?$/)
+      info[:provider] = $1.strip
+      info[:url]      = $2
+      info[:revision] = $3 unless info.has_key?(:revision)
+    end
+    return Plugin.translate(plugin_type, info[:provider], info)
+  end
 end
 end
 end

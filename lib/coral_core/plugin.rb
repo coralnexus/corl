@@ -244,8 +244,6 @@ module Plugin
   def self.translate(type, provider, info, method = :translate)
     klass = Coral.class_const([ :coral, type, provider ])          
     info  = klass.send(method, info) if klass.respond_to?(method)
-    
-    info[:provider] = type_default(type) unless info.has_key?(:provider)
     return info  
   end
 
@@ -370,7 +368,7 @@ class Base < Core
   #---
 
   def self.translate(data)
-    return ( data.is_a?(Hash) ? data : {} )
+    return ( data.is_a?(Hash) ? symbol_map(data) : {} )
   end
 end
 end
