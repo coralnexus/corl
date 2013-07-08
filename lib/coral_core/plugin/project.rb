@@ -168,8 +168,8 @@ class Project < Base
     end
     
     # ex: github::coralnexus/puppet-coral[0.3]
-    if info[:url].match(/^([a-zA-Z0-9_-]+)::(.+)\s*(?:\[\s*([^\]\s]+)\s*\])?$/)
-      info[:provider] = $1.strip
+    if info[:url].match(/^\s*([a-zA-Z0-9_-]+)::(.+)\s*(?:\[\s*([^\]\s]+)\s*\])?\s*$/)
+      info[:provider] = $1
       info[:url]      = $2
       info[:revision] = $3 unless info.has_key?(:revision)
     end
