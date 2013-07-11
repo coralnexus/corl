@@ -132,6 +132,12 @@ class Project < Base
  
   #-----------------------------------------------------------------------------
   # Project operations
+  
+  def syncronize(cloud, options = {})
+    # Implement in sub classes
+  end
+  
+  #---
    
   def fetch(options = {})
     # implement in sub classes
