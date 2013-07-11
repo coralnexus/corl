@@ -3,7 +3,7 @@ module Coral
 class Config
 class File < Config
   
-  include Mixins::SubConfig
+  extend Mixins::SubConfig
 
   #-----------------------------------------------------------------------------
   

@@ -9,27 +9,21 @@ module Lookup
   
   #---
   
-  def self.hiera_config(provider = :puppet)
+  def hiera_config(provider = :puppet)
     return Coral.provisioner(provider).hiera_config
   end
   
   #---
 
-  def self.hiera(provider = :puppet)
+  def hiera(provider = :puppet)
     @@hiera[provider] = Hiera.new(:config => hiera_config(provider)) unless @@hiera.has_key?(provider)
     return @@hiera[provider]
-  end
-  
-  #---
-
-  def hiera(provider = :puppet)
-    return self.class.hiera(provider)
   end
   
   #-----------------------------------------------------------------------------
   # Configuration lookup interface
       
-  def self.initialized?(options = {})
+  def initialized?(options = {})
     config   = Config.ensure(options)
     provider = config.get(:provisioner, nil)
     begin
@@ -44,7 +38,7 @@ module Lookup
   
   #---
     
-  def self.lookup(properties, default = nil, options = {})
+  def lookup(properties, default = nil, options = {})
     config          = Config.ensure(options)
     value           = nil
     
@@ -87,7 +81,7 @@ module Lookup
     
   #---
   
-  def self.lookup_array(properties, default = [], options = {})
+  def lookup_array(properties, default = [], options = {})
     config          = Config.ensure(options) 
     value, property = lookup(properties, nil, config.import({ :return_property => true }))
     
@@ -110,7 +104,7 @@ module Lookup
     
   #---
   
-  def self.lookup_hash(properties, default = {}, options = {})
+  def lookup_hash(properties, default = {}, options = {})
     config          = Config.ensure(options) 
     value, property = lookup(properties, nil, config.import({ :return_property => true }))
     
@@ -133,7 +127,7 @@ module Lookup
   
   #---
 
-  def self.normalize(data, override = nil, options = {})
+  def normalize(data, override = nil, options = {})
     config  = Config.ensure(options)
     results = {}
     

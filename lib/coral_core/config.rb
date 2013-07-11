@@ -5,11 +5,11 @@ class Config
   #-----------------------------------------------------------------------------
   # Global interface
 
-  include Mixins::ConfigOptions
-  include Mixins::ConfigCollection
-  include Mixins::Lookup
-  include Mixins::ConfigOps
-    
+  extend Mixins::ConfigOptions
+  extend Mixins::ConfigCollection
+  extend Mixins::Lookup
+  extend Mixins::ConfigOps
+  
   #-----------------------------------------------------------------------------
   # Instance generators
   

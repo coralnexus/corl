@@ -5,7 +5,7 @@ module ConfigOps
   #-----------------------------------------------------------------------------
   # Parsing
       
-  def self.parse(statement, options = {})
+  def parse(statement, options = {})
     config = Config.ensure(options)
     
     # statement = 'common->php::apache::memory_limit = 32M'
