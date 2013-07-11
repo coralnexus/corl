@@ -21,7 +21,7 @@ module Plugin
     provider = provider.to_sym
     return nil unless @@types.has_key?(type)
     
-    info = @@load_info[type][provider] if @@load_info[type].has_key?(provider)
+    info = @@load_info[type][provider] if Util::Data.exists?(@@load_info, [ type, provider ])
         
     if info
       options = translate(type, provider, options)
@@ -125,6 +125,8 @@ module Plugin
   
   def self.add_build_info(type, file)
     type = type.to_sym
+    
+    puts file
     
     @@load_info[type] = {} unless @@load_info.has_key?(type)
     

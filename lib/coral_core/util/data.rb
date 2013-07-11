@@ -43,6 +43,18 @@ class Data
     end
     return false
   end
+  
+  #---
+  
+  def self.exists?(data, keys, check_empty = false)
+    keys = [ keys ] unless keys.is_a?(Array)
+    keys.each do |key|
+      return false unless data.is_a?(Hash) && data.has_key?(key)
+      return false if check_empty && empty?(data[key])
+      data = data[key]
+    end
+    return true
+  end
    
   #-----------------------------------------------------------------------------
   # Translation
