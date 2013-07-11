@@ -7,7 +7,7 @@ class Config
 
   include Mixins::ConfigOptions
   include Mixins::ConfigCollection
-  include Mixins::ConfigLookup
+  include Mixins::Lookup
   include Mixins::ConfigOps
     
   #-----------------------------------------------------------------------------
