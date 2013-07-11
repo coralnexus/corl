@@ -496,7 +496,25 @@ class Git < Plugin::Project
       return url(host, path, config.import({ :auth => true }))
     end
     return url
-  end          
+  end
+  
+  #---
+  
+  def syncronize(cloud, options = {})
+    config = Config.ensure(options)
+    
+    if can_persist?
+      remote_path  = config.delete(:remote_path, '/var/git')
+      server_hosts = []
+        
+      cloud.servers.each do |server_name, server|
+        server_hosts << server.hostname          
+        set_host_remote(server_name, server.hostname, remote_path, config)
+      end
+      set_host_remote('all', server_hosts, remote_path, config.import({ :add => true })) unless server_hosts.empty?
+    end
+    return true
+  end
 end
 end
 end
