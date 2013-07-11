@@ -133,6 +133,10 @@ module Coral
   
   VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
   
+  #---
+  
+  DEFAULT_BUILD_FILE = 'coral.json'
+  
   #-----------------------------------------------------------------------------
   
   def self.ui
@@ -173,6 +177,10 @@ module Coral
   # Plugins
   
   def self.plugin(type, name, options = {})
+    if options.is_a?(Hash)
+      config = Config.ensure(options)
+      name   = config.get(:provider, name)
+    end
     name = Plugin.type_default(type) unless name # Sanity checking (see plugins)
     return Plugin.instance(type, name, options)
   end
@@ -276,7 +284,7 @@ module Coral
     config = Config.ensure(options)
     
     project_path = config.get(:project_path, Dir.pwd)
-    config_file  = config.get(:config_file, 'coral.json')
+    config_file  = config.get(:config_file, Coral::DEFAULT_BUILD_FILE)
     build_path   = config.get(:build_path, 'build')
     
     return Builder.get("#{project_path}--#{config_file}--#{build_path}", { 
