@@ -93,7 +93,7 @@ end
 
 #---
 
-# Object modifications
+# Object modifications (100% pure monkey patches)
 Dir.glob(File.join(mod_dir, '*.rb')).each do |file|
   require file
 end
@@ -118,9 +118,7 @@ coral_require(core_dir, :core)
 end
 
 # Include core systems
-[ :plugin, :builder ].each do |name| 
-  coral_require(core_dir, name) 
-end
+coral_require(core_dir, :plugin) 
 
 #*******************************************************************************
 # Coral Core Library
@@ -280,27 +278,27 @@ module Coral
   #-----------------------------------------------------------------------------
   # Build process
   
-  def self.builder(options = {})
-    config = Config.ensure(options)
+  #def self.builder(options = {})
+  #  config = Config.ensure(options)
     
-    project_path = config.get(:project_path, Dir.pwd)
-    config_file  = config.get(:config_file, Coral::DEFAULT_BUILD_FILE)
-    build_path   = config.get(:build_path, 'build')
+  #  project_path = config.get(:project_path, Dir.pwd)
+  #  config_file  = config.get(:config_file, Coral::DEFAULT_BUILD_FILE)
+  #  build_path   = config.get(:build_path, 'build')
     
-    return Builder.get("#{project_path}--#{config_file}--#{build_path}", { 
-      :directory          => project_path,
-      :config_file        => config_file,
-      :build_path         => build_path,
-      :provision_provider => config.get(:provisioner, :puppet)
-    }, false)   
-  end
+  #  return Builder.get("#{project_path}--#{config_file}--#{build_path}", { 
+  #    :directory          => project_path,
+  #    :config_file        => config_file,
+  #    :build_path         => build_path,
+  #    :provision_provider => config.get(:provisioner, :puppet)
+  #  }, false)   
+  #end
   
   #---
   
-  def self.build(options = {})
-    builder = builder(options)   
-    return builder.build
-  end
+  #def self.build(options = {})
+  #  builder = builder(options)   
+  #  return builder.build
+  #end
 
   #-----------------------------------------------------------------------------
   # Execution
