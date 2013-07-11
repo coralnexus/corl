@@ -1,17 +1,7 @@
 
 module Coral
 module Plugin
-  
-  #-----------------------------------------------------------------------------
-  # Core plugin types
-  
-  define_type :command     => :shell,
-              :context     => :type,
-              :event       => :regex,
-              :project     => :git,
-              :provisioner => :puppet,
-              :template    => :json
-  
+ 
   #-----------------------------------------------------------------------------
   # Plugin instances
   
@@ -246,7 +236,17 @@ module Plugin
     info  = klass.send(method, info) if klass.respond_to?(method)
     return info  
   end
-
+  
+  #-----------------------------------------------------------------------------
+  # Core plugin types
+  
+  define_type :command     => :shell,
+              :context     => :type,
+              :event       => :regex,
+              :project     => :git,
+              :provisioner => :puppet,
+              :template    => :json
+ 
   #-----------------------------------------------------------------------------
   # Base plugin
   
