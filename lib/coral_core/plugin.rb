@@ -53,6 +53,20 @@ module Plugin
   
   #---
   
+  def self.register_gem(spec)
+    lib_path = File.join(spec.full_gem_path, 'lib', 'coral')
+    if File.directory?(lib_path)
+      @@core = spec if spec.name == 'coral_core'
+      @@gems[spec.name] = {
+        :lib_dir => lib_path,
+        :spec    => spec
+      }
+      register(lib_path) # Autoload plugins and related files
+    end  
+  end
+  
+  #---
+  
   def self.gems(reset = false)
     if reset || Util::Data.empty?(@@gems)
       if defined?(::Gem) 
@@ -69,21 +83,6 @@ module Plugin
     end    
     return @@gems
   end
-  
-  #---
-  
-  def self.register_gem(spec)
-    lib_path = File.join(spec.full_gem_path, 'lib', 'coral')
-    if File.directory?(lib_path)
-      @@core = spec if spec.name == 'coral_core'
-      @@gems[spec.name] = {
-        :lib_dir => lib_path,
-        :spec    => spec
-      }
-      register(lib_path) # Autoload plugins and related files
-    end  
-  end
-  protected :register_gem
   
   #-----------------------------------------------------------------------------
   
@@ -143,10 +142,21 @@ module Plugin
       @@load_info[type][provider] = data
     end
   end
-  protected :add_build_info
  
   #-----------------------------------------------------------------------------
   # Plugin autoloading
+  
+  def self.register_type(base_path, plugin_type)
+    base_directory = File.join(base_path, plugin_type.to_s)
+    
+    if File.directory?(base_directory)
+      Dir.glob(File.join(base_directory, '*.rb')).each do |file|
+        add_build_info(plugin_type, file)
+      end
+    end
+  end
+  
+  #---
  
   def self.register(base_path)
     if File.directory?(base_path)
@@ -161,19 +171,6 @@ module Plugin
       end
     end  
   end
-  
-  #---
-  
-  def self.register_type(base_path, plugin_type)
-    base_directory = File.join(base_path, plugin_type.to_s)
-    
-    if File.directory?(base_directory)
-      Dir.glob(File.join(base_directory, '*.rb')).each do |file|
-        add_build_info(plugin_type, file)
-      end
-    end
-  end
-  protected :register_type
   
   #---
   
