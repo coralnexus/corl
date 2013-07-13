@@ -287,7 +287,7 @@ class Config
   
   #---
   
-  def symbol(data, default = '')
+  def symbol(data, default = :undefined)
     return self.class.symbol(data, default)
   end
      
