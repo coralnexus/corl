@@ -109,7 +109,7 @@ end
 
 coral_require(util_dir, :data)
 coral_require(core_dir, :config)
-coral_require(core_dir, :interface) 
+coral_require(util_dir, :interface) 
 coral_require(core_dir, :core) 
 
 # Include core utilities

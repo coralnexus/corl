@@ -5,7 +5,7 @@ class Core < Config
   #-----------------------------------------------------------------------------
   # Properties
   
-  @@ui = Interface.new("coral")
+  @@ui = Util::Interface.new("coral")
   
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
@@ -13,7 +13,7 @@ class Core < Config
   def initialize(options = {})
     config = Config.ensure(options)
     
-    @ui = Interface.new(config)
+    @ui = Util::Interface.new(config)
   end
   
   #---
