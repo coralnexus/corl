@@ -53,7 +53,7 @@ begin
 
         answer = default if answer.nil?
         
-        Coral::Config::Collection.set(key, answer) # This is why we override this function!!
+        Coral::Config.set_property(key, answer) # This is why we override this function!!
         return answer
       end
     end
