@@ -181,15 +181,23 @@ class Config
   # Import / Export
  
   def import(properties, options = {})
-    config = new(options, { :force => @force }).set(:context, :hash)
+    config      = new(options, { :force => @force }).set(:context, :hash)    
+    import_type = config.get(:import_type, :override)
     
     case properties
     when Hash
-      @properties = Util::Data.merge([ @properties, symbol_map(properties) ], config)
+      data = [ @properties, symbol_map(properties) ]
+      data = data.reverse if import_type != :override
+      
+      @properties = Util::Data.merge(data, config)
     
     when String, Symbol      
-      properties  = lookup(properties.to_s, {}, config)
-      @properties = Util::Data.merge([ @properties, properties ], config)
+      properties = lookup(properties.to_s, {}, config)
+      
+      data = [ @properties, symbol_map(properties) ]
+      data = data.reverse if import_type != :override
+    
+      @properties = Util::Data.merge(data, config)
      
     when Array
       properties.each do |item|
@@ -198,6 +206,13 @@ class Config
     end
     
     return self
+  end
+  
+  #---
+  
+  def defaults(defaults, options = {})
+    config = new(options).set(:import_type, :default)
+    return import(defaults, config.export)
   end
 
   #---
