@@ -3,17 +3,20 @@ module Coral
 module Provisioner
 module Puppet
 class Resource < Core
+  
+  extend Mixin::SubConfig
    
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
   def initialize(provisioner, info, title, properties = {})
-    @provisioner = provisioner
-    @info        = info
-    
-    @title       = title
-    @properties  = symbol_map(hash(properties))
-    @ready       = false  
+    super({
+      :title       => string(title),
+      :info        => hash(info),
+      :provisioner => provisioner,
+      :ready       => false
+    })
+    import(properties) 
   end
      
   #-----------------------------------------------------------------------------
@@ -23,36 +26,64 @@ class Resource < Core
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  attr_reader :provisioner, :info, :title, :properties, :ready
-  
-  #---
-  
-  def [](key)
-    return properties[key]
+  def provisioner(default = nil)
+    return _get(:provisioner, default)
   end
   
   #---
   
-  def set_defaults(defaults, options = {})
-    @properties = Util::Data.merge([ symbol_map(hash(defaults)), properties ])
-    @ready      = false
+  def provisioner=provisioner
+    _set(:provisioner, provisioner)
+  end
+  
+  #---
+  
+  def info(default = {})
+    return hash(_get(:info, default))
+  end
+  
+  #---
+  
+  def info=info
+    _set(:info, hash(info))
+  end
+  
+  #---
+  
+  def title(default = '')
+    return string(_get(:title, default))
+  end
+  
+  #---
+  
+  def title=info
+    _set(:title, string(info))
+  end
+  
+  #---
+  
+  def ready(default = false)
+    return test(_get(:ready, default))
+  end
+ 
+  #---
+  
+  def defaults(defaults, options = {})
+    super(defaults, options)
+    
+    _set(:ready, false)
     process(options)
     return self 
   end
 
   #---
   
-  def set_overrides(overrides, options = {})
-    @properties = Util::Data.merge([ properties, symbol_map(hash(overrides)) ])
-    @ready      = false
+  def import(properties, options = {})
+    super(defaults, options)
+    
+    _set(:ready, false)
     process(options)
     return self  
-  end
-  
-  #---
-  
-  def project=project
-    @project = project
   end
       
   #-----------------------------------------------------------------------------
@@ -67,32 +98,29 @@ class Resource < Core
   #---
   
   def process(options = {})
-    tag(options[:tag])
-    render(options)
-    translate(options)
-    @ready = true # Ready for resource creation
+    config = Config.ensure(options)
+    
+    tag(config[:tag])
+    
+    render(config)
+    translate(config)
+    
+    _set(:ready, true) # Ready for resource creation
     return self
   end
   
   #---
   
   def tag(tag, append = true)
-    unless tag.empty?
-      tag = tag.to_s
+    unless Util::Data.empty?(tag)
+      tag           = tag.to_s.split(/\s*,\s*/)
+      resource_tags = get(:tag)
       
-      if ! properties.has_key?(:tag)
-        properties[:tag] = tag
+      if ! resource_tags || ! append
+        set(:tag, tag)
       else
-        resource_tags = properties[:tag]
-        
-        case resource_tags
-        when Array
-          properties[:tag] << tag
-          
-        when String
-          resource_tags    = resource_tags.split(/\s*,\s*/).push(tag)
-          properties[:tag] = resource_tags
-        end
+        resource_tags << tag
+        set(:tag, resource_tags)
       end
     end
     return self
@@ -100,22 +128,19 @@ class Resource < Core
   
   #---
 
-  def self.render(options = {})
-    resource = string_map(@properties)
+  def render(options = {})
+    resource = string_map(export)
     config   = Config.ensure(options)
     
     resource.keys.each do |name|
       if match = name.to_s.match(/^(.+)_template$/)
         target = match.captures[0]
         
-        #dbg(name, 'name')
-        #dbg(target, 'target')
-        
         config.set(:normalize_template, config.get("normalize_#{target}", true))
         config.set(:interpolate_template, config.get("interpolate_#{target}", true))
         
-        properties[target] = Template.render(properties[name], properties[target], config)
-        properties.delete(name)         
+        set(target, Coral.template(properties[name], config).render(properties[target]))
+        delete(name)         
       end
     end    
     return self
@@ -126,12 +151,10 @@ class Resource < Core
   def translate(options = {})
     config = Config.ensure(options)
     
-    properties[:before]    = translate_resource_refs(properties[:before], config) if properties.has_key?(:before)
-    properties[:notify]    = translate_resource_refs(properties[:notify], config) if properties.has_key?(:notify)
-    properties[:require]   = translate_resource_refs(properties[:require], config) if properties.has_key?(:require)       
-    properties[:subscribe] = translate_resource_refs(properties[:subscribe], config) if properties.has_key?(:subscribe)
-    
-    #dbg(properties, 'translate exit')    
+    set(:before, translate_resource_refs(get(:before), config)) if get(:before)
+    set(:notify, translate_resource_refs(get(:notify), config)) if get(:notify)
+    set(:require, translate_resource_refs(get(:require), config)) if get(:require)       
+    set(:subscribe, translate_resource_refs(get(:subscribe), config)) if get(:subscribe)
     return self
   end
 
@@ -196,12 +219,10 @@ class Resource < Core
     end
     
     resource_refs.flatten.each do |ref|
-      #dbg(ref, 'reference -> init')
       unless ref.nil?        
         unless ref.is_a?(Puppet::Resource)
           ref = ref.match(title_regexp) ? Puppet::Resource.new(type_name, ref) : Puppet::Resource.new(ref)
         end
-        #dbg(ref, 'reference -> final')       
         values << ref unless ref.nil?
       end
     end
