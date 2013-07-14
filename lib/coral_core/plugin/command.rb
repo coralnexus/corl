@@ -13,13 +13,19 @@ class Command < Base
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
   
-  def command=command
-    set(:command, command)
+  def command(default = '')
+    return string(get(:command, default))
   end
   
   #---
   
-  def args(default = nil)
+  def command=command
+    set(:command, string(command))
+  end
+  
+  #---
+  
+  def args(default = [])
     return array(get(:args, default)) 
   end
   
@@ -31,7 +37,7 @@ class Command < Base
   
   #---
   
-  def flags(default = nil)
+  def flags(default = [])
     return array(get(:flags, default)) 
   end
   
@@ -43,7 +49,7 @@ class Command < Base
   
   #---
   
-  def data(default = nil)
+  def data(default = {})
     return hash(get(:data, default)) 
   end
   
