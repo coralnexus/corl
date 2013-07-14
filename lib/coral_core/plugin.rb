@@ -307,7 +307,7 @@ class Base < Core
   
   #---
   
-  def plugin_name
+  def plugin_provider
     return meta.get(:provider)
   end
   
