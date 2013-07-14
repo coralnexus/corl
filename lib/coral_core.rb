@@ -241,8 +241,8 @@ module Coral
 
   #---
   
-  def self.template(provider, data)
-    return plugin(:template, provider, data)
+  def self.template(provider, options = {})
+    return plugin(:template, provider, options)
   end
   
   #---
