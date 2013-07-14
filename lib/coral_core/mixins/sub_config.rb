@@ -114,6 +114,20 @@ module SubConfig
   
   #---
   
+  def _defaults(defaults, options = {})
+    return _parent_exec(:defaults, defaults, options)
+  end
+  protected :_defaults
+  
+  #---
+  
+  def defaults(defaults, options = {})
+    config.defaults(defaults, options)
+    return self
+  end
+  
+  #---
+  
   def _export
     return _parent_exec(:export)
   end
