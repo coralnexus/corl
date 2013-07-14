@@ -10,10 +10,10 @@ class Core < Config
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
-  def initialize(options = {})
-    config = Config.ensure(options)
+  def initialize(data = {}, defaults = {}, force = true)
+    super(data, defaults, force)
     
-    @ui = Util::Interface.new(config)
+    @ui = Util::Interface.new(export)
   end
   
   #---
@@ -27,7 +27,7 @@ class Core < Config
   
   attr_accessor :ui
   
-  #-----------------------------------------------------------------------------
+  #---
   
   def self.ui
     return @@ui
@@ -39,16 +39,16 @@ class Core < Config
     return @@ui.logger
   end
   
+  #---
+ 
+  def self.logger=logger
+    self.class.logger = logger
+  end
+  
   #--- 
    
   def logger
     return self.class.logger
-  end
-  
-  #---
- 
-  def logger=logger
-    self.class.logger = logger
   end
  
   #-----------------------------------------------------------------------------
