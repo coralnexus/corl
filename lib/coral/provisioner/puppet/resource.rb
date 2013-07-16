@@ -12,7 +12,7 @@ class Resource < Core
   def initialize(provisioner, info, title, properties = {})
     super({
       :title       => string(title),
-      :info        => hash(info),
+      :info        => symbol_map(hash(info)),
       :provisioner => provisioner,
       :ready       => false
     })
@@ -127,22 +127,31 @@ class Resource < Core
   end
   
   #---
-
-  def render(options = {})
-    resource = string_map(export)
+  
+  def self.render(resource_info, options = {})
+    resource = string_map(resource_info)
     config   = Config.ensure(options)
     
     resource.keys.each do |name|
-      if match = name.to_s.match(/^(.+)_template$/)
+      if match = name.match(/^(.+)_template$/)
         target = match.captures[0]
         
         config.set(:normalize_template, config.get("normalize_#{target}", true))
         config.set(:interpolate_template, config.get("interpolate_#{target}", true))
         
-        set(target, Coral.template(properties[name], config).render(properties[target]))
-        delete(name)         
+        resource[target] = Coral.template(resource[name], config).render(resource[target])
+        resource.delete(name)         
       end
-    end    
+    end
+    return resource 
+  end
+  
+  #---
+
+  def render(options = {})
+    resource = self.class.render(export, options)
+    clear(options)
+    import(resource, options)    
     return self
   end
   
@@ -155,6 +164,7 @@ class Resource < Core
     set(:notify, translate_resource_refs(get(:notify), config)) if get(:notify)
     set(:require, translate_resource_refs(get(:require), config)) if get(:require)       
     set(:subscribe, translate_resource_refs(get(:subscribe), config)) if get(:subscribe)
+    
     return self
   end
 
