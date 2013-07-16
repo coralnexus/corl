@@ -345,8 +345,9 @@ class Puppet < Plugin::Provisioner
   
   #--
   
-  def import(files)
-    
+  def import(files, base_dir = nil)
+    resource_types.loader.import(file, base_dir + '/')
+    return self  
   end
   
   #---
