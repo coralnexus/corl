@@ -3,16 +3,19 @@ module Coral
 module Provisioner
 module Puppet
 class ResourceGroup < Core
+  
+  extend Mixin::SubConfig
    
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
-  def initialize(provisioner, type_info, defaults = {})
-    @provisioner = provisioner
-    @info        = type_info
-    
-    @defaults    = symbol_map(hash(defaults))
-    @resources   = {}
+  def initialize(provisioner, type_info, default = {})
+    super({
+      :info        => hash(type_info),
+      :provisioner => provisioner,
+      :default     => symbol_map(hash(default))
+    })
+    self.resources = {}
   end
      
   #-----------------------------------------------------------------------------
@@ -22,12 +25,68 @@ class ResourceGroup < Core
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  attr_reader :provisioner, :info, :defaults, :resources
+  def provisioner(default = nil)
+    return _get(:provisioner, default)
+  end
+  
+  #---
+  
+  def provisioner=provisioner
+    _set(:provisioner, provisioner)
+  end
+  
+  #---
+  
+  def info(default = {})
+    return hash(_get(:info, default))
+  end
+  
+  #---
+  
+  def info=info
+    _set(:info, hash(info))
+  end
+  
+  #---
+  
+  def default(default = {})
+    return hash(_get(:default, default))
+  end
+  
+  #---
+  
+  def default=default
+    _set(:default, symbol_map(hash(default)))
+  end
+ 
+  #---
+  
+  def resources(default = {})
+    return hash(_get(:resources, default))
+  end
+  
+  #---
+  
+  def resources=resources
+    _set(:resources, symbol_map(hash(resources)))
+  end
+ 
+  #---
+  
+  def composite_resources(default = {})
+    return hash(_get(:composite_resources, default))
+  end
+  
+  #---
+  
+  def composite_resources=resources
+    _set(:composite_resources, symbol_map(hash(resources)))
+  end
   
   #---
   
   def clear
-    @resources = {}
+    self.resources = {}
     return self
   end
   
@@ -38,28 +97,47 @@ class ResourceGroup < Core
     resources = normalize(resources, config)
     
     unless Util::Data.empty?(resources)
+      collection = self.resources
       resources.each do |title, resource|
         provisioner.add_resource(info, title, resource.export)
-        @resources[title] = resource
+        collection[title] = resource
       end
+      self.resources = collection
     end
     return self
   end
+  
+  #---
+  
+  def add_composite_resource(name, resource_names)
+    composite       = self.composite_resources    
+    composite[name] = [] unless composite[name].is_a?(Array)
+    
+    unless resource_names.is_a?(Array)
+      resource_names = [ resource_names ]
+    end
+    
+    resource_names.each do |r_name|
+      unless composite[name].include?(r_name)
+        composite[name] << r_name
+      end
+    end
+    
+    self.composite_resources = composite
+  end
+  protected :add_composite_resource
 
   #-----------------------------------------------------------------------------
   # Resource operations
   
   def normalize(type_name, resources, options = {})
-    clear_composite_resources
+    self.composite_resources = {}
     
     config    = Config.ensure(options)
     resources = Util::Data.value(resources)
     
-    #dbg(resources, 'normalize -> init')
-    
     unless Util::Data.empty?(resources)
       resources.keys.each do |name|
-        #dbg(name, 'normalize -> name')
         if ! resources[name] || resources[name].empty? || ! resources[name].is_a?(Hash)        
           resources.delete(name)
         else
@@ -69,7 +147,6 @@ class ResourceGroup < Core
           if resources[name].has_key?(namevar)
             value = resources[name][namevar]
             if Util::Data.empty?(value)
-              #dbg(value, "delete #{name}")
               resources.delete(name)
               normalize = false
               
@@ -80,7 +157,7 @@ class ResourceGroup < Core
                 new_resource = resources[name].clone
                 new_resource[namevar] = item
                 
-                resources[item_name] = render(new_resource, config)
+                resources[item_name] = Resource.render(new_resource, config)
                 add_composite_resource(name, item_name)
               end
               resources.delete(name)
@@ -88,11 +165,9 @@ class ResourceGroup < Core
             end  
           end
           
-          #dbg(resources, 'normalize -> resources')
-          
           if normalize
             resource = Resource.new(provisioner, info, name, resources[name])
-            resource.set_defaults(defaults, config.import({ :groups => composite_resources }))
+            resource.defaults(default, config.import({ :groups => self.composite_resources }))
             
             resources[name] = resource
           end
@@ -109,20 +184,15 @@ class ResourceGroup < Core
     config  = Config.ensure(options)
     results = {}
         
-    #dbg(resources, 'resources -> translate')
-    
-    prefix = config.get(:resource_prefix, '')
-    
+    prefix   = config.get(:resource_prefix, '')    
     name_map = {}
+    
     resources.keys.each do |name|
       name_map[name] = true
     end
     config[:resource_names] = name_map
     
     resources.each do |name, resource|
-      #dbg(name, 'name')
-      #dbg(resource, 'resource')
-      
       unless prefix.empty?
         name = "#{prefix}_#{name}"
       end
@@ -131,43 +201,6 @@ class ResourceGroup < Core
     return results
   end
   protected :translate
-  
-  #-----------------------------------------------------------------------------
-  # Resource group tables
-
-  @composite_resources = {}
-  
-  #---
-  
-  def composite_resources
-    return @composite_resources
-  end
-  
-  #---
-  
-  def clear_composite_resources
-    @composite_resources = {}
-  end
-  
-  #---
-  
-  def add_composite_resource(name, resource_names)
-    @composite_resources[name] = [] unless @composite_resources[name].is_a?(Array)
-    
-    unless resource_names.is_a?(Array)
-      resource_names = [ resource_names ]
-    end
-    
-    resource_names.each do |r_name|
-      unless @composite_resources[name].include?(r_name)
-        @composite_resources[name] << r_name
-      end
-    end
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Utilities
-
 end
 end
 end
