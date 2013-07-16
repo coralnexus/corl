@@ -12,7 +12,7 @@ class Puppet < Plugin::Provisioner
     config       = Config.ensure(options)
     puppet_scope = config.get(:puppet_scope, scope)
     
-    prefix_text = '::'  
+    prefix_text = config.get(:prefix_text, '::')  
     init_fact   = prefix_text + config.get(:init_fact, 'hiera_ready')
       
     if Puppet::Parser::Functions.function('hiera') && puppet_scope.respond_to?('[]')
@@ -32,7 +32,7 @@ class Puppet < Plugin::Provisioner
     if File.exist?(config_file)
       config = Hiera::Config.load(config_file)
     else
-      Coral.ui.warn("Config file #{config_file} not found, using Hiera defaults")
+      ui.warn("Config file #{config_file} not found, using Hiera defaults")
     end
 
     config[:logger] = 'puppet'
@@ -107,17 +107,17 @@ class Puppet < Plugin::Provisioner
     end
     
     Puppet[:node_name_fact] = name_orig if name_orig
-    @facts = facts  
+    set(:facts, facts)  
   end
   protected :init_facts
   
   #---
   
   def facts(reset = false)
-    if reset || ! @facts
+    if reset || ! get(:facts)
       init_facts
     end
-    return @facts
+    return get(:facts)
   end
   
   #---
@@ -189,15 +189,12 @@ class Puppet < Plugin::Provisioner
   end
   
   #---
-  
-  @type_info = {}
-  
-  #---
            
   def type_info(type_name, reset = false)
     type_name = type_name.to_s.downcase
+    type_info = get(:type_info, {})
     
-    if reset || ! @type_info.has_key?(type_name)    
+    if reset || ! type_info.has_key?(type_name)    
       resource_type = nil       
       type_exported, type_virtual = false
         
@@ -221,15 +218,17 @@ class Puppet < Plugin::Provisioner
         end
       end
     
-      @type_info[type_name] = {
+      type_info[type_name] = {
         :name     => type_name, 
         :type     => resource_type, 
         :resource => resource, 
         :exported => type_exported, 
         :virtual  => type_virtual 
       }
+      set(:type_info, type_info)
     end
-    return @type_info[type_name]  
+    
+    return type_info[type_name]  
   end
   
   #---
