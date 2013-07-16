@@ -424,15 +424,15 @@ class Puppet < Plugin::Provisioner
     else
       return 'name'
     end
-      
-    #---
-  
-    def configure
-      configurer = Puppet::Configurer.new
-      return configurer.run(:catalog => catalog, :pluginsync => false)
-    end
-    protected :configure
   end
+      
+  #---
+  
+  def configure
+    configurer = Puppet::Configurer.new
+    return configurer.run(:catalog => catalog, :pluginsync => false)
+  end
+  protected :configure
 end
 end
 end
