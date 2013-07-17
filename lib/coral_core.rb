@@ -274,31 +274,12 @@ module Coral
   def self.projects(data, build_hash = false, keep_array = false)
     return plugins(:project, data, build_hash, keep_array)
   end
-
-  #-----------------------------------------------------------------------------
-  # Build process
-  
-  #def self.builder(options = {})
-  #  config = Config.ensure(options)
-    
-  #  project_path = config.get(:project_path, Dir.pwd)
-  #  config_file  = config.get(:config_file, Coral::DEFAULT_BUILD_FILE)
-  #  build_path   = config.get(:build_path, 'build')
-    
-  #  return Builder.get("#{project_path}--#{config_file}--#{build_path}", { 
-  #    :directory          => project_path,
-  #    :config_file        => config_file,
-  #    :build_path         => build_path,
-  #    :provision_provider => config.get(:provisioner, :puppet)
-  #  }, false)   
-  #end
   
   #---
   
-  #def self.build(options = {})
-  #  builder = builder(options)   
-  #  return builder.build
-  #end
+  def self.builder(options, provider = nil)
+    return plugin(:builder, provider, options)
+  end
 
   #-----------------------------------------------------------------------------
   # Execution

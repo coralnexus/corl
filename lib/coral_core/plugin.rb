@@ -239,7 +239,8 @@ module Plugin
   #-----------------------------------------------------------------------------
   # Core plugin types
   
-  define_type :command     => :shell,
+  define_type :builder     => :coral,
+              :command     => :shell,
               :context     => :type,
               :event       => :regex,
               :project     => :git,
