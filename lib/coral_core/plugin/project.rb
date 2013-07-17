@@ -29,8 +29,26 @@ class Project < Base
  
   #-----------------------------------------------------------------------------
   # Project plugin interface
-
-       
+   
+  def normalize
+    super
+    
+    set_location(Util::Disk.filename(get(:directory, Dir.pwd)))
+    
+    set_url(get(:url)) unless get(:url, false)
+    checkout(get(:revision))
+    
+    pull if get(:pull, false)    
+  end
+   
+  #-----------------------------------------------------------------------------
+  # Plugin operations
+  
+  def register
+    super
+    # TODO: Scan project directory looking for plugins
+  end
+        
   #-----------------------------------------------------------------------------
   # Checks
    
@@ -45,6 +63,12 @@ class Project < Base
     return true if File.directory?(path)
     return false
   end
+    
+  #---
+          
+  def subproject?(path)
+    return false
+  end
 
   #---
       
@@ -53,6 +77,7 @@ class Project < Base
     return true if File.directory?(path) && (! require_top_level || top?(path))
     return false
   end
+  protected :project_directory?
    
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
@@ -60,7 +85,29 @@ class Project < Base
   def url(default = nil)
     return get(:url, default)
   end
+
+  #---
   
+  def set_url(url)
+    set(:url, url)
+    set_remote(:url, url)
+    return self
+  end
+
+  #---
+  
+  def edit_url(default = nil)
+    return get(:edit, default)
+  end
+  
+  #---
+  
+  def set_edit_url(url)
+    set(:edit, url)
+    set_remote(:edit, url)
+    return self
+  end
+ 
   #---
   
   def directory(default = nil)
@@ -89,6 +136,8 @@ class Project < Base
     @@projects[get(:directory)] = self
     
     init_parent
+    init_remotes    
+    load_revision   
     return self
   end
   
@@ -99,6 +148,55 @@ class Project < Base
   end
 
   #---
+  
+  def subprojects(default = nil)
+    return get(:subprojects, default)
+  end
+
+  #---
+  
+  def revision(default = nil)
+    return get(:revision, default)
+  end
+  
+  #---
+  
+  def config(name, options = {})
+    config = Config.ensure(options) # Just in case we throw a configuration in
+    return yield(config) if can_persist? && block_given?
+    return nil
+  end
+  
+  #---
+  
+  def set_config(name, value, options = {})
+    config = Config.ensure(options) # Just in case we throw a configuration in
+    yield(config) if can_persist? && block_given?
+    return self
+  end
+  
+  #---
+  
+  def delete_config(name, options = {})
+    config = Config.ensure(options) # Just in case we throw a configuration in
+    yield(config) if can_persist? && block_given?
+    return self
+  end
+  
+  #---
+ 
+  def subproject_config(options = {})
+    config = Config.ensure(options)
+    result = {}
+    if can_persist?
+      result = yield(config) if block_given?
+    end
+    return result
+  end
+  protected :subproject_config
+
+  #-----------------------------------------------------------------------------
+  # Project operations
   
   def init_parent
     delete(:parent)
@@ -116,43 +214,240 @@ class Project < Base
     return self       
   end
   protected :init_parent
+
+  #---
+ 
+  def load_revision
+    if can_persist?
+      yield if block_given?
+      load_subprojects
+    end
+    return self
+  end
+  protected :load_revision
   
   #---
   
-  def revision(default = nil)
-    return get(:revision, default)
+  def checkout(revision)
+    if can_persist?
+      yield if block_given?
+      set(:revision, revision)
+      load_subprojects
+    end
+    return self 
   end
-   
-  #-----------------------------------------------------------------------------
-  # Plugin operations
   
-  def register
-    super
+  #---
+  
+  def commit(files = '.', options = {})
+    config = Config.ensure(options)
+    
+    if can_persist?
+      time    = Time.new.strftime("%Y-%m-%d %H:%M:%S")
+      user    = ENV['USER']
+      message = config.get(:message, 'Saving state')
+      
+      user = 'UNKNOWN' unless user && ! user.empty?
+      
+      yield(config, time, user, message) if block_given?
+      
+      if ! parent.nil? && config.get(:propogate, true)
+        parent.commit(directory, config.import({
+          :message => "Updating subproject #{path} with: #{message}"
+        }))
+      end                
+    end
+    return self      
+  end
+
+  #-----------------------------------------------------------------------------
+  # Subproject operations
+ 
+  def load_subprojects(options = {})
+    config      = Config.ensure(options)
+    subprojects = {}
+    
+    if can_persist?
+      subproject_config(config).each do |path, data|
+        project_path = File.join(directory, path)
+        if File.directory?(project_path) 
+          add_project = true
+          add_project = yield(project_path, data) if block_given?
+          
+          if add_project
+            project = self.class.open(project_path)
+            project.set_url(data['url']) # Just a sanity check (might disapear)
+        
+            subprojects[path] = project
+          end
+        end
+      end
+    end
+    set(:subprojects, subprojects)
+    return self  
+  end
+  protected :load_subprojects
+  
+  #---
+  
+  def add_subproject(path, url, revision, options = {})
+    if can_persist?
+      yield if block_given?      
+      load_subprojects
+    end  
+  end
+  
+  #---
+  
+  def delete_subproject(path)
+    if can_persist?
+      yield if block_given?  
+      load_subprojects
+    end  
   end
  
-  #-----------------------------------------------------------------------------
-  # Project operations
-  
-  def syncronize(cloud, options = {})
-    # Implement in sub classes
-  end
-  
   #---
    
-  def fetch(options = {})
-    # implement in sub classes
+  def update_subprojects
+    yield if can_persist? && block_given?
+    return self
+  end
+  protected :update_submodules
+  
+  #---
+  
+  def foreach!
+    if can_persist?
+      subprojects.each do |path, project|
+        yield(path, project)  
+      end
+    end
+    return self
+  end 
+         
+  #-----------------------------------------------------------------------------
+  # Remote operations
+  
+  def init_remotes
+    yield if block_given?
+    set_edit_url(translate_edit_url(url))
+    return self 
+  end
+  protected :init_remotes
+ 
+  #---
+  
+  def set_remote(name, url)
+    delete_remote(name)
+    yield if can_persist? && block_given?
+    return self
   end
   
   #---
   
-  def update(options = {})
-    # Implement in sub classes
+  def add_remote_url(name, url, options = {})
+    config = Config.ensure(options)    
+    yield(config) if can_persist? && block_given?
+    return self  
+  end
+  
+  #---
+    
+  def set_host_remote(name, hosts, path, options = {})
+    config = Config.ensure(options)
+    
+    if can_persist?
+      hosts = array(hosts)
+      
+      return self if hosts.empty?
+      
+      set_remote(name, translate_url(hosts.shift, path, config.export))
+      
+      unless hosts.empty?
+        hosts.each do |host|
+          add_remote_url(name, translate_url(host, path, config.export), config)
+        end
+      end
+    end
+    return self
   end
   
   #---
   
-  def delete(options = {})
-    # Implement in sub classes
+  def delete_remote(name)
+    yield if can_persist? && block_given?
+    return self  
+  end
+  
+  #---
+    
+  def syncronize(cloud, options = {})
+    config = Config.ensure(options)
+    yield(config) if block_given?
+    
+    if can_persist?
+      remote_path  = config.delete(:remote_path, '/var/coral')
+      server_hosts = []
+        
+      cloud.servers.each do |server_name, server|
+        server_hosts << server.hostname          
+        set_host_remote(server_name, server.hostname, remote_path, config)
+      end
+      set_host_remote('all', server_hosts, remote_path, config) unless server_hosts.empty?
+    end
+    return true
+  end
+   
+  #-----------------------------------------------------------------------------
+  # SSH operations
+ 
+  def pull!(remote, options = {})
+    config  = Config.ensure(options)
+    success = false
+    
+    if can_persist?
+      success = yield(config) if block_given?
+      
+      update_subprojects
+      
+      if success && ! parent.nil? && config.get(:propogate, true)
+        parent.commit(directory, config.import({
+          :message     => "Pulling updates for subproject #{path}",
+          :allow_empty => true
+        }))
+      end      
+    end
+    return success
+  end
+  
+  #---
+  
+  def pull(remote, options = {})
+    return pull!(remote, options)
+  end  
+  
+  #---
+    
+  def push!(remote, options = {})
+    config  = Config.ensure(options)
+    success = false
+    
+    if can_persist?
+      success = yield(config) if block_given?
+      
+      if success && config.get(:propogate, true)
+        foreach! do |path, project|
+          project.push(remote, config)
+        end
+      end
+    end
+    return success
+  end
+  
+  #---
+  
+  def push(remote, options = {})
+    return push!(remote, options)
   end
     
   #-----------------------------------------------------------------------------
@@ -180,6 +475,31 @@ class Project < Base
       info[:revision] = $3 unless info.has_key?(:revision)
     end
     return Plugin.translate(plugin_type, info[:provider], info)
+  end
+  
+  #---
+  
+  def translate_url(host, path, options = {})
+    config = Config.ensure(options)
+    url    = "#{host}/#{path}"
+    
+    if block_given?
+      temp_url = yield(config)
+      url      = temp_url if temp_url
+    end
+    return url
+  end
+  
+  #---
+  
+  def translate_edit_url(url, options = {})
+    config = Config.ensure(options)
+    
+    if block_given?
+      temp_url = yield(config)
+      url      = temp_url if temp_url
+    end
+    return url
   end
 end
 end
