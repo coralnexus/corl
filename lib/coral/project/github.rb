@@ -5,11 +5,7 @@ class Github < Git
  
   #-----------------------------------------------------------------------------
   # Project plugin interface
-
-    
-  #-----------------------------------------------------------------------------
-  # Plugin operations
-  
+ 
   def normalize    
     if get(:ssh, false)
       protocol  = 'git@'
