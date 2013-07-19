@@ -180,7 +180,7 @@ module Coral
       name   = config.get(:provider, name)
     end
     name = Plugin.type_default(type) unless name # Sanity checking (see plugins)
-    return Plugin.instance(type, name, options)
+    return Plugin.create_instance(type, name, options)
   end
   
   #---
@@ -201,6 +201,18 @@ module Coral
     end
     return group.shift if ! build_hash && group.length == 1 && ! keep_array
     return group  
+  end
+  
+  #---
+  
+  def self.get_plugin(type, name)
+    return Plugin.get_instance(type, name)
+  end
+  
+  #---
+  
+  def self.remove_plugin(plugin)
+    return Plugin.remove_instance(plugin)
   end
    
   #---

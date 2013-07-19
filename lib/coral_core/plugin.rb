@@ -16,7 +16,7 @@ module Plugin
   
   #---
   
-  def self.instance(type, provider, options = {})
+  def self.create_instance(type, provider, options = {})
     type     = type.to_sym
     provider = provider.to_sym
     return nil unless @@types.has_key?(type)
@@ -27,21 +27,39 @@ module Plugin
       options = translate(type, provider, options)
       options.delete(:provider)
       
-      group_name    = "#{type}_#{provider}"
-      instance_name = Coral.sha1(options)
+      instance_name = "#{provider}_" + Coral.sha1(options)
       
-      @@plugins[group_name] = {} unless @@plugins.has_key?(group_name)
+      @@plugins[type] = {} unless @@plugins.has_key?(type)
       
-      unless instance_name && @@plugins[group_name].has_key?(instance_name)
+      unless instance_name && @@plugins[type].has_key?(instance_name)
         plugin = Coral.class_const([ :coral, type, provider ]).new(type, provider, options)
+        
+        info[:instance] = instance_name
         plugin.set_meta(info) 
         
-        @@plugins[group_name][instance_name] = plugin 
+        @@plugins[type][instance_name] = plugin 
       end
            
-      return @@plugins[group_name][instance_name]
+      return @@plugins[type][instance_name]
     end      
     return nil
+  end
+  
+  #---
+  
+  def self.get_instance(type, name)
+    @@plugins[type].each do |instance_name, plugin|
+      return plugin if plugin.name == name
+    end
+    return nil  
+  end
+  
+  #---
+  
+  def self.remove_instance(plugin)
+    if plugin && plugin.is_a?(Plugin::Base) && @@plugins.has_key?(plugin.plugin_type)
+      @@plugins[plugin.plugin_type].delete(plugin.plugin_instance)
+    end
   end
  
   #-----------------------------------------------------------------------------
@@ -69,8 +87,8 @@ module Plugin
   
   def self.gems(reset = false)
     if reset || Util::Data.empty?(@@gems)
-      if defined?(::Gem) 
-        if ! defined?(::Bundler) && Gem::Specification.respond_to?(:latest_specs)
+      if defined?(Gem) 
+        if ! defined?(Bundler) && Gem::Specification.respond_to?(:latest_specs)
           Gem::Specification.latest_specs(true).each do |spec|
             register_gem(spec)
           end
@@ -112,9 +130,7 @@ module Plugin
     results = {}
     
     if type
-      type = type.to_sym    
-      return results unless @@plugins.has_key?(type)
-      results[type] = @@plugins[type]
+      results[type] = @@plugins[type] if @@plugins.has_key?(type)
     else
       results = @@plugins
     end    
@@ -322,6 +338,12 @@ class Base < Core
   
   def plugin_file
     return meta.get(:file)
+  end
+  
+  #---
+  
+  def plugin_instance
+    return meta.get(:instance)
   end
 
   #-----------------------------------------------------------------------------
