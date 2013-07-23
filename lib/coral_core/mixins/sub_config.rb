@@ -1,4 +1,9 @@
 
+# Should be included via include
+#
+# include Mixins::SubConfig
+#
+
 module Coral
 module Mixins
 module SubConfig
