@@ -1,12 +1,26 @@
 
 # Should be included via include
 #
-# include Mixins::SubConfig
+# include Mixin::SubConfig
 #
 
 module Coral
-module Mixins
+module Mixin
 module SubConfig
+  
+  #-----------------------------------------------------------------------------
+  # Initialization
+  
+  def init_subconfig(reset = false)
+    return if @subconfig_initialized && ! reset
+    
+    unless _get(:config)
+      _set(:config, Config::File.new(self))
+    end
+    
+    @subconfig_initialized = true
+  end
+  protected :init_subconfig
   
   #-----------------------------------------------------------------------------
   # Propety accessors / modifiers
@@ -32,7 +46,21 @@ module SubConfig
   def config=config
     _set(:config, config)
   end
-    
+  
+  #---
+  
+  def directory
+    init_subconfig
+    return config.project.directory
+  end
+  
+  #---
+  
+  def directory=directory
+    init_subconfig
+    config.set_location(directory)
+  end
+     
   #-----------------------------------------------------------------------------
   
   def _parent_exec(method, *params)
@@ -50,6 +78,7 @@ module SubConfig
   #---
   
   def get(keys, default = nil, format = false)
+    init_subconfig
     return config.get(keys, default, format)
   end
   
@@ -70,6 +99,7 @@ module SubConfig
   #---
     
   def set(keys, value = '', options = {})
+    init_subconfig
     config.set(keys, value, options)
     return self
   end
@@ -84,6 +114,7 @@ module SubConfig
   #---
    
   def delete(keys, options = {})
+    init_subconfig
     config.delete(keys, options)
     return self
   end
@@ -98,6 +129,7 @@ module SubConfig
   #---
   
   def clear(options = {})
+    init_subconfig
     config.clear(options)
     return self
   end
@@ -113,6 +145,7 @@ module SubConfig
   #---
   
   def import(properties, options = {})
+    init_subconfig
     config.import(properties, options)
     return self
   end
@@ -127,6 +160,7 @@ module SubConfig
   #---
   
   def defaults(defaults, options = {})
+    init_subconfig
     config.defaults(defaults, options)
     return self
   end
@@ -141,8 +175,24 @@ module SubConfig
   #---
   
   def export
+    init_subconfig
     return config.export
   end
+      
+  #-----------------------------------------------------------------------------
+  # Configuration loading saving
+    
+  def load(options = {})
+    config.load(options)    
+    return self  
+  end
+    
+  #---
+    
+  def save(options = {})
+    config.save(options)
+    return self  
+  end  
 end
 end
 end

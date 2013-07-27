@@ -1,6 +1,11 @@
 
+# Should be included via extend
+#
+# extend Mixin::ConfigOps
+#
+
 module Coral
-module Mixins
+module Mixin
 module ConfigOps
   #-----------------------------------------------------------------------------
   # Parsing

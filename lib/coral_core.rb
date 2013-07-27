@@ -60,7 +60,8 @@ end
 
 lib_dir      = File.dirname(__FILE__)
 core_dir     = File.join(lib_dir, 'coral_core')
-mixin_dir    = File.join(core_dir, 'mixins')
+mixin_dir    = File.join(core_dir, 'mixin')
+macro_dir    = File.join(mixin_dir, 'macro')
 util_dir     = File.join(core_dir, 'util')
 mod_dir      = File.join(core_dir, 'mod')
 
@@ -102,6 +103,11 @@ end
 
 # Mixins for classes
 Dir.glob(File.join(mixin_dir, '*.rb')).each do |file|
+  puts file
+  require file
+end
+Dir.glob(File.join(macro_dir, '*.rb')).each do |file|
+  puts file
   require file
 end
 

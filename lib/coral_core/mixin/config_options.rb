@@ -1,6 +1,11 @@
 
+# Should be included via extend
+#
+# extend Mixin::ConfigOptions
+#
+
 module Coral
-module Mixins
+module Mixin
 module ConfigOptions
   #-----------------------------------------------------------------------------
   # Configuration options interface

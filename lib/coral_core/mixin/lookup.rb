@@ -1,6 +1,11 @@
 
+# Should be included via extend
+#
+# extend Mixin::Lookup
+#
+
 module Coral
-module Mixins
+module Mixin
 module Lookup
   #-----------------------------------------------------------------------------
   # Hiera configuration
