@@ -188,10 +188,10 @@ class File < Config
     local_config = Config.ensure(options)
     
     if can_persist? && File.exists?(@absolute_config_file)
-      json_text = Util::Disk.read(@absolute_config_file)    
-      if json_text && ! json_text.empty?
+      raw = Util::Disk.read(@absolute_config_file)    
+      if raw && ! raw.empty?
         config.clear if local_config.get(:override, false)
-        config.import(Util::Data.parse_json(json_text), local_config)
+        config.import(Coral.translator(local_config).parse(raw, local_config), local_config)
       end
     end
     return self
@@ -203,9 +203,9 @@ class File < Config
     local_config = Config.ensure(options)
     
     if can_persist?
-      json_text = Util::Data.to_json(config.export, true)
-      if json_text && ! json_text.empty?
-        Util::Disk.write(@absolute_config_file, json_text)
+      rendering = Coral.translator(local_config).generate(config.export, local_config)
+      if rendering && ! rendering.empty?
+        Util::Disk.write(@absolute_config_file, rendering)
         project.commit(@absolute_config_file, local_config) if autocommit
       end
     end
