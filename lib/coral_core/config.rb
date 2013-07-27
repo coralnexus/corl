@@ -212,7 +212,7 @@ class Config
   
   def defaults(defaults, options = {})
     config = new(options).set(:import_type, :default)
-    return import(defaults, config.export)
+    return import(defaults, config)
   end
 
   #---
