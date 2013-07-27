@@ -117,10 +117,21 @@ class Data
   
   #---
   
+  def self.parse_yaml(yaml_text)
+    output = ''
+    begin
+      output = YAML.load(yaml_text)
+      
+    rescue Exception
+    end
+    return output  
+  end
+  
+  #---
+  
   def self.to_yaml(data)
     output = ''
     begin
-      require 'yaml'
       output = YAML.dump(data)
       
     rescue Exception
