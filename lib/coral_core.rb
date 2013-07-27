@@ -224,6 +224,18 @@ module Coral
    
   #---
   
+  def self.translator(options, provider = nil)
+    return plugin(:translator, provider, options)
+  end
+  
+  #---
+  
+  def self.translator(data, build_hash = false, keep_array = false)
+    return plugins(:translator, data, build_hash, keep_array)
+  end
+     
+  #---
+  
   def self.context(options, provider = nil)
     return plugin(:context, provider, options)
   end
