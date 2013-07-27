@@ -260,7 +260,7 @@ module Coral
 
   #---
   
-  def self.template(provider, options = {})
+  def self.template(options, provider = nil)
     return plugin(:template, provider, options)
   end
   
@@ -272,7 +272,7 @@ module Coral
   
   #---
   
-  def self.provisioner(provider = nil, options = {})
+  def self.provisioner(options, provider = nil)
     return plugin(:provisioner, provider, options)
   end
   
