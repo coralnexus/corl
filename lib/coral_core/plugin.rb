@@ -261,7 +261,8 @@ module Plugin
               :event       => :regex,
               :project     => :git,
               :provisioner => :puppet,
-              :template    => :json
+              :template    => :json,
+              :translator  => :json
  
   #-----------------------------------------------------------------------------
   # Base plugin
