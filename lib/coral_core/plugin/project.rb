@@ -312,7 +312,7 @@ class Project < Base
     yield if can_persist? && block_given?
     return self
   end
-  protected :update_submodules
+  protected :update_subprojects
   
   #---
   
