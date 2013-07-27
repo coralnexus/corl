@@ -1,7 +1,7 @@
 
 module Coral
 module Template
-class JSON < Plugin::Template
+class Json < Plugin::Template
   
   #-----------------------------------------------------------------------------
   # Renderers  

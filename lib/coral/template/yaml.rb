@@ -1,7 +1,7 @@
 
 module Coral
 module Template
-class YAML < Plugin::Template
+class Yaml < Plugin::Template
   
   #-----------------------------------------------------------------------------
   # Renderers  
