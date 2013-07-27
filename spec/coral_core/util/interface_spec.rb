@@ -2,6 +2,7 @@
 require 'spec_helper'
 
 module Coral
+module Util
 
   describe Interface do
 
@@ -486,4 +487,5 @@ module Coral
       end
     end  
   end
+end
 end
