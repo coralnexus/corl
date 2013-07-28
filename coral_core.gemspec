@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2013-07-11"
+  s.date = "2013-07-27"
   s.description = "= coral_core\n\nThis library provides core data elements and utilities used in other Coral gems.\n\nThe Coral core library contains functionality that is utilized by other\nCoral gems by providing basic utilities like Git, Shell, Disk, and Data\nmanipulation libraries, a UI system, and a core data model that supports\nEvents, Commands, Repositories, and Memory (version controlled JSON \nobjects).  This library is only used as a starting point for other systems.\n\nNote:  This library is still very early in development!\n\n== Contributing to coral_core\n \n* Check out the latest {major}.{minor} branch to make sure the feature hasn't \n  been implemented or the bug hasn't been fixed yet.\n* Check out the issue tracker to make sure someone already hasn't requested \n  it and/or contributed it.\n* Fork the project.\n* Start a feature/bugfix branch.\n* Commit and push until you are happy with your contribution.\n* Make sure to add tests for it. This is important so I don't break it in a \n  future version unintentionally.\n* Please try not to mess with the Rakefile, version, or history. If you want \n  to have your own version, or is otherwise necessary, that is fine, but \n  please isolate to its own commit so I can cherry-pick around it.\n\n== Copyright\n\nLicensed under GPLv3.  See LICENSE.txt for further details.\n\nCopyright (c) 2013  Adrian Webb <adrian.webb@coraltech.net>\nCoral Technology Group LLC"
   s.email = "adrian.webb@coraltech.net"
   s.extra_rdoc_files = [
@@ -25,6 +25,8 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "coral_core.gemspec",
+    "jira.json",
+    "lib/coral/builder/coral.rb",
     "lib/coral/command/shell.rb",
     "lib/coral/context/type.rb",
     "lib/coral/event/puppet.rb",
@@ -39,18 +41,11 @@ Gem::Specification.new do |s|
     "lib/coral/template/wrapper.rb",
     "lib/coral/template/yaml.rb",
     "lib/coral_core.rb",
-    "lib/coral_core/builder.rb",
     "lib/coral_core/config.rb",
     "lib/coral_core/config/collection.rb",
     "lib/coral_core/config/file.rb",
     "lib/coral_core/config/options.rb",
     "lib/coral_core/core.rb",
-    "lib/coral_core/interface.rb",
-    "lib/coral_core/mixins/config_collection.rb",
-    "lib/coral_core/mixins/config_ops.rb",
-    "lib/coral_core/mixins/config_options.rb",
-    "lib/coral_core/mixins/lookup.rb",
-    "lib/coral_core/mixins/sub_config.rb",
     "lib/coral_core/mod/hash.rb",
     "lib/coral_core/mod/hiera_backend.rb",
     "lib/coral_core/plugin.rb",
@@ -64,6 +59,7 @@ Gem::Specification.new do |s|
     "lib/coral_core/util/data.rb",
     "lib/coral_core/util/disk.rb",
     "lib/coral_core/util/git.rb",
+    "lib/coral_core/util/interface.rb",
     "lib/coral_core/util/process.rb",
     "lib/coral_core/util/shell.rb",
     "lib/facter/coral_exists.rb",
@@ -90,7 +86,6 @@ Gem::Specification.new do |s|
     "lib/puppet/parser/functions/name.rb",
     "lib/puppet/parser/functions/render.rb",
     "lib/puppet/parser/functions/value.rb",
-    "spec/coral_core/interface_spec.rb",
     "spec/coral_mock_input.rb",
     "spec/coral_test_kernel.rb",
     "spec/spec_helper.rb"
