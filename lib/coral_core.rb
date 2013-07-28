@@ -104,11 +104,9 @@ end
 
 # Mixins for classes
 Dir.glob(File.join(mixin_dir, '*.rb')).each do |file|
-  puts file
   require file
 end
 Dir.glob(File.join(macro_dir, '*.rb')).each do |file|
-  puts file
   require file
 end
 
