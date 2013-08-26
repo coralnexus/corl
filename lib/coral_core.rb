@@ -179,13 +179,20 @@ module Coral
   #-----------------------------------------------------------------------------
   # Plugins
   
-  def self.plugin(type, name, options = {})
-    if options.is_a?(Hash)
-      config = Config.ensure(options)
-      name   = config.get(:provider, name)
+  def self.plugin(type, provider, options = {})
+    default_provider = Plugin.type_default(type)
+    
+    if options.is_a?(Hash) || options.is_a?(Coral::Config)
+      config   = Config.ensure(options)
+      provider = config.get(:provider, provider)
+      name     = config.get(:name, ( provider ? provider : default_provider ))
+      options  = config.export
     end
-    name = Plugin.type_default(type) unless name # Sanity checking (see plugins)
-    return Plugin.create_instance(type, name, options)
+    provider          = default_provider unless provider # Sanity checking (see plugins)
+    existing_instance = Plugin.get_instance(type, name) if name
+    
+    return existing_instance if existing_instance
+    return Plugin.create_instance(type, provider, options)
   end
   
   #---
