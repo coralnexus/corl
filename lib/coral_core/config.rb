@@ -103,7 +103,7 @@ class Config
     }
     
     if keys.empty?      
-      existing[:value] = data[key] if has_kay
+      existing[:value] = data[key] if has_key
       
       if value.nil?
         data.delete(key) if has_key
