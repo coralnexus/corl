@@ -34,7 +34,7 @@ module Plugin
       unless instance_name && @@plugins[type].has_key?(instance_name)
         plugin = Coral.class_const([ :coral, type, provider ]).new(type, provider, options)
         
-        info[:instance] = instance_name
+        info[:instance_name] = instance_name
         plugin.set_meta(info) 
         
         @@plugins[type][instance_name] = plugin 
@@ -48,8 +48,10 @@ module Plugin
   #---
   
   def self.get_instance(type, name)
-    @@plugins[type].each do |instance_name, plugin|
-      return plugin if plugin.name == name
+    if @@plugins.has_key?(type)
+      @@plugins[type].each do |instance_name, plugin|
+        return plugin if plugin.name == name
+      end
     end
     return nil  
   end
@@ -58,7 +60,7 @@ module Plugin
   
   def self.remove_instance(plugin)
     if plugin && plugin.is_a?(Plugin::Base) && @@plugins.has_key?(plugin.plugin_type)
-      @@plugins[plugin.plugin_type].delete(plugin.plugin_instance)
+      @@plugins[plugin.plugin_type].delete(plugin.plugin_instance_name)
     end
   end
  
@@ -316,7 +318,7 @@ class Base < Core
     @meta = Config.ensure(meta)
   end
   protected :set_meta
-  
+ 
   #---
   
   def plugin_type
@@ -343,8 +345,20 @@ class Base < Core
   
   #---
   
-  def plugin_instance
-    return meta.get(:instance)
+  def plugin_instance_name
+    return meta.get(:instance_name)
+  end
+  
+  #---
+  
+  def plugin_parent=parent
+    meta.set(:parent, parent) if parent.is_a?(Coral::Plugin::Base)
+  end
+  
+  #---
+  
+  def plugin_parent
+    return meta.get(:parent)
   end
 
   #-----------------------------------------------------------------------------
