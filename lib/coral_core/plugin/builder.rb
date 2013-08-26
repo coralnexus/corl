@@ -3,10 +3,10 @@ module Coral
 module Plugin
 class Builder < Base
   
-  extend Mixin::ObjectInterface  
+  extend Mixin::Macro::PluginInterface  
   
   #-----------------------------------------------------------------------------
-  # Project plugin interface
+  # Builder plugin interface
    
   def normalize
     super
@@ -15,14 +15,18 @@ class Builder < Base
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  plugin_collection :config
-  plugin_collection :provisioner
+  plugin_collection :config, :plugin_type => :project
+  
+  plugin_collection :provisioner, :single_instance => true
+  
+  plugin_collection :library, :plural      => :libraries,
+                              :plugin_type => :project
 
   #-----------------------------------------------------------------------------
   # Build operations
 
   def build(plugin_types = nil)
-    foreach_plugin!(plugin_types) do |type, name, plugin|
+    each_plugin!(plugin_types) do |type, provider, plugin|
       plugin.build(self)
     end  
   end
