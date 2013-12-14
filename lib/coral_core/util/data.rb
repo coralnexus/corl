@@ -43,14 +43,72 @@ class Data
     end
     return false
   end
+  
+  #---
+  
+  def self.exists?(data, keys, check_empty = false)
+    keys = [ keys ] unless keys.is_a?(Array)
+    keys.each do |key|
+      return false unless data.is_a?(Hash) && data.has_key?(key)
+      return false if check_empty && empty?(data[key])
+      data = data[key]
+    end
+    return true
+  end
    
   #-----------------------------------------------------------------------------
   # Translation
+
+  def self.symbol_map(data)
+    results = {}
+    return data unless data
+    
+    case data
+    when Hash
+      data.each do |key, value|
+        results[key.to_sym] = symbol_map(value)
+      end
+    else
+      results = data
+    end    
+    return results
+  end
   
-  def self.to_json(data)
+  #---
+  
+  def self.string_map(data)
+    results = {}
+    return data unless data
+    
+    case data
+    when Hash
+      data.each do |key, value|
+        results[key.to_s] = string_map(value)
+      end
+    else
+      results = data
+    end    
+    return results
+  end
+  
+  #---
+  
+  def self.parse_json(json_text)
     output = ''
     begin
-      output = data.to_json
+      output = MultiJson.load(json_text)
+      
+    rescue Exception
+    end
+    return output
+  end
+    
+  #---
+  
+  def self.to_json(data, pretty = true)
+    output = ''
+    begin
+      output = MultiJson.dump(data, :pretty => pretty)
       
     rescue Exception
     end
@@ -59,10 +117,21 @@ class Data
   
   #---
   
+  def self.parse_yaml(yaml_text)
+    output = ''
+    begin
+      output = YAML.load(yaml_text)
+      
+    rescue Exception
+    end
+    return output  
+  end
+  
+  #---
+  
   def self.to_yaml(data)
     output = ''
     begin
-      require 'yaml'
       output = YAML.dump(data)
       
     rescue Exception
@@ -95,7 +164,88 @@ class Data
     end
     return value  
   end
- 
+  
+  #---
+      
+  def self.filter(data, method = false)
+    if method && method.is_a?(Symbol) && 
+      [ :array, :hash, :string, :symbol, :test ].include?(method.to_sym)
+      return send(method, data)
+    end
+    return data
+  end
+  
+  #---
+          
+  def self.array(data, default = [], split_string = false)
+    result = default    
+    if data
+      case data
+      when Array
+        result = data
+      when String
+        result = [ ( split_string ? data.split(/\s*,\s*/) : data ) ]
+      else
+        result = [ data ]
+      end
+    end
+    return result
+  end
+    
+  #---
+        
+  def self.hash(data, default = {})
+    result = default    
+    if data
+      case data
+      when Hash
+        result = data
+      else
+        result = {}
+      end
+    end
+    return result
+  end
+    
+  #---
+         
+  def self.string(data, default = '')
+    result = default    
+    if data
+      case data
+      when String
+        result = data
+      else
+        result = data.to_s
+      end
+    end
+    return result
+  end
+    
+  #---
+         
+  def self.symbol(data, default = :undefined)
+    result = default    
+    if data
+      case data
+      when Symbol
+        result = data
+      when String
+        result = data.to_sym
+      else
+        result = data.class.to_sym
+      end
+    end
+    return result
+  end
+     
+  #---
+    
+  def self.test(data)
+    return false if Util::Data.empty?(data)
+    return true
+  end
+    
   #-----------------------------------------------------------------------------
   # Operations
   
@@ -107,10 +257,10 @@ class Data
     force = force.is_a?(Coral::Config) ? force.get(:force, true) : force
     
     if data.is_a?(Array)
-      value = data.shift.clone
+      value = undef?(data[0]) ? nil : data.shift.clone
       
       data.each do |item|
-        item = item.clone
+        item = undef?(item) ? nil : item.clone
         
         case value
         when Hash
@@ -132,8 +282,8 @@ class Data
             value = item
           end
                 
-        when String, Symbol
-          value = item if item.is_a?(String) || item.is_a?(Symbol) || force 
+        else
+          value = item if force || item.is_a?(String) || item.is_a?(Symbol)
         end
       end  
     end
@@ -213,6 +363,26 @@ class Data
       end      
     end
     return result
+  end
+  
+  #---
+  
+  def self.ensure(test, success_value = nil, failure_value = nil)
+    success_value = (success_value ? success_value : test)
+    failure_value = (failure_value ? failure_value : nil)
+      
+    if empty?(test)
+      value = failure_value
+    else
+      value = success_value
+    end
+    return value
+  end
+  
+  #---
+  
+  def self.ensure_value(value, failure_value = nil)
+    return self.ensure(value, nil, failure_value)
   end
 end
 end
