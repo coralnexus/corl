@@ -1,6 +1,6 @@
+require 'log4r'
 
 module Coral
-module Util
 class Interface
   
   #-----------------------------------------------------------------------------
@@ -11,15 +11,15 @@ class Interface
   #---
 
   COLORS = {
-    :clear  => "\e[0m",
-    :red    => "\e[31m",
-    :green  => "\e[32m",
+    :clear => "\e[0m",
+    :red => "\e[31m",
+    :green => "\e[32m",
     :yellow => "\e[33m"
   }
 
   COLOR_MAP = {
-    :warn    => COLORS[:yellow],
-    :error   => COLORS[:red],
+    :warn => COLORS[:yellow],
+    :error => COLORS[:red],
     :success => COLORS[:green]
   }
 
@@ -38,30 +38,24 @@ class Interface
       if config[:logger].is_a?(String)
         @logger = Log4r::Logger.new(config[:logger])
       else
-        @logger = config[:logger] 
+        @logger = config[:logger]
       end
     else
       @logger = Log4r::Logger.new(class_name)
     end
     
-    @resource  = config.get(:resource, '')
-    @color     = config.get(:color, true)
+    @resource = config.get(:resource, '')
+    @color = config.get(:color, true)
     
-    @printer   = config.get(:printer, :puts)
+    @printer = config.get(:printer, :puts)
     
-    @input     = config.get(:input, $stdin)
-    @output    = config.get(:output, $stdout)
-    @error     = config.get(:error, $stderr)
+    @input = config.get(:input, $stdin)
+    @output = config.get(:output, $stdout)
+    @error = config.get(:error, $stderr)
     
-    @delegate  = config.get(:ui_delegate, nil)    
+    @delegate = config.get(:ui_delegate, nil)
   end
 
-  #---
-  
-  def inspect
-    "#<#{self.class}: #{resource} >"
-  end
-  
   #-----------------------------------------------------------------------------
   # Accessors / Modifiers
   
@@ -80,9 +74,9 @@ class Interface
     return @delegate.say(type, message, options) if check_delegate('say')
   
     defaults = { :new_line => true, :prefix => true }
-    options  = defaults.merge(options)
-    printer  = options[:new_line] ? :puts : :print
-    channel  = type == :error || options[:channel] == :error ? @error : @output
+    options = defaults.merge(options)
+    printer = options[:new_line] ? :puts : :print
+    channel = type == :error || options[:channel] == :error ? @error : @output
 
     safe_puts(format_message(type, message, options),
               :channel => channel, :printer => printer)
@@ -94,7 +88,7 @@ class Interface
     return @delegate.ask(message, options) if check_delegate('ask')
 
     options[:new_line] = false if ! options.has_key?(:new_line)
-    options[:prefix]   = false if ! options.has_key?(:prefix)
+    options[:prefix] = false if ! options.has_key?(:prefix)
 
     say(:info, message, options)
     return @input.gets.chomp
@@ -143,13 +137,13 @@ class Interface
     return @delegate.format_message(type, message, options) if check_delegate('format_message')
     
     if @resource && ! @resource.empty? && options[:prefix]
-      prefix = "[#{@resource}]"    
+      prefix = "[#{@resource}]"
     end
     message = "#{prefix} #{message}".strip
     
     if @color
       if options.has_key?(:color)
-        color   = COLORS[options[:color]]
+        color = COLORS[options[:color]]
         message = "#{color}#{message}#{COLORS[:clear]}"
       else
         message = "#{COLOR_MAP[type]}#{message}#{COLORS[:clear]}" if COLOR_MAP[type]
@@ -164,7 +158,7 @@ class Interface
     return @delegate.safe_puts(message, options) if check_delegate('safe_puts')
     
     message ||= ""
-    options   = {
+    options = {
       :channel => @output,
       :printer => @printer,
     }.merge(options)
@@ -181,6 +175,5 @@ class Interface
   def check_delegate(method)
     return ( @delegate && @delegate.respond_to?(method.to_s) )
   end
-end
 end
 end
