@@ -13,6 +13,7 @@
 module Kernel
    
   def dbg(data, label = '')
+    # Invocations of this function should NOT be committed to the project
     require 'pp'
     
     puts '>>----------------------'
@@ -26,8 +27,9 @@ module Kernel
   
   #---  
     
-  def locate(command)
-    exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+  def coral_locate(command)
+    command = command.to_s
+    exts    = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
     ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
       exts.each do |ext|
         exe = File.join(path, "#{command}#{ext}")
@@ -44,7 +46,7 @@ end
 home         = File.dirname(__FILE__)
 dependencies = File.join(home, 'dependency')
 
-git_location = locate('git')
+git_location = coral_locate('git')
  
 #-------------------------------------------------------------------------------
 
@@ -108,7 +110,7 @@ end
 #---
 
 # Include pre core utilities (no internal dependencies)
-[ :data, :disk, :cli ].each do |name| 
+[ :data, :disk, :cli, :process ].each do |name| 
   require File.join('coral_core', 'util', name.to_s + ".rb") 
 end
 
