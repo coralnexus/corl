@@ -14,6 +14,18 @@ class Disk
   #-----------------------------------------------------------------------------
   # Utilities
   
+  def self.exists?(file)
+    return File.exists?(File.expand_path(file))  
+  end
+  
+  #---
+  
+  def self.filename(file_name)
+    return ( file_name.is_a?(Array) ? file_name.join(File::SEPARATOR) : file_name.to_s )
+  end
+  
+  #---
+  
   def self.open(file_name, options = {}, reset = false)
     mode          = options[:mode].to_s
     
@@ -44,6 +56,7 @@ class Disk
     file           = open(file_name, options)
     
     if file
+      file.pos = 0 if options[:mode] == 'r'
       return file.read
     end
     return nil
