@@ -48,6 +48,7 @@ Gem::Specification.new do |s|
     "lib/coral_core/util/git/base.rb",
     "lib/coral_core/util/git/lib.rb",
     "lib/coral_core/util/git/remote.rb",
+    "lib/coral_core/util/process.rb",
     "lib/coral_core/util/shell.rb",
     "lib/hiera_backend.rb",
     "spec/coral_core/interface_spec.rb",
