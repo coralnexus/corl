@@ -108,7 +108,7 @@ end
 #---
 
 # Include pre core utilities (no internal dependencies)
-[ :data, :disk ].each do |name| 
+[ :data, :disk, :cli ].each do |name| 
   require File.join('coral_core', 'util', name.to_s + ".rb") 
 end
 
