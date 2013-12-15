@@ -170,7 +170,8 @@ require 'hiera_backend.rb'
 # License::   GPLv3
 module Coral
   
-  VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
+  VERSION    = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
+  CORAL_FILE = 'coral.json'
   
   #---
   
