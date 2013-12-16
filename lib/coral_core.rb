@@ -41,91 +41,49 @@ module Kernel
 end
 
 #-------------------------------------------------------------------------------
-# Properties and 
+# Top level properties 
 
-home         = File.dirname(__FILE__)
-dependencies = File.join(home, 'dependency')
+lib_dir      = File.dirname(__FILE__)
+core_dir     = File.join(lib_dir, 'coral_core')
+event_dir    = File.join(core_dir, 'event')
+template_dir = File.join(core_dir, 'template')
+util_dir     = File.join(core_dir, 'util')
+ 
+#-------------------------------------------------------------------------------
+# Coral requirements
 
 git_location = coral_locate('git')
  
 #-------------------------------------------------------------------------------
 
-$:.unshift(home) unless
-  $:.include?(home) || $:.include?(File.expand_path(home))
+$:.unshift(lib_dir) unless
+  $:.include?(lib_dir) || $:.include?(File.expand_path(lib_dir))
 
 #---
   
 require 'rubygems'
-
-#---
-
-begin
-  require 'log4r'
-    
-rescue LoadError
-  log4r_lib = File.join(dependencies, 'log4r', 'lib')
-  
-  $:.push(log4r_lib)
-  require File.join(log4r_lib, 'log4r.rb')  
-end
-
-#---
-
-begin
-  require 'deep_merge'
-    
-rescue LoadError
-  deep_merge_lib = File.join(dependencies, 'deep_merge', 'lib')
-  
-  $:.push(deep_merge_lib)
-  require File.join(deep_merge_lib, 'deep_merge.rb')  
-end
-
-#---
-
-begin
-  require 'json'
-    
-rescue LoadError
-  json_lib = File.join(dependencies, 'json', 'lib')
-  
-  $:.push(json_lib)
-  require File.join(json_lib, 'json.rb')  
-end
-
-#---
+require 'log4r'
+require 'deep_merge'
+require 'json'
 
 if git_location
-  begin
-    require 'git'
-    
-  rescue LoadError
-    git_lib = File.join(dependencies, 'git', 'lib')
-  
-    $:.push(git_lib)
-    require File.join(git_lib, 'git.rb')  
-  end
+  require 'grit'
 end
 
 #---
 
 # Include pre core utilities (no internal dependencies)
 [ :data, :disk, :cli, :process ].each do |name| 
-  require File.join('coral_core', 'util', name.to_s + ".rb") 
+  require File.join(util_dir, name.to_s + ".rb") 
 end
 
 if git_location
-  require File.join('coral_core', 'util', 'git.rb') 
-
-  # Include Git overrides
-  Dir.glob(File.join(home, 'coral_core', 'util', 'git', '*.rb')).each do |file|
-    require file
-  end
+  require File.join(util_dir, 'git.rb')
 end
 
 # Include core
 [ :config, :interface, :core, :resource, :template ].each do |name| 
-  require File.join('coral_core', name.to_s + ".rb") 
+  require File.join(core_dir, name.to_s + ".rb") 
 end
 
 # Include post core utilities 
@@ -133,33 +91,29 @@ end
 #   core classes )
 #
 [ :shell ].each do |name| 
-  require File.join('coral_core', 'util', name.to_s + ".rb") 
+  require File.join(util_dir, name.to_s + ".rb") 
 end
 
 # Include data model
 [ :event, :command ].each do |name| 
-  require File.join('coral_core', name.to_s + ".rb") 
+  require File.join(core_dir, name.to_s + ".rb") 
 end
 
 if git_location
   [ :repository, :memory ].each do |name| 
-    require File.join('coral_core', name.to_s + ".rb") 
+    require File.join(core_dir, name.to_s + ".rb") 
   end  
 end
 
 # Include specialized events
-Dir.glob(File.join(home, 'coral_core', 'event', '*.rb')).each do |file|
+Dir.glob(File.join(event_dir, '*.rb')).each do |file|
   require file
 end
 
 # Include bundled templates
-Dir.glob(File.join(home, 'coral_core', 'template', '*.rb')).each do |file|
+Dir.glob(File.join(template_dir, '*.rb')).each do |file|
   require file
 end
-
-#---
-
-require 'hiera_backend.rb'
 
 #*******************************************************************************
 # Coral Core Library
