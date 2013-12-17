@@ -238,7 +238,7 @@ class Repository < Core
   def init_parent
     @parent = nil
         
-    unless top?(directory)
+    unless top?
       search_dir = directory
       
       while File.directory?((search_dir = File.expand_path('..', search_dir)))
