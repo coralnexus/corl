@@ -306,7 +306,7 @@ module Coral
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def self.class_name(name, separator = '::')
+  def self.class_name(name, separator = '::', want_array = FALSE)
     components = []
     
     case name
@@ -320,13 +320,26 @@ module Coral
       value.to_s.strip.capitalize  
     end
     
+    if want_array
+      return components
+    end    
     return components.join(separator)
   end
   
   #---
   
   def self.class_const(name, separator = '::')
-    return Object::const_get(class_name(name, separator))
+    components = class_name(name, separator, TRUE)
+    constant   = Object
+    
+    components.each do |component|
+      constant = constant.const_defined?(component) ? 
+                  constant.const_get(component) : 
+                  constant.const_missing(component)
+    end
+    
+    dbg(constant)
+    return constant
   end
   
   #---
