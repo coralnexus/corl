@@ -243,6 +243,13 @@ module Plugin
     info  = klass.send(method, info) if klass.respond_to?(method)
     return info  
   end
+  
+  #-----------------------------------------------------------------------------
+  # Core plugin types
+  
+  define_type :network => :default, 
+              :node    => :default,
+              :machine => :fog    
 
   #-----------------------------------------------------------------------------
   # Base plugin

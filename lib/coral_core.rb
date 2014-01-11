@@ -44,11 +44,13 @@ module Kernel
   def coral_require(base_dir, name)
     name = name.to_s
     
+    dbg(name, 'require name')
     require File.join(base_dir, "#{name}.rb")  
     directory = File.join(base_dir, name)
       
     if File.directory?(directory)
       Dir.glob(File.join(directory, '**', '*.rb')).each do |sub_file|
+        dbg(sub_file, 'sub file')
         require sub_file
       end
     end  
@@ -86,12 +88,13 @@ require 'multi_json'
 require 'digest/sha1'
 
 require 'puppet'
+require 'fog'
 
 #---
 
 # TODO: Make this dynamically settable
 
-I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir)
+#I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir)
 
 #---
 
@@ -129,8 +132,11 @@ coral_require(core_dir, :core)
   coral_require(util_dir, name)
 end
 
+dbg('hello from coral_core')
+
 # Include core systems
-[ :event, :template, :command, :repository, :resource, :plugin ].each do |name| 
+[ :event, :template, :command, :repository, :resource, :plugin ].each do |name|
+  dbg(name) 
   coral_require(core_dir, name)
 end
 
@@ -238,7 +244,50 @@ module Coral
   def self.remove_plugin(plugin)
     return Plugin.remove_instance(plugin)
   end
+  
+  #-----------------------------------------------------------------------------
+  # Core plugin type facade
    
+  def self.network(name, options = {}, provider = nil)
+    plugin      = plugin(:network, provider, options)
+    plugin.name = name
+    return plugin
+  end
+  
+  #---
+  
+  def self.networks(data, build_hash = false, keep_array = false)
+    return plugins(:network, data, build_hash, keep_array)
+  end
+   
+  #---
+  
+  def self.node(name, options = {}, provider = nil)
+    plugin      = plugin(:node, provider, options)
+    plugin.name = name
+    return plugin
+  end
+  
+  #---
+  
+  def self.nodes(data, build_hash = false, keep_array = false)
+    return plugins(:node, data, build_hash, keep_array)
+  end
+   
+  #---
+  
+  def self.machine(name, options = {}, provider = nil)
+    plugin      = plugin(:machine, provider, options)
+    plugin.name = name
+    return plugin
+  end
+  
+  #---
+  
+  def self.machines(data, build_hash = false, keep_array = false)
+    return plugins(:machine, data, build_hash, keep_array)
+  end
+     
   #-----------------------------------------------------------------------------
   # External execution
    
@@ -268,8 +317,9 @@ module Coral
     end
     
     components.collect! do |value|
-      name.to_s.strip.capitalize  
-    end    
+      value.to_s.strip.capitalize  
+    end
+    
     return components.join(separator)
   end
   
