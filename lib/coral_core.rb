@@ -85,7 +85,6 @@ require 'yaml'
 require 'multi_json'
 require 'digest/sha1'
 
-require 'rgen'
 require 'puppet'
 
 #---
@@ -286,8 +285,3 @@ module Coral
     return Digest::SHA1.hexdigest(Util::Data.to_json(data, false))
   end  
 end
-
-#-------------------------------------------------------------------------------
-# Coral initialization
-
-Coral.initialize

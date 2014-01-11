@@ -3,7 +3,7 @@ require 'spec_helper'
 
 module Coral
 
-  describe Interface do
+  describe Util::Interface do
 
     #---------------------------------------------------------------------------
     # UI functionality
@@ -17,11 +17,11 @@ module Coral
         output  = double('output')
         output.should_receive(:puts).with('message')
         
-        ui = Interface.new({
+        ui = Util::Interface.new({
           :output  => output,
           :printer => :puts,
         })        
-        Interface.new({ :ui_delegate => ui }).say(:info, 'message')
+        Util::Interface.new({ :ui_delegate => ui }).say(:info, 'message')
       end
       
       #-------------------------------------------------------------------------
@@ -31,12 +31,12 @@ module Coral
         output1 = double('output1')
         output1.should_receive(:puts).with('message')
         
-        Interface.new({ :output => output1 }).say(:info, 'message')
+        Util::Interface.new({ :output => output1 }).say(:info, 'message')
         
         output2 = double('output2')
         output2.should_receive(:puts).with('[component] message')
         
-        Interface.new({
+        Util::Interface.new({
           :resource => 'component', 
           :output   => output2, 
         }).say(:info, 'message')      
@@ -48,13 +48,13 @@ module Coral
         output1 = double('output1')
         output1.should_receive(:puts).with('message')
         
-        test = Interface.new({ :output => output1 })
+        test = Util::Interface.new({ :output => output1 })
         test.say(:info, 'message', { :new_line => true })
         
         output2 = double('output2')
         output2.should_receive(:print).with('message')
         
-        test = Interface.new({ :output => output2 })
+        test = Util::Interface.new({ :output => output2 })
         test.say(:info, 'message', { :new_line => false })      
       end
       
@@ -65,7 +65,7 @@ module Coral
           output = double('output')
           output.should_receive(:puts).with('message')
         
-          Interface.new({
+          Util::Interface.new({
             :output  => output,
             :printer => :puts,
             :color   => false,
@@ -75,7 +75,7 @@ module Coral
         error = double('error')
         error.should_receive(:puts).with('message')
         
-        Interface.new({
+        Util::Interface.new({
           :error   => error,
           :printer => :puts,
           :color   => false,
@@ -89,7 +89,7 @@ module Coral
           output = double('output')
           output.should_receive(:puts).with('message')
         
-          Interface.new({
+          Util::Interface.new({
             :output  => output,
             :printer => :puts,
           }).say(:info, 'message', { :channel => type })        
@@ -98,7 +98,7 @@ module Coral
         error = double('error')
         error.should_receive(:puts).with('message')
         
-        Interface.new({
+        Util::Interface.new({
           :error   => error,
           :printer => :puts,
           :color   => false,
@@ -132,11 +132,11 @@ module Coral
         output  = double('output')
         output.should_receive(:puts).with('message')
         
-        ui = Interface.new({
+        ui = Util::Interface.new({
           :output  => output,
           :printer => :puts,
         })        
-        Interface.new({ :ui_delegate => ui }).info('message')
+        Util::Interface.new({ :ui_delegate => ui }).info('message')
       end
       
       #-------------------------------------------------------------------------
@@ -146,7 +146,7 @@ module Coral
         output = double('output')
         output.should_receive(:puts).with('message')
         
-        Interface.new({ 
+        Util::Interface.new({ 
           :output  => output,
           :printer => :puts, 
         }).info('message')
@@ -164,12 +164,12 @@ module Coral
         output  = double('output')
         output.should_receive(:puts).with('message')
         
-        ui = Interface.new({
+        ui = Util::Interface.new({
           :output  => output,
           :printer => :puts,
           :color   => false,
         })        
-        Interface.new({ :ui_delegate => ui }).warn('message')
+        Util::Interface.new({ :ui_delegate => ui }).warn('message')
       end
       
       #-------------------------------------------------------------------------
@@ -179,7 +179,7 @@ module Coral
         output = double('output')
         output.should_receive(:puts).with('message')
         
-        Interface.new({ 
+        Util::Interface.new({ 
           :output  => output,
           :printer => :puts,
           :color   => false, 
@@ -192,7 +192,7 @@ module Coral
         output = double('output')
         output.should_receive(:print).with(/^\e\[33mmessage\e\[0m$/)
         
-        Interface.new({ 
+        Util::Interface.new({ 
           :output => output,
           :color  => true, 
         }).warn('message', { :new_line => false })
@@ -210,12 +210,12 @@ module Coral
         error  = double('error')
         error.should_receive(:puts).with('message')
         
-        ui = Interface.new({
+        ui = Util::Interface.new({
           :error   => error,
           :printer => :puts,
           :color   => false,
         })        
-        Interface.new({ :ui_delegate => ui }).error('message')
+        Util::Interface.new({ :ui_delegate => ui }).error('message')
       end
       
       #-------------------------------------------------------------------------
@@ -225,7 +225,7 @@ module Coral
         error = double('error')
         error.should_receive(:puts).with('message')
         
-        Interface.new({ 
+        Util::Interface.new({ 
           :error   => error,
           :printer => :puts,
           :color   => false, 
@@ -238,7 +238,7 @@ module Coral
         error = double('error')
         error.should_receive(:print).with(/^\e\[31mmessage\e\[0m$/)
         
-        Interface.new({ 
+        Util::Interface.new({ 
           :error => error,
           :color => true, 
         }).error('message', { :new_line => false })
@@ -256,12 +256,12 @@ module Coral
         output  = double('output')
         output.should_receive(:puts).with('message')
         
-        ui = Interface.new({
+        ui = Util::Interface.new({
           :output  => output,
           :printer => :puts,
           :color   => false,
         })        
-        Interface.new({ :ui_delegate => ui }).success('message')
+        Util::Interface.new({ :ui_delegate => ui }).success('message')
       end
       
       #-------------------------------------------------------------------------
@@ -271,7 +271,7 @@ module Coral
         output = double('output')
         output.should_receive(:puts).with('message')
         
-        Interface.new({ 
+        Util::Interface.new({ 
           :output  => output,
           :printer => :puts,
           :color   => false, 
@@ -284,7 +284,7 @@ module Coral
         output = double('output')
         output.should_receive(:print).with(/^\e\[32mmessage\e\[0m$/)
         
-        Interface.new({ 
+        Util::Interface.new({ 
           :output => output,
           :color  => true, 
         }).success('message', { :new_line => false })
@@ -300,8 +300,8 @@ module Coral
       # Delegation
       
       it "can delegate to another class that contains this method" do
-        message = Interface.new({ 
-          :ui_delegate => Interface.new('delegate')
+        message = Util::Interface.new({ 
+          :ui_delegate => Util::Interface.new('delegate')
         }).format_message(:info, 'message', { :prefix => true })
         
         message.should == '[delegate] message'
@@ -311,28 +311,28 @@ module Coral
       # Prefix specifications
       
       it "returns without a prefix because no resource" do
-        message = Interface.new.format_message(:info, 'message', { :prefix => true })
+        message = Util::Interface.new.format_message(:info, 'message', { :prefix => true })
         message.should == 'message'
       end
       
       #---
       
       it "returns without a prefix because prefix is false" do
-        message = Interface.new('component').format_message(:info, 'message', { :prefix => false })
+        message = Util::Interface.new('component').format_message(:info, 'message', { :prefix => false })
         message.should == 'message'
       end
       
       #---
             
       it "returns without a prefix because no prefix option given" do
-        message = Interface.new('component').format_message(:info, 'message')
+        message = Util::Interface.new('component').format_message(:info, 'message')
         message.should == 'message'
       end
       
       #---
             
       it "returns with a prefix if resource and prefix option given" do
-        message = Interface.new('component').format_message(:info, 'message', { :prefix => true })
+        message = Util::Interface.new('component').format_message(:info, 'message', { :prefix => true })
         message.should == '[component] message'
       end
       
@@ -340,7 +340,7 @@ module Coral
       # Color specifications
       
       it "formats a error message in red if color enabled" do
-        message = Interface.new({
+        message = Util::Interface.new({
           :resource => 'component',
           :color    => true,
         }).format_message(:error, 'message')
@@ -350,7 +350,7 @@ module Coral
       #---
       
       it "formats a warning message in yellow if color enabled" do
-        message = Interface.new({
+        message = Util::Interface.new({
           :resource => 'component',
           :color    => true,
         }).format_message(:warn, 'message')
@@ -360,7 +360,7 @@ module Coral
       #---
       
       it "formats a success message in green if color enabled" do
-        message = Interface.new({
+        message = Util::Interface.new({
           :resource => 'component',
           :color    => true,
         }).format_message(:success, 'message')
@@ -379,11 +379,11 @@ module Coral
         output  = double('output')
         output.should_receive(:puts).with('message')
         
-        ui = Interface.new({
+        ui = Util::Interface.new({
           :output  => output,
           :printer => :puts,
         })        
-        Interface.new({ :ui_delegate => ui }).safe_puts('message')
+        Util::Interface.new({ :ui_delegate => ui }).safe_puts('message')
       end
       
       #-------------------------------------------------------------------------
@@ -393,7 +393,7 @@ module Coral
         output  = double('output')
         output.should_receive(:puts).with('')
         
-        Interface.new({
+        Util::Interface.new({
           :output  => output,
           :printer => :puts,
         }).safe_puts()
@@ -405,7 +405,7 @@ module Coral
         output1 = double('output1')
         output1.should_receive(:puts).with('message')
         
-        test = Interface.new({
+        test = Util::Interface.new({
           :output  => output1,
           :printer => :puts,
         })
@@ -424,7 +424,7 @@ module Coral
         output = double('output')
         output.should_receive(:puts).with('message')
         
-        Interface.new({
+        Util::Interface.new({
           :output  => output,
           :printer => :puts,
         }).safe_puts('message')
@@ -436,7 +436,7 @@ module Coral
         output = double('output')
         output.should_receive(:print).with('message')
         
-        Interface.new({
+        Util::Interface.new({
           :output  => output,
           :printer => :print,
         }).safe_puts('message')
@@ -452,7 +452,7 @@ module Coral
         output2 = double('output2')
         output2.should_receive(:puts).with('message')
         
-        Interface.new({
+        Util::Interface.new({
           :output  => output1,
           :printer => :puts,
         }).safe_puts('message', { :channel => output2 })  
@@ -465,7 +465,7 @@ module Coral
         output.should_not_receive(:puts).with('message')
         output.should_receive(:print).with('message')
         
-        Interface.new({
+        Util::Interface.new({
           :output  => output,
           :printer => :puts,
         }).safe_puts('message', { :printer => :print })
@@ -477,10 +477,10 @@ module Coral
     describe "#check_delegate" do
       
       it "returns false if no delegate exists" do
-        Interface.new.check_delegate('safe_puts').should be_false
+        Util::Interface.new.check_delegate('safe_puts').should be_false
       end
       it "returns true if a delegate exists and it implements given method" do
-        test = Interface.new({ :ui_delegate => Interface.new })
+        test = Util::Interface.new({ :ui_delegate => Util::Interface.new })
         test.check_delegate('safe_puts').should be_true
         test.check_delegate('nonexistent').should be_false
       end

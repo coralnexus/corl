@@ -1,6 +1,7 @@
 require 'log4r'
 
 module Coral
+module Util
 class Interface
   
   #-----------------------------------------------------------------------------
@@ -175,5 +176,6 @@ class Interface
   def check_delegate(method)
     return ( @delegate && @delegate.respond_to?(method.to_s) )
   end
+end
 end
 end
