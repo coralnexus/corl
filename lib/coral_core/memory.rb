@@ -11,6 +11,7 @@ class Memory < Repository
     super(config)
     
     @absolute_config_file = ''
+    @submodule            = ''
     @config_file          = ''
     
     @properties     = config.get(:properties, {})
@@ -189,7 +190,7 @@ class Memory < Repository
   #-----------------------------------------------------------------------------
   # Configuration loading / saving
     
-  def load
+  def load(options = {})
     if can_persist?
       config = Coral::Util::Disk.read(@absolute_config_file)    
       if config && ! config.empty?
@@ -217,7 +218,7 @@ class Memory < Repository
   
   def can_persist?
     success = super
-    success = false if success && @absolute_config_file.empty?
+    success = false if success && ! @absolute_config_file.nil? && @absolute_config_file.empty?
     return success
   end
 end

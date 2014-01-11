@@ -38,6 +38,21 @@ module Kernel
     end
     return nil
   end
+    
+  #---
+  
+  def coral_require(base_dir, name)
+    name = name.to_s
+    
+    require File.join(base_dir, "#{name}.rb")  
+    directory = File.join(base_dir, name)
+      
+    if File.directory?(directory)
+      Dir.glob(File.join(directory, '**', '*.rb')).each do |sub_file|
+        require sub_file
+      end
+    end  
+  end
 end
 
 #-------------------------------------------------------------------------------
@@ -45,74 +60,79 @@ end
 
 lib_dir      = File.dirname(__FILE__)
 core_dir     = File.join(lib_dir, 'coral_core')
+mixin_dir    = File.join(core_dir, 'mixin')
+macro_dir    = File.join(mixin_dir, 'macro')
 event_dir    = File.join(core_dir, 'event')
 template_dir = File.join(core_dir, 'template')
 util_dir     = File.join(core_dir, 'util')
+mod_dir      = File.join(core_dir, 'mod')
  
 #-------------------------------------------------------------------------------
 # Coral requirements
 
 git_location = coral_locate('git')
- 
-#-------------------------------------------------------------------------------
 
-$:.unshift(lib_dir) unless
-  $:.include?(lib_dir) || $:.include?(File.expand_path(lib_dir))
+$:.unshift(lib_dir) unless $:.include?(lib_dir) || $:.include?(File.expand_path(lib_dir))
 
 #---
   
 require 'rubygems'
+
+require 'i18n'
 require 'log4r'
 require 'deep_merge'
-require 'json'
+require 'yaml'
+require 'multi_json'
+require 'digest/sha1'
+
+require 'rgen'
+require 'puppet'
+
+#---
+
+# TODO: Make this dynamically settable
+
+I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir)
+
+#---
 
 if git_location
   require 'grit'
+  coral_require(util_dir, :git)
 end
 
 #---
 
-# Include pre core utilities (no internal dependencies)
-[ :data, :disk, :cli, :process ].each do |name| 
-  require File.join(util_dir, name.to_s + ".rb") 
-end
-
-if git_location
-  require File.join(util_dir, 'git.rb')
-end
-
-# Include core
-[ :config, :interface, :core, :resource, :template ].each do |name| 
-  require File.join(core_dir, name.to_s + ".rb") 
-end
-
-# Include post core utilities 
-# ( normally inherit from core and have no reverse dependencies with 
-#   core classes )
-#
-[ :shell ].each do |name| 
-  require File.join(util_dir, name.to_s + ".rb") 
-end
-
-# Include data model
-[ :event, :command ].each do |name| 
-  require File.join(core_dir, name.to_s + ".rb") 
-end
-
-if git_location
-  [ :repository, :memory ].each do |name| 
-    require File.join(core_dir, name.to_s + ".rb") 
-  end  
-end
-
-# Include specialized events
-Dir.glob(File.join(event_dir, '*.rb')).each do |file|
+# Object modifications (100% pure monkey patches)
+Dir.glob(File.join(mod_dir, '*.rb')).each do |file|
   require file
 end
 
-# Include bundled templates
-Dir.glob(File.join(template_dir, '*.rb')).each do |file|
+#---
+
+# Mixins for classes
+Dir.glob(File.join(mixin_dir, '*.rb')).each do |file|
   require file
+end
+Dir.glob(File.join(macro_dir, '*.rb')).each do |file|
+  require file
+end
+
+#---
+
+coral_require(util_dir, :data)
+coral_require(core_dir, :config)
+coral_require(util_dir, :interface) 
+coral_require(core_dir, :core) 
+
+# Include core utilities
+[ :cli, :disk, :process, :shell ].each do |name| 
+  coral_require(util_dir, name)
+end
+
+# Include core systems
+[ :event, :template, :command, :repository, :resource, :plugin ].each do |name| 
+  coral_require(core_dir, name)
 end
 
 #*******************************************************************************
@@ -124,37 +144,26 @@ end
 # License::   GPLv3
 module Coral
   
-  VERSION    = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
+  VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
+  
+  #---
+  
   CORAL_FILE = 'coral.json'
   
-  #---
-  
-  @@ui = Coral::Core.ui
-  
-  #---
+  #-----------------------------------------------------------------------------
   
   def self.ui
-    return @@ui
+    return Core.ui
+  end
+  
+  #---
+  
+  def self.logger
+    return Core.logger
   end
   
   #-----------------------------------------------------------------------------
   # Initialization
-  
-  def self.load(base_path)
-    if File.exists?(base_path)
-      Dir.glob(File.join(base_path, '*.rb')).each do |file|
-        require file
-      end
-      Dir.glob(File.join(base_path, 'event', '*.rb')).each do |file|
-        require file
-      end
-      Dir.glob(File.join(base_path, 'template', '*.rb')).each do |file|
-        require file
-      end  
-    end  
-  end
-  
-  #---
   
   @@initialized = false
   
@@ -162,15 +171,75 @@ module Coral
     unless @@initialized
       Config.set_property('time', Time.now.to_i)
       
-      # Include Coral extensions
+      # Include Coral plugins
       Puppet::Node::Environment.new.modules.each do |mod|
-        load(File.join(mod.path, 'lib', 'coral'))
-      end      
+        lib_path = File.join(mod.path, 'lib', 'coral')
+        Plugin.register(lib_path)
+      end
+      
+      Plugin.initialize
             
       @@initialized = true
     end    
   end
   
+  #---
+  
+  def self.initialized?
+    return @@initialized
+  end
+    
+  #-----------------------------------------------------------------------------
+  # Plugins
+  
+  def self.plugin(type, provider, options = {})
+    default_provider = Plugin.type_default(type)
+    
+    if options.is_a?(Hash) || options.is_a?(Coral::Config)
+      config   = Config.ensure(options)
+      provider = config.get(:provider, provider)
+      name     = config.get(:name, ( provider ? provider : default_provider ))
+      options  = config.export
+    end
+    provider          = default_provider unless provider # Sanity checking (see plugins)
+    existing_instance = Plugin.get_instance(type, name) if name
+    
+    return existing_instance if existing_instance
+    return Plugin.create_instance(type, provider, options)
+  end
+  
+  #---
+  
+  def self.plugins(type, data, build_hash = false, keep_array = false)
+    group = ( build_hash ? {} : [] )
+    klass = class_const([ :coral, :plugin, type ])    
+    data  = klass.build_info(type, data) if klass.respond_to?(:build_info)
+    
+    data.each do |options|
+      if plugin = plugin(type, options[:provider], options)
+        if build_hash
+          group[plugin.name] = plugin
+        else
+          group << plugin
+        end
+      end
+    end
+    return group.shift if ! build_hash && group.length == 1 && ! keep_array
+    return group  
+  end
+  
+  #---
+  
+  def self.get_plugin(type, name)
+    return Plugin.get_instance(type, name)
+  end
+  
+  #---
+  
+  def self.remove_plugin(plugin)
+    return Plugin.remove_instance(plugin)
+  end
+   
   #-----------------------------------------------------------------------------
   # External execution
    
@@ -185,33 +254,40 @@ module Coral
       raise
     end
   end
+    
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def self.class_name(name, separator = '::')
+    components = []
+    
+    case name
+    when String, Symbol
+      components = name.to_s.split(separator)
+    when Array
+      components = name 
+    end
+    
+    components.collect! do |value|
+      name.to_s.strip.capitalize  
+    end    
+    return components.join(separator)
+  end
+  
+  #---
+  
+  def self.class_const(name, separator = '::')
+    return Object::const_get(class_name(name, separator))
+  end
+  
+  #---
+  
+  def self.sha1(data)
+    return Digest::SHA1.hexdigest(Util::Data.to_json(data, false))
+  end  
 end
 
 #-------------------------------------------------------------------------------
-# Data type alterations
+# Coral initialization
 
-class Hash
-  def search(search_key, options = {})
-    config = Coral::Config.ensure(options)
-    value  = nil
-    
-    recurse       = config.get(:recurse, false)
-    recurse_level = config.get(:recurse_level, -1)
-        
-    self.each do |key, data|
-      if key == search_key
-        value = data
-        
-      elsif data.is_a?(Hash) && 
-        recurse && (recurse_level == -1 || recurse_level > 0)
-        
-        recurse_level -= 1 unless recurse_level == -1
-        value = value.search(search_key, 
-          Coral::Config.new(config).set(:recurse_level, recurse_level)
-        )
-      end
-      break unless value.nil?
-    end
-    return value
-  end
-end
+Coral.initialize

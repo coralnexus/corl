@@ -3,265 +3,13 @@ module Coral
 class Config
   
   #-----------------------------------------------------------------------------
-  # Global configuration
-  
-  @@options = {}
-  
-  #---
-  
-  def self.options(contexts, force = true)
-    options = {}
-    
-    unless contexts.is_a?(Array)
-      contexts = [ contexts ]
-    end
-    contexts.each do |name|
-      if @@options.has_key?(name)
-        options = Util::Data.merge([ options, @@options[name] ], force)
-      end
-    end
-    return options
-  end
-  
-  #---
-  
-  def self.set_options(context, options, force = true)    
-    current_options = ( @@options.has_key?(context) ? @@options[context] : {} )
-    @@options[context] = Util::Data.merge([ current_options, options ], force)  
-  end
-  
-  #---
-  
-  def self.clear_options(contexts)
-    unless contexts.is_a?(Array)
-      contexts = [ contexts ]
-    end
-    contexts.each do |name|
-      @@options.delete(name)
-    end
-  end
-  
-  #-----------------------------------------------------------------------------
+  # Global interface
 
-  @@properties = {}
+  extend Mixin::ConfigOptions
+  extend Mixin::ConfigCollection
+  extend Mixin::Lookup
+  extend Mixin::ConfigOps
   
-  #---
-  
-  def self.properties
-    return @@properties
-  end
-  
-  #---
-  
-  def self.set_property(name, value)
-    #dbg(value, "result -> #{name}")
-    @@properties[name] = value
-    save_properties  
-  end
-  
-  #---
-  
-  def self.clear_property(name)
-    @@properties.delete(name)
-    save_properties
-  end
-  
-  #---
-  
-  def self.save_properties
-    log_options = options('coral_log')
-    
-    unless Util::Data.empty?(log_options['config_log'])
-      config_log = log_options['config_log']
-      
-      if log_options['config_store']
-        Util::Disk.write(config_log, JSON.pretty_generate(@@properties))
-        Util::Disk.close(config_log)
-      end
-    end
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Hiera configuration
-  
-  @@hiera = nil
-  
-  #---
-  
-  def self.hiera_config
-    config_file = Puppet.settings[:hiera_config]
-    config      = {}
-
-    if File.exist?(config_file)
-      config = Hiera::Config.load(config_file)
-    else
-      Coral.ui.warn("Config file #{config_file} not found, using Hiera defaults")
-    end
-
-    config[:logger] = 'puppet'
-    return config
-  end
-  
-  #---
-
-  def self.hiera
-    @@hiera = Hiera.new(:config => hiera_config) unless @@hiera
-    return @@hiera
-  end
-  
-  #---
-
-  def hiera
-    return self.class.hiera
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Configuration lookup
-      
-  def self.initialized?(options = {})
-    config = Config.ensure(options)
-    begin
-      require 'hiera_puppet'
-      
-      scope       = config.get(:scope, {})
-      
-      sep         = config.get(:sep, '::')
-      prefix      = config.get(:prefix, true)    
-      prefix_text = prefix ? sep : ''
-      
-      init_fact   = prefix_text + config.get(:init_fact, 'hiera_ready')
-      coral_fact  = prefix_text + config.get(:coral_fact, 'coral_exists') 
-      
-      if Puppet::Parser::Functions.function('hiera')
-        if scope.respond_to?('[]')
-          return true if Util::Data.true?(scope[init_fact]) && Util::Data.true?(scope[coral_fact])
-        else
-          return true
-        end
-      end
-    
-    rescue Exception # Prevent abortions.
-    end    
-    return false
-  end
-  
-  #---
-    
-  def self.lookup(name, default = nil, options = {})
-    config = Config.ensure(options)
-    value  = nil
-    
-    context     = config.get(:context, :priority)
-    scope       = config.get(:scope, {})
-    override    = config.get(:override, nil)
-    
-    base_names  = config.get(:search, nil)
-    sep         = config.get(:sep, '::')
-    prefix      = config.get(:prefix, true)    
-    prefix_text = prefix ? sep : ''
-    
-    debug       = config.get(:debug, false)
-    
-    search_name    = config.get(:search_name, true)
-    reverse_lookup = config.get(:reverse_lookup, true)
-    
-    dbg(default, "lookup -> #{name}") if debug
-    
-    if Config.initialized?(options)
-      unless scope.respond_to?("[]")
-        scope = Hiera::Scope.new(scope)
-      end
-      value = hiera.lookup(name, nil, scope, override, context)
-      dbg(value, "hiera lookup -> #{name}") if debug
-    end 
-    
-    if Util::Data.undef?(value) && ( scope.respond_to?("[]") || scope.respond_to?("lookupvar") )
-      log_level = Puppet::Util::Log.level
-      Puppet::Util::Log.level = :err # Don't want failed parameter lookup warnings here.
-      
-      if base_names
-        if base_names.is_a?(String)
-          base_names = [ base_names ]
-        end
-        base_names = base_names.reverse if reverse_lookup
-        
-        dbg(base_names, 'lookup search path') if debug        
-        base_names.each do |item|
-          if scope.respond_to?("lookupvar")
-            value = scope.lookupvar("#{prefix_text}#{item}#{sep}#{name}")  
-          else
-            value = scope["#{prefix_text}#{item}#{sep}#{name}"]
-          end
-          dbg(value, "scope lookup #{prefix_text}#{item}#{sep}#{name}") if debug
-          break unless Util::Data.undef?(value)  
-        end
-      end
-      if Util::Data.undef?(value) && search_name
-        if scope.respond_to?("lookupvar")
-          value = scope.lookupvar("#{prefix_text}#{name}")
-        else
-          value = scope["#{prefix_text}#{name}"]
-        end
-        dbg(value, "scope lookup #{prefix_text}#{name}") if debug
-      end
-      Puppet::Util::Log.level = log_level
-    end    
-    value = default if Util::Data.undef?(value)
-    value = Util::Data.value(value)
-    
-    if ! @@properties.has_key?(name) || ! Util::Data.undef?(value)
-      set_property(name, value)
-    end
-    
-    dbg(value, "lookup result -> #{name}") if debug    
-    return value  
-  end
-  
-  #---
-
-  def self.normalize(data, override = nil, options = {})
-    config  = Config.ensure(options)
-    results = {}
-    
-    debug   = config.get(:debug, false)
-    
-    unless Util::Data.undef?(override)
-      case data
-      when String, Symbol
-        data = [ data, override ] if data != override
-      when Array
-        data << override unless data.include?(override)
-      when Hash
-        data = [ data, override ]
-      end
-    end
-    
-    dbg(data, 'config normalize data') if debug
-    dbg(override, 'config normalize override') if debug
-    
-    case data
-    when String, Symbol
-      results = Config.lookup(data.to_s, {}, config)
-      
-    when Array
-      data.each do |item|
-        if item.is_a?(String) || item.is_a?(Symbol)
-          item = Config.lookup(item.to_s, {}, config)
-        end
-        unless Util::Data.undef?(item)
-          results = Util::Data.merge([ results, item ], config)
-        end
-      end
-  
-    when Hash
-      results = data
-    end
-    
-    dbg(results, 'config normalize results') if debug
-    
-    return results
-  end
-    
   #-----------------------------------------------------------------------------
   # Instance generators
   
@@ -270,68 +18,189 @@ class Config
     when Coral::Config
       return config
     when Hash
-      return Config.new(config) 
+      return new(config) 
     end
-    return Config.new
+    return new
   end
   
   #---
   
-  def self.init(options, contexts = [], defaults = {})
-    config = Coral::Config.new(Coral::Config.options(contexts), defaults)
-    config.import(options) unless Coral::Util::Data.empty?(options)
+  def self.init(options, contexts = [], hierarchy = [], defaults = {})
+    contexts = contexts(contexts, hierarchy)
+    config   = new(get_options(contexts), defaults)
+    config.import(options) unless Util::Data.empty?(options)
     return config
   end
   
+  #---
+  
+  def self.init_flat(options, contexts = [], defaults = {})
+    return init(options, contexts, [], defaults)
+  end
+   
   #-----------------------------------------------------------------------------
-  # Configuration instance
-    
+  # Constructor / Destructor
+   
   def initialize(data = {}, defaults = {}, force = true)
-    @force   = force
-    @options = {}
+    @force      = force
+    @properties = {}
     
     if defaults.is_a?(Hash) && ! defaults.empty?
-      symbolized = {}
-      defaults.each do |key, value|
-        symbolized[key.to_sym] = value
-      end
-      defaults = symbolized
+      defaults = symbol_map(defaults)
     end
     
     case data
     when Coral::Config
-      @options = Util::Data.merge([ defaults, data.options ], force)
+      @properties = Util::Data.merge([ defaults, data.export ], force)
     when Hash
-      @options = {}
+      @properties = {}
       if data.is_a?(Hash)
-        symbolized = {}
-        data.each do |key, value|
-          symbolized[key.to_sym] = value
-        end
-        @options = Util::Data.merge([ defaults, symbolized ], force)
+        @properties = Util::Data.merge([ defaults, symbol_map(data) ], force)
       end  
     end
   end
   
   #---
   
-  def import(data, options = {})
-    config = Config.new(options, { :force => @force }).set(:context, :hash)
+  def inspect
+    "#<#{self.class}: >"
+  end
+      
+  #-----------------------------------------------------------------------------
+  # Property accessors / modifiers
     
-    case data
-    when Hash
-      symbolized = {}
-      data.each do |key, value|
-        symbolized[key.to_sym] = value
+  def fetch(data, keys, default = nil, format = false)    
+    if keys.is_a?(String) || keys.is_a?(Symbol)
+      keys = [ keys ]
+    end    
+    key = keys.shift.to_sym
+    
+    if data.has_key?(key)
+      value = data[key]
+      
+      if keys.empty?
+        return filter(value, format)
+      else
+        return fetch(data[key], keys, default, format)  
       end
-      @options = Util::Data.merge([ @options, symbolized ], config)
+    end
+    return filter(default, format)
+  end
+  protected :fetch
+  
+  #---
+  
+  def modify(data, keys, value = nil) 
+    if keys.is_a?(String) || keys.is_a?(Symbol)
+      keys = [ keys ]
+    end
+        
+    key      = keys.shift.to_sym
+    has_key  = data.has_key?(key)
+    existing = { 
+      :key   => key, 
+      :value => ( has_key ? data[key] : nil ) 
+    }
     
-    when String      
-      data = Util::Data.lookup(data, {}, config)
-      Util::Data.merge([ @options, data ], config)
+    if keys.empty?      
+      existing[:value] = data[key] if has_key
+      
+      if value.nil?
+        data.delete(key) if has_key
+      else
+        data[key] = value
+      end
+    else      
+      data[key] = {} unless has_key
+      existing  = modify(data[key], keys, value)  
+    end
+    
+    return existing
+  end
+  protected :modify
+  
+  #---
+  
+  def get(keys, default = nil, format = false)
+    return fetch(@properties, array(keys).flatten, default, format)
+  end
+
+  #---
+ 
+  def [](name, default = nil, format = false)
+    get(name, default, format)
+  end
+  
+  #---
+  
+  def get_array(keys, default = [])
+    return get(keys, default, :array)
+  end
+  
+  #---
+  
+  def get_hash(keys, default = {})
+    return get(keys, default, :hash)
+  end
+  
+  #---
+  
+  def init(keys, default = nil)
+    return set(keys, get(keys, default))
+  end
+
+  #---
+  
+  def set(keys, value)
+    modify(@properties, array(keys).flatten, value)
+    return self
+  end
+  
+  #---
+  
+  def []=(name, value)
+    set(name, value)
+  end
+   
+  #---
+  
+  def delete(keys, default = nil)
+    existing = modify(@properties, array(keys).flatten, nil)
+    return existing[:value] if existing[:value]
+    return default
+  end
+  
+  #---
+  
+  def clear(options = {})
+    @properties = {}
+    return self
+  end
+
+  #-----------------------------------------------------------------------------
+  # Import / Export
+ 
+  def import(properties, options = {})
+    config      = new(options, { :force => @force }).set(:context, :hash)    
+    import_type = config.get(:import_type, :override)
+    
+    case properties
+    when Hash
+      data = [ @properties, symbol_map(properties) ]
+      data = data.reverse if import_type != :override
+      
+      @properties = Util::Data.merge(data, config)
+    
+    when String, Symbol      
+      properties = lookup(properties.to_s, {}, config)
+      
+      data = [ @properties, symbol_map(properties) ]
+      data = data.reverse if import_type != :override
+    
+      @properties = Util::Data.merge(data, config)
      
     when Array
-      data.each do |item|
+      properties.each do |item|
         import(item, config)
       end
     end
@@ -341,31 +210,112 @@ class Config
   
   #---
   
-  def set(name, value)
-    @options[name.to_sym] = value
-    return self
+  def defaults(defaults, options = {})
+    config = new(options).set(:import_type, :default)
+    return import(defaults, config)
+  end
+
+  #---
+  
+  def export
+    return @properties
   end
   
-  def []=(name, value)
-    set(name, value)
+  #-----------------------------------------------------------------------------
+  # Utilities
+
+  def self.symbol_map(data)
+    return Util::Data.symbol_map(data)
   end
   
+  #---
+  
+  def symbol_map(data)
+    return self.class.symbol_map(data)
+  end
+  
+  #---
+  
+  def self.string_map(data)
+    return Util::Data.string_map(data)
+  end
+  
+  #---
+  
+  def string_map(data)
+    return self.class.string_map(data)
+  end
+  
+  #-----------------------------------------------------------------------------
+      
+  def self.filter(data, method = false)
+    return Util::Data.filter(data, method)
+  end
+  
+  #---
+  
+  def filter(data, method = false)
+    return self.class.filter(data, method)
+  end
+    
+  #-----------------------------------------------------------------------------
+          
+  def self.array(data, default = [], split_string = false)
+    return Util::Data.array(data, default, split_string)
+  end
+  
+  #---
+  
+  def array(data, default = [], split_string = false)
+    return self.class.array(data, default, split_string)
+  end
+    
+  #---
+        
+  def self.hash(data, default = {})
+    return Util::Data.hash(data, default)
+  end
+  
+  #---
+  
+  def hash(data, default = {})
+    return self.class.hash(data, default)
+  end
+    
+  #---
+         
+  def self.string(data, default = '')
+    return Util::Data.string(data, default)
+  end
+  
+  #---
+  
+  def string(data, default = '')
+    return self.class.string(data, default)
+  end
+    
+  #---
+         
+  def self.symbol(data, default = :undefined)
+    return Util::Data.symbol(data, default)
+  end
+  
+  #---
+  
+  def symbol(data, default = :undefined)
+    return self.class.symbol(data, default)
+  end
+     
   #---
     
-  def get(name, default = nil)
-    name = name.to_sym
-    return @options[name] if @options.has_key?(name)
-    return default
-  end
-  
-  def [](name, default = nil)
-    get(name, default)
+  def self.test(data)
+    return Util::Data.test(data)
   end
   
   #---
   
-  def options
-    return @options
-  end
+  def test(data)
+    return self.class.test(data)
+  end  
 end
 end

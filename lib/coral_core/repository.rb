@@ -46,15 +46,16 @@ class Repository < Core
     
     set_location(config.get(:directory, Dir.pwd))
     
-    @origin = config.get(:origin, nil)
+    @cloud       = config.get(:object_container, nil)
+    @remote_path = config.get(:remote_path, nil)
+    
+    @origin   = config.get(:origin, nil)
     @revision = config.get(:revision, nil)
     
     set_origin(@origin) unless @origin.nil?
     checkout(@revision) unless @revision.nil?
     
     pull if config.get(:pull, false)
-    
-    @@repositories[directory] = self
   end
   
   #-----------------------------------------------------------------------------
@@ -214,11 +215,15 @@ class Repository < Core
   #---
    
   def set_location(directory)
+    @@repositories.delete(@directory) if @directory
+    
     if Util::Data.empty?(directory)
       @directory = Dir.pwd
     else
       @directory = Util::Disk.filename(directory)
     end
+    
+    @@repositories[@directory] = self
     
     ensure_git(true)
     
@@ -237,13 +242,13 @@ class Repository < Core
   
   def init_parent
     @parent = nil
-        
+    
     unless top?
       search_dir = directory
       
       while File.directory?((search_dir = File.expand_path('..', search_dir)))
-        if git_dir(search_dir)
-          @parent = open(search_dir)
+        if self.class.git_dir(search_dir)
+          @parent = self.class.open(search_dir)
           break;
         end
       end
@@ -256,10 +261,10 @@ class Repository < Core
   
   def load_revision
     if can_persist?
-      @revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD')
+      @revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip
     
       if @revision.empty?
-        @revision = git.native(:rev_parse, {}, 'HEAD')
+        @revision = git.native(:rev_parse, {}, 'HEAD').strip
       end
       load_submodules
     end
@@ -271,6 +276,8 @@ class Repository < Core
   
   def checkout(revision)
     if can_persist?
+      revision = revision.strip
+      
       git.checkout({}, revision) unless @git_lib.bare
       @revision = revision
       load_submodules
@@ -321,16 +328,22 @@ class Repository < Core
   def load_submodules
     @submodules = {}
     
+    if @parent.nil?
+      dbg(@directory, "Top level repository")  
+    else
+      dbg(@directory, "Repository within #{@parent.directory}")
+    end
     if can_persist?
       # Returns a Hash of { <path:String> => { 'url' => <url:String>, 'id' => <id:String> } }
       # Returns {} if no .gitmodules file was found
       Grit::Submodule.config(@git_lib, revision).each do |path, data|
-        repo = open(File.join(directory, path))
+        repo = self.class.open(File.join(directory, path))
         repo.set_origin(data['url']) # Just a sanity check (might disapear)
         
         @submodules[path] = repo
       end
     end
+    dbg(@submodules.keys.size, 'Submodules')
     return self
   end
   protected :load_submodules
