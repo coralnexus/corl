@@ -1,7 +1,7 @@
 
 module Coral
-module Cloud
-class Default < Plugin::Cloud
+module Network
+class Default < Plugin::Network
  
   #-----------------------------------------------------------------------------
   # Cloud plugin interface

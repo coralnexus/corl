@@ -3,8 +3,6 @@ module Coral
 module Plugin
 class Network < Base
   
-  dbg('hello from Coral::Plugin::Network')
-  
   extend Mixin::Macro::PluginInterface  
   
   #-----------------------------------------------------------------------------

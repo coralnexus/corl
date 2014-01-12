@@ -3,7 +3,7 @@ module Coral
 module Machine
 class Fog < Plugin::Machine
   
-  include Mixins::SubConfig
+  include Mixin::SubConfig
   
   #-----------------------------------------------------------------------------
   # Machine plugin interface

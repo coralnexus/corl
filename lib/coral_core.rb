@@ -44,13 +44,11 @@ module Kernel
   def coral_require(base_dir, name)
     name = name.to_s
     
-    dbg(name, 'require name')
     require File.join(base_dir, "#{name}.rb")  
     directory = File.join(base_dir, name)
       
     if File.directory?(directory)
       Dir.glob(File.join(directory, '**', '*.rb')).each do |sub_file|
-        dbg(sub_file, 'sub file')
         require sub_file
       end
     end  
@@ -132,11 +130,8 @@ coral_require(core_dir, :core)
   coral_require(util_dir, name)
 end
 
-dbg('hello from coral_core')
-
 # Include core systems
 [ :event, :template, :command, :repository, :resource, :plugin ].each do |name|
-  dbg(name) 
   coral_require(core_dir, name)
 end
 
@@ -176,10 +171,13 @@ module Coral
     unless @@initialized
       Config.set_property('time', Time.now.to_i)
       
-      # Include Coral plugins
-      Puppet::Node::Environment.new.modules.each do |mod|
-        lib_path = File.join(mod.path, 'lib', 'coral')
-        Plugin.register(lib_path)
+      begin
+        # Include Coral plugins
+        Puppet::Node::Environment.new.modules.each do |mod|
+          lib_path = File.join(mod.path, 'lib', 'coral')
+          Plugin.register(lib_path)
+        end
+      rescue
       end
       
       Plugin.initialize
@@ -250,6 +248,7 @@ module Coral
    
   def self.network(name, options = {}, provider = nil)
     plugin      = plugin(:network, provider, options)
+    dbg(plugin, 'network plugin (coral_core)')
     plugin.name = name
     return plugin
   end
@@ -338,7 +337,6 @@ module Coral
                   constant.const_missing(component)
     end
     
-    dbg(constant)
     return constant
   end
   
@@ -348,3 +346,8 @@ module Coral
     return Digest::SHA1.hexdigest(Util::Data.to_json(data, false))
   end  
 end
+
+#-------------------------------------------------------------------------------
+# Coral initialization
+
+Coral.initialize

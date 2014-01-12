@@ -20,11 +20,23 @@ module Plugin
     type     = type.to_sym
     provider = provider.to_sym
     
+    dbg(type, 'type')
+    dbg(provider, 'provider')
+    dbg(options, 'options')
+    dbg(@@types, 'types')
+    dbg(@@core)
+    dbg(@@gems, 'gems')
+    dbg(@@load_info, 'loaded info')
+    
     return nil unless @@types.has_key?(type)
     
     options  = translate_type(type, options)
     provider = options.delete(:provider).to_sym if options.has_key?(:provider)    
     info     = @@load_info[type][provider] if Util::Data.exists?(@@load_info, [ type, provider ])
+    
+    dbg(options, 'modified options')
+    dbg(provider, 'modified provider')
+    dbg(info, 'info')
         
     if info
       options       = translate(type, provider, options)      
@@ -75,14 +87,17 @@ module Plugin
   #---
   
   def self.register_gem(spec)
-    lib_path = File.join(spec.full_gem_path, 'lib', 'coral')
-    if File.directory?(lib_path)
-      @@core = spec if spec.name == 'coral_core'
+    plugin_path = File.join(spec.full_gem_path, 'lib', 'coral')
+    if File.directory?(plugin_path)
       @@gems[spec.name] = {
-        :lib_dir => lib_path,
+        :lib_dir => plugin_path,
         :spec    => spec
       }
-      register(lib_path) # Autoload plugins and related files
+      if spec.name == 'coral_core'
+        @@core = spec
+      else
+        register(plugin_path) # Autoload plugins and related files  
+      end      
     end  
   end
   
@@ -101,7 +116,7 @@ module Plugin
           end     
         end
       end
-    end    
+    end
     return @@gems
   end
   
@@ -145,13 +160,13 @@ module Plugin
   def self.add_build_info(type, file)
     type = type.to_sym
     
-    puts file
-    
     @@load_info[type] = {} unless @@load_info.has_key?(type)
     
     components = file.split(File::SEPARATOR)
     provider   = components.pop.sub(/\.rb/, '').to_sym
     directory  = components.join(File::SEPARATOR) 
+    
+    puts 'Loading ' + type.to_s + ' plugin: ' + provider.to_s
         
     unless @@load_info[type].has_key?(provider)
       data = {
@@ -186,7 +201,7 @@ module Plugin
       end
       
       Dir.entries(base_path).each do |path|
-        if File.directory?(path) && ! path.match(/^\.\.?$/)
+        unless path.match(/^\.\.?$/)
           register_type(base_path, path)          
         end
       end
@@ -211,12 +226,15 @@ module Plugin
   
   def self.initialize
     unless @@initialized
-      # Register Coral Gem plugins and other plugin defined plugins
+      # Register core plugins
+      register(File.join(File.dirname(__FILE__), '..', 'coral'))      
+      
+      # Register external Gem defined plugins
       gems(true)
       
       # Autoload the registered plugins
       autoload
-            
+           
       @@initialized = true
     end    
   end
@@ -249,8 +267,8 @@ module Plugin
   
   define_type :network => :default, 
               :node    => :default,
-              :machine => :fog    
-
+              :machine => :fog
+              
   #-----------------------------------------------------------------------------
   # Base plugin
   
