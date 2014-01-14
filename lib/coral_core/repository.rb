@@ -58,6 +58,12 @@ class Repository < Core
     pull if config.get(:pull, false)
   end
   
+  #---
+  
+  def inspect
+    "#<#{self.class}: #{directory} : #{@origin} : #{@revision}>"
+  end
+   
   #-----------------------------------------------------------------------------
   # Location information
       
@@ -192,7 +198,7 @@ class Repository < Core
   
   def config(name, options = {})
     config = Config.ensure(options) # Just in case we throw a configuration in
-    return git.config(config.options, name) if can_persist?
+    return git.config(config.export, name) if can_persist?
     return nil
   end
   
@@ -200,7 +206,7 @@ class Repository < Core
   
   def set_config(name, value, options = {})
     config = Config.ensure(options) # Just in case we throw a configuration in
-    git.config(config.options, name, string(value)) if can_persist?
+    git.config(config.export, name, string(value)) if can_persist?
     return self
   end
   
@@ -328,11 +334,6 @@ class Repository < Core
   def load_submodules
     @submodules = {}
     
-    if @parent.nil?
-      dbg(@directory, "Top level repository")  
-    else
-      dbg(@directory, "Repository within #{@parent.directory}")
-    end
     if can_persist?
       # Returns a Hash of { <path:String> => { 'url' => <url:String>, 'id' => <id:String> } }
       # Returns {} if no .gitmodules file was found
@@ -343,7 +344,6 @@ class Repository < Core
         @submodules[path] = repo
       end
     end
-    dbg(@submodules.keys.size, 'Submodules')
     return self
   end
   protected :load_submodules
