@@ -19,24 +19,12 @@ module Plugin
   def self.create_instance(type, provider, options = {})
     type     = type.to_sym
     provider = provider.to_sym
-    
-    dbg(type, 'type')
-    dbg(provider, 'provider')
-    dbg(options, 'options')
-    dbg(@@types, 'types')
-    dbg(@@core)
-    dbg(@@gems, 'gems')
-    dbg(@@load_info, 'loaded info')
-    
+       
     return nil unless @@types.has_key?(type)
     
     options  = translate_type(type, options)
     provider = options.delete(:provider).to_sym if options.has_key?(:provider)    
     info     = @@load_info[type][provider] if Util::Data.exists?(@@load_info, [ type, provider ])
-    
-    dbg(options, 'modified options')
-    dbg(provider, 'modified provider')
-    dbg(info, 'info')
         
     if info
       options       = translate(type, provider, options)      
@@ -45,10 +33,10 @@ module Plugin
       @@plugins[type] = {} unless @@plugins.has_key?(type)
       
       unless instance_name && @@plugins[type].has_key?(instance_name)
-        plugin = Coral.class_const([ :coral, type, provider ]).new(type, provider, options)
-        
         info[:instance_name] = instance_name
-        plugin.set_meta(info) 
+        options[:meta]       = info
+        
+        plugin = Coral.class_const([ :coral, type, provider ]).new(type, provider, options)
         
         @@plugins[type][instance_name] = plugin 
       end
@@ -266,141 +254,8 @@ module Plugin
   # Core plugin types
   
   define_type :network => :default, 
-              :node    => :default,
-              :machine => :fog
-              
-  #-----------------------------------------------------------------------------
-  # Base plugin
-  
-class Base < Core
-  # All Plugin classes should directly or indirectly extend Base
-  
-  def intialize(type, provider, options)
-    name = Util::Data.ensure_value(options.delete(:name), provider)
-    
-    super(options)
-    
-    self.name = name
-    normalize
-  end
-  
-  #---
-  
-  def initialized?(options = {})
-    return true  
-  end
-  
-  #---
-  
-  def method_missing(method, *args, &block)  
-    return nil  
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Property accessor / modifiers
-  
-  def name
-    return get(:name)
-  end
-  
-  #---
-  
-  def name=name
-    set(:name, string(name))
-  end
-  
-  #---
-  
-  def meta
-    return @meta
-  end
-  
-  #---
-  
-  def set_meta(meta)
-    @meta = Config.ensure(meta)
-  end
-  protected :set_meta
- 
-  #---
-  
-  def plugin_type
-    return meta.get(:type)
-  end
-  
-  #---
-  
-  def plugin_provider
-    return meta.get(:provider)
-  end
-  
-  #---
-  
-  def plugin_directory
-    return meta.get(:directory)
-  end
-  
-  #---
-  
-  def plugin_file
-    return meta.get(:file)
-  end
-  
-  #---
-  
-  def plugin_instance_name
-    return meta.get(:instance_name)
-  end
-  
-  #---
-  
-  def plugin_parent=parent
-    meta.set(:parent, parent) if parent.is_a?(Coral::Plugin::Base)
-  end
-  
-  #---
-  
-  def plugin_parent
-    return meta.get(:parent)
-  end
-
-  #-----------------------------------------------------------------------------
-  # Plugin operations
-    
-  def normalize
-  end
-
-  #-----------------------------------------------------------------------------
-  # Utilities
-  
-  def self.build_info(type, data)  
-    plugins = []
-    
-    if data.is_a?(Hash)
-      data = [ data ]
-    end
-    
-    if data.is_a?(Array)
-      data.each do |info|
-        unless Util::Data.empty?(info)
-          info = translate(info)
-          
-          if Util::Data.empty?(info[:provider])
-            info[:provider] = Plugin.type_default(type)
-          end
-          
-          plugins << info
-        end
-      end
-    end
-    return plugins
-  end
-  
-  #---
-
-  def self.translate(data)
-    return ( data.is_a?(Hash) ? symbol_map(data) : {} )
-  end
-end
+              :node    => :rackspace,
+              :machine => :fog,
+              :command => :shell
 end
 end
