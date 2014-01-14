@@ -36,10 +36,6 @@ class Node < Base
   #---
   
   def search(property, default = nil, format = false)
-    #dbg(plugin_provider, 'plugin provider')
-    #dbg(name, 'plugin name')
-    #dbg(property, 'plugin property')
-    #dbg(network)
     return network.search_node(plugin_provider, name, property, default, format)
   end
   
@@ -64,13 +60,18 @@ class Node < Base
   end
   
   #---
+  
+  def machine=machine
+    set(:machine, machine)  
+  end
+  
+  #---
  
-  def set_machine(machine, options = {})
-    if machine.is_a?(String) || machine.is_a?(Symbol)
-      set(:machine, Coral.machine(options, machine))
-    else
-      set(:machine, machine)
+  def create_machine(provider, options = {})
+    if provider.is_a?(String) || provider.is_a?(Symbol)
+      set(:machine, Coral.machine(options, provider))
     end
+    return self
   end
  
   #---
