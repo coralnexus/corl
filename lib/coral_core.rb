@@ -131,7 +131,7 @@ coral_require(core_dir, :core)
 end
 
 # Include core systems
-[ :event, :template, :command, :repository, :resource, :plugin ].each do |name|
+[ :event, :template, :repository, :resource, :plugin_base, :plugin ].each do |name|
   coral_require(core_dir, name)
 end
 
@@ -148,7 +148,7 @@ module Coral
   
   #---
   
-  CORAL_FILE = 'coral.json'
+  @@config_file = 'coral.json'
   
   #-----------------------------------------------------------------------------
   
@@ -160,6 +160,18 @@ module Coral
   
   def self.logger
     return Core.logger
+  end
+  
+  #-----------------------------------------------------------------------------
+  
+  def self.config_file=file_name
+    @@config_file = file_name
+  end
+  
+  #---
+  
+  def self.config_file
+    return @@config_file
   end
   
   #-----------------------------------------------------------------------------
@@ -248,7 +260,6 @@ module Coral
    
   def self.network(name, options = {}, provider = nil)
     plugin      = plugin(:network, provider, options)
-    dbg(plugin, 'network plugin (coral_core)')
     plugin.name = name
     return plugin
   end
@@ -275,9 +286,8 @@ module Coral
    
   #---
   
-  def self.machine(name, options = {}, provider = nil)
-    plugin      = plugin(:machine, provider, options)
-    plugin.name = name
+  def self.machine(options = {}, provider = nil)
+    plugin = plugin(:machine, provider, options)
     return plugin
   end
   
@@ -285,6 +295,18 @@ module Coral
   
   def self.machines(data, build_hash = false, keep_array = false)
     return plugins(:machine, data, build_hash, keep_array)
+  end
+  
+  #---
+  
+  def self.command(options, provider = nil)
+    return plugin(:command, provider, options)
+  end
+  
+  #---
+  
+  def self.commands(data, build_hash = false, keep_array = false)
+    return plugins(:command, data, build_hash, keep_array)
   end
      
   #-----------------------------------------------------------------------------
