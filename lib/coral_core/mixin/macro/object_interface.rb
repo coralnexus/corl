@@ -9,8 +9,8 @@ module Mixin
 module Macro
 module ObjectInterface
   
-  include Mixin::SubConfig
-  include Mixin::Settings
+  # requires Mixin::SubConfig
+  # requires Mixin::Settings
 
   #-----------------------------------------------------------------------------
   # Object collections
@@ -205,41 +205,58 @@ module ObjectInterface
   
     unless respond_to? :search_object  
       define_method :search_object do |obj_config, keys, default = '', format = false|
-        value = obj_config.get(keys)
-       
-        unless ! value || value.is_a?(Hash)
+        obj_config = Marshal.load(Marshal.dump(obj_config))
+        value      = obj_config.get(keys)
+        
+        #dbg(obj_config, 'search object config')
+        
+        if ! value || value.is_a?(Hash)
           settings = {}
     
-          keys     = [ keys ] unless keys.is_a?(Array)
-          temp     = keys.dup
+          keys = [ keys ] unless keys.is_a?(Array)
+          temp = keys.dup
+          
+          #dbg('specialized settings')
       
           until temp.empty? do
+            #dbg(temp, 'temporary settings prefix')
             if obj_settings = obj_config.delete([ temp, :settings ])
+              #dbg(obj_settings, 'object settings')
               array(obj_settings).each do |group_name|
-                if group_settings = settings(group_name)
-                  settings = Util::Data.merge([ group_settings, settings ], true)  
+                #dbg(group_name, 'group name')
+                if group_settings = Marshal.load(Marshal.dump(settings(group_name)))
+                  #dbg(group_settings, 'group settings')
+                  settings = Util::Data.merge([ group_settings.dup, settings ], true)  
                 end
               end            
             end
             temp.pop
           end
     
+          #dbg(settings, 'specialized settings')
+          
+          #dbg('general settings')
+      
           if obj_settings = obj_config.delete(:settings)
+            #dbg(obj_settings, 'object settings')
             array(obj_settings).each do |group_name|
-              if group_settings = settings(group_name)
+              #dbg(group_name, 'group name')
+              if group_settings = Marshal.load(Marshal.dump(settings(group_name)))
+                #dbg(group_settings, 'group settings')
                 settings = Util::Data.merge([ group_settings, settings ], true)  
               end
             end            
-          end    
+          end 
+          
+          #dbg(settings, 'general settings')   
         
           unless settings.empty?
-            if value
-              value = Util::Data.merge([ settings, value ], true)         
-            else
-              value = settings[keys.last] if settings.has_key?(keys.last)
-            end
+            #dbg(obj_config, 'initial object config')
+            final_config = Config.new(Util::Data.merge([ settings, obj_config.export ], true))
+            value        = final_config.get(keys)
+            #dbg(final_config, 'final object config')
           end
-    
+          
           value = default if Util::Data.undef?(value)
         end
         filter(value, format)

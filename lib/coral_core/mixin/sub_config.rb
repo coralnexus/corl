@@ -14,8 +14,8 @@ module SubConfig
   def init_subconfig(reset = false)
     return if @subconfig_initialized && ! reset
     
-    unless _get(:config)
-      _set(:config, Config::File.new(self))
+    unless @config
+      @config = Config.new
     end
     
     @subconfig_initialized = true
@@ -36,42 +36,43 @@ module SubConfig
   end
   
   #---
-    
-  def config(default = nil)
-    return _get(:config, default)
+  
+  def config
+    return @config
   end
   
   #---
   
   def config=config
-    _set(:config, config)
+    @config = config
   end
   
   #---
   
   def directory
     init_subconfig
-    return config.project.directory
+    
+    if config.is_a?(Config::Project)
+      return config.project.directory
+    else
+      return nil
+    end
   end
   
   #---
   
   def directory=directory
     init_subconfig
-    config.set_location(directory)
+    
+    if config.is_a?(Config::Project)
+      config.set_location(directory)
+    end
   end
      
   #-----------------------------------------------------------------------------
-  
-  def _parent_exec(method, *params)
-    return self.class.superclass.instance_method(method).bind(self).call(*params)
-  end
-  protected :_parent_exec
-  
-  #---
-  
+
   def _get(keys, default = nil, format = false)
-    return _parent_exec(:get, keys, default, format)  
+    return fetch(@properties, array(keys).flatten, default, format)
   end
   protected :_get
   
@@ -91,46 +92,50 @@ module SubConfig
 
   #---
  
-  def _set(keys, value = '', options = {})
-    return _parent_exec(:set, keys, value, options)  
+  def _set(keys, value = '')
+    modify(@properties, array(keys).flatten, value)
+    return self
   end
   protected :_set
   
   #---
     
-  def set(keys, value = '', options = {})
+  def set(keys, value = '')
     init_subconfig
-    config.set(keys, value, options)
+    config.set(keys, value)
     return self
   end
   
   #---
  
-  def _delete(keys, options = {})
-    return _parent_exec(:delete, keys, options)  
+  def _delete(keys, default = nil)
+    existing = modify(@properties, array(keys).flatten, nil)
+    return existing[:value] if existing[:value]
+    return default 
   end
   protected :_delete
   
   #---
    
-  def delete(keys, options = {})
+  def delete(keys, default = nil)
     init_subconfig
-    config.delete(keys, options)
+    config.delete(keys, default)
     return self
   end
  
   #---
  
-  def _clear(options = {})
-    return _parent_exec(:clear, options)  
+  def _clear
+    @properties = {}
+    return self
   end
   protected :_clear
   
   #---
   
-  def clear(options = {})
+  def clear
     init_subconfig
-    config.clear(options)
+    config.clear
     return self
   end
   
@@ -138,7 +143,7 @@ module SubConfig
   # Import / Export
   
   def _import(properties, options = {})
-    return _parent_exec(:import, properties, options)
+    return import_base(properties, options)
   end
   protected :_import
   
@@ -153,7 +158,8 @@ module SubConfig
   #---
   
   def _defaults(defaults, options = {})
-    return _parent_exec(:defaults, defaults, options)
+    config = new(options).set(:import_type, :default)
+    return import_base(defaults, config)
   end
   protected :_defaults
   
@@ -168,7 +174,7 @@ module SubConfig
   #---
   
   def _export
-    return _parent_exec(:export)
+    return @properties
   end
   protected :_export
   
@@ -183,14 +189,18 @@ module SubConfig
   # Configuration loading saving
     
   def load(options = {})
-    config.load(options)    
+    if config.respond_to?(:load)
+      config.load(options)
+    end
     return self  
   end
     
   #---
     
   def save(options = {})
-    config.save(options)
+    if config.respond_to?(:save)
+      config.save(options)
+    end
     return self  
   end  
 end

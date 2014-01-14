@@ -77,12 +77,6 @@ module PluginInterface
         get([ _type, provider, property ], default, format)
       end
       
-      #---
-      
-      define_method "search_#{_type}" do |provider, keys, default = '', format = false|
-        search(_type, nil, keys, default, format)
-      end
-      
     #---------------------------------------------------------------------------  
     else
       define_method "#{_type}_config" do |provider, name = nil|
@@ -93,12 +87,6 @@ module PluginInterface
       
       define_method "#{_type}_setting" do |provider, name, property, default = nil, format = false|
         get([ _plural, provider, name, property ], default, format)
-      end
-      
-      #---
-      
-      define_method "search_#{_type}" do |provider, name, keys, default = '', format = false|
-        search(_type, name, keys, default, format)
       end
     end
    
@@ -119,14 +107,15 @@ module PluginInterface
       symbol_map(data).each do |provider, instance_settings|
         if ! providers || providers.include?(provider)
           if _single_instance
-            plugin = Coral.plugin(_plugin_type, provider, instance_settings)              
+            plugin = Coral.plugin(_plugin_type, provider, instance_settings)
             plugin.plugin_parent = self
           
             _set([ _plural, provider ], plugin)
           else
             instance_settings.each do |name, options|
               if name != :settings
-                plugin = Coral.plugin(_plugin_type, provider, options)              
+                options[:name] = name
+                plugin         = Coral.plugin(_plugin_type, provider, options)
                 plugin.plugin_parent = self
           
                 _set([ _plural, provider, name ], plugin)
@@ -153,7 +142,8 @@ module PluginInterface
           _set([ _plural, provider ], plugin)  
         else
           instance_settings.each do |name, options|
-            plugin = Coral.plugin(_plugin_type, provider, options)
+            options[:name] = name
+            plugin         = Coral.plugin(_plugin_type, provider, options)
             plugin.plugin_parent = self
         
             _set([ _plural, provider, name ], plugin)  
@@ -239,7 +229,8 @@ module PluginInterface
       
         set([ _plural, provider, name ], options)
     
-        plugin = Coral.plugin(_plugin_type, provider, options)
+        options[:name] = name
+        plugin         = Coral.plugin(_plugin_type, provider, options)
         plugin.plugin_parent = self
         
         _set([ _plural, provider, name ], plugin)
