@@ -62,9 +62,9 @@ class Config
   
   #---
   
-  def inspect
-    "#<#{self.class}: >"
-  end
+  #def inspect
+  #  "#<#{self.class}: >"
+  #end
       
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
@@ -172,7 +172,7 @@ class Config
   
   #---
   
-  def clear(options = {})
+  def clear
     @properties = {}
     return self
   end
@@ -180,8 +180,8 @@ class Config
   #-----------------------------------------------------------------------------
   # Import / Export
  
-  def import(properties, options = {})
-    config      = new(options, { :force => @force }).set(:context, :hash)    
+  def import_base(properties, options = {})
+    config      = Config.new(options, { :force => @force }).set(:context, :hash)    
     import_type = config.get(:import_type, :override)
     
     case properties
@@ -201,18 +201,25 @@ class Config
      
     when Array
       properties.each do |item|
-        import(item, config)
+        import_base(item, config)
       end
     end
     
     return self
+  end
+  protected :import_base
+  
+  #---
+  
+  def import(properties, options = {})
+    return import_base(properties, options)
   end
   
   #---
   
   def defaults(defaults, options = {})
     config = new(options).set(:import_type, :default)
-    return import(defaults, config)
+    return import_base(defaults, config)
   end
 
   #---

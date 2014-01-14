@@ -1,7 +1,7 @@
 
 module Coral
 class Config
-class File < Config
+class Project < Config
   
   include Mixin::SubConfig
 
@@ -10,16 +10,13 @@ class File < Config
   def initialize(data = {}, defaults = {}, force = true)
     super(data, defaults, force)
     
+    init_subconfig(true)
+    
     unless _get(:project)
-      _set(:project, Repository.open({
-        :directory => _delete(:directory, Dir.pwd),
+      _set(:project, Repository.open(_delete(:directory, Dir.pwd), {
         :origin    => _delete(:origin),
         :revision  => _delete(:revision)
       }))
-    end
-    
-    unless _get(:config)
-      _set(:config, Config.new)
     end
     
     _init(:autoload, true)
@@ -40,9 +37,9 @@ class File < Config
   
   #---
   
-  def inspect
-    "#<#{self.class}: #{@absolute_config_file}>"
-  end
+  #def inspect
+  #  "#<#{self.class}: #{@absolute_config_file}>"
+  #end
      
   #-----------------------------------------------------------------------------
   # Checks
@@ -151,7 +148,7 @@ class File < Config
   #-----------------------------------------------------------------------------
     
   def set(keys, value = '', options = {})
-    super(keys, value, options)
+    super(keys, value)
     save(options) if autosave
     return self
   end
@@ -159,7 +156,7 @@ class File < Config
   #---
    
   def delete(keys, options = {})
-    super(keys, options)
+    super(keys)
     save(options) if autosave
     return self
   end
@@ -167,7 +164,7 @@ class File < Config
   #---
   
   def clear(options = {})
-    super(options)
+    super
     save(options) if autosave
     return self
   end
