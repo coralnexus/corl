@@ -5,11 +5,11 @@ class Git < ::Grit::Repo
   # Constructor / Destructor
 
   def initialize(path, options = {})
-    epath = File.expand_path(path)
+    epath   = File.expand_path(path)
     git_dir = File.join(epath, '.git')
     
     @bare = (options[:is_bare] ? true : false)
-
+    
     if File.exist?(git_dir)
       self.working_dir = epath
       
