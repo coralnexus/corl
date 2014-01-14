@@ -1,14 +1,14 @@
 
 module Coral
 module Node
-class Default < Plugin::Node
+class Rackspace < Plugin::Node
  
   #-----------------------------------------------------------------------------
   # Node plugin interface
    
   def normalize
-    super
-    
+    #super
+    dbg('hello from rackspace node')
   end
        
   #-----------------------------------------------------------------------------

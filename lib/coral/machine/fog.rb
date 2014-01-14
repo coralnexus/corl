@@ -36,8 +36,8 @@ class Fog < Plugin::Machine
   
   #---
   
-  def compute(default = nil)
-    return get(:compute, default)
+  def compute
+    return get(:compute)
   end
   
   #---
@@ -48,54 +48,27 @@ class Fog < Plugin::Machine
   
   #---
   
-  def id=id
-    set(:server, compute.servers.get(id)) if id  
-  end
-  
-  #---
-  
-  def id
-    return ( server ? server.id : nil )
-  end
-  
-  #---
-  
   def name
-    return server.name if server
-    return nil
+    return ( server ? server.id : '' )
+  end
+  
+  #---
+  
+  def name=id
+    set(:server, compute.servers.get(id)) if id    
   end
   
   #---
   
   def hostname
-    return name
-  end
-  
-  #---
-  
-  def created
-    return server.created if server
-    return nil
-  end
-  
-  #---
-  
-  def updated
-    return server.updated if server
-    return nil
+    return server.name if server
+    return ''
   end
   
   #---
   
   def state
     return server.state if server
-    return nil
-  end
-  
-  #---
-  
-  def addresses
-    return server.addresses if server
     return nil
   end
   
@@ -148,16 +121,6 @@ class Fog < Plugin::Machine
     success = super(options)
     if success && ! created?
       set(:server, compute.servers.bootstrap(options))
-    end
-    return success
-  end
-  
-  #---
-  
-  def update(options = {})
-    success = super(options)
-    if success && created?
-      return server.update(options)
     end
     return success
   end
@@ -220,19 +183,8 @@ class Fog < Plugin::Machine
     end
     return success
   end
-  
-  #-----------------------------------------------------------------------------
-  
-  def create_image(name, options = {})
-    success = super(options)
-    if success && created?
-      image = server.create_image(name, options)
-      return ( image ? image.id : false )
-    end
-    return success
-  end
-  
-  #-----------------------------------------------------------------------------
+ 
+  #---
   
   def exec(options = {})
     success = super(options)
@@ -244,6 +196,17 @@ class Fog < Plugin::Machine
     return success
   end
   
+  #---
+ 
+  def create_image(name, options = {})
+    success = super(options)
+    if success && created?
+      image = server.create_image(name, options)
+      return ( image ? image.id : false )
+    end
+    return success
+  end
+   
   #-----------------------------------------------------------------------------
   # Utilities
 

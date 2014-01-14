@@ -7,7 +7,7 @@ class Default < Plugin::Network
   # Cloud plugin interface
    
   def normalize
-    super 
+    super
   end
        
   #-----------------------------------------------------------------------------

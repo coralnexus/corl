@@ -23,20 +23,26 @@ class Machine < Base
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  def hostname(default = '')
-    return get(:hostname, default)
+  def hostname
+    return get(:hostname, '')
   end
   
   #---
   
-  def public_ip(default = '')
-    return get(:public_ip, default)
+  def state
+    return get(:state, nil)
   end
   
   #---
   
-  def private_ip(default = nil)
-    return get(:private_ip, default)
+  def public_ip
+    return get(:public_ip, nil)
+  end
+  
+  #---
+  
+  def private_ip
+    return get(:private_ip, nil)
   end
             
   #-----------------------------------------------------------------------------
@@ -44,15 +50,6 @@ class Machine < Base
 
   def create(options = {})
     unless created?
-      
-    end
-    return true
-  end
-  
-  #---
-  
-  def update(options = {})
-    if created?
       
     end
     return true
@@ -94,7 +91,23 @@ class Machine < Base
     return true
   end
   
-  #-----------------------------------------------------------------------------
+  #---
+  
+  def exec(options = {})
+    if running?
+      config = Config.ensure(options)
+      if commands = config.delete(:commands)
+        commands.each do |command|
+          Util::Shell.exec!(command, config) do |line|
+            yield(line) if block_given?
+          end
+        end
+      end  
+    end
+    return true
+  end
+    
+  #---
   
   def provision(options = {})
     if running?
@@ -114,9 +127,9 @@ class Machine < Base
           }),
           :args => config.delete(:puppet_manifest, "/etc/#{puppet}/manifests/site.pp")
         }
-      }, config.get(:provider, :puppet))
+      }, config.get(:provider, :shell))
       
-      config[:commands] = command.to_s
+      config[:commands] = [ command.to_s ]
       return exec(config)
     end
     return true
@@ -130,23 +143,7 @@ class Machine < Base
     end
     return true
   end
-  
-  #-----------------------------------------------------------------------------
-  
-  def exec(options = {})
-    if running?
-      config = Config.ensure(options)
-      if commands = config.delete(:commands)
-        commands.each do |command|
-          Util::Shell.exec!(command, config) do |line|
-            yield(line) if block_given?
-          end
-        end
-      end  
-    end
-    return true
-  end
-  
+
   #-----------------------------------------------------------------------------
   # Utilities
 

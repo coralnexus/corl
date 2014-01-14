@@ -4,19 +4,10 @@ module Plugin
 class Node < Base
  
   #-----------------------------------------------------------------------------
-  # Cloud plugin interface
+  # Node plugin interface
    
   def normalize
     super
-    
-    unless get(:cloud)
-      set(:cloud, Coral.cloud(name))
-    end   
-     
-    self.machine = get(:machine, 'default')
-   
-    init_projects
-    init_shares
   end
        
   #-----------------------------------------------------------------------------
@@ -26,69 +17,60 @@ class Node < Base
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
+  def network
+    return plugin_parent
+  end
+ 
+  #---
+  
+  def network=network
+    self.plugin_parent = network
+  end
+  
+  #---
+  
   def setting(property, default = nil, format = false)
-    return cloud.node_setting(name, property, default, format)
+    return network.node_setting(plugin_provider, name, property, default, format)
   end
   
   #---
   
   def search(property, default = nil, format = false)
-    return cloud.search(name, property, default, format)
+    #dbg(plugin_provider, 'plugin provider')
+    #dbg(name, 'plugin name')
+    #dbg(property, 'plugin property')
+    #dbg(network)
+    return network.search_node(plugin_provider, name, property, default, format)
   end
   
   #---
   
   def set_setting(property, value = nil)
-    cloud.set_node_setting(name, property, value)
+    network.set_node_setting(plugin_provider, name, property, value)
     return self
   end
   
   #---
   
   def delete_setting(property)
-    cloud.delete_node_setting(name, property)
+    network.delete_node_setting(plugin_provider, name, property)
     return self
   end
   
   #-----------------------------------------------------------------------------
   
-  def cloud
-    return plugin_parent
-  end
- 
-  #---
-  
-  def cloud=cloud
-    self.plugin_parent = (cloud.is_a?(Coral::Plugin::Cloud) ? cloud : Coral.cloud(name) )
-    
-    init_shares
-  end
-  
-  #---
-  
-  def machine(default = nil)
-    return get(:machine, default)
+  def machine
+    return get(:machine, nil)
   end
   
   #---
  
-  def machine=machine
-    set(:name, '')
-    
+  def set_machine(machine, options = {})
     if machine.is_a?(String) || machine.is_a?(Symbol)
-      set(:machine, nil)
-      set(:name, machine)
+      set(:machine, Coral.machine(options, machine))
     else
       set(:machine, machine)
-      set(:name, machine.name.to_s) if machine
     end
-  end
-  
-  #---
-  
-  def hostname # Must be set at machine level
-    return machine.hostname if machine
-    return nil
   end
  
   #---
@@ -104,82 +86,41 @@ class Node < Base
     return machine.private_ip if machine
     return nil
   end
+
+  #---
+ 
+  def hostname # Must be set at machine level
+    return machine.hostname if machine
+    return ''
+  end
  
   #---
-  
-  def virtual_hostname
-    return search(:virtual_hostname, '', :string)
+ 
+  def state # Must be set at machine level
+    return machine.state if machine
+    return nil
   end
-  
-  #---
-  
-  def virtual_ip
-    return search(:virtual_ip, '', :string)
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Plugin collections
-
-  def plugins!(plural, reset = false)
-    plugins = get(plural, {}, :hash)
-    
-    return plugins unless plugins.empty? || reset
-    
-    plugins = {}
-    hash(yield(type, plural)).each do |provider, names|
-      names = [ names ] unless names.is_a?(Array)
-      
-      plugins[provider] = {} unless plugins.has_key?(provider)
-     
-      names.each do |name|
-        plugins[provider][name] = cloud.send(provider, name)
-      end     
-    end
-    set(plural, plugins)
-  end
-      
-  #-----------------------------------------------------------------------------
-  # Shares
-
-  def shares(reset = false)
-    return plugins!(:share, :shares, reset) do |type, plural|
-      search(plural, {}, :hash)  
-    end
-  end
-
+ 
   #-----------------------------------------------------------------------------
   # Machine operations
     
   def start(options = {})
-    sync_projects(options)
-    
-    return true unless machine    
+    return true unless machine
     return machine.start(options)
   end
   
   #---
     
   def stop(options = {})
-    sync_projects(options)
-        
-    return true unless machine    
+    return true unless machine && machine.running?    
     return machine.stop(options)
   end
-     
+
   #---
-  
-  def update(options = {})
-    sync_projects(options)
     
-    success = true    
-    return success unless machine    
-    
-    if machine.running?
-      success = Command.new("vagrant provision #{name}").exec!(options) do |line|
-        process_puppet_message(line)
-      end    
-    end
-    return success   
+  def reload(options = {})
+    return true unless machine && machine.created?    
+    return machine.reload(options)
   end
     
   #---
@@ -210,13 +151,33 @@ class Node < Base
     end
     return true    
   end
+
+  #---
+  
+  def exec(commands, options = {})
+    return true unless machine && machine.running?
+    
+    config = Config.ensure(options)        
+    return machine.exec(config.import({ :commands => commands }))  
+  end
+   
+  #---
+  
+  def provision(options = {})
+    return true unless machine && machine.running?    
+    return machine.provision(options)  
+  end
+ 
+  #---
+  
+  def create_image(options = {})
+    return true unless machine && machine.running?    
+    return machine.create_image(options)  
+  end
  
   #-----------------------------------------------------------------------------
   # Utilities
-  
-  def process_puppet_message(line)
-    return line.match(/(err|error):\s+/i) ? { :success => false, :prefix => 'FAIL' } : true
-  end              
+               
 end
 end
 end
