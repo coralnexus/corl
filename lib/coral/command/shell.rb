@@ -1,116 +1,17 @@
 
 module Coral
-class Command < Core
-
+module Command
+class Shell < Plugin::Command
+   
   #-----------------------------------------------------------------------------
-  # Properties
+  # Command operations
   
-  attr_accessor :name
-  attr_reader :subcommand
-  
-  #-----------------------------------------------------------------------------
-  # Constructor / Destructor
-
-  def initialize(options = {})
-      
-    if options.is_a?(String) || options.is_a?(Symbol)
-      options = string(options)
-      options = { :name => options, :command => options }
-    end
-    
-    config = Config.ensure(options)
-  
-    super(config)
-    
-    @properties           = {}
-    
-    self.subcommand       = config.get(:subcommand, nil)
-    
-    @name                 = config.get(:name, '')
-    
-    @properties           = config.options
-    @properties[:command] = executable(config)   
-  end
-     
-  #-----------------------------------------------------------------------------
-  # Property accessors / modifiers
- 
-  def command_base
-    return @properties[:command]
-  end
-  
-  #---
-  
-  def command=command
-    @properties[:command] = executable({ :command => command })
-  end
-  
-  #---
-  
-  def vagrant=command
-    @properties[:command] = executable({ :vagrant => command })
-  end
-  
-  #---
-  
-  def coral=command
-    @properties[:command] = executable({ :coral => command })
-  end
-  
-  #---
-  
-  def args
-    return array(@properties[:args]) 
-  end
-  
-  #---
-  
-  def args=args
-    @properties[:args] = array(args)
-  end
-  
-  #---
-  
-  def flags
-    return array(@properties[:flags]) 
-  end
-  
-  #---
-  
-  def flags=flags
-    @properties[:flags] = array(flags)
-  end
-  
-  #---
-  
-  def data
-    return hash(@properties[:data]) 
-  end
-  
-  #---
-  
-  def data=data
-    @properties[:data] = hash(data)
-  end
-  
-  #---
-  
-  def subcommand=subcommand
-    unless Util::Data.empty?(subcommand)
-      @properties[:subcommand] = hash(subcommand)
-      @subcommand = self.class.new(@properties[:subcommand])
-    end
+  def normalize
+    super
+    set(:command, executable(self))
   end
 
-  #-----------------------------------------------------------------------------
-  # Import / Export
-  
-  def export
-    return symbol_map(@properties)
-  end
- 
-  #-----------------------------------------------------------------------------
-  # Command functions
+  #---
   
   def build(components = {}, overrides = nil, override_key = false)    
     
@@ -212,16 +113,10 @@ class Command < Core
     config = Config.ensure(options)
     
     config[:ui] = @ui
-    success = Coral::Util::Shell.exec!(build(export, overrides), config) do |line|
+    success = Util::Shell.exec!(build(properties, overrides), config) do |line|
       block_given? ? yield(line) : true
     end    
     return success
-  end
-  
-  #---
-  
-  def exec(options = {}, overrides = nil)
-    return exec!(options, overrides)
   end
   
   #-----------------------------------------------------------------------------
@@ -239,6 +134,7 @@ class Command < Core
     elsif config.get(:command, false)
       return config[:command]
     end
-  end
+  end  
+end
 end
 end
