@@ -164,6 +164,9 @@ class Interface
   def safe_puts(message = nil, options = {})
     return @delegate.safe_puts(message, options) if check_delegate('safe_puts')
     
+    #dbg(message, 'message')
+    #dbg(options, 'options')
+    
     message ||= ""
     options = {
       :channel => @output,
