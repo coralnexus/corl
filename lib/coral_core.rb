@@ -92,7 +92,7 @@ require 'fog'
 
 # TODO: Make this dynamically settable
 
-#I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir)
+I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir)
 
 #---
 

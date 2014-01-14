@@ -1,0 +1,8 @@
+en:
+  coral:
+    core:
+      util:
+        cli:
+          options:
+            help: |-
+              Display help information for this command
