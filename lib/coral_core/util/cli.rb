@@ -94,38 +94,32 @@ module Coral
           
           self.processed = false
           
-          parser.on_tail('-h', '--help', message('coral.util.cli.options.help')) do
-            Coral.ui.info(parser.help)
+          parser.on_tail('-h', '--help', CLI.message('coral.core.util.cli.options.help')) do
+            puts parser.help.chomp
             options[:help] = true
             return
           end
-
+          
           parser.parse!(args)
           
           @arg_settings.each_with_index do |settings, index|
             if index >= args.length
-              argument = nil
+              value = nil
             else
-              argument = Util::Data.value(args[index])  
-            end            
+              value = Util::Data.value(args[index])  
+            end
             
-            value = nil
-            
-            if !argument.nil? && settings.has_key?(:allowed)
+            if !value.nil? && settings.has_key?(:allowed)
               allowed = settings[:allowed]
               case allowed
               when Class
-                if argument.is_a?(allowed)
-                  value = argument
-                else
-                  Coral.ui.error(message(settings[:message]))
+                unless value.is_a?(allowed)
+                  Coral.ui.error(CLI.message(settings[:message]))
                   error = true
                 end
               when Array
-                if allowed.include(argument)
-                  value = argument
-                else
-                  Coral.ui.error(message(settings[:message]))
+                unless allowed.include(value)
+                  Coral.ui.error(CLI.message(settings[:message]))
                   error = true  
                 end
               end
@@ -140,7 +134,7 @@ module Coral
             end
             
             if !value.nil? && settings.has_key?(:block)
-              value = block.call(value)
+              value = settings[:block].call(value)
               error = true if value.nil?
             end
             
@@ -149,8 +143,8 @@ module Coral
           end          
           
           if error
-            Coral.ui.error(message('coral.util.cli.parse.error'))
-            Coral.ui.info(parser.help)
+            Coral.ui.error(CLI.message('coral.util.cli.parse.error'))
+            puts parser.help.chomp
           else
             self.processed = true
           end
@@ -167,7 +161,7 @@ module Coral
           options[name] = config.get(name, default)
           
           message_name = name.to_s + '_message'
-          message      = message(message_id, options[name])
+          message      = CLI.message(message_id, options[name])
         
           option_str   = Util::Data.array(option_str)
           
@@ -191,7 +185,7 @@ module Coral
           name         = name.to_sym
           
           message_name = name.to_s + '_message'
-          message      = message(message_id, arguments[name])
+          message      = CLI.message(message_id, arguments[name])
         
           settings     = { 
             :name    => name,
