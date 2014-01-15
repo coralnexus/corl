@@ -51,7 +51,7 @@ module Plugin
   def self.get_instance(type, name)
     if @@plugins.has_key?(type)
       @@plugins[type].each do |instance_name, plugin|
-        return plugin if plugin.name == name
+        return plugin if plugin.name.to_s == name.to_s
       end
     end
     return nil  
