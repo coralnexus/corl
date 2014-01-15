@@ -62,9 +62,9 @@ class Config
   
   #---
   
-  #def inspect
-  #  "#<#{self.class}: >"
-  #end
+  def inspect
+    "#<#{self.class}: #{@properties.to_s}>"
+  end
       
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
