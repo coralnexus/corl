@@ -68,7 +68,7 @@ module Lookup
     context         = config.get(:context, :priority)    
     override        = config.get(:override, nil)
     
-    puppet_scope    = config.get(:puppet_scope, scope)
+    puppet_scope    = config.get(:puppet_scope, {})
     
     base_names      = config.get(:search, nil)
      
