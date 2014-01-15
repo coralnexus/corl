@@ -29,17 +29,23 @@ class Base < Core
     return nil  
   end
   
+  #---
+  
+  def inspect
+    "#<#{self.class}: #{name}>"
+  end
+  
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
   
   def name
-    return get(:name)
+    return @name
   end
   
   #---
   
   def name=name
-    set(:name, string(name))
+    @name = string(name)
   end
   
   #---
@@ -136,7 +142,7 @@ class Base < Core
   
   #---
   
-  def self.ensure_plugin_collection
+  def self.init_plugin_collection
     include Mixin::Settings
     include Mixin::SubConfig
     
