@@ -1,4 +1,5 @@
 module Coral
+module Util
 class Git < ::Grit::Repo
   
   #-----------------------------------------------------------------------------
@@ -36,5 +37,6 @@ class Git < ::Grit::Repo
       self.git.init({ :bare => @bare })
     end
   end
+end
 end
 end
