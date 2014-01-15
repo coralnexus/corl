@@ -19,7 +19,7 @@ class Default < Plugin::Network
 
 
   #-----------------------------------------------------------------------------
-  # Coral cloud operations
+  # Operations
      
 end
 end
