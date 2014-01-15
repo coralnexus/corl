@@ -58,14 +58,12 @@ end
 #-------------------------------------------------------------------------------
 # Top level properties 
 
-lib_dir      = File.dirname(__FILE__)
-core_dir     = File.join(lib_dir, 'coral_core')
-mixin_dir    = File.join(core_dir, 'mixin')
-macro_dir    = File.join(mixin_dir, 'macro')
-event_dir    = File.join(core_dir, 'event')
-template_dir = File.join(core_dir, 'template')
-util_dir     = File.join(core_dir, 'util')
-mod_dir      = File.join(core_dir, 'mod')
+lib_dir   = File.dirname(__FILE__)
+core_dir  = File.join(lib_dir, 'coral_core')
+mixin_dir = File.join(core_dir, 'mixin')
+macro_dir = File.join(mixin_dir, 'macro')
+util_dir  = File.join(core_dir, 'util')
+mod_dir   = File.join(core_dir, 'mod')
  
 #-------------------------------------------------------------------------------
 # Coral requirements
@@ -131,7 +129,7 @@ coral_require(core_dir, :core)
 end
 
 # Include core systems
-[ :event, :template, :repository, :resource, :plugin_base, :plugin ].each do |name|
+[ :repository, :resource, :plugin_base, :plugin ].each do |name|
   coral_require(core_dir, name)
 end
 
@@ -299,6 +297,18 @@ module Coral
   
   #---
   
+  def self.project(options, provider = nil)
+    return plugin(:project, provider, options)
+  end
+  
+  #---
+  
+  def self.projects(data, build_hash = false, keep_array = false)
+    return plugins(:project, data, build_hash, keep_array)
+  end
+  
+  #---
+  
   def self.command(options, provider = nil)
     return plugin(:command, provider, options)
   end
@@ -308,7 +318,43 @@ module Coral
   def self.commands(data, build_hash = false, keep_array = false)
     return plugins(:command, data, build_hash, keep_array)
   end
-     
+    
+  #---
+  
+  def self.event(options, provider = nil)
+    return plugin(:event, provider, options)
+  end
+  
+  #---
+  
+  def self.events(data, build_hash = false, keep_array = false)
+    return plugins(:event, data, build_hash, keep_array)
+  end
+  
+  #---
+  
+  def self.template(options, provider = nil)
+    return plugin(:template, provider, options)
+  end
+  
+  #---
+  
+  def self.templates(data, build_hash = false, keep_array = false)
+    return plugins(:template, data, build_hash, keep_array)
+  end
+   
+  #---
+  
+  def self.translator(options, provider = nil)
+    return plugin(:translator, provider, options)
+  end
+  
+  #---
+  
+  def self.translator(data, build_hash = false, keep_array = false)
+    return plugins(:translator, data, build_hash, keep_array)
+  end
+        
   #-----------------------------------------------------------------------------
   # External execution
    
