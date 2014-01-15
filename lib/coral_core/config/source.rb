@@ -1,7 +1,7 @@
 
 module Coral
 class Config
-class Project < Config
+class Source < Config
   
   include Mixin::SubConfig
 
@@ -13,10 +13,11 @@ class Project < Config
     init_subconfig(true)
     
     unless _get(:project)
-      _set(:project, Repository.open(_delete(:directory, Dir.pwd), {
-        :origin    => _delete(:origin),
+      _set(:project, Coral.project({
+        :directory => _delete(:directory, Dir.pwd),
+        :url       => _delete(:url),
         :revision  => _delete(:revision)
-      }))
+      }, _delete(:project_provider)))
     end
     
     _init(:autoload, true)
@@ -188,7 +189,7 @@ class Project < Config
       raw = Util::Disk.read(@absolute_config_file)    
       if raw && ! raw.empty?
         config.clear if local_config.get(:override, false)
-        config.import(Util::Data.parse_json(raw), local_config)
+        config.import(Coral.translator(local_config, _get(:translator_provider)).parse(raw), local_config)
       end
     end
     return self
@@ -200,7 +201,7 @@ class Project < Config
     local_config = Config.ensure(options)
     
     if can_persist?
-      rendering = Util::Data.to_json(config.export, local_config.get(:pretty, true))
+      rendering = Coral.translator(local_config, _get(:translator_provider)).generate(config.export)
       if rendering && ! rendering.empty?
         Util::Disk.write(@absolute_config_file, rendering)
         project.commit(@absolute_config_file, local_config) if autocommit
