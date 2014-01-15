@@ -154,7 +154,7 @@ module Plugin
     provider   = components.pop.sub(/\.rb/, '').to_sym
     directory  = components.join(File::SEPARATOR) 
     
-    puts 'Loading ' + type.to_s + ' plugin: ' + provider.to_s
+    puts 'Loading coral ' + type.to_s + ' plugin: ' + provider.to_s
         
     unless @@load_info[type].has_key?(provider)
       data = {
@@ -249,13 +249,5 @@ module Plugin
     info  = klass.send(method, info) if klass.respond_to?(method)
     return info  
   end
-  
-  #-----------------------------------------------------------------------------
-  # Core plugin types
-  
-  define_type :network => :default, 
-              :node    => :rackspace,
-              :machine => :fog,
-              :command => :shell
 end
 end
