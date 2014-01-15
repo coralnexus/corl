@@ -104,7 +104,7 @@ module Resource
         config.set(:normalize_template, config.get("normalize_#{target}", true))
         config.set(:interpolate_template, config.get("interpolate_#{target}", true))
         
-        resource[target] = Template.render(resource[name], resource[target], config)
+        resource[target] = Coral.template(config, resource[name]).render(resource[target])
         resource.delete(name)         
       end
     end
