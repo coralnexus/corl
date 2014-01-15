@@ -3,13 +3,13 @@ module Coral
 module Plugin
 class Network < Base
   
-  ensure_plugin_collection 
+  init_plugin_collection 
   
   #-----------------------------------------------------------------------------
   # Cloud plugin interface
   
   def normalize
-    @config = Config::Project.new(self._export)
+    @config = Config::Source.new(self._export)
     super
     
     init_nodes
