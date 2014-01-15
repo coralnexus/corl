@@ -6,8 +6,7 @@ class Json < Plugin::Translator
   #-----------------------------------------------------------------------------
   # Translator operations
    
-  def parse(json_text, options = {})
-    config     = Config.ensure(options)
+  def parse(json_text)
     properties = {}
     
     if json_text && ! json_text.empty?
@@ -18,9 +17,8 @@ class Json < Plugin::Translator
   
   #---
   
-  def generate(properties, options = {})
-    config = Config.ensure(options)
-    return Util::Data.to_json(properties, config.get(:pretty, true))
+  def generate(properties)
+    return Util::Data.to_json(properties, get(:pretty, true))
   end
 end
 end

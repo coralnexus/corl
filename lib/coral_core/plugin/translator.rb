@@ -5,8 +5,7 @@ class Translator < Base
 
   #-----------------------------------------------------------------------------
   # Translator plugin interface
-
- 
+  
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
 
@@ -14,14 +13,14 @@ class Translator < Base
   #-----------------------------------------------------------------------------
   # Operations
   
-  def parse(raw, options = {})
+  def parse(raw)
     # Implement in sub classes.
     return raw
   end
   
   #---
   
-  def generate(properties, options = {})
+  def generate(properties)
     # Implement in sub classes.
     return properties
   end

@@ -6,8 +6,7 @@ class Yaml < Plugin::Translator
   #-----------------------------------------------------------------------------
   # Translator operations
    
-  def parse(yaml_text, options = {})
-    config     = Config.ensure(options)
+  def parse(yaml_text)
     properties = {}
     
     if yaml_text && ! yaml_text.empty?
@@ -18,8 +17,7 @@ class Yaml < Plugin::Translator
   
   #---
   
-  def generate(properties, options = {})
-    config = Config.ensure(options)
+  def generate(properties)
     return Util::Data.to_yaml(properties)
   end
 end
