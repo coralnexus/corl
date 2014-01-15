@@ -280,6 +280,7 @@ class Config
   #---
         
   def self.hash(data, default = {})
+    data = data.export if data.is_a?(Coral::Config)
     return Util::Data.hash(data, default)
   end
   
