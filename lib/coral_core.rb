@@ -129,7 +129,7 @@ coral_require(core_dir, :core)
 end
 
 # Include core systems
-[ :repository, :resource, :plugin_base, :plugin ].each do |name|
+[ :resource, :plugin_base, :plugin ].each do |name|
   coral_require(core_dir, name)
 end
 
@@ -204,6 +204,18 @@ module Coral
     
   #-----------------------------------------------------------------------------
   # Plugins
+  
+  Plugin.define_type :network    => :default, 
+                     :node       => :rackspace,
+                     :machine    => :fog,
+                     :command    => :shell,
+                     :event      => :regex,
+                     :template   => :json,
+                     :translator => :json,
+                     :project    => :git
+                     
+  #-----------------------------------------------------------------------------
+  # Plugin interface (facade)
   
   def self.plugin(type, provider, options = {})
     default_provider = Plugin.type_default(type)
@@ -351,7 +363,7 @@ module Coral
   
   #---
   
-  def self.translator(data, build_hash = false, keep_array = false)
+  def self.translators(data, build_hash = false, keep_array = false)
     return plugins(:translator, data, build_hash, keep_array)
   end
         
