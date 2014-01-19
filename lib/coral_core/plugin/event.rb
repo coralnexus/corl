@@ -27,9 +27,9 @@ class Event < Base
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def self.build_info(data)  
+  def self.build_info(type, data)  
     data = data.split(/\s*,\s*/) if data.is_a?(String)
-    return super(data)
+    return super(type, data)
   end
   
   #---
