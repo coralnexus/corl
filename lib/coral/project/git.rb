@@ -7,7 +7,6 @@ class Git < Plugin::Project
   # Project plugin interface
    
   def normalize
-    init(:revision, 'master')
     super   
   end
   
@@ -165,8 +164,8 @@ class Git < Plugin::Project
   
   def load_revision
     return super do
-      set(:revision, git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip)
-    
+      set(:revision, git.native(:rev_parse, { :verify => true }, 'HEAD').strip) unless get(:revision, false)
+      
       if get(:revision, '').empty?
         set(:revision, git.native(:rev_parse, {}, 'HEAD').strip)
       end
@@ -247,7 +246,13 @@ class Git < Plugin::Project
   
   def init_remotes
     return super do
-      set(:url, config('remote.origin.url').strip)
+      origin_url = config('remote.origin.url').strip
+      
+      set(:url, origin_url) unless get(:url, false)
+      
+      if origin_url.empty?
+        set_remote(:origin, url)
+      end
     end
   end
  
@@ -299,7 +304,7 @@ class Git < Plugin::Project
         :subcommand => {
           :command => :pull,
           :flags   => ( config.get(:tags, true) ? :tags : '' ),
-          :args    => [ remote, config.get(:branch, '') ]
+          :args    => [ remote, config.get(:revision, get(:revision, :master)) ]
         }
       }, config.get(:provider, :shell)).exec!(config) do |line|
         block_given? ? yield(line) : true
@@ -317,7 +322,7 @@ class Git < Plugin::Project
         :subcommand => {
           :command => :push,
           :flags => ( config.get(:tags, true) ? :tags : '' ),
-          :args => [ remote, config.get(:branch, '') ]
+          :args => [ remote, config.get(:revision, get(:revision, :master)) ]
         }
       }, config.get(:provider, :shell)).exec!(config) do |line|
         block_given? ? yield(line) : true

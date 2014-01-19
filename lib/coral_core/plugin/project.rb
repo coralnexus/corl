@@ -17,10 +17,11 @@ class Project < Base
   def self.open(directory, provider, options = {})
     config = Config.ensure(options)
     
-    directory = Util::Disk.filename(directory)
+    directory = File.expand_path(Util::Disk.filename(directory))
     
     if ! @@projects.has_key?(directory) || config.get(:reset, false)
       return Coral.project(config.import({
+        :name      => directory,
         :directory => directory
       }), provider)
     end
@@ -33,14 +34,14 @@ class Project < Base
   def normalize
     super
     
+    set_url(get(:url)) unless get(:url, false)    
     set_location(Util::Disk.filename(get(:directory, Dir.pwd)))
     
     self.name = path
     
-    set_url(get(:url)) unless get(:url, false)
     checkout(get(:revision))
     
-    pull if get(:pull, false)    
+    pull if get(:pull, false)
   end
    
   #-----------------------------------------------------------------------------
@@ -91,8 +92,10 @@ class Project < Base
   #---
   
   def set_url(url)
-    set(:url, url)
-    set_remote(:origin, url.strip)
+    if url
+      set(:url, url)
+      set_remote(:origin, url.strip)
+    end
     return self
   end
 
@@ -133,7 +136,7 @@ class Project < Base
     if Util::Data.empty?(directory)
       set(:directory, Dir.pwd)
     else
-      set(:directory, Util::Disk.filename(directory))
+      set(:directory, File.expand_path(Util::Disk.filename(directory)))
     end
     @@projects[get(:directory)] = self
     
@@ -211,7 +214,7 @@ class Project < Base
       
       while File.directory?((search_dir = File.expand_path('..', search_dir)))
         if project_directory?(search_dir)
-          set(:parent, self.class.open(search_dir, plugin_provider))                
+          set(:parent, self.class.open(search_dir, plugin_provider))
           break;
         end        
       end      
@@ -275,14 +278,13 @@ class Project < Base
     if can_persist?
       subproject_config(config).each do |path, data|
         project_path = File.join(directory, path)
+        
         if File.directory?(project_path) 
           add_project = true
           add_project = yield(project_path, data) if block_given?
           
           if add_project
             project = self.class.open(project_path, plugin_provider)
-            project.set_url(data['url']) # Just a sanity check (might disapear)
-        
             subprojects[path] = project
           end
         end
@@ -315,6 +317,7 @@ class Project < Base
    
   def update_subprojects
     yield if can_persist? && block_given?
+    load_subprojects
     return self
   end
   protected :update_subprojects
@@ -411,6 +414,9 @@ class Project < Base
     success = false
     
     if can_persist?
+      prev_dir = Dir.pwd      
+      Dir.chdir(directory)
+      
       success = yield(config) if block_given?
       
       update_subprojects
@@ -420,7 +426,9 @@ class Project < Base
           :message     => "Pulling updates for subproject #{path}",
           :allow_empty => true
         }))
-      end      
+      end
+      
+      Dir.chdir(prev_dir)      
     end
     return success
   end
@@ -438,6 +446,9 @@ class Project < Base
     success = false
     
     if can_persist?
+      prev_dir = Dir.pwd      
+      Dir.chdir(directory)
+      
       success = yield(config) if block_given?
       
       if success && config.get(:propogate, true)
@@ -445,6 +456,8 @@ class Project < Base
           project.push(remote, config)
         end
       end
+      
+      Dir.chdir(prev_dir)
     end
     return success
   end
@@ -458,9 +471,9 @@ class Project < Base
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def self.build_info(data)  
+  def self.build_info(type, data)  
     data = data.split(/\s*,\s*/) if data.is_a?(String)
-    return super(data)
+    return super(type, data)
   end
   
   #---
@@ -476,8 +489,8 @@ class Project < Base
     end
     
     if options.has_key?(:url) && ! options[:url].nil?
-      # ex: github::coralnexus/puppet-coral[0.3]
-      if options[:url].match(/^\s*([a-zA-Z0-9_-]+)::(.+)\s*(?:\[\s*([^\]\s]+)\s*\])?\s*$/)
+      # ex: github:::coralnexus/puppet-coral[0.3]
+      if options[:url].match(/^\s*([a-zA-Z0-9_-]+):::([^\]\s]+)\s*(?:\[\s*([^\]\s]+)\s*\])?\s*$/)
         options[:provider] = $1
         options[:url]      = $2
         options[:revision] = $3 unless options.has_key?(:revision)
