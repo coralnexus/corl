@@ -14,7 +14,6 @@ class Shell < Plugin::Command
   #---
   
   def build(components = {}, overrides = nil, override_key = false)    
-    
     command            = string(components[:command])
     flags              = array( components.has_key?(:flags) ? components[:flags] : [] )
     data               = string_map(hash( components.has_key?(:data) ? components[:data] : {} ))
@@ -113,7 +112,7 @@ class Shell < Plugin::Command
     config = Config.ensure(options)
     
     config[:ui] = @ui
-    success = Util::Shell.exec!(build(properties, overrides), config) do |line|
+    success = Util::Shell.exec!(build(export, overrides), config) do |line|
       block_given? ? yield(line) : true
     end    
     return success
