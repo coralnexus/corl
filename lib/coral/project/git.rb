@@ -164,7 +164,7 @@ class Git < Plugin::Project
   
   def load_revision
     return super do
-      set(:revision, git.native(:rev_parse, { :verify => true }, 'HEAD').strip) unless get(:revision, false)
+      set(:revision, git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip) unless get(:revision, false)
       
       if get(:revision, '').empty?
         set(:revision, git.native(:rev_parse, {}, 'HEAD').strip)
