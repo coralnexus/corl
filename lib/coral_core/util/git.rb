@@ -27,8 +27,11 @@ class Git < ::Grit::Repo
     elsif File.directory?(epath) && (options[:is_bare] || (epath =~ /\.git$/ && File.exist?(File.join(epath, 'HEAD'))))
       self.path = epath
       @bare = true
+      
+    else
+      self.path = git_dir
     end
-
+    
     self.git = ::Grit::Git.new(self.path)
     self.git.work_tree = epath
     
