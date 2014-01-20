@@ -10,8 +10,8 @@ module Coral
           default = :none
         end
         return I18n.t(name.to_s, :default_value => default.to_s)
-      end  
-         
+      end
+        
       #-------------------------------------------------------------------------
       # Parser
        
@@ -149,8 +149,8 @@ module Coral
             self.processed = true
           end
         
-        rescue OptionParser::InvalidOption
-          raise Errors::CLIInvalidOptions, :help => parser.help.chomp  
+        rescue OptionParser::InvalidOption => e
+          puts e.message + "\n\n" + parser.help.chomp
         end
         
         #---
