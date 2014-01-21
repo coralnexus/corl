@@ -248,7 +248,7 @@ class Git < Plugin::Project
       FileUtils.rm_rf(File.join(directory, path))
       FileUtils.rm_rf(File.join(git.git_dir, 'modules', path))
       
-      commit([ '.gitmodules', path ], { :message => "Removing submodule #{url} from #{path}" })
+      commit([ '.gitmodules', path ], { :message => "Removing submodule #{path} from #{url}" })
     end  
   end
  
