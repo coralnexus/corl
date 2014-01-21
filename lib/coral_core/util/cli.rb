@@ -114,12 +114,12 @@ module Coral
               case allowed
               when Class
                 unless value.is_a?(allowed)
-                  Coral.ui.error(CLI.message(settings[:message]))
+                  puts CLI.message(settings[:message])
                   error = true
                 end
               when Array
                 unless allowed.include(value)
-                  Coral.ui.error(CLI.message(settings[:message]))
+                  puts CLI.message(settings[:message])
                   error = true  
                 end
               end
@@ -143,7 +143,8 @@ module Coral
           end          
           
           if error
-            Coral.ui.error(CLI.message('coral.util.cli.parse.error'))
+            puts CLI.message('coral.core.util.cli.parse.error')
+            puts "\n"
             puts parser.help.chomp
           else
             self.processed = true
@@ -194,6 +195,8 @@ module Coral
           }
           settings[:allowed] = allowed_values if allowed_values
           settings[:block]   = block if block
+          
+          settings.delete(:default) if settings[:default].nil?
           
           @arg_settings << settings  
         end
