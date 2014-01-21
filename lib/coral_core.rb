@@ -223,7 +223,7 @@ module Coral
     if options.is_a?(Hash) || options.is_a?(Coral::Config)
       config   = Config.ensure(options)
       provider = config.get(:provider, provider)
-      name     = config.get(:name, ( provider ? provider : default_provider ))
+      name     = config.get(:name, nil)
       options  = config.export
     end
     provider          = default_provider unless provider # Sanity checking (see plugins)
