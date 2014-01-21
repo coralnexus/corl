@@ -6,3 +6,6 @@ en:
           options:
             help: |-
               Display help information for this command
+          parse:
+            error: |-
+              There was a problem with the command arguments given
