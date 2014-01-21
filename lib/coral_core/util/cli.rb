@@ -113,6 +113,9 @@ module Coral
               allowed = settings[:allowed]
               case allowed
               when Class
+                if (allowed == Array)
+                  value = args
+                end
                 unless value.is_a?(allowed)
                   puts CLI.message(settings[:message])
                   error = true
