@@ -13,7 +13,7 @@ class Shell < Plugin::Command
 
   #---
   
-  def build(components = {}, overrides = nil, override_key = false)    
+  def build(components = {}, overrides = nil, override_key = false)
     command            = string(components[:command])
     flags              = array( components.has_key?(:flags) ? components[:flags] : [] )
     data               = string_map(hash( components.has_key?(:data) ? components[:data] : {} ))
@@ -84,17 +84,22 @@ class Shell < Plugin::Command
     
     # Arguments
     if overrides && overrides.has_key?(:args)
-      if overrides[:args].is_a?(Hash)
-        if overrides[:args].has_key?(override_key)
-          args = array(overrides[:args][override_key])
+      unless overrides[:args].empty?
+        if overrides[:args].is_a?(Hash)
+          if overrides[:args].has_key?(override_key)
+            args = array(overrides[:args][override_key])
+          end
+        else
+          args = array(overrides[:args])
         end
-      else
-        args = array(overrides[:args])
       end
     end
     args.each do |arg|
       arg = string(arg).sub(escape_characters, escape_replacement)
-      command_string << " '#{arg}'"
+      
+      unless arg.empty?
+        command_string << " '#{arg}'"
+      end
     end
     
     # Subcommand
@@ -102,7 +107,6 @@ class Shell < Plugin::Command
     if subcommand && subcommand.is_a?(Hash) && ! subcommand.empty?
       subcommand_string = build(subcommand, subcommand_overrides)
     end
-    
     return (command_string + ' ' + subcommand_string).strip
   end
   
