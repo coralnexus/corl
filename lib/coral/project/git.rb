@@ -186,17 +186,24 @@ class Git < Plugin::Project
   
   def commit(files = '.', options = {})
     return super(files, options) do |config, time, user, message|
-      git.reset({}, 'HEAD') # Clear the index so we get a clean commit
+      begin
+        git.reset({}, 'HEAD') # Clear the index so we get a clean commit
       
-      files = array(files)
-      git.add(files)                      # Get all added and updated files
-      git.add({ :update => true }, files) # Get all deleted files
+        files = array(files)
+      
+        git.add({ :raise => true }, files)                  # Get all added and updated files
+        git.add({ :update => true, :raise => true }, files) # Get all deleted files
     
-      git.commit({ 
-        :m           => "#{time} by <#{user}> - #{message}",
-        :author      => config.get(:author, false),
-        :allow_empty => config.get(:allow_empty, false) 
-      })  
+        git.commit({
+          :raise       => true, 
+          :m           => "#{time} by <#{user}> - #{message}",
+          :author      => config.get(:author, false),
+          :allow_empty => config.get(:allow_empty, false) 
+        })
+        true
+      rescue
+        false
+      end
     end   
   end
 
@@ -212,16 +219,24 @@ class Git < Plugin::Project
   #---
   
   def add_subproject(path, url, revision, options = {})
-    return super(path, url, revision, options) do
-      git.submodule({ :branch => revision }, 'add', url, path)
-      commit([ '.gitmodules', path ], { :message => "Adding submodule #{url} to #{path}" })
+    return super do
+      branch_options = ''
+      branch_options = [ '-b', revision ] if revision
+      
+      begin      
+        git.submodule({ :raise => true }, 'add', *branch_options, url, path)
+        commit([ '.gitmodules', path ], { :message => "Adding submodule #{url} to #{path}" })
+        true
+      rescue
+        false
+      end
     end  
   end
   
   #---
   
   def delete_subproject(path)
-    return super(path) do
+    return super do
       submodule_key = "submodule.#{path}"
       
       delete_config(submodule_key)
@@ -318,13 +333,15 @@ class Git < Plugin::Project
     
   def push!(remote = :edit, options = {})
     return super(remote, options) do |config|
+      push_branch = config.get(:revision, '')
+      
       success = Coral.command({
         :command => :git,
         :data => { 'git-dir=' => git.git_dir },
         :subcommand => {
           :command => :push,
-          :flags => ( config.get(:tags, true) ? :tags : '' ),
-          :args => [ remote, config.get(:revision, get(:revision, :master)) ]
+          :flags => [ ( push_branch.empty? ? :all : '' ), ( config.get(:tags, true) ? :tags : '' ) ],
+          :args => [ remote, push_branch ]
         }
       }, config.get(:provider, :shell)).exec!(config) do |line|
         block_given? ? yield(line) : true

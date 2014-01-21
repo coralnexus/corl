@@ -164,7 +164,7 @@ class Project < Base
   #---
   
   def revision(default = nil)
-    return get(:revision, default)
+    return get(:revision, default).to_s
   end
   
   #---
@@ -298,19 +298,23 @@ class Project < Base
   #---
   
   def add_subproject(path, url, revision, options = {})
+    success = true
     if can_persist?
-      yield if block_given?      
-      load_subprojects
-    end  
+      success = yield if block_given?      
+      update_subprojects if success
+    end
+    return success
   end
   
   #---
   
   def delete_subproject(path)
+    success = true
     if can_persist?
-      yield if block_given?  
-      load_subprojects
-    end  
+      success = yield if block_given?  
+      update_subprojects if success
+    end
+    return success
   end
  
   #---
@@ -451,9 +455,11 @@ class Project < Base
       
       success = yield(config) if block_given?
       
+      config.delete(:revision)
+      
       if success && config.get(:propogate, true)
         foreach! do |path, project|
-          project.push(remote, config)
+          project.push!(remote, config)
         end
       end
       
@@ -488,15 +494,46 @@ class Project < Base
       options = data
     end
     
-    if options.has_key?(:url) && ! options[:url].nil?
-      # ex: github:::coralnexus/puppet-coral[0.3]
-      if options[:url].match(/^\s*([a-zA-Z0-9_-]+):::([^\]\s]+)\s*(?:\[\s*([^\]\s]+)\s*\])?\s*$/)
-        options[:provider] = $1
-        options[:url]      = $2
-        options[:revision] = $3 unless options.has_key?(:revision)
+    if options.has_key?(:url)
+      if matches = translate_reference(options[:url])
+        options[:provider] = matches[:provider]
+        options[:url]      = matches[:reference]
+        options[:revision] = matches[:revision] unless options.has_key?(:revision)  
       end
     end
     return options
+  end
+  
+  #---
+  
+  def self.translate_reference(reference, editable = false)
+    # ex: github:::coralnexus/puppet-coral[0.3]
+    if reference && reference.match(/^\s*([a-zA-Z0-9_-]+):::([^\]\s]+)\s*(?:\[\s*([^\]\s]+)\s*\])?\s*$/)
+      provider = $1
+      url      = $2
+      revision = $3
+      
+      if provider
+        klass        = Coral.class_const([ :coral, :project, provider ])          
+        expanded_url = klass.send(:expand_url, url, editable) if klass.respond_to?(:expand_url)
+      end
+      expanded_url = url unless expanded_url
+      
+      info = {
+        :provider  => provider,
+        :reference => url,
+        :url       => expanded_url,
+        :revision  => revision
+      }
+      return info
+    end
+    return nil
+  end
+  
+  #---
+  
+  def translate_reference(reference, editable = false)
+    return self.class.translate_reference(reference, editable)
   end
   
   #---
