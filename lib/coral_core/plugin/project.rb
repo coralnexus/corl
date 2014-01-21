@@ -34,7 +34,7 @@ class Project < Base
   def normalize
     super
     
-    set_url(get(:url)) unless get(:url, false)    
+    set_url(get(:url)) if get(:url, false)    
     set_location(Util::Disk.filename(get(:directory, Dir.pwd)))
     
     self.name = path
