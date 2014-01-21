@@ -193,13 +193,15 @@ class Git < Plugin::Project
       
         git.add({ :raise => true }, files)                  # Get all added and updated files
         git.add({ :update => true, :raise => true }, files) # Get all deleted files
-    
-        git.commit({
+        
+        commit_options = {
           :raise       => true, 
           :m           => "#{time} by <#{user}> - #{message}",
-          :author      => config.get(:author, false),
           :allow_empty => config.get(:allow_empty, false) 
-        })
+        }
+        commit_options[:author] = config[:author] if config.get(:author, false)
+    
+        git.commit(commit_options)
         true
       rescue
         false

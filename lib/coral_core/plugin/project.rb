@@ -251,12 +251,13 @@ class Project < Base
     config = Config.ensure(options)
     
     if can_persist?
-      time    = Time.new.strftime("%Y-%m-%d %H:%M:%S")
-      user    = ENV['USER']
-      message = config.get(:message, 'Saving state')
+      time     = Time.new.strftime("%Y-%m-%d %H:%M:%S")
+      user     = ENV['USER']
+      
+      message  = config.get(:message, '')
+      message  = 'Saving state: ' + ( files.is_a?(Array) ? "\n\n" + files.join("\n") : files.to_s ) if message.empty?
       
       user = 'UNKNOWN' unless user && ! user.empty?
-      
       yield(config, time, user, message) if block_given?
       
       if ! parent.nil? && config.get(:propogate, true)
