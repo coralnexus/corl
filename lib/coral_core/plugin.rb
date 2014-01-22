@@ -220,6 +220,9 @@ module Plugin
       # Register external Gem defined plugins
       gems(true)
       
+      # Register any other dependent plugins
+      yield if block_given?
+      
       # Autoload the registered plugins
       autoload
            

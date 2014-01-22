@@ -181,16 +181,16 @@ module Coral
     unless @@initialized
       Config.set_property('time', Time.now.to_i)
       
-      begin
-        # Include Coral plugins
-        Puppet::Node::Environment.new.modules.each do |mod|
-          lib_path = File.join(mod.path, 'lib', 'coral')
-          Plugin.register(lib_path)
+      Plugin.initialize do
+        begin
+          # Include Coral plugins
+          Puppet::Node::Environment.new.modules.each do |mod|
+            lib_path = File.join(mod.path, 'lib', 'coral')
+            Plugin.register(lib_path)
+          end
+        rescue
         end
-      rescue
       end
-      
-      Plugin.initialize
             
       @@initialized = true
     end    
