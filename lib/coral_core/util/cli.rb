@@ -102,7 +102,7 @@ module Coral
           
           parser.parse!(args)
           
-          remaining_args = args
+          remaining_args = args.dup
           
           @arg_settings.each_with_index do |settings, index|
             if index >= args.length
@@ -116,7 +116,7 @@ module Coral
               case allowed
               when Class
                 if (allowed == Array)
-                  value          = args
+                  value          = remaining_args
                   remaining_args = []
                 end
                 unless value.is_a?(allowed)
