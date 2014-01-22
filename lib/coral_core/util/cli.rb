@@ -83,7 +83,7 @@ module Coral
             end                       
           else
             parser.separator help
-          end  
+          end
         end
         
         #---
@@ -95,7 +95,7 @@ module Coral
           self.processed = false
           
           parser.on_tail('-h', '--help', CLI.message('coral.core.util.cli.options.help')) do
-            puts parser.help.chomp
+            puts parser.help.chomp + "\n\n"
             options[:help] = true
             return
           end
@@ -147,8 +147,7 @@ module Coral
           
           if error
             puts CLI.message('coral.core.util.cli.parse.error')
-            puts "\n"
-            puts parser.help.chomp
+            puts  "\n" + parser.help.chomp + "\n\n"
           else
             self.processed = true
           end
