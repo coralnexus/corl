@@ -102,11 +102,13 @@ module Coral
           
           parser.parse!(args)
           
+          remaining_args = args
+          
           @arg_settings.each_with_index do |settings, index|
             if index >= args.length
               value = nil
             else
-              value = Util::Data.value(args[index])  
+              value = Util::Data.value(args[index])
             end
             
             if !value.nil? && settings.has_key?(:allowed)
@@ -114,7 +116,8 @@ module Coral
               case allowed
               when Class
                 if (allowed == Array)
-                  value = args
+                  value          = args
+                  remaining_args = []
                 end
                 unless value.is_a?(allowed)
                   puts CLI.message(settings[:message])
@@ -142,6 +145,8 @@ module Coral
             end
             
             break if error
+            
+            remaining_args.shift unless remaining_args.empty?
             self.arguments[settings[:name]] = value
           end          
           
