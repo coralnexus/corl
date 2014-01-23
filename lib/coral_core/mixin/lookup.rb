@@ -92,7 +92,7 @@ module Lookup
         value = hiera.lookup(property, nil, hiera_scope, override, context)
       end 
     
-      if Util::Data.undef?(value)    
+      if Util::Data.undef?(value) && puppet_scope.respond_to?(:lookupvar)    
         log_level = Puppet::Util::Log.level
         Puppet::Util::Log.level = :err # Don't want failed parameter lookup warnings here.
       
