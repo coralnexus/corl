@@ -26,7 +26,7 @@ module Coral
         
         def initialize(args, banner = '', help = '')
           
-          @parser        = OptionParser.new
+          @parser = OptionParser.new
           
           self.options   = {}
           self.arguments = {}
@@ -76,6 +76,10 @@ module Coral
         
         #---
         
+        def help
+          return parser.help
+        end
+        
         def help=help
           if help.is_a?(Array)
             help.each do |line|
@@ -95,7 +99,7 @@ module Coral
           self.processed = false
           
           parser.on_tail('-h', '--help', CLI.message('coral.core.util.cli.options.help')) do
-            puts parser.help.chomp + "\n\n"
+            self.help = parser.help.chomp + "\n\n"
             options[:help] = true
             return
           end
@@ -103,6 +107,7 @@ module Coral
           parser.parse!(args)
           
           remaining_args = args.dup
+          arg_messages   = []
           
           @arg_settings.each_with_index do |settings, index|
             if index >= args.length
@@ -120,12 +125,12 @@ module Coral
                   remaining_args = []
                 end
                 unless value.is_a?(allowed)
-                  puts CLI.message(settings[:message])
+                  arg_messages << CLI.message(settings[:message])
                   error = true
                 end
               when Array
                 unless allowed.include(value)
-                  puts CLI.message(settings[:message])
+                  arg_messages << CLI.message(settings[:message])
                   error = true  
                 end
               end
@@ -151,14 +156,17 @@ module Coral
           end          
           
           if error
-            puts CLI.message('coral.core.util.cli.parse.error')
-            puts  "\n" + parser.help.chomp + "\n\n"
+            if ! arg_messages.empty?
+              self.help = CLI.message('coral.core.util.cli.parse.error') + "\n\n" + arg_messages.join("\n") + "\n\n" + parser.help.chomp + "\n\n"
+            else
+              self.help = CLI.message('coral.core.util.cli.parse.error') + "\n" + parser.help.chomp + "\n\n"  
+            end
           else
             self.processed = true
           end
         
         rescue OptionParser::InvalidOption => e
-          puts e.message + "\n\n" + parser.help.chomp
+          self.help =  e.message + "\n\n" + parser.help.chomp
         end
         
         #---
