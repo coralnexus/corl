@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+Signal.trap("INT") { exit 1 }
+
+#---
+
+require 'coral_core'
+
+#---
+
+logger = Coral.logger
+logger.info("`coral` invoked: #{ARGV.inspect}")
+
+#---
+
+$stdout.sync = true
+$stderr.sync = true
+
+#---
+
+begin
+  logger.debug("Running coral action")
+  
+  dbg('we are here')
+  
+  begin
+    # Execute the CLI interface, and exit with the proper error code
+    exit_status = something(ARGV)
+  ensure
+    # Cleanup if necessary
+  end
+
+  exit(exit_status)
+  
+rescue Exception => e
+  logger.error("Coral experienced an error! Details:")
+  logger.error(e.inspect)
+  logger.error(e.message)
+  logger.error(e.backtrace.join("\n"))
+
+  opts = { :prefix => false }
+  Coral.ui.error e.message, opts if e.message
+  
+  exit e.status_code if e.respond_to?(:status_code)
+  exit 999
+end
