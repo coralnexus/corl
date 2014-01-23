@@ -55,7 +55,7 @@ class Template < Base
     end
     
     if normalize && interpolate
-      data = Util::Data.interpolate(data, data, properties)
+      data = Util::Data.interpolate(data, data, export)
     end    
     return render_processed(process(data))
   end
