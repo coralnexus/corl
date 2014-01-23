@@ -43,7 +43,7 @@ module Lookup
     
     begin
       require 'hiera'
-      puppet_scope = config.get(:puppet_scope, scope)
+      puppet_scope = config.get(:puppet_scope, {})
     
       prefix_text = config.get(:prefix_text, '::')  
       init_fact   = prefix_text + config.get(:init_fact, 'hiera_ready')
