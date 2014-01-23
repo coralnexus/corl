@@ -116,7 +116,7 @@ module Lookup
     value = default if Util::Data.undef?(value)
     value = Util::Data.value(value)
     
-    if ! @@properties.has_key?(first_property) || ! Util::Data.undef?(value)
+    if ! Config::Collection.get(first_property) || ! Util::Data.undef?(value)
       Config::Collection.set(first_property, value)
     end
     return value, first_property if return_property
