@@ -191,8 +191,8 @@ class Config
       
       @properties = Util::Data.merge(data, config)
     
-    when String, Symbol      
-      properties = lookup(properties.to_s, {}, config)
+    when String, Symbol
+      properties = self.class.lookup(properties.to_s, {}, config)
       
       data = [ @properties, symbol_map(properties) ]
       data = data.reverse if import_type != :override
