@@ -9,3 +9,12 @@ en:
           parse:
             error: |-
               There was a problem with the command arguments given
+      actions:
+        create:
+          options:
+            reference: |-
+              Git repository URL of Coral cloud to start project from (default %{default_value})
+            path: |-
+              Project path (default %{default_value})
+          start: |-
+            Creating a new Coral cloud at %{path} from %{reference}
