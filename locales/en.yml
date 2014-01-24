@@ -47,7 +47,7 @@ en:
           header: |-
             Available actions
           footer: |-
-            For help on any individual action run `coral {action} -h`
+            For help on any individual action run `coral <action> -h`
       actions:        
         create:
           options:
