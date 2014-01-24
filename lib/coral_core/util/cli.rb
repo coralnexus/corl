@@ -99,7 +99,6 @@ module Coral
           self.processed = false
           
           parser.on_tail('-h', '--help', CLI.message('coral.core.util.cli.options.help')) do
-            self.help = parser.help.chomp + "\n\n"
             options[:help] = true
             return
           end
