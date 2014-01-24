@@ -85,7 +85,7 @@ require 'yaml'
 require 'multi_json'
 require 'digest/sha1'
 
-require 'puppet'
+#require 'puppet'
 require 'fog'
 
 #---

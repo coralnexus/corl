@@ -1,13 +1,12 @@
 
 # Should be included via extend
 #
-# extend Mixin::Config::Collection
+# extend Mixin::ConfigCollection
 #
 
 module Coral
 module Mixin
-module Config
-module Collection
+module ConfigCollection
 
   #-----------------------------------------------------------------------------
   # Configuration collection interface
@@ -49,7 +48,6 @@ module Collection
     Config::Collection.save
     return self
   end
-end
 end
 end
 end

@@ -5,10 +5,10 @@ class Config
   #-----------------------------------------------------------------------------
   # Global interface
 
-  extend Mixin::Config::Options
-  extend Mixin::Config::Collection
+  extend Mixin::ConfigOptions
+  extend Mixin::ConfigCollection
   extend Mixin::Lookup
-  extend Mixin::Config::Ops
+  extend Mixin::ConfigOps
   
   #-----------------------------------------------------------------------------
   # Instance generators

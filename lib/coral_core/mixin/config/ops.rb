@@ -1,13 +1,12 @@
 
 # Should be included via extend
 #
-# extend Mixin::Config::Ops
+# extend Mixin::ConfigOps
 #
 
 module Coral
 module Mixin
-module Config
-module Ops
+module ConfigOps
 
   #-----------------------------------------------------------------------------
   # Parsing
@@ -49,7 +48,6 @@ module Ops
       :new_value     => eval(new_value) 
     }    
   end
-end
 end
 end
 end
