@@ -17,7 +17,7 @@ class Action < Base
   def normalize
     @@register[plugin_provider] = self
     
-    parse(get_array(:args, []))
+    parse(get_array(:args))
   end
   
   #-----------------------------------------------------------------------------
@@ -36,13 +36,13 @@ class Action < Base
   #---
   
   def options
-    return get_hash(:options, {})
+    return get_hash(:options)
   end
   
   #---
   
   def arguments
-    return get_hash(:arguments, {})
+    return get_hash(:arguments)
   end
    
   #---
