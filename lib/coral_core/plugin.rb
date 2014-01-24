@@ -132,15 +132,22 @@ module Plugin
   
   #---
   
-  def self.plugins(type = nil)
-    results = {}
-    
+  def self.loaded_plugins(type = nil)
     if type
-      results[type] = @@plugins[type] if @@plugins.has_key?(type)
-    else
-      results = @@plugins
+      return @@load_info[type] if @@load_info.has_key?(type)
+      return {}
+    end
+    return @@load_info
+  end
+ 
+  #---
+  
+  def self.plugins(type = nil)
+    if type
+      return @@plugins[type] if @@plugins.has_key?(type)
+      return {}
     end    
-    return results
+    return @@plugins
   end
  
   #---
@@ -154,7 +161,7 @@ module Plugin
     provider   = components.pop.sub(/\.rb/, '').to_sym
     directory  = components.join(File::SEPARATOR) 
     
-    puts 'Loading coral ' + type.to_s + ' plugin: ' + provider.to_s
+    Coral.logger.info('Loading coral ' + type.to_s + ' plugin: ' + provider.to_s)
         
     unless @@load_info[type].has_key?(provider)
       data = {
@@ -202,6 +209,7 @@ module Plugin
     @@load_info.keys.each do |type|
       @@load_info[type].each do |provider, plugin|
         coral_require(plugin[:directory], provider)
+        @@load_info[type][provider][:class] = Coral.class_const([ :coral, type, provider ])
       end      
     end 
   end
@@ -215,7 +223,7 @@ module Plugin
   def self.initialize
     unless @@initialized
       # Register core plugins
-      register(File.join(File.dirname(__FILE__), '..', 'coral'))      
+      register(File.join(File.dirname(__FILE__), '..', 'coral'))
       
       # Register external Gem defined plugins
       gems(true)
