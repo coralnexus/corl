@@ -23,6 +23,12 @@ class Action < Base
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
   
+  def quiet?
+    return get(:quiet, false)
+  end
+  
+  #---
+  
   def processed?
     return get(:processed, false)
   end
@@ -53,10 +59,15 @@ class Action < Base
     @parser = nil    
     @parser = yield if block_given?
     
-    if @parser && @parser.processed
-      set(:processed, true)
-      set(:options, @parser.options)
-      set(:arguments, @parser.arguments)
+    if @parser 
+      if @parser.processed
+        set(:processed, true)
+        set(:options, @parser.options)
+        set(:arguments, @parser.arguments)
+        
+      elsif @parser.options[:help] && ! quiet?
+        puts I18n.t('coral.core.exec.help.usage') + ': ' + @parser.help + "\n"
+      end
     end 
     return self  
   end
@@ -75,25 +86,25 @@ class Action < Base
   # Output
         
   def info(name, options = {})
-    ui.info(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true)))
+    ui.info(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true))) unless quiet?
   end
         
   #---
        
   def warn(name, options = {})
-    ui.warn(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true)))  
+    ui.warn(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true))) unless quiet?  
   end
         
   #---
         
   def error(name, options = {})
-    ui.error(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true)))  
+    ui.error(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true))) unless quiet?  
   end
         
   #---
         
   def success(name, options = {})
-    ui.success(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true)))  
+    ui.success(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true))) unless quiet?  
   end
 end
 end
