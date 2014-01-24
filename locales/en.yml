@@ -9,7 +9,15 @@ en:
           parse:
             error: |-
               There was a problem with the command arguments given
-      actions:
+      exec:
+        help:
+          usage: |-
+            Usage
+          header: |-
+            Available actions
+          footer: |-
+            For help on any individual action run `coral {action} -h`
+      actions:        
         create:
           options:
             reference: |-
