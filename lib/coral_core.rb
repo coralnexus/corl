@@ -90,6 +90,7 @@ require 'fog'
 
 # TODO: Make this dynamically settable
 
+I18n.enforce_available_locales = false
 I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir)
 
 #---
@@ -212,7 +213,8 @@ module Coral
                      :event      => :regex,
                      :template   => :json,
                      :translator => :json,
-                     :project    => :git
+                     :project    => :git,
+                     :action     => :create
                      
   #-----------------------------------------------------------------------------
   # Plugin interface (facade)
@@ -365,6 +367,18 @@ module Coral
   
   def self.translators(data, build_hash = false, keep_array = false)
     return plugins(:translator, data, build_hash, keep_array)
+  end
+  
+  #---
+  
+  def self.action(provider, args = [], quiet = false)
+    return plugin(:action, provider, { :args => args, :quiet => quiet })
+  end
+  
+  #---
+  
+  def self.actions(data, build_hash = false, keep_array = false)
+    return plugins(:action, data, build_hash, keep_array)  
   end
         
   #-----------------------------------------------------------------------------
