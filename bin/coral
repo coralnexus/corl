@@ -45,7 +45,7 @@ begin
     
     loaded_actions.each do |provider, action|
       tmp = Coral.action(provider, [ '-h' ], true)
-      puts sprintf("   %-10s : %s\n", provider, tmp.help)
+      puts sprintf("   %-10s : %s\n", "<#{provider}>", tmp.help)
     end
     
     puts "\n" + I18n.t('coral.core.exec.help.footer') + "\n\n"   
