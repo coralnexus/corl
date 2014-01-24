@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
     "coral_core.gemspec",
     "lib/coral/action/add.rb",
     "lib/coral/action/create.rb",
+    "lib/coral/action/remove.rb",
     "lib/coral/command/shell.rb",
     "lib/coral/event/puppet.rb",
     "lib/coral/event/regex.rb",
