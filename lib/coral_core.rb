@@ -84,9 +84,7 @@ require 'deep_merge'
 require 'yaml'
 require 'multi_json'
 require 'digest/sha1'
-
-#require 'puppet'
-require 'fog'
+require 'optparse'
 
 #---
 

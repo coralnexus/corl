@@ -30,6 +30,7 @@ class Fog < Plugin::Machine
   # Property accessors / modifiers
   
   def set_connection
+    require 'fog'
     set(:compute, Fog::Compute.new(_export))
   end
   protected :set_connection

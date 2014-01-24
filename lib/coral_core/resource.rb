@@ -152,6 +152,8 @@ module Resource
   
   def self.translate_resource_refs(type_name, resource_refs, options = {})
     return :undef if Util::Data.undef?(resource_refs)
+     
+    require 'puppet'
     
     config         = Config.ensure(options)
     resource_names = config.get(:resource_names, {})
