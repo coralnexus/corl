@@ -67,7 +67,7 @@ en:
               Whether or not this sub project should be added as an editable remote (default %{default_value})
           start: |-
             Adding new subproject from %{sub_reference} at %{sub_path}
-        rm:
+        remove:
           options:
             sub_path: |-
               Subproject path
