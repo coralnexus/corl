@@ -11,8 +11,8 @@ class Add < Plugin::Action
   
   def parse(args)
     return super do
-      Util::CLI::Parser.new(@argv, 
-        'Usage: coral add <subproject/path> <subproject:::reference>'
+      Util::CLI::Parser.new(args, 
+        'coral add <subproject/path> <subproject:::reference>'
       ) do |parser|
         parser.arg_str(:sub_path, nil, 
           'coral.vagrant.commands.add.options.sub_path'
