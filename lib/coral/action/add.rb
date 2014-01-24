@@ -10,23 +10,19 @@ class Add < Plugin::Action
   # Action operations
   
   def parse(args)
-    return super do
-      Util::CLI::Parser.new(args, 
-        'coral add <subproject/path> <subproject:::reference>'
-      ) do |parser|
-        parser.arg_str(:sub_path, nil, 
-          'coral.core.actions.add.options.sub_path'
-        )
-        parser.arg_str(:sub_reference, nil, 
-          'coral.core.actions.add.options.sub_reference'
-        )
-        parser.option_bool(:editable, false, 
-          '--editable', 
-          'coral.core.actions.add.options.editable'
-        )
-        project_options(parser, true, true)
-        push_options(parser, true)
-      end
+    return super(args, 'coral add <subproject/path> <subproject:::reference>') do |parser|
+      parser.arg_str(:sub_path, nil, 
+        'coral.core.actions.add.options.sub_path'
+      )
+      parser.arg_str(:sub_reference, nil, 
+        'coral.core.actions.add.options.sub_reference'
+      )
+      parser.option_bool(:editable, false, 
+        '--editable', 
+        'coral.core.actions.add.options.editable'
+      )
+      project_options(parser, true, true)
+      push_options(parser, true)
     end
   end
   

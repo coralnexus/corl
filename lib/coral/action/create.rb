@@ -7,19 +7,15 @@ class Create < Plugin::Action
   # Action operations
   
   def parse(args)
-    return super do
-      Util::CLI::Parser.new(args, 
-        'coral create [ <project:::reference> ]'
-      ) do |parser|
-        parser.option_str(:path, Dir.pwd, 
-          '--path PROJECT_DIR', 
-          'coral.core.actions.create.options.path'
-        )
-        parser.arg_str(:reference, 
-          'github:::coralnexus/puppet-cloud-template', 
-          'coral.core.actions.create.options.reference'
-        )
-      end
+    return super(args, 'coral create [ <project:::reference> ]') do |parser|
+      parser.option_str(:path, Dir.pwd, 
+        '--path PROJECT_DIR', 
+        'coral.core.actions.create.options.path'
+      )
+      parser.arg_str(:reference, 
+        'github:::coralnexus/puppet-cloud-template', 
+        'coral.core.actions.create.options.reference'
+      )
     end
   end
   

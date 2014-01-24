@@ -55,9 +55,11 @@ class Action < Base
   #-----------------------------------------------------------------------------
   # Operations
   
-  def parse(args)
-    @parser = nil    
-    @parser = yield if block_given?
+  def parse(args, banner = '')
+    
+    @parser = Util::CLI::Parser.new(args, banner) do |parser| 
+      yield(parser) if block_given?
+    end
     
     if @parser 
       if @parser.processed
