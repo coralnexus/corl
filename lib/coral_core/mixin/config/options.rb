@@ -1,12 +1,14 @@
 
 # Should be included via extend
 #
-# extend Mixin::ConfigOptions
+# extend Mixin::Config::Options
 #
 
 module Coral
 module Mixin
-module ConfigOptions
+module Config
+module Options
+  
   #-----------------------------------------------------------------------------
   # Configuration options interface
   
@@ -33,6 +35,7 @@ module ConfigOptions
     Config::Options.clear(contexts)
     return self  
   end
+end
 end
 end
 end

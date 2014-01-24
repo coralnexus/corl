@@ -58,12 +58,14 @@ end
 #-------------------------------------------------------------------------------
 # Top level properties 
 
-lib_dir   = File.dirname(__FILE__)
-core_dir  = File.join(lib_dir, 'coral_core')
-mixin_dir = File.join(core_dir, 'mixin')
-macro_dir = File.join(mixin_dir, 'macro')
-util_dir  = File.join(core_dir, 'util')
-mod_dir   = File.join(core_dir, 'mod')
+lib_dir          = File.dirname(__FILE__)
+core_dir         = File.join(lib_dir, 'coral_core')
+mixin_dir        = File.join(core_dir, 'mixin')
+mixin_config_dir = File.join(mixin_dir, 'config')
+mixin_cli_dir    = File.join(mixin_dir, 'cli')
+macro_dir        = File.join(mixin_dir, 'macro')
+util_dir         = File.join(core_dir, 'util')
+mod_dir          = File.join(core_dir, 'mod')
  
 #-------------------------------------------------------------------------------
 # Coral requirements
@@ -111,6 +113,12 @@ end
 
 # Mixins for classes
 Dir.glob(File.join(mixin_dir, '*.rb')).each do |file|
+  require file
+end
+Dir.glob(File.join(mixin_config_dir, '*.rb')).each do |file|
+  require file
+end
+Dir.glob(File.join(mixin_cli_dir, '*.rb')).each do |file|
   require file
 end
 Dir.glob(File.join(macro_dir, '*.rb')).each do |file|

@@ -1,7 +1,8 @@
 
 module Coral
 module Mixin
-module CommitCLI
+module CLI
+module Commit
         
   #-----------------------------------------------------------------------------
   # Options
@@ -53,3 +54,5 @@ module CommitCLI
 end
 end
 end
+end
+

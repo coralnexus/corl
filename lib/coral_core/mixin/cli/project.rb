@@ -1,7 +1,8 @@
 
 module Coral
 module Mixin
-module ProjectCLI
+module CLI
+module Project
         
   #-----------------------------------------------------------------------------
   # Options
@@ -48,3 +49,5 @@ module ProjectCLI
 end
 end
 end
+end
+

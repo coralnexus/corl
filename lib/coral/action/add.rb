@@ -3,8 +3,8 @@ module Coral
 module Action
 class Add < Plugin::Action
   
-  include Mixin::ProjectCLI
-  include Mixin::PushCLI
+  include Mixin::CLI::Project
+  include Mixin::CLI::Push
 
   #-----------------------------------------------------------------------------
   # Action operations
@@ -15,14 +15,14 @@ class Add < Plugin::Action
         'coral add <subproject/path> <subproject:::reference>'
       ) do |parser|
         parser.arg_str(:sub_path, nil, 
-          'coral.vagrant.commands.add.options.sub_path'
+          'coral.core.actions.add.options.sub_path'
         )
         parser.arg_str(:sub_reference, nil, 
-          'coral.vagrant.commands.add.options.sub_reference'
+          'coral.core.actions.add.options.sub_reference'
         )
         parser.option_bool(:editable, false, 
           '--editable', 
-          'coral.vagrant.commands.add.options.editable'
+          'coral.core.actions.add.options.editable'
         )
         project_options(parser, true, true)
         push_options(parser, true)

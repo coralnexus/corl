@@ -1,7 +1,8 @@
 
 module Coral
 module Mixin
-module PushCLI
+module CLI
+module Push
         
   #-----------------------------------------------------------------------------
   # Options
@@ -47,3 +48,5 @@ module PushCLI
 end
 end
 end
+end
+
