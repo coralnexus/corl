@@ -18,19 +18,39 @@ $stderr.sync = true
 
 #---
 
+exit_status = 999
+
 begin
   logger.debug("Running coral action")
   
-  dbg('we are here')
+  arg_components = Coral::Util::CLI::Parser.split(ARGV, 'coral <action> [ <arg> ... ]')
+  main_command   = arg_components.shift
+  sub_command    = arg_components.shift
+  sub_args       = arg_components
   
-  begin
-    # Execute the CLI interface, and exit with the proper error code
-    exit_status = something(ARGV)
-  ensure
-    # Cleanup if necessary
-  end
-
-  exit(exit_status)
+  loaded_actions    = Coral::Plugin.loaded_plugins(:action)
+  available_actions = loaded_actions.keys
+  
+  if main_command.processed && sub_command
+    action_plugin = Coral.action(sub_command, sub_args)     
+  
+    begin   
+      exit_status = action_plugin.execute
+    ensure
+      action_plugin.cleanup if action_plugin.respond_to?(:cleanup)
+    end  
+  else
+    puts I18n.t('coral.core.exec.help.usage') + ': ' + main_command.help + "\n"
+    puts I18n.t('coral.core.exec.help.header') + ":\n\n"
+    
+    loaded_actions.each do |provider, action|
+      tmp = Coral.action(provider, [ '-h' ], true)
+      puts sprintf("   %-10s : %s\n", provider, tmp.help)
+    end
+    
+    puts "\n" + I18n.t('coral.core.exec.help.footer') + "\n\n"   
+    exit_status = 1  
+  end 
   
 rescue Exception => e
   logger.error("Coral experienced an error! Details:")
@@ -38,9 +58,9 @@ rescue Exception => e
   logger.error(e.message)
   logger.error(e.backtrace.join("\n"))
 
-  opts = { :prefix => false }
-  Coral.ui.error e.message, opts if e.message
+  Coral.ui.error(e.message, { :prefix => false }) if e.message
   
-  exit e.status_code if e.respond_to?(:status_code)
-  exit 999
+  exit_status = e.status_code if e.respond_to?(:status_code)
 end
+
+exit(exit_status)
