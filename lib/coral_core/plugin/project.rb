@@ -620,7 +620,7 @@ class Project < Base
   #---
    
   def self.translate(data)
-    options = {}
+    options = super(data)
     
     case data        
     when String
