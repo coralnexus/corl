@@ -11,7 +11,7 @@ require 'coral_core'
 logger = Coral.logger
 
 if ENV['CORAL_LOG']
-  logger.level      = Log4r.const_get ENV['CORAL_LOG'].upcase
+  logger.level      = Log4r.const_get(ENV['CORAL_LOG']).upcase
   logger.outputters = Log4r::StdoutOutputter.new('console') 
 end
 
