@@ -9,12 +9,12 @@ class Interface
   @@logger = Log4r::Logger.new("coral::interface")
     
   if ENV['CORAL_LOG']
-    log_level           = ENV['CORAL_LOG'].upcase
+    @@log_level         = ENV['CORAL_LOG'].upcase
     
-    @@logger.level      = Log4r.const_get(log_level)
+    @@logger.level      = Log4r.const_get(@@log_level)
     @@logger.outputters = Log4r::StdoutOutputter.new('console')
         
-    Grit.debug = true if log_level == 'DEBUG'
+    Grit.debug = true if @@log_level == 'DEBUG'
   end
   
   #---
