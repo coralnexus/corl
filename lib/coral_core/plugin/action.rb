@@ -2,21 +2,11 @@
 module Coral
 module Plugin
 class Action < Base
-  
-  @@register = {}
 
   #-----------------------------------------------------------------------------
   # Action plugin interface
   
-  def self.actions
-    return @@register
-  end
-  
-  #---
-  
   def normalize
-    @@register[plugin_provider] = self
-    
     parse(get_array(:args))
   end
   
@@ -57,6 +47,8 @@ class Action < Base
   
   def parse(args, banner = '')
     
+    logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
+    
     @parser = Util::CLI::Parser.new(args, banner) do |parser| 
       yield(parser) if block_given?
     end
@@ -67,8 +59,17 @@ class Action < Base
         set(:options, @parser.options)
         set(:arguments, @parser.arguments)
         
+        logger.debug("Parse successful: #{export.inspect}")
+        
       elsif @parser.options[:help] && ! quiet?
         puts I18n.t('coral.core.exec.help.usage') + ': ' + @parser.help + "\n"
+        
+      else
+        if @parser.options[:help]
+          logger.debug("Help wanted but running in silent mode")
+        else
+          logger.warn("Parse failed for unknown reasons")
+        end
       end
     end 
     return self  
@@ -78,19 +79,26 @@ class Action < Base
   
   def execute
     success = false
+    
+    logger.info("Executing action #{plugin_provider}")
+    
     begin
       if processed?
+        logger.debug("Parse was successful;  We are go for launch")
         success = yield if block_given?    
       end
     ensure
       cleanup
-    end  
+    end
+    
+    logger.warn("Execution failed for #{plugin_provider} with #{export.inspect}") if processed? && ! success  
     return success
   end
   
   #---
   
   def cleanup
+    logger.info("Running cleanup for action #{plugin_provider}")
     # Nothing to do right now
   end
   

@@ -13,6 +13,7 @@ class Core < Config
   def initialize(data = {}, defaults = {}, force = true)
     super(data, defaults, force)
     
+    logger.debug("Setting instance interface")
     @ui = Util::Interface.new(export)
   end
   
