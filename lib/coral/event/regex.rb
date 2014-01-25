@@ -38,8 +38,12 @@ class Regex < Plugin::Event
    
   def check(source)
     if pattern.empty?
-      return true if source.match(/#{pattern}/)                 
-      return false
+      logger.warn("Can not check regex pattern because it is empty")
+    else
+      success = source.match(/#{pattern}/)
+      
+      logger.debug("Checking regex event with pattern #{pattern}: #{success.inspect}")
+      return success
     end
     return true
   end

@@ -35,16 +35,18 @@ class Event < Base
   #---
    
   def self.translate(data)
-    info = super(data)
+    options = super(data)
     
     case data        
     when String
       components = data.split(':')
       
-      info[:provider] = components.shift
-      info[:string]   = components.join(':')
+      options[:provider] = components.shift
+      options[:string]   = components.join(':')
+      
+      logger.debug("Translating event options: #{options.inspect}") 
     end
-    return info  
+    return options  
   end
 end
 end

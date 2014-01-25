@@ -74,10 +74,13 @@ class Puppet < Plugin::Event
                     
       if source_operation
         source_element = source_elements.join('/').strip
+        success        = ( source_element.include?(element) && source_operation == operation && source_message.include?(message) )
         
-        if source_element.include?(element) && source_operation == operation && source_message.include?(message)
-          return true
-        end
+        logger.debug("Checking puppet event with source #{source_element} #{source_operation} #{source_message}: #{success.inspect}")
+        
+        return success
+      else
+        logger.warn("Can not check puppet event because it is missing an operation")
       end
     end
     return false
