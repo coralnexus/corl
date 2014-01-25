@@ -66,6 +66,7 @@ mixin_cli_dir    = File.join(mixin_dir, 'cli')
 macro_dir        = File.join(mixin_dir, 'macro')
 util_dir         = File.join(core_dir, 'util')
 mod_dir          = File.join(core_dir, 'mod')
+plugin_dir       = File.join(core_dir, 'plugin')
  
 #-------------------------------------------------------------------------------
 # Coral requirements
@@ -125,6 +126,7 @@ end
 
 #---
 
+# Include bootstrap classes
 coral_require(util_dir, :data)
 coral_require(core_dir, :config)
 coral_require(util_dir, :interface) 
@@ -138,7 +140,11 @@ coral_require(core_dir, :core)
 end
 
 # Include core systems
-[ :resource, :plugin_base, :plugin ].each do |name|
+coral_require(plugin_dir, :base)
+coral_require(core_dir, :plugin)
+
+# Include extras
+[ :resource ].each do |name|
   coral_require(core_dir, name)
 end
 
