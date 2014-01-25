@@ -9,22 +9,26 @@ class Interface
   @@logger = Log4r::Logger.new("coral::interface")
     
   if ENV['CORAL_LOG']
-    @@logger.level      = Log4r.const_get(ENV['CORAL_LOG'].upcase)
-    @@logger.outputters = Log4r::StdoutOutputter.new('console') 
+    log_level           = ENV['CORAL_LOG'].upcase
+    
+    @@logger.level      = Log4r.const_get(log_level)
+    @@logger.outputters = Log4r::StdoutOutputter.new('console')
+        
+    Grit.debug = true if log_level == 'DEBUG'
   end
   
   #---
 
   COLORS = {
-    :clear => "\e[0m",
-    :red => "\e[31m",
-    :green => "\e[32m",
+    :clear  => "\e[0m",
+    :red    => "\e[31m",
+    :green  => "\e[32m",
     :yellow => "\e[33m"
   }
 
   COLOR_MAP = {
-    :warn => COLORS[:yellow],
-    :error => COLORS[:red],
+    :warn    => COLORS[:yellow],
+    :error   => COLORS[:red],
     :success => COLORS[:green]
   }
 
