@@ -13,8 +13,11 @@ class Interface
     
     @@logger.level      = Log4r.const_get(@@log_level)
     @@logger.outputters = Log4r::StdoutOutputter.new('console')
-        
-    Grit.debug = true if @@log_level == 'DEBUG'
+    
+    if @@log_level == 'DEBUG'    
+      Grit.debug   = true
+      ENV['DEBUG'] = true # Fog uses this
+    end
   end
   
   #---
