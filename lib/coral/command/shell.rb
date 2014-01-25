@@ -8,7 +8,10 @@ class Shell < Plugin::Command
   
   def normalize
     super
-    set(:command, executable(self))
+    command = executable(self)
+    
+    logger.info("Setting command executable to #{command}")
+    set(:command, command)
   end
 
   #---
@@ -31,6 +34,15 @@ class Shell < Plugin::Command
     
     dash_pattern       = /^([\-]+)/
     assignment_pattern = /\=$/
+    
+    logger.info("Building command #{command}")
+    logger.debug("Command flags: #{flags.inspect}")
+    logger.debug("Command options: #{data.inspect}")
+    logger.debug("Command arguments: #{args.inspect}")
+    logger.debug("Command has sub command") unless subcommand.empty?
+    
+    logger.debug("Overrides: #{overrides.inspect}")
+    logger.debug("Override key: #{override_key}")
     
     # Flags
     if overrides && overrides.has_key?(:flags)
@@ -107,7 +119,11 @@ class Shell < Plugin::Command
     if subcommand && subcommand.is_a?(Hash) && ! subcommand.empty?
       subcommand_string = build(subcommand, subcommand_overrides)
     end
-    return (command_string + ' ' + subcommand_string).strip
+    
+    command_string = (command_string + ' ' + subcommand_string).strip
+    
+    logger.debug("Rendered command: #{command_string}")
+    return command_string
   end
   
   #-----------------------------------------------------------------------------
@@ -115,10 +131,15 @@ class Shell < Plugin::Command
   def exec!(options = {}, overrides = nil)
     config = Config.ensure(options)
     
+    logger.info("Executing command #{command}")
+    
     config[:ui] = @ui
     success = Util::Shell.exec!(build(export, overrides), config) do |line|
+      logger.debug("Command line: \"#{line}\"")
       block_given? ? yield(line) : true
-    end    
+    end
+    
+    logger.warn("Command #{command} failed to execute") unless success    
     return success
   end
   

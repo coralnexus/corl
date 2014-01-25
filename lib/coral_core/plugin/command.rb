@@ -75,12 +75,19 @@ class Command < Base
   # Command operations
   
   def build(components = {}, overrides = nil, override_key = false)
+    logger.debug("Building command with #{components.inspect}")
+    logger.debug("Overrides: #{overrides.inspect}")
+    logger.debug("Override key: #{override_key}")
+    
     return '' # Implement in sub classes
   end
   
   #---
   
   def exec!(options = {}, overrides = nil)
+    logger.debug("Executing command with #{options.inspect}")
+    logger.debug("Overrides: #{overrides.inspect}")
+    
     # Implement in sub classes (don't forget the yield!)
     return true
   end
