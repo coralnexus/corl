@@ -2,18 +2,22 @@
 module Coral
 module Plugin
 class Base < Core
+  
   # All Plugin classes should directly or indirectly extend Base
   
   def initialize(type, provider, options)
     config = Config.ensure(options)
     name   = Util::Data.ensure_value(config.delete(:name), provider)
     
+    logger.debug("Setting #{type} plugin #{name} meta data")
     set_meta(config.delete(:meta, Config.new))
     
+    logger.debug("Passing execution to core: #{config.export.inspect}")
     super(config)
     
     self.name = name
     
+    logger.debug("Normalizing #{type} plugin #{name}")
     normalize
   end
   
@@ -113,10 +117,12 @@ class Base < Core
   
   def self.build_info(type, data)  
     plugins = []
-    
+        
     if data.is_a?(Hash)
       data = [ data ]
     end
+    
+    logger.debug("Building plugin list of #{type} from data: #{data.inspect}")
     
     if data.is_a?(Array)
       data.each do |info|
@@ -126,6 +132,8 @@ class Base < Core
           if Util::Data.empty?(info[:provider])
             info[:provider] = Plugin.type_default(type)
           end
+          
+          logger.debug("Translated plugin info: #{info.inspect}")
           
           plugins << info
         end
@@ -137,12 +145,15 @@ class Base < Core
   #---
 
   def self.translate(data)
+    logger.debug("Translating data to internal plugin structure: #{data.inspect}")
     return ( data.is_a?(Hash) ? symbol_map(data) : {} )
   end
   
   #---
   
   def self.init_plugin_collection
+    logger.debug("Initializing plugin collection interface at #{Time.now}")
+    
     include Mixin::Settings
     include Mixin::SubConfig
     

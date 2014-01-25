@@ -130,6 +130,8 @@ coral_require(core_dir, :config)
 coral_require(util_dir, :interface) 
 coral_require(core_dir, :core) 
 
+#---
+
 # Include core utilities
 [ :cli, :disk, :process, :shell ].each do |name| 
   coral_require(util_dir, name)
@@ -148,12 +150,8 @@ end
 # Author::    Adrian Webb (mailto:adrian.webb@coraltech.net)
 # License::   GPLv3
 module Coral
-  
+ 
   VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
-  
-  #---
-  
-  @@config_file = 'coral.json'
   
   #-----------------------------------------------------------------------------
   
@@ -166,9 +164,13 @@ module Coral
   def self.logger
     return Core.logger
   end
-  
+   
   #-----------------------------------------------------------------------------
+
+  @@config_file = 'coral.json'
   
+  #---
+    
   def self.config_file=file_name
     @@config_file = file_name
   end
@@ -186,17 +188,26 @@ module Coral
   
   def self.initialize
     unless @@initialized
-      Config.set_property('time', Time.now.to_i)
+      current_time = Time.now
+      
+      logger.info("Initializing the Coral plugin system at #{current_time}")
+      Config.set_property('time', current_time.to_i)
       
       Plugin.initialize do
         begin
+          logger.info("Registering Coral plugin defined within Puppet modules")
+          
           # Include Coral plugins
           Puppet::Node::Environment.new.modules.each do |mod|
             lib_path = File.join(mod.path, 'lib', 'coral')
+            
+            logger.debug("Registering Puppet module at #{lib_path}")
             Plugin.register(lib_path)
           end
         rescue
         end
+        
+        logger.info("Finished initializing Coral plugin system at #{Time.now}")
       end
             
       @@initialized = true
@@ -234,8 +245,15 @@ module Coral
       name     = config.get(:name, nil)
       options  = config.export
     end
-    provider          = default_provider unless provider # Sanity checking (see plugins)
-    existing_instance = Plugin.get_instance(type, name) if name
+    provider = default_provider unless provider # Sanity checking (see plugins)
+    
+    logger.info("Fetching plugin #{type} provider #{provider} at #{Time.now}")
+    logger.debug("Plugin options: #{options.inspect}")
+    
+    if name
+      existing_instance = Plugin.get_instance(type, name)
+      logger.info("Using existing instance of #{type}, #{name}") if existing_instance
+    end
     
     return existing_instance if existing_instance
     return Plugin.create_instance(type, provider, options)
@@ -244,9 +262,13 @@ module Coral
   #---
   
   def self.plugins(type, data, build_hash = false, keep_array = false)
+    logger.info("Fetching multiple plugins of #{type} at #{Time.now}")
+    
     group = ( build_hash ? {} : [] )
     klass = class_const([ :coral, :plugin, type ])    
     data  = klass.build_info(type, data) if klass.respond_to?(:build_info)
+    
+    logger.debug("Translated plugin data: #{data.inspect}")
     
     data.each do |options|
       if plugin = plugin(type, options[:provider], options)
@@ -392,12 +414,18 @@ module Coral
    
   def self.run
     begin
+      logger.debug("Running contained process at #{Time.now}")
+      
       initialize
       yield
       
-    rescue Exception => error
-      ui.warn(error.inspect)
-      ui.warn(Util::Data.to_yaml(error.backtrace))
+    rescue Exception => e
+      logger.error("Coral run experienced an error! Details:")
+      logger.error(e.inspect)
+      logger.error(e.message)
+      logger.error(Util::Data.to_yaml(e.backtrace))
+  
+      ui.error(e.message) if e.message
       raise
     end
   end
