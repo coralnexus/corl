@@ -7,15 +7,15 @@ class Environment < Plugin::Template
   # Renderers  
    
   def render_processed(data)
-    output = ''
-    
-    case data
-    when Hash
-      data.each do |name, value|
-        output << render_assignment(name, value)
+    return super do |output|   
+      case data
+      when Hash
+        data.each do |name, value|
+          output << render_assignment(name, value)
+        end
       end
-    end              
-    return output      
+      output          
+    end      
   end
   
   #-----------------------------------------------------------------------------

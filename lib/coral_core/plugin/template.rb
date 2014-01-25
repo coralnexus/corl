@@ -50,12 +50,16 @@ class Template < Base
     normalize   = get(:normalize_template, true)
     interpolate = get(:interpolate_template, true)
     
+    logger.debug("Rendering data: normalize: #{normalize.inspect}; interpolate: #{interpolate.inspect}: #{data.inspect}")
+    
     if normalize
       data = Config.normalize(data, nil, config)
+      logger.debug("Pre-rendering data normalization: #{data.inspect}")
     end
     
     if normalize && interpolate
       data = Util::Data.interpolate(data, data, export)
+      logger.debug("Pre-rendering data interpolation: #{data.inspect}")
     end    
     return render_processed(process(data))
   end
@@ -63,8 +67,13 @@ class Template < Base
   #---
   
   def render_processed(data)
-    # implement in sub classes.
-    return data.to_s
+    logger.debug("Rendering #{plugin_provider} data: #{data.inspect}")
+    
+    output = ''
+    output = yield(output) if block_given?
+    
+    logger.debug("Completed rendering of #{plugin_provider} data: #{output}")
+    return output
   end
 end
 end
