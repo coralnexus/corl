@@ -195,7 +195,7 @@ module Plugin
     provider   = components.pop.sub(/\.rb/, '').to_sym
     directory  = components.join(File::SEPARATOR) 
     
-    logger.info("Loading coral #{type} plugin: #{provider} at #{Time.now}")
+    logger.info("Loading coral #{type} plugin #{provider} at #{Time.now}")
         
     unless @@load_info[type].has_key?(provider)
       data = {
