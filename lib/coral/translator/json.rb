@@ -7,18 +7,20 @@ class Json < Plugin::Translator
   # Translator operations
    
   def parse(json_text)
-    properties = {}
-    
-    if json_text && ! json_text.empty?
-      properties = Util::Data.parse_json(json_text)
+    return super do |properties|
+      if json_text && ! json_text.empty?
+        properties = Util::Data.parse_json(json_text)
+      end
+      properties
     end
-    return properties
   end
   
   #---
   
   def generate(properties)
-    return Util::Data.to_json(properties, get(:pretty, true))
+    return super do
+      Util::Data.to_json(properties, get(:pretty, true))
+    end
   end
 end
 end

@@ -9,20 +9,29 @@ class Translator < Base
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
 
-
   #-----------------------------------------------------------------------------
   # Operations
   
   def parse(raw)
-    # Implement in sub classes.
-    return raw
+    logger.debug("Parsing raw data: #{raw}")
+    
+    properties = {}
+    properties = yield(properties) if block_given?
+    
+    logger.debug("Completed parsing data: #{properties.inspect}")
+    return properties
   end
   
   #---
   
   def generate(properties)
-    # Implement in sub classes.
-    return properties
+    logger.debug("Generating output data: #{properties.inspect}")
+    
+    output = ''
+    output = yield(output) if block_given?
+    
+    logger.debug("Completed generating data: #{output}")
+    return output
   end
 end
 end
