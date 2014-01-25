@@ -16,7 +16,10 @@ class Git < Plugin::Project
   def ensure_git(reset = false)
     if reset || ! get(:git_lib, false)
       delete(:git_lib)
-      unless directory.empty?
+      if directory.empty?
+        logger.warn("Can not manage Git project at #{directory} as it does not exist")  
+      else
+        logger.debug("Ensuring Git instance to manage #{directory}")
         set(:git_lib, Util::Git.new(directory))
       end
     end
@@ -119,7 +122,7 @@ class Git < Plugin::Project
   
   def set_config(name, value, options = {})
     return super(name, value, options) do |config|
-      git.config(config.export, name, string(value))
+      git.config(config.export, name, value)
     end
   end
   
@@ -140,6 +143,8 @@ class Git < Plugin::Project
       result = {}
     
       if blob
+        logger.debug("Houston, we have a Git blob!")
+        
         lines   = blob.data.gsub(/\r\n?/, "\n" ).split("\n")
         current = nil
 
@@ -148,6 +153,8 @@ class Git < Plugin::Project
             current         = $1
             result[current] = {}
             result[current]['id'] = (commit.tree/current).id
+            
+            logger.debug("Reading: #{current}")
       
           elsif line =~ /^\t(\w+) = (.+)$/
             result[current][$1]   = $2
@@ -166,9 +173,12 @@ class Git < Plugin::Project
     return super do
       current_revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip
       
+      logger.debug("Current revision: #{current_revision}")
+      
       set(:revision, current_revision) unless get(:revision, false)
       
       if get(:revision, '').empty?
+        logger.debug("Setting revision to current revision")
         set(:revision, current_revision)
       end
     end
@@ -191,6 +201,8 @@ class Git < Plugin::Project
       
         files = array(files)
       
+        logger.debug("Adding files to Git index")
+        
         git.add({ :raise => true }, files)                  # Get all added and updated files
         git.add({ :update => true, :raise => true }, files) # Get all deleted files
         
@@ -201,9 +213,11 @@ class Git < Plugin::Project
         }
         commit_options[:author] = config[:author] if config.get(:author, false)
     
+        logger.debug("Composing commit options: #{commit_options.inspect}")
         git.commit(commit_options)
         true
       rescue
+        logger.warn("There was apparently a problem with the commit")
         false
       end
     end   
@@ -241,10 +255,14 @@ class Git < Plugin::Project
     return super do
       submodule_key = "submodule.#{path}"
       
+      logger.debug("Deleting Git configurations for #{submodule_key}")
       delete_config(submodule_key)
       delete_config(submodule_key, { :file => '.gitmodules' })
       
+      logger.debug("Cleaning Git index cache for #{path}")
       git.rm({ :cached => true }, path)
+      
+      logger.debug("Removing Git submodule directories")
       FileUtils.rm_rf(File.join(directory, path))
       FileUtils.rm_rf(File.join(git.git_dir, 'modules', path))
       
@@ -267,9 +285,12 @@ class Git < Plugin::Project
     return super do
       origin_url = config('remote.origin.url').strip
       
+      logger.debug("Original origin remote url: #{origin_url}")
+      
       set(:url, origin_url) unless get(:url, false)
       
       if origin_url.empty?
+        logger.debug("Setting origin remote url to #{url}")
         set_remote(:origin, url)
       end
     end
