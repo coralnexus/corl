@@ -78,10 +78,20 @@ class Action < Base
   
   def execute
     success = false
-    if processed?
-      success = yield if block_given?    
-    end
+    begin
+      if processed?
+        success = yield if block_given?    
+      end
+    ensure
+      cleanup
+    end  
     return success
+  end
+  
+  #---
+  
+  def cleanup
+    # Nothing to do right now
   end
   
   #-----------------------------------------------------------------------

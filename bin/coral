@@ -28,26 +28,21 @@ begin
   sub_command    = arg_components.shift
   sub_args       = arg_components
   
-  loaded_actions    = Coral::Plugin.loaded_plugins(:action)
-  available_actions = loaded_actions.keys
+  loaded_actions = Coral::Plugin.loaded_plugins(:action)
   
   if main_command.processed && sub_command
     logger.debug("Running coral action #{sub_command} with #{sub_args.inspect}")
     
-    action_plugin = Coral.action(sub_command, sub_args)     
-  
-    begin   
-      exit_status = action_plugin.execute
-    ensure
-      action_plugin.cleanup if action_plugin.respond_to?(:cleanup)
-    end  
+    exit_status = Coral.action(sub_command, sub_args).execute
   else
     puts I18n.t('coral.core.exec.help.usage') + ': ' + main_command.help + "\n"
     puts I18n.t('coral.core.exec.help.header') + ":\n\n"
     
     loaded_actions.each do |provider, action|
-      tmp = Coral.action(provider, [ '-h' ], true)
-      puts sprintf("   %-10s : %s\n", "<#{provider}>", tmp.help)
+      puts sprintf("   %-10s : %s\n", 
+        "<#{provider}>", 
+        Coral.action(provider, [ '-h' ], true).help
+      )
     end
     
     puts "\n" + I18n.t('coral.core.exec.help.footer') + "\n\n"   
@@ -58,7 +53,7 @@ rescue Exception => e
   logger.error("Coral experienced an error! Details:")
   logger.error(e.inspect)
   logger.error(e.message)
-  logger.error(Util::Data.to_yaml(e.backtrace))
+  logger.error(Coral::Util::Data.to_yaml(e.backtrace))
 
   Coral.ui.error(e.message, { :prefix => false }) if e.message
   
