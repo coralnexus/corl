@@ -9,12 +9,6 @@ require 'coral_core'
 #---
 
 logger = Coral.logger
-
-if ENV['CORAL_LOG']
-  logger.level      = Log4r.const_get(ENV['CORAL_LOG'].upcase)
-  logger.outputters = Log4r::StdoutOutputter.new('console') 
-end
-
 logger.info("`coral` invoked: #{ARGV.inspect}")
 
 #---
@@ -27,7 +21,7 @@ $stderr.sync = true
 exit_status = 999
 
 begin
-  logger.debug("Running coral action")
+  logger.debug("Beginning execution run")
   
   arg_components = Coral::Util::CLI::Parser.split(ARGV, 'coral <action> [ <arg> ... ]')
   main_command   = arg_components.shift
@@ -38,6 +32,8 @@ begin
   available_actions = loaded_actions.keys
   
   if main_command.processed && sub_command
+    logger.debug("Running coral action #{sub_command} with #{sub_args.inspect}")
+    
     action_plugin = Coral.action(sub_command, sub_args)     
   
     begin   
@@ -62,7 +58,7 @@ rescue Exception => e
   logger.error("Coral experienced an error! Details:")
   logger.error(e.inspect)
   logger.error(e.message)
-  logger.error(e.backtrace.join("\n"))
+  logger.error(Util::Data.to_yaml(e.backtrace))
 
   Coral.ui.error(e.message, { :prefix => false }) if e.message
   

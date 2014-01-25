@@ -1,4 +1,3 @@
-require 'log4r'
 
 module Coral
 module Util
@@ -8,6 +7,11 @@ class Interface
   # Properties
   
   @@logger = Log4r::Logger.new("coral::interface")
+    
+  if ENV['CORAL_LOG']
+    @@logger.level      = Log4r.const_get(ENV['CORAL_LOG'].upcase)
+    @@logger.outputters = Log4r::StdoutOutputter.new('console') 
+  end
   
   #---
 
@@ -45,8 +49,11 @@ class Interface
       @logger = Log4r::Logger.new(class_name)
     end
     
+    @logger.level      = @@logger.level
+    @logger.outputters = @@logger.outputters
+    
     @resource = config.get(:resource, '')
-    @color = config.get(:color, true)
+    @color    = config.get(:color, true)
     
     @printer = config.get(:printer, :puts)
     
