@@ -129,7 +129,7 @@ class Shell < Plugin::Command
     config = Config.ensure(options)
     
     if config.get(:coral, false)
-      return 'vagrant coral ' + config[:coral]
+      return 'coral ' + config[:coral]
         
     elsif config.get(:vagrant, false)
       return 'vagrant ' + config[:vagrant]
