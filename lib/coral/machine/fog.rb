@@ -203,7 +203,6 @@ class Fog < Plugin::Machine
       logger.debug("Provisioning machine #{name} with #{config[:commands].inspect}")   
       exec(config)
     end
-    end
   end
   
   #---
