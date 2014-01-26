@@ -7,8 +7,7 @@ class Rackspace < Plugin::Node
   # Node plugin interface
    
   def normalize
-    #super
-    dbg('hello from rackspace node')
+    super
   end
        
   #-----------------------------------------------------------------------------
