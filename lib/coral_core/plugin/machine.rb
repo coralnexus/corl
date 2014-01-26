@@ -23,6 +23,10 @@ class Machine < Base
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
+  def hostname=hostname
+    set(:hostname, hostname)
+  end
+  
   def hostname
     return get(:hostname, '')
   end
@@ -30,16 +34,24 @@ class Machine < Base
   #---
   
   def state
-    return get(:state, nil)
+    return nil
   end
   
   #---
+  
+  def public_ip=public_ip
+    set(:public_ip, public_ip)
+  end
   
   def public_ip
     return get(:public_ip, nil)
   end
   
   #---
+  
+  def private_ip=private_ip
+    set(:private_ip, private_ip)
+  end
   
   def private_ip
     return get(:private_ip, nil)
@@ -49,99 +61,135 @@ class Machine < Base
   # Management 
 
   def create(options = {})
-    unless created?
-      
+    success = true
+    
+    if created?
+      logger.debug("Machine #{name} already exists")
+    else
+      logger.debug("Creating #{plugin_provider} machine with: #{options.inspect}")
+      success = yield if block_given?  
     end
-    return true
+    
+    logger.warn("There was an error creating the machine #{name}") unless success
+    return success
   end
   
   #---
   
   def start(options = {})
-    unless running?
+    success = true
+    
+    if running?
+      logger.debug("Machine #{name} is already running")  
+    else
+      logger.debug("Starting #{plugin_provider} machine with: #{options.inspect}")
       
+      if created?
+        success = yield if block_given?    
+      else
+        logger.debug("Machine #{name} does not yet exist")
+        success = create(options)
+      end      
     end
-    return true
+    
+    logger.warn("There was an error starting the machine #{name}") unless success
+    return success
   end
   
   #---
   
   def stop(options = {})
+    success = true
+    
     if running?
-      
+      logger.debug("Stopping #{plugin_provider} machine with: #{options.inspect}")      
+      success = yield if block_given?
+    else
+      logger.debug("Machine #{name} is not running")  
     end
-    return true
+    
+    logger.warn("There was an error stopping the machine #{name}") unless success
+    return success
   end
   
   #---
   
   def reload(options = {})
+    success = true
+    
     if created?
-      
+      logger.debug("Reloading #{plugin_provider} machine with: #{options.inspect}")
+      success = yield if block_given?
+    else
+      logger.debug("Machine #{name} does not yet exist")
     end
-    return true
+    
+    logger.warn("There was an error reloading the machine #{name}") unless success
+    return success
   end
 
   #---
 
   def destroy(options = {})   
+    success = true
+    
     if created?
-        
+      logger.debug("Destroying #{plugin_provider} machine with: #{options.inspect}")
+      success = yield if block_given?
+    else
+      logger.debug("Machine #{name} does not yet exist")
     end
-    return true
+    
+    logger.warn("There was an error destroying the machine #{name}") unless success
+    return success
   end
   
   #---
   
   def exec(options = {})
+    success = true
+    
     if running?
-      config = Config.ensure(options)
-      if commands = config.delete(:commands)
-        commands.each do |command|
-          Util::Shell.exec!(command, config) do |line|
-            yield(line) if block_given?
-          end
-        end
-      end  
+      logger.debug("Executing command on #{plugin_provider} machine with: #{options.inspect}")      
+      success = yield if block_given?
+    else
+      logger.debug("Machine #{name} is not running")  
     end
-    return true
+    
+    logger.warn("There was an error executing command on the machine #{name}") unless success
+    return success
   end
     
   #---
   
   def provision(options = {})
+    success = true
+    
     if running?
-      config = Config.ensure(options)
-      
-      # TODO: Abstract this out so it does not depend on Puppet functionality.
-      
-      puppet  = config.delete(:puppet, :puppet) # puppet (community) or puppetlabs (enterprise)     
-      command = Coral.command({
-        :command    => :puppet,
-        :flags      => config.delete(:puppet_flags, ''),
-        :subcommand => {
-          :command => config.delete(:puppet_op, :apply),
-          :flags   => config.delete(:puppet_op_flags, ''),
-          :data    => config.delete(:puppet_op_data, {}).merge({
-            'modulepath=' => array(config.delete(:puppet_modules, "/etc/#{puppet}/modules")).join(':')
-          }),
-          :args => config.delete(:puppet_manifest, "/etc/#{puppet}/manifests/site.pp")
-        }
-      }, config.get(:provider, :shell))
-      
-      config[:commands] = [ command.to_s ]
-      return exec(config)
+      logger.debug("Provisioning #{plugin_provider} machine with: #{options.inspect}")      
+      success = yield if block_given?
+    else
+      logger.debug("Machine #{name} is not running")  
     end
-    return true
+    
+    logger.warn("There was an error provisioning the machine #{name}") unless success
+    return success
   end
   
   #---
   
   def create_image(options = {})
-    if created?
-      
+    success = true
+    
+    if running?
+      logger.debug("Creating image of #{plugin_provider} machine with: #{options.inspect}")      
+      success = yield if block_given?
+    else
+      logger.debug("Machine #{name} is not running")  
     end
-    return true
+    
+    logger.warn("There was an error creating an image of the machine #{name}") unless success
+    return success
   end
 
   #-----------------------------------------------------------------------------

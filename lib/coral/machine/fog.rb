@@ -3,8 +3,6 @@ module Coral
 module Machine
 class Fog < Plugin::Machine
   
-  include Mixin::SubConfig
-  
   #-----------------------------------------------------------------------------
   # Machine plugin interface
   
@@ -30,60 +28,52 @@ class Fog < Plugin::Machine
   # Property accessors / modifiers
   
   def set_connection
+    logger.info("Initializing Fog Compute connection to cloud hosting provider")
+    logger.debug("Compute settings: #{export.inspect}")
+    
     require 'fog'
-    set(:compute, Fog::Compute.new(_export))
+    self.compute = Fog::Compute.new(export)
+    self.server  = name if @compute && name    
   end
   protected :set_connection
   
   #---
   
+  def compute=compute
+    @compute = compute
+  end
+  
   def compute
-    return get(:compute)
+    set_connection unless @compute
+    return @compute
   end
   
   #---
+  
+  def server=id
+    if id.is_a?(String)
+      @server = compute.servers.get(id)
+    else
+      @server = id
+    end
+    
+    self.name       = server.id
+    self.hostname   = server.name
+    self.image      = server.image
+    self.flavor     = server.flavor
+    
+    self.public_ip  = server.public_ip_address
+    self.private_ip = server.private_ip_address
+  end
   
   def server
-    return get(:server)
-  end
-  
-  #---
-  
-  def name
-    return ( server ? server.id : '' )
-  end
-  
-  #---
-  
-  def name=id
-    set(:server, compute.servers.get(id)) if id    
-  end
-  
-  #---
-  
-  def hostname
-    return server.name if server
-    return ''
+    return @server
   end
   
   #---
   
   def state
     return server.state if server
-    return nil
-  end
-  
-  #---
-  
-  def public_ip
-    return server.public_ip_address if server
-    return nil
-  end
-  
-  #---
-  
-  def private_ip
-    return server.private_ip_address if server
     return nil
   end
   
@@ -96,9 +86,12 @@ class Fog < Plugin::Machine
   
   #---
   
+  def flavor=flavor
+    set(:flavor, flavor)
+  end
+  
   def flavor
-    return server.flavor if server
-    return nil
+    return get(:flavor, nil)
   end
   
   #---
@@ -110,102 +103,136 @@ class Fog < Plugin::Machine
   
   #---
   
+  def image=image
+    set(:image, image)
+  end
+  
   def image
-    return server.image if server
-    return nil
+    return get(:image, nil)
   end
   
   #-----------------------------------------------------------------------------
   # Management
 
   def create(options = {})
-    success = super(options)
-    if success && ! created?
-      set(:server, compute.servers.bootstrap(options))
+    return super do
+      self.server = compute.servers.bootstrap(options)
+      self.server ? true : false
     end
-    return success
   end
   
   #---
   
   def start(options = {})
-    success = super(options)
-    if success
-      unless created?
-        return create(options)
-      end
-      unless running?
-        server_info = compute.servers.create(options)
+    return super do
+      server_info = compute.servers.create(options)
       
-        Fog.wait_for do
-          compute.servers.get(server_info.id).ready? ? true : false
-        end      
-        @server = compute.servers.get(server_info.id)
+      logger.info("Waiting for #{plugin_provider} machine to start")
+      Fog.wait_for do
+        compute.servers.get(server_info.id).ready? ? true : false
       end
+      
+      logger.debug("Setting machine #{server_info.id}")
+            
+      self.server = compute.servers.get(server_info.id)
+      self.server ? true : false
     end
-    return success
   end
   
   #---
   
   def stop(options = {})
-    success = super(options)
-    if success && running?
-      if image_id = create_image(name)
-      
+    return super do
+      success = true
+      if image_id = create_image(name)      
+        logger.info("Waiting for #{plugin_provider} machine to finish creating image: #{image_id}")
         Fog.wait_for do
           compute.images.get(image_id).ready? ? true : false
         end
-      
-        server.destroy
-        return image_id
+              
+        logger.debug("Detroying machine #{name}")
+        success = server.destroy        
       end
+      success
     end
-    return success
   end
   
   #---
   
   def reload(options = {})
-    success = super(options)
-    if success && created?
-      # Don't quite know what this should do yet??
-      return server.reboot(options)  
+    return super do
+      logger.debug("Rebooting machine #{name}")
+      server.reboot(options)  
     end
-    return success
   end
 
   #---
 
   def destroy(options = {})
-    success = super(options)   
-    if success && created?
-      return server.destroy(options)  
+    return super do
+      logger.debug("Destroying machine #{name}")   
+      server.destroy(options)  
     end
-    return success
   end
- 
+   
+  #---
+  
+  def provision(options = {})
+    return super do
+      config = Config.ensure(options)
+      
+      # TODO: Abstract this out so it does not depend on Puppet functionality.
+      # Perhaps this should be moved out of the machine plugin and into the node?
+      
+      puppet  = config.delete(:puppet, :puppet) # puppet (community) or puppetlabs (enterprise)     
+      command = Coral.command({
+        :command    => :puppet,
+        :flags      => config.delete(:puppet_flags, ''),
+        :subcommand => {
+          :command => config.delete(:puppet_op, :apply),
+          :flags   => config.delete(:puppet_op_flags, ''),
+          :data    => config.delete(:puppet_op_data, {}).merge({
+            'modulepath=' => array(config.delete(:puppet_modules, "/etc/#{puppet}/modules")).join(':')
+          }),
+          :args => config.delete(:puppet_manifest, "/etc/#{puppet}/manifests/site.pp")
+        }
+      }, config.get(:provider, :shell))
+      
+      config[:commands] = [ command.to_s ]
+      
+      logger.debug("Provisioning machine #{name} with #{config[:commands].inspect}")   
+      exec(config)
+    end
+    end
+  end
+  
   #---
   
   def exec(options = {})
-    success = super(options)
-    if success && running?
+    return super do
+      success = true
       if commands = options.delete(:commands)
-        return server.ssh(commands, options)
+        logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}") 
+        success = server.ssh(commands, options)
       end
+      success
     end
-    return success
   end
   
   #---
  
   def create_image(name, options = {})
-    success = super(options)
-    if success && created?
+    return super do
+      logger.debug("Imaging machine #{self.name}") 
       image = server.create_image(name, options)
-      return ( image ? image.id : false )
+      
+      if image
+        self.image = image.id
+        true
+      else
+        false
+      end
     end
-    return success
   end
    
   #-----------------------------------------------------------------------------
