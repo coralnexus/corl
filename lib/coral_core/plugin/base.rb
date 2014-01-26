@@ -8,15 +8,14 @@ class Base < Core
   def initialize(type, provider, options)
     config = Config.ensure(options)
     name   = Util::Data.ensure_value(config.delete(:name), provider)
-    
-    logger.debug("Setting #{type} plugin #{name} meta data")
+       
     set_meta(config.delete(:meta, Config.new))
     
-    logger.debug("Passing execution to core: #{config.export.inspect}")
-    super(config)
-    
+    # No logging statements aove this line!!
+    super(config.import({ :logger => "#{plugin_type}->#{plugin_provider}" }))
     self.name = name
     
+    logger.debug("Set #{type} plugin #{name} meta data: #{meta.inspect}")    
     logger.debug("Normalizing #{type} plugin #{name}")
     normalize
   end

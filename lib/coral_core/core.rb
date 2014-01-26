@@ -5,7 +5,7 @@ class Core < Config
   #-----------------------------------------------------------------------------
   # Properties
   
-  @@ui = Util::Interface.new("coral")
+  @@ui = Util::Interface.new("core")
   
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
@@ -13,8 +13,13 @@ class Core < Config
   def initialize(data = {}, defaults = {}, force = true)
     super(data, defaults, force)
     
-    logger.debug("Setting instance interface")
+    class_label = self.class.to_s.downcase
+    
+    init(:logger, class_label)
+    init(:resource, class_label)
+    
     @ui = Util::Interface.new(export)
+    logger.debug("Initialized instance interface")
   end
   
   #---
@@ -43,13 +48,13 @@ class Core < Config
   #---
  
   def self.logger=logger
-    self.class.logger = logger
+    @ui.logger = logger
   end
   
   #--- 
    
   def logger
-    return self.class.logger
+    return @ui.logger
   end
  
   #-----------------------------------------------------------------------------

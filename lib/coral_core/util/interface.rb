@@ -6,7 +6,7 @@ class Interface
   #-----------------------------------------------------------------------------
   # Properties
   
-  @@logger = Log4r::Logger.new("coral::interface")
+  @@logger = Log4r::Logger.new('core')
     
   if ENV['CORAL_LOG']
     @@log_level         = ENV['CORAL_LOG'].upcase
@@ -16,7 +16,7 @@ class Interface
     
     if @@log_level == 'DEBUG'    
       Grit.debug   = true
-      ENV['DEBUG'] = true # Fog uses this
+      ENV['DEBUG'] = 'true' # Fog uses this
     end
   end
   
@@ -39,12 +39,12 @@ class Interface
   # Constructor
   
   def initialize(options = {})
-    class_name = self.class.to_s.downcase
-    
     if options.is_a?(String)
       options = { :resource => options, :logger => options }
     end
     config = Config.ensure(options)
+    
+    @resource = config.get(:resource, '')
     
     if config.get(:logger, false)
       if config[:logger].is_a?(String)
@@ -53,20 +53,18 @@ class Interface
         @logger = config[:logger]
       end
     else
-      @logger = Log4r::Logger.new(class_name)
+      @logger = Log4r::Logger.new(@resource)
     end
     
     @logger.level      = @@logger.level
-    @logger.outputters = @@logger.outputters
+    @logger.outputters = @@logger.outputters    
     
-    @resource = config.get(:resource, '')
-    @color    = config.get(:color, true)
-    
+    @color   = config.get(:color, true)    
     @printer = config.get(:printer, :puts)
     
-    @input = config.get(:input, $stdin)
+    @input  = config.get(:input, $stdin)
     @output = config.get(:output, $stdout)
-    @error = config.get(:error, $stderr)
+    @error  = config.get(:error, $stderr)
     
     @delegate = config.get(:ui_delegate, nil)
   end
