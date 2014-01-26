@@ -135,7 +135,6 @@ class Shell < Plugin::Command
     
     config[:ui] = @ui
     success = Util::Shell.exec!(build(export, overrides), config) do |line|
-      logger.debug("Command line: \"#{line}\"")
       block_given? ? yield(line) : true
     end
     
