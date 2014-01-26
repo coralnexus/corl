@@ -85,6 +85,15 @@ class Git < Plugin::Project
     end
     return false
   end
+  
+  #---
+  
+  def new?(reset = false)
+    if get(:new, nil).nil? || reset
+      set(:new, git.native(:rev_parse, { :all => true }).empty?)  
+    end
+    get(:new, false)
+  end
    
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
@@ -104,7 +113,7 @@ class Git < Plugin::Project
   #---
    
   def set_location(directory)
-    super(directory) do
+    super do
       ensure_git(true)
     end
     return self
@@ -113,7 +122,7 @@ class Git < Plugin::Project
   #---
   
   def config(name, options = {})
-    return super(name, options) do |config|
+    return super do |config|
       git.config(config.export, name)
     end
   end
@@ -121,7 +130,7 @@ class Git < Plugin::Project
   #---
   
   def set_config(name, value, options = {})
-    return super(name, value, options) do |config|
+    return super do |config|
       git.config(config.export, name, value)
     end
   end
@@ -129,7 +138,7 @@ class Git < Plugin::Project
   #---
   
   def delete_config(name, options = {})
-    return super(name, options) do |config|
+    return super do |config|
       git.config(config.import({ :remove_section => true }).export, name)
     end
   end
@@ -137,28 +146,33 @@ class Git < Plugin::Project
   #---
  
   def subproject_config(options = {})
-    return super(options) do |config|
-      commit = lib.commit(revision)
-      blob   = commit.tree/'.gitmodules' unless commit.nil?
+    return super do |config|
       result = {}
-    
-      if blob
-        logger.debug("Houston, we have a Git blob!")
-        
-        lines   = blob.data.gsub(/\r\n?/, "\n" ).split("\n")
-        current = nil
-
-        lines.each do |line|
-          if line =~ /^\[submodule "(.+)"\]$/
-            current         = $1
-            result[current] = {}
-            result[current]['id'] = (commit.tree/current).id
-            
-            logger.debug("Reading: #{current}")
       
-          elsif line =~ /^\t(\w+) = (.+)$/
-            result[current][$1]   = $2
-            result[current]['id'] = (commit.tree/$2).id if $1 == 'path'
+      if new?
+        logger.debug("Project has no sub project configuration yet (has not been committed to)")  
+      else
+        commit = lib.commit(revision)
+        blob   = commit.tree/'.gitmodules' unless commit.nil?
+          
+        if blob
+          logger.debug("Houston, we have a Git blob!")
+        
+          lines   = blob.data.gsub(/\r\n?/, "\n" ).split("\n")
+          current = nil
+
+          lines.each do |line|
+            if line =~ /^\[submodule "(.+)"\]$/
+              current         = $1
+              result[current] = {}
+              result[current]['id'] = (commit.tree/current).id
+            
+              logger.debug("Reading: #{current}")
+      
+            elsif line =~ /^\t(\w+) = (.+)$/
+              result[current][$1]   = $2
+              result[current]['id'] = (commit.tree/$2).id if $1 == 'path'
+            end
           end
         end
       end
@@ -171,15 +185,19 @@ class Git < Plugin::Project
   
   def load_revision
     return super do
-      current_revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip
+      if new?
+        logger.debug("Project has no current revision yet (has not been committed to)")  
+      else
+        current_revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip
       
-      logger.debug("Current revision: #{current_revision}")
+        logger.debug("Current revision: #{current_revision}")
       
-      set(:revision, current_revision) unless get(:revision, false)
+        set(:revision, current_revision) unless get(:revision, false)
       
-      if get(:revision, '').empty?
-        logger.debug("Setting revision to current revision")
-        set(:revision, current_revision)
+        if get(:revision, '').empty?
+          logger.debug("Setting revision to current revision")
+          set(:revision, current_revision)
+        end
       end
     end
   end
@@ -187,15 +205,19 @@ class Git < Plugin::Project
   #---
   
   def checkout(revision)
-    return super(revision) do
-      git.checkout({}, revision) unless lib.bare  
+    return super do
+      if new?
+        logger.debug("Project can not be checked out (has not been committed to)")  
+      else
+        git.checkout({}, revision) unless lib.bare
+      end  
     end
   end
   
   #---
   
   def commit(files = '.', options = {})
-    return super(files, options) do |config, time, user, message|
+    return super do |config, time, user, message|
       begin
         git.reset({}, 'HEAD') # Clear the index so we get a clean commit
       
@@ -215,6 +237,8 @@ class Git < Plugin::Project
     
         logger.debug("Composing commit options: #{commit_options.inspect}")
         git.commit(commit_options)
+        
+        new?(true)
         true
       rescue
         logger.warn("There was apparently a problem with the commit")
@@ -227,7 +251,7 @@ class Git < Plugin::Project
   # Subproject operations
  
   def load_subprojects(options = {})
-    return super(options) do |project_path, data|
+    return super do |project_path, data|
       File.exist?(File.join(project_path, '.git'))
     end
   end
@@ -299,7 +323,7 @@ class Git < Plugin::Project
   #---
   
   def set_remote(name, url)
-    return super(name, url) do
+    return super do
       git.remote({}, 'add', name.to_s, url)
     end
   end
@@ -307,7 +331,7 @@ class Git < Plugin::Project
   #---
   
   def add_remote_url(name, url, options = {})
-    return super(name, url, options) do |config|
+    return super do |config|
       git.remote({
         :add    => true,
         :delete => config.get(:delete, false),
@@ -319,15 +343,19 @@ class Git < Plugin::Project
   #---
   
   def delete_remote(name)
-    return super(name) do
-      git.remote({}, 'rm', name.to_s)
+    return super do
+      if config("remote.#{name}.url").empty?
+        logger.debug("Project can not delete remote #{name} because it does not exist yet")  
+      else
+        git.remote({}, 'rm', name.to_s)
+      end
     end
   end
   
   #---
     
   def syncronize(cloud, options = {})
-    return super(cloud, options) do |config|
+    return super do |config|
       config.init(:remote_path, '/var/git')
       config.set(:add, true)
     end
@@ -337,7 +365,7 @@ class Git < Plugin::Project
   # SSH operations
  
   def pull!(remote = :origin, options = {})
-    return super(remote, options) do |config|
+    return super do |config|
       success = Coral.command({
         :command => :git,
         :data    => { 'git-dir=' => git.git_dir },
@@ -348,14 +376,17 @@ class Git < Plugin::Project
         }
       }, config.get(:provider, :shell)).exec!(config) do |line|
         block_given? ? yield(line) : true
-      end    
+      end
+      
+      new?(true) if success
+      success    
     end
   end
   
   #---
     
   def push!(remote = :edit, options = {})
-    return super(remote, options) do |config|
+    return super do |config|
       push_branch = config.get(:revision, '')
       
       success = Coral.command({
@@ -376,7 +407,7 @@ class Git < Plugin::Project
   # Utilities
   
   def translate_url(host, path, options = {})
-    return super(host, path, options) do |config|
+    return super do |config|
       user = config.get(:user, 'git')
       auth = config.get(:auth, true)
       
@@ -387,7 +418,7 @@ class Git < Plugin::Project
   #---
   
   def translate_edit_url(url, options = {})
-    return super(url, options) do |config|    
+    return super do |config|    
       if matches = url.strip.match(/^(https?|git)\:\/\/([^\/]+)\/(.+)/)
         protocol, host, path = matches.captures
         translate_url(host, path, config.import({ :auth => true }))

@@ -311,6 +311,7 @@ class Project < Base
       logger.debug("Commit by #{user} at #{time} with #{message}")
       
       yield(config, time, user, message) if block_given?
+      load_revision
       
       if ! parent.nil? && config.get(:propogate, true)
         logger.debug("Commit to parent as parent exists and propogate option given")
@@ -548,7 +549,8 @@ class Project < Base
       
       success = yield(config) if block_given?
       
-      update_subprojects
+      load_revision
+      update_subprojects      
       
       if success && ! parent.nil? && config.get(:propogate, true)
         logger.debug("Commit to parent as parent exists and propogate option was given")
