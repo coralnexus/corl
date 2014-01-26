@@ -155,6 +155,7 @@ module ObjectInterface
     logger.debug("Defining object interface method: set_#{_type}_setting")
   
     define_method "set_#{_type}_setting" do |name, property, value = nil|
+      logger.debug("Setting #{name} property #{property} to #{value.inspect}")
       set([ _plural, name, property ], value)
       self
     end
