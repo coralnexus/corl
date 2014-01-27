@@ -176,16 +176,21 @@ class Base < Core
   
   def extended_config(type, config)
     config = Config.ensure(config)
+    
+    logger.debug("Generating extended configuration from: #{config.export.inspect}")
       
     extension("#{type}_config") do |op, results|
       if op == :reduce
         results.each do |provider, result|
           config.defaults(result)
         end
+        nil
       else
         hash(results)
       end
-    end    
+    end
+     
+    logger.debug("Final extended configuration: #{config.export.inspect}")   
     config 
   end
 end
