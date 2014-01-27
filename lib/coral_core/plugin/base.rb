@@ -113,7 +113,7 @@ class Base < Core
   
   #---
   
-  def extend(hook, options = {})
+  def exec(hook, options = {})
     method = "#{plugin_type}_#{plugin_provider}_#{hook}"
     
     logger.debug("Executing plugin hook #{hook} (#{method})")

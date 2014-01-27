@@ -51,7 +51,7 @@ class Action < Base
     
     @parser = Util::CLI::Parser.new(args, banner) do |parser| 
       yield(parser) if block_given?
-      extend(:parse, { :parser => parser })
+      exec(:parse, { :parser => parser })
     end
     
     if @parser 
@@ -85,7 +85,7 @@ class Action < Base
     
     begin
       if processed?
-        success = extend(:exec_init) do |op, results|
+        success = exec(:exec_init) do |op, results|
           if op == :reduce
             ! results.values.include?(false)
           else
@@ -97,7 +97,7 @@ class Action < Base
           success = yield if block_given?
         end
         
-        extend(:exec_exit)    
+        exec(:exec_exit, { :success => success })    
       end
     ensure
       cleanup
@@ -113,7 +113,7 @@ class Action < Base
     logger.info("Running cleanup for action #{plugin_provider}")
     
     # Nothing to do right now
-    extend(:cleanup)
+    exec(:cleanup)
   end
   
   #-----------------------------------------------------------------------
