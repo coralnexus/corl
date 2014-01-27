@@ -258,6 +258,8 @@ module Coral
     logger.debug("Plugin options: #{options.inspect}")
     
     if name
+      logger.debug("Looking up existing instance of #{name}")
+      
       existing_instance = Plugin.get_instance(type, name)
       logger.info("Using existing instance of #{type}, #{name}") if existing_instance
     end
