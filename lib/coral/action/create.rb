@@ -25,14 +25,16 @@ class Create < Plugin::Action
     return super do
       info('coral.core.actions.create.start')
       
-      success = false
-      project = Coral.project({
+      project = Coral.project(extended_config(:project, {
         :directory => options[:path],
         :url       => arguments[:reference],
         :pull      => true
-      })          
-      success = true if project
-      success
+      }))
+      
+      if project
+        extension(:extend_project, { :project => project })
+      end 
+      project ? true : false
     end
   end
 end
