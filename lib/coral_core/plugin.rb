@@ -306,12 +306,15 @@ module Plugin
   # Hook execution
  
   def self.exec!(method, options = {})
-    results = {}
+    results = nil
     
     logger.info("Executing extension method #{method} at #{Time.now}")
     logger.debug("Options given: #{options.inspect}")
     
-    plugins(:extension).each do |name, plugin|
+    extensions = plugins(:extension)
+    results    = {} if extensions.size
+    
+    extensions.each do |name, plugin|
       provider = plugin.plugin_provider
       result   = nil      
       
@@ -335,7 +338,7 @@ module Plugin
       end
     end
     
-    if block_given?
+    if extensions.size && block_given? 
       results = yield(:reduce, results)
       logger.debug("Reducing extension results to: #{results.inspect}")
     else
