@@ -220,7 +220,7 @@ class Config
   #---
   
   def defaults(defaults, options = {})
-    config = new(options).set(:import_type, :default)
+    config = Config.new(options).set(:import_type, :default)
     return import_base(defaults, config)
   end
 
