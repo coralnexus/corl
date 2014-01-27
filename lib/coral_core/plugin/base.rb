@@ -123,7 +123,7 @@ class Base < Core
       results
     end
   end
-
+  
   #-----------------------------------------------------------------------------
   # Utilities
   
@@ -170,6 +170,23 @@ class Base < Core
     include Mixin::SubConfig
     
     extend Mixin::Macro::PluginInterface
+  end
+  
+  #---
+  
+  def extended_config(type, config)
+    config = Config.ensure(config)
+      
+    extension("#{type}_config") do |op, results|
+      if op == :reduce
+        results.each do |provider, result|
+          config.defaults(result)
+        end
+      else
+        hash(results)
+      end
+    end    
+    config 
   end
 end
 end
