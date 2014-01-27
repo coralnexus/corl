@@ -111,7 +111,8 @@ class Base < Core
   def normalize
   end
   
-  #---
+  #-----------------------------------------------------------------------------
+  # Extensions
   
   def extension(hook, options = {})
     method = "#{plugin_type}_#{plugin_provider}_#{hook}"
@@ -122,54 +123,6 @@ class Base < Core
       results = yield(op, results) if block_given?
       results
     end
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Utilities
-  
-  def self.build_info(type, data)  
-    plugins = []
-        
-    if data.is_a?(Hash)
-      data = [ data ]
-    end
-    
-    logger.debug("Building plugin list of #{type} from data: #{data.inspect}")
-    
-    if data.is_a?(Array)
-      data.each do |info|
-        unless Util::Data.empty?(info)
-          info = translate(info)
-          
-          if Util::Data.empty?(info[:provider])
-            info[:provider] = Plugin.type_default(type)
-          end
-          
-          logger.debug("Translated plugin info: #{info.inspect}")
-          
-          plugins << info
-        end
-      end
-    end
-    return plugins
-  end
-  
-  #---
-
-  def self.translate(data)
-    logger.debug("Translating data to internal plugin structure: #{data.inspect}")
-    return ( data.is_a?(Hash) ? symbol_map(data) : {} )
-  end
-  
-  #---
-  
-  def self.init_plugin_collection
-    logger.debug("Initializing plugin collection interface at #{Time.now}")
-    
-    include Mixin::Settings
-    include Mixin::SubConfig
-    
-    extend Mixin::Macro::PluginInterface
   end
   
   #---
@@ -230,6 +183,54 @@ class Base < Core
     
     logger.debug("Extension #{plugin_provider} #{hook} set value to: #{value.inspect}")  
     value
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def self.build_info(type, data)  
+    plugins = []
+        
+    if data.is_a?(Hash)
+      data = [ data ]
+    end
+    
+    logger.debug("Building plugin list of #{type} from data: #{data.inspect}")
+    
+    if data.is_a?(Array)
+      data.each do |info|
+        unless Util::Data.empty?(info)
+          info = translate(info)
+          
+          if Util::Data.empty?(info[:provider])
+            info[:provider] = Plugin.type_default(type)
+          end
+          
+          logger.debug("Translated plugin info: #{info.inspect}")
+          
+          plugins << info
+        end
+      end
+    end
+    return plugins
+  end
+  
+  #---
+
+  def self.translate(data)
+    logger.debug("Translating data to internal plugin structure: #{data.inspect}")
+    return ( data.is_a?(Hash) ? symbol_map(data) : {} )
+  end
+  
+  #---
+  
+  def self.init_plugin_collection
+    logger.debug("Initializing plugin collection interface at #{Time.now}")
+    
+    include Mixin::Settings
+    include Mixin::SubConfig
+    
+    extend Mixin::Macro::PluginInterface
   end
 end
 end
