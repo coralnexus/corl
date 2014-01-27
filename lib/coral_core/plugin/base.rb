@@ -110,6 +110,19 @@ class Base < Core
     
   def normalize
   end
+  
+  #---
+  
+  def extend(hook, options = {})
+    method = "#{plugin_type}_#{plugin_provider}_#{hook}"
+    
+    logger.debug("Executing plugin hook #{hook} (#{method})")
+    
+    return Plugin.exec!(method, Config.ensure(options).import({ :plugin => self })) do |op, results|
+      results = yield(op, results) if block_given?
+      results
+    end
+  end
 
   #-----------------------------------------------------------------------------
   # Utilities

@@ -285,6 +285,12 @@ module Plugin
       
       # Autoload the registered plugins
       autoload
+      
+      # Initializing registered extensions
+      logger.info("Initializing registered extensions at #{Time.now}")
+      loaded_plugins(:extension).each do |provider, info|
+        Coral.extension(provider) # Create a persistent instance        
+      end
            
       @@initialized = true
     end    
@@ -294,6 +300,49 @@ module Plugin
   
   def self.initialized?
     return @@initialized
+  end
+    
+  #-----------------------------------------------------------------------------
+  # Hook execution
+ 
+  def self.exec!(method, options = {})
+    results = {}
+    
+    logger.info("Executing extension method #{method} at #{Time.now}")
+    logger.debug("Options given: #{options.inspect}")
+    
+    plugins(:extension).each do |name, plugin|
+      provider = plugin.plugin_provider
+      result   = nil      
+      
+      logger.debug("Checking extension #{provider}")
+      
+      if plugin.respond_to?(method)
+        logger.debug("Executing extension method #{method} at #{Time.now}")
+        
+        result = plugin.send(method, options)
+        logger.debug("Completed at: #{Time.now}")
+                    
+        if block_given?
+          results[provider] = yield(:process, result)
+          logger.debug("Processed extension result into: #{results[provider].inspect}")  
+        end
+        
+        if results[provider].nil?
+          logger.debug("Setting extension result to: #{result.inspect}") 
+          results[provider] = result
+        end
+      end
+    end
+    
+    if block_given?
+      results = yield(:reduce, results)
+      logger.debug("Reducing extension results to: #{results.inspect}")
+    else
+      logger.debug("Final extension results: #{results.inspect}")     
+    end
+        
+    return results    
   end
  
   #-----------------------------------------------------------------------------

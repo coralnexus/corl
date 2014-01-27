@@ -237,7 +237,8 @@ module Coral
                      :template   => :json,
                      :translator => :json,
                      :project    => :git,
-                     :action     => :create
+                     :action     => :create,
+                     :extension  => nil
                      
   #-----------------------------------------------------------------------------
   # Plugin interface (facade)
@@ -414,7 +415,23 @@ module Coral
   def self.actions(data, build_hash = false, keep_array = false)
     return plugins(:action, data, build_hash, keep_array)  
   end
-        
+    
+  #---
+  
+  def self.extension(provider)
+    return plugin(:extension, provider, {})
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Plugin extensions
+   
+  def self.exec!(method, options = {})
+    return Plugin.exec!(method, options) do |op, results|
+      results = yield(op, results) if block_given?
+      results
+    end
+  end
+       
   #-----------------------------------------------------------------------------
   # External execution
    
