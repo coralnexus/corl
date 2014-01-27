@@ -130,8 +130,8 @@ class Git < Plugin::Project
   #---
   
   def set_config(name, value, options = {})
-    return super do |config|
-      git.config(config.export, name, value)
+    return super do |config, processed_value|
+      git.config(config.export, name, processed_value)
     end
   end
   
