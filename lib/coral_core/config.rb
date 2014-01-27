@@ -184,6 +184,8 @@ class Config
     config      = Config.new(options, { :force => @force }).set(:context, :hash)    
     import_type = config.get(:import_type, :override)
     
+    properties  = properties.export if properties.is_a?(Coral::Config)
+    
     case properties
     when Hash
       data = [ @properties, symbol_map(properties) ]
