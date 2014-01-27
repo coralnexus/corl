@@ -85,13 +85,7 @@ class Action < Base
     
     begin
       if processed?
-        success = extension(:exec_init) do |op, results|
-          if op == :reduce
-            ! results.values.include?(false)
-          else
-            results ? true : false
-          end
-        end
+        success = extension_check(:exec_init)
         
         if success.nil? || success
           success = yield if block_given?

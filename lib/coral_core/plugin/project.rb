@@ -39,10 +39,14 @@ class Project < Base
   def normalize
     super
     
+    extension(:normalize)
+    
     set_url(get(:url)) if get(:url, false)    
     set_location(Util::Disk.filename(get(:directory, Dir.pwd)))
     
     self.name = path
+    
+    extension(:init)
     
     checkout(get(:revision))
     
@@ -98,7 +102,7 @@ class Project < Base
   
   def set_url(url)
     if url
-      url = url.strip
+      url = extension_set(:set_url, url.strip)
       
       logger.info("Setting project #{name} url to #{url}")
       
@@ -118,7 +122,7 @@ class Project < Base
   
   def set_edit_url(url)
     if url
-      url = url.strip
+      url = extension_set(:set_edit_url, url.strip)
       
       logger.info("Setting project #{name} edit url to #{url}")
       
@@ -149,14 +153,17 @@ class Project < Base
     @@projects.delete(get(:directory)) if get(:directory)
     
     if Util::Data.empty?(directory)
-      set(:directory, Dir.pwd)
+      current_directory = Dir.pwd
     else
-      set(:directory, File.expand_path(Util::Disk.filename(directory)))
+      current_directory = File.expand_path(Util::Disk.filename(directory))
     end
-    current_directory = get(:directory)
     
+    current_directory = extension_set(:set_location, current_directory)
+      
     logger.info("Setting project #{name} directory to #{current_directory}")
     @@projects[current_directory] = self
+    
+    set(:directory, current_directory)
     
     yield if block_given?
     
@@ -196,11 +203,12 @@ class Project < Base
   #---
   
   def set_config(name, value, options = {})
-    config = Config.ensure(options) # Just in case we throw a configuration in
-    
+    config = Config.ensure(options) # Just in case we throw a configuration in    
+    value  = extension_set(:set_config, value, { :name => name })
+     
     logger.info("Setting project #{self.name} configuration: #{name} = #{value.inspect}")
     
-    yield(config) if can_persist? && block_given?
+    yield(config, value) if can_persist? && block_given?
     return self
   end
   
@@ -208,6 +216,8 @@ class Project < Base
   
   def delete_config(name, options = {})
     config = Config.ensure(options) # Just in case we throw a configuration in
+    
+    extension(:delete_config, { :name => name })
     
     logger.info("Removing project #{self.name} configuration: #{name}")
     
@@ -224,6 +234,8 @@ class Project < Base
     if can_persist?
       result = yield(config) if block_given?
     end
+    
+    extension(:subproject_config, { :config => result })
     
     logger.debug("Subproject configuration: #{result.inspect}")
     return result
@@ -249,7 +261,11 @@ class Project < Base
         if project_directory?(search_dir)
           logger.debug("Directory #{search_dir} is a valid parent for this #{plugin_provider} project")
           
-          set(:parent, self.class.open(search_dir, plugin_provider))
+          project = self.class.open(search_dir, plugin_provider)
+          
+          extension(:init_parent, { :parent => project })
+          
+          set(:parent, project)
           logger.debug("Setting parent to #{parent.inspect}")
           break;
         end        
@@ -265,7 +281,14 @@ class Project < Base
     if can_persist?
       logger.info("Loading project #{name} revision")
       
-      yield if block_given?      
+      yield if block_given?
+      
+      extension(:load_revision, { :revision => revision }) do |op, results|
+        if op == :process
+          set(:revision, string(results).strip) unless results.nil?  
+        end
+      end     
+           
       logger.debug("Loaded revision: #{revision}")
       
       load_subprojects
@@ -280,12 +303,15 @@ class Project < Base
   
   def checkout(revision)
     if can_persist?
-      logger.info("Checking out project #{name} revision: #{revision}")
       
-      yield if block_given?
-      set(:revision, revision)
+      if extension_check(:checkout)
+        logger.info("Checking out project #{name} revision: #{revision}")
       
-      load_subprojects
+        yield if block_given?
+        set(:revision, revision)
+      
+        load_subprojects
+      end
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not checkout a revision")
     end
