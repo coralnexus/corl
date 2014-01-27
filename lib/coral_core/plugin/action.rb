@@ -87,7 +87,7 @@ class Action < Base
       if processed?
         success = extension_check(:exec_init)
         
-        if success.nil? || success
+        if success
           success = yield if block_given?
         end
         
