@@ -174,10 +174,10 @@ class Base < Core
   
   #---
   
-  def extended_config(type, config)
-    config = Config.ensure(config)
+  def extended_config(type, options = {})
+    config = Config.ensure(options)
     
-    logger.debug("Generating extended configuration from: #{config.export.inspect}")
+    logger.debug("Generating #{type} extended configuration from: #{config.export.inspect}")
       
     extension("#{type}_config") do |op, results|
       if op == :reduce
@@ -192,6 +192,44 @@ class Base < Core
      
     logger.debug("Final extended configuration: #{config.export.inspect}")   
     config 
+  end
+  
+  #---
+  
+  def extension_check(hook, options = {})
+    config = Config.ensure(options)
+    
+    logger.debug("Checking extension #{plugin_provider} #{hook} given: #{config.export.inspect}")
+    
+    success = extension(hook, config) do |op, results|
+      if op == :reduce
+        ! results.values.include?(false)
+      else
+        results ? true : false
+      end
+    end
+    
+    success = success.nil? || success ? true : false
+    
+    logger.debug("Extension #{plugin_provider} #{hook} check result: #{success.inspect}")  
+    success
+  end
+  
+  #---
+  
+  def extension_set(hook, value, options = {})
+    config = Config.ensure(options)
+    
+    logger.debug("Setting extension #{plugin_provider} #{hook} value given: #{value.inspect}")
+    
+    extension(hook, config.import({ :value => value })) do |op, results|
+      if op == :process
+        value = results unless results.nil?  
+      end
+    end
+    
+    logger.debug("Extension #{plugin_provider} #{hook} set value to: #{value.inspect}")  
+    value
   end
 end
 end
