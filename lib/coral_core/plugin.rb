@@ -353,7 +353,9 @@ module Plugin
   # Utilities
   
   def self.translate_type(type, info, method = :translate)
-    klass = Coral.class_const([ :coral, :plugin, type ])          
+    klass = Coral.class_const([ :coral, :plugin, type ])
+    logger.debug("Executing option translation for: #{klass.inspect}")          
+    
     info  = klass.send(method, info) if klass.respond_to?(method)
     return info  
   end
@@ -361,7 +363,9 @@ module Plugin
   #---
   
   def self.translate(type, provider, info, method = :translate)
-    klass = Coral.class_const([ :coral, type, provider ])          
+    klass = Coral.class_const([ :coral, type, provider ])    
+    logger.debug("Executing option translation for: #{klass.inspect}")
+              
     info  = klass.send(method, info) if klass.respond_to?(method)
     return info  
   end
