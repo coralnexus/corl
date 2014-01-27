@@ -312,7 +312,6 @@ module Plugin
     logger.debug("Options given: #{options.inspect}")
     
     extensions = plugins(:extension)
-    results    = {} if extensions.size
     
     extensions.each do |name, plugin|
       provider = plugin.plugin_provider
@@ -321,6 +320,8 @@ module Plugin
       logger.debug("Checking extension #{provider}")
       
       if plugin.respond_to?(method)
+        results = {} if results.nil?
+        
         logger.debug("Executing extension method #{method} at #{Time.now}")
         
         result = plugin.send(method, options)
@@ -338,7 +339,7 @@ module Plugin
       end
     end
     
-    if extensions.size && block_given? 
+    if ! results.nil? && block_given? 
       results = yield(:reduce, results)
       logger.debug("Reducing extension results to: #{results.inspect}")
     else
