@@ -229,16 +229,17 @@ module Coral
   #-----------------------------------------------------------------------------
   # Plugins
   
-  Plugin.define_type :network    => :default, 
-                     :node       => :rackspace,
-                     :machine    => :fog,
-                     :command    => :shell,
-                     :event      => :regex,
-                     :template   => :json,
-                     :translator => :json,
-                     :project    => :git,
-                     :action     => :create,
-                     :extension  => nil
+  Plugin.define_type :configuration => :file,
+                     :network       => :default, 
+                     :node          => :rackspace,
+                     :machine       => :fog,
+                     :command       => :shell,
+                     :event         => :regex,
+                     :template      => :json,
+                     :translator    => :json,
+                     :project       => :git,
+                     :action        => :create,
+                     :extension     => nil
                      
   #-----------------------------------------------------------------------------
   # Plugin interface (facade)
@@ -306,14 +307,20 @@ module Coral
   
   #-----------------------------------------------------------------------------
   # Core plugin type facade
-   
-  def self.network(name, options = {}, provider = nil)
-    plugin      = plugin(:network, provider, options)
-    plugin.name = name
-    return plugin
+  
+  def self.configuration(options, provider = nil)
+    return plugin(:configuration, provider, options)
   end
   
+  def self.configurations(data, build_hash = false, keep_array = false)
+    return plugins(:configuration, data, build_hash, keep_array)
+  end
+   
   #---
+   
+  def self.network(name, options = {}, provider = nil)
+    return plugin(:network, provider, Config.ensure(options).import({ :name => name }))
+  end
   
   def self.networks(data, build_hash = false, keep_array = false)
     return plugins(:network, data, build_hash, keep_array)
@@ -322,12 +329,8 @@ module Coral
   #---
   
   def self.node(name, options = {}, provider = nil)
-    plugin      = plugin(:node, provider, options)
-    plugin.name = name
-    return plugin
+    return plugin(:node, provider, Config.ensure(options).import({ :name => name }))
   end
-  
-  #---
   
   def self.nodes(data, build_hash = false, keep_array = false)
     return plugins(:node, data, build_hash, keep_array)
@@ -336,11 +339,8 @@ module Coral
   #---
   
   def self.machine(options = {}, provider = nil)
-    plugin = plugin(:machine, provider, options)
-    return plugin
+    return plugin(:machine, provider, options)
   end
-  
-  #---
   
   def self.machines(data, build_hash = false, keep_array = false)
     return plugins(:machine, data, build_hash, keep_array)
@@ -352,8 +352,6 @@ module Coral
     return plugin(:project, provider, options)
   end
   
-  #---
-  
   def self.projects(data, build_hash = false, keep_array = false)
     return plugins(:project, data, build_hash, keep_array)
   end
@@ -363,8 +361,6 @@ module Coral
   def self.command(options, provider = nil)
     return plugin(:command, provider, options)
   end
-  
-  #---
   
   def self.commands(data, build_hash = false, keep_array = false)
     return plugins(:command, data, build_hash, keep_array)
@@ -376,8 +372,6 @@ module Coral
     return plugin(:event, provider, options)
   end
   
-  #---
-  
   def self.events(data, build_hash = false, keep_array = false)
     return plugins(:event, data, build_hash, keep_array)
   end
@@ -387,8 +381,6 @@ module Coral
   def self.template(options, provider = nil)
     return plugin(:template, provider, options)
   end
-  
-  #---
   
   def self.templates(data, build_hash = false, keep_array = false)
     return plugins(:template, data, build_hash, keep_array)
@@ -400,8 +392,6 @@ module Coral
     return plugin(:translator, provider, options)
   end
   
-  #---
-  
   def self.translators(data, build_hash = false, keep_array = false)
     return plugins(:translator, data, build_hash, keep_array)
   end
@@ -411,8 +401,6 @@ module Coral
   def self.action(provider, args = [], quiet = false)
     return plugin(:action, provider, { :args => args, :quiet => quiet })
   end
-  
-  #---
   
   def self.actions(data, build_hash = false, keep_array = false)
     return plugins(:action, data, build_hash, keep_array)  
