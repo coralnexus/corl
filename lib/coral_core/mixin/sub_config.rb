@@ -25,18 +25,6 @@ module SubConfig
   #-----------------------------------------------------------------------------
   # Propety accessors / modifiers
   
-  def name
-    return _get(:name)
-  end
-  
-  #---
-  
-  def name=name
-    _set(:name, string(name))
-  end
-  
-  #---
-  
   def config
     return @config
   end
@@ -46,29 +34,7 @@ module SubConfig
   def config=config
     @config = config
   end
-  
-  #---
-  
-  def directory
-    init_subconfig
     
-    if config.is_a?(Config::Project)
-      return config.project.directory
-    else
-      return nil
-    end
-  end
-  
-  #---
-  
-  def directory=directory
-    init_subconfig
-    
-    if config.is_a?(Config::Project)
-      config.set_location(directory)
-    end
-  end
-     
   #-----------------------------------------------------------------------------
 
   def _get(keys, default = nil, format = false)
@@ -184,25 +150,6 @@ module SubConfig
     init_subconfig
     return config.export
   end
-      
-  #-----------------------------------------------------------------------------
-  # Configuration loading saving
-    
-  def load(options = {})
-    if config.respond_to?(:load)
-      config.load(options)
-    end
-    return self  
-  end
-    
-  #---
-    
-  def save(options = {})
-    if config.respond_to?(:save)
-      config.save(options)
-    end
-    return self  
-  end  
 end
 end
 end
