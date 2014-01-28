@@ -14,13 +14,14 @@ class Git < Plugin::Project
   # Git interface (local)
    
   def ensure_git(reset = false)
-    if reset || ! get(:git_lib, false)
-      delete(:git_lib)
+    if reset || @git_lib.nil?
+      @git_lib = nil
+      
       if directory.empty?
         logger.warn("Can not manage Git project at #{directory} as it does not exist")  
       else
         logger.debug("Ensuring Git instance to manage #{directory}")
-        set(:git_lib, Util::Git.new(directory))
+        @git_lib = Util::Git.new(directory)
       end
     end
     return self
@@ -32,7 +33,7 @@ class Git < Plugin::Project
    
   def can_persist?
     ensure_git
-    return true if get(:git_lib, false)
+    return true unless @git_lib.nil?
     return false
   end
  
@@ -98,8 +99,8 @@ class Git < Plugin::Project
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  def lib(default = nil)
-    return get(:git_lib, default)
+  def lib
+    return @git_lib
   end
  
   #---
@@ -186,18 +187,12 @@ class Git < Plugin::Project
   def load_revision
     return super do
       if new?
-        logger.debug("Project has no current revision yet (has not been committed to)")  
+        logger.debug("Project has no current revision yet (has not been committed to)")
       else
         current_revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip
       
         logger.debug("Current revision: #{current_revision}")
-      
-        set(:revision, current_revision) unless get(:revision, false)
-      
-        if get(:revision, '').empty?
-          logger.debug("Setting revision to current revision")
-          set(:revision, current_revision)
-        end
+        current_revision
       end
     end
   end
@@ -205,12 +200,17 @@ class Git < Plugin::Project
   #---
   
   def checkout(revision)
-    return super do
+    return super do |success|
       if new?
         logger.debug("Project can not be checked out (has not been committed to)")  
       else
-        git.checkout({}, revision) unless lib.bare
-      end  
+        unless lib.bare
+          success = safe_exec(false) do
+            git.checkout({ :raise => true }, revision)
+          end
+        end
+      end
+      success  
     end
   end
   
@@ -218,7 +218,7 @@ class Git < Plugin::Project
   
   def commit(files = '.', options = {})
     return super do |config, time, user, message|
-      begin
+      safe_exec(false) do
         git.reset({}, 'HEAD') # Clear the index so we get a clean commit
       
         files = array(files)
@@ -239,10 +239,6 @@ class Git < Plugin::Project
         git.commit(commit_options)
         
         new?(true)
-        true
-      rescue
-        logger.warn("There was apparently a problem with the commit")
-        false
       end
     end   
   end
@@ -259,16 +255,17 @@ class Git < Plugin::Project
   #---
   
   def add_subproject(path, url, revision, options = {})
-    return super do
-      branch_options = ''
-      branch_options = [ '-b', revision ] if revision
+    return super do |config|
+      safe_exec(false) do
+        branch_options = ''
+        branch_options = [ '-b', config[:revision] ] if config.get(:revision, false)
       
-      begin      
+        path = config[:path]
+        url  = config[:url]
+        
         git.submodule({ :raise => true }, 'add', *branch_options, url, path)
-        commit([ '.gitmodules', path ], { :message => "Adding submodule #{url} to #{path}" })
-        true
-      rescue
-        false
+        
+        config.set(:files, [ '.gitmodules', path ])
       end
     end  
   end
@@ -276,21 +273,24 @@ class Git < Plugin::Project
   #---
   
   def delete_subproject(path)
-    return super do
-      submodule_key = "submodule.#{path}"
+    return super do |config|
+      safe_exec(false) do
+        path          = config[:path]
+        submodule_key = "submodule.#{path}"
       
-      logger.debug("Deleting Git configurations for #{submodule_key}")
-      delete_config(submodule_key)
-      delete_config(submodule_key, { :file => '.gitmodules' })
+        logger.debug("Deleting Git configurations for #{submodule_key}")
+        delete_config(submodule_key)
+        delete_config(submodule_key, { :file => '.gitmodules' })
       
-      logger.debug("Cleaning Git index cache for #{path}")
-      git.rm({ :cached => true }, path)
+        logger.debug("Cleaning Git index cache for #{path}")
+        git.rm({ :cached => true }, path)
       
-      logger.debug("Removing Git submodule directories")
-      FileUtils.rm_rf(File.join(directory, path))
-      FileUtils.rm_rf(File.join(git.git_dir, 'modules', path))
+        logger.debug("Removing Git submodule directories")
+        FileUtils.rm_rf(File.join(directory, path))
+        FileUtils.rm_rf(File.join(git.git_dir, 'modules', path))
       
-      commit([ '.gitmodules', path ], { :message => "Removing submodule #{path} from #{url}" })
+        config.set(:files, [ '.gitmodules', path ])
+      end
     end  
   end
  
@@ -298,7 +298,9 @@ class Git < Plugin::Project
    
   def update_subprojects
     return super do
-      git.submodule({ :timeout => false }, 'update', '--init', '--recursive')
+      safe_exec(false) do
+        git.submodule({ :raise => true, :timeout => false }, 'update', '--init', '--recursive')
+      end
     end
   end
          
@@ -310,33 +312,32 @@ class Git < Plugin::Project
       origin_url = config('remote.origin.url').strip
       
       logger.debug("Original origin remote url: #{origin_url}")
-      
-      set(:url, origin_url) unless get(:url, false)
-      
-      if origin_url.empty?
-        logger.debug("Setting origin remote url to #{url}")
-        set_remote(:origin, url)
-      end
+      origin_url
     end
   end
  
   #---
   
   def set_remote(name, url)
-    return super do
-      git.remote({}, 'add', name.to_s, url)
+    return super do |processed_url|
+      safe_exec(false) do
+        git.remote({ :raise => true }, 'add', name.to_s, processed_url)
+      end
     end
   end
   
   #---
   
   def add_remote_url(name, url, options = {})
-    return super do |config|
-      git.remote({
-        :add    => true,
-        :delete => config.get(:delete, false),
-        :push   => config.get(:push, false)
-      }, 'set-url', name.to_s, url)
+    return super do |config, processed_url|
+      safe_exec(false) do
+        git.remote({
+          :raise  => true,
+          :add    => true,
+          :delete => config.get(:delete, false),
+          :push   => config.get(:push, false)
+        }, 'set-url', name.to_s, processed_url)
+      end
     end
   end
   
@@ -345,9 +346,12 @@ class Git < Plugin::Project
   def delete_remote(name)
     return super do
       if config("remote.#{name}.url").empty?
-        logger.debug("Project can not delete remote #{name} because it does not exist yet")  
+        logger.debug("Project can not delete remote #{name} because it does not exist yet")
+        true  
       else
-        git.remote({}, 'rm', name.to_s)
+        safe_exec(false) do
+          git.remote({ :raise => true }, 'rm', name.to_s)
+        end
       end
     end
   end
@@ -365,14 +369,14 @@ class Git < Plugin::Project
   # SSH operations
  
   def pull!(remote = :origin, options = {})
-    return super do |config|
+    return super do |config, processed_remote|
       success = Coral.command({
         :command => :git,
         :data    => { 'git-dir=' => git.git_dir },
         :subcommand => {
           :command => :pull,
           :flags   => ( config.get(:tags, true) ? :tags : '' ),
-          :args    => [ remote, config.get(:revision, get(:revision, :master)) ]
+          :args    => [ processed_remote, config.get(:revision, get(:revision, :master)) ]
         }
       }, config.get(:provider, :shell)).exec!(config) do |line|
         block_given? ? yield(line) : true
@@ -386,7 +390,7 @@ class Git < Plugin::Project
   #---
     
   def push!(remote = :edit, options = {})
-    return super do |config|
+    return super do |config, processed_remote|
       push_branch = config.get(:revision, '')
       
       success = Coral.command({
@@ -395,7 +399,7 @@ class Git < Plugin::Project
         :subcommand => {
           :command => :push,
           :flags => [ ( push_branch.empty? ? :all : '' ), ( config.get(:tags, true) ? :tags : '' ) ],
-          :args => [ remote, push_branch ]
+          :args => [ processed_remote, push_branch ]
         }
       }, config.get(:provider, :shell)).exec!(config) do |line|
         block_given? ? yield(line) : true

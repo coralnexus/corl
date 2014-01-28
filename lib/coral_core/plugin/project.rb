@@ -15,8 +15,7 @@ class Project < Base
   # Constructor / Destructor
   
   def self.open(directory, provider, options = {})
-    config = Config.ensure(options)
-    
+    config    = Config.ensure(options)    
     directory = File.expand_path(Util::Disk.filename(directory))
     
     if ! @@projects.has_key?(directory) || config.get(:reset, false)
@@ -47,8 +46,6 @@ class Project < Base
     self.name = path
     
     extension(:init)
-    
-    checkout(get(:revision))
     
     pull if get(:pull, false)
   end
@@ -101,9 +98,7 @@ class Project < Base
   #---
   
   def set_url(url)
-    if url
-      url = extension_set(:set_url, url.strip)
-      
+    if url && url = extension_set(:set_url, url.strip)      
       logger.info("Setting project #{name} url to #{url}")
       
       set(:url, url)
@@ -121,9 +116,7 @@ class Project < Base
   #---
   
   def set_edit_url(url)
-    if url
-      url = extension_set(:set_edit_url, url.strip)
-      
+    if url && url = extension_set(:set_edit_url, url.strip)      
       logger.info("Setting project #{name} edit url to #{url}")
       
       set(:edit, url)
@@ -149,27 +142,27 @@ class Project < Base
   
   #---
    
-  def set_location(directory)
-    @@projects.delete(get(:directory)) if get(:directory)
-    
+  def set_location(directory)    
     if Util::Data.empty?(directory)
       current_directory = Dir.pwd
     else
       current_directory = File.expand_path(Util::Disk.filename(directory))
     end
     
-    current_directory = extension_set(:set_location, current_directory)
+    if current_directory = extension_set(:set_location, current_directory)
+      logger.info("Setting project #{name} directory to #{current_directory}")
       
-    logger.info("Setting project #{name} directory to #{current_directory}")
-    @@projects[current_directory] = self
+      @@projects.delete(get(:directory)) if get(:directory)
+      @@projects[current_directory] = self
     
-    set(:directory, current_directory)
+      set(:directory, current_directory)
     
-    yield if block_given?
+      yield if block_given?
     
-    init_parent
-    init_remotes    
-    load_revision
+      init_parent
+      init_remotes    
+      load_revision
+    end
        
     return self
   end
@@ -203,35 +196,36 @@ class Project < Base
   #---
   
   def set_config(name, value, options = {})
-    config = Config.ensure(options) # Just in case we throw a configuration in    
-    value  = extension_set(:set_config, value, { :name => name })
-     
-    logger.info("Setting project #{self.name} configuration: #{name} = #{value.inspect}")
+    config = Config.ensure(options) 
     
-    yield(config, value) if can_persist? && block_given?
+    if value = extension_set(:set_config, value, { :name => name, :config => config })
+      logger.info("Setting project #{self.name} configuration: #{name} = #{value.inspect}")
+    
+      yield(config, value) if can_persist? && block_given?
+    end
     return self
   end
   
   #---
   
   def delete_config(name, options = {})
-    config = Config.ensure(options) # Just in case we throw a configuration in
+    config = Config.ensure(options)
     
-    extension(:delete_config, { :name => name })
+    if extension_check(:delete_config, { :name => name, :config => config })
+      logger.info("Removing project #{self.name} configuration: #{name}")
     
-    logger.info("Removing project #{self.name} configuration: #{name}")
-    
-    yield(config) if can_persist? && block_given?
+      yield(config) if can_persist? && block_given?
+    end
     return self
   end
   
   #---
  
-  def subproject_config(options = {})
-    config = Config.ensure(options)
+  def subproject_config(options = {})    
     result = {}
     
     if can_persist?
+      config = Config.ensure(options)
       result = yield(config) if block_given?
     end
     
@@ -281,17 +275,17 @@ class Project < Base
     if can_persist?
       logger.info("Loading project #{name} revision")
       
-      yield if block_given?
+      current_revision = revision.to_s
+      current_revision = yield if block_given?
       
-      extension(:load_revision, { :revision => revision }) do |op, results|
-        if op == :process
-          set(:revision, string(results).strip) unless results.nil?  
-        end
-      end     
+      if current_revision && extended_revision = extension_set(:load_revision, current_revision).to_s.strip
+        set(:revision, extended_revision)
+        checkout(extended_revision) if current_revision != extended_revision     
            
-      logger.debug("Loaded revision: #{revision}")
+        logger.debug("Loaded revision: #{revision}")
       
-      load_subprojects
+        load_subprojects
+      end
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and has no revision")
     end
@@ -302,15 +296,19 @@ class Project < Base
   #---
   
   def checkout(revision)
-    if can_persist?
-      
-      if extension_check(:checkout)
+    if can_persist?      
+      if extension_check(:checkout, { :revision => revision })
         logger.info("Checking out project #{name} revision: #{revision}")
       
-        yield if block_given?
-        set(:revision, revision)
-      
-        load_subprojects
+        success = true
+        success = yield(success) if block_given?
+        
+        if success
+          set(:revision, revision)
+          
+          extension(:checkout_success, { :revision => revision })
+          load_subprojects
+        end
       end
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not checkout a revision")
@@ -321,30 +319,38 @@ class Project < Base
   #---
   
   def commit(files = '.', options = {})
-    config = Config.ensure(options)
-    
     if can_persist?
-      logger.info("Committing changes to project #{name}: #{files.inspect}")
+      config = Config.ensure(options)
       
-      time     = Time.new.strftime("%Y-%m-%d %H:%M:%S")
-      user     = ENV['USER']
+      if extension_check(:commit, { :files => files, :config => config })
+        logger.info("Committing changes to project #{name}: #{files.inspect}")
       
-      message  = config.get(:message, '')
-      message  = 'Saving state: ' + ( files.is_a?(Array) ? "\n\n" + files.join("\n") : files.to_s ) if message.empty?
+        time     = Time.new.strftime("%Y-%m-%d %H:%M:%S")
+        user     = config.delete(:user, ENV['USER'])
       
-      user = 'UNKNOWN' unless user && ! user.empty?
+        message  = config.get(:message, '')
+        message  = 'Saving state: ' + ( files.is_a?(Array) ? "\n\n" + files.join("\n") : files.to_s ) if message.empty?
       
-      logger.debug("Commit by #{user} at #{time} with #{message}")
+        user = 'UNKNOWN' unless user && ! user.empty?
       
-      yield(config, time, user, message) if block_given?
-      load_revision
+        logger.debug("Commit by #{user} at #{time} with #{message}")
       
-      if ! parent.nil? && config.get(:propogate, true)
-        logger.debug("Commit to parent as parent exists and propogate option given")
+        success = false
+        success = yield(config, time, user, message) if block_given?
         
-        parent.commit(directory, config.import({
-          :message => "Updating subproject #{path} with: #{message}"
-        }))
+        if success
+          load_revision
+          
+          extension(:commit_success, { :files => files })
+      
+          if ! parent.nil? && config.get(:propogate, true)
+            logger.debug("Commit to parent as parent exists and propogate option given")
+        
+            parent.commit(directory, config.import({
+              :message => "Updating subproject #{path} with: #{message}"
+            }))
+          end
+        end
       end
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can be committed to")                
@@ -356,10 +362,11 @@ class Project < Base
   # Subproject operations
  
   def load_subprojects(options = {})
-    config      = Config.ensure(options)
     subprojects = {}
     
     if can_persist?
+      config = Config.ensure(options)
+      
       logger.info("Loading sub projects for project #{name}")
       
       subproject_config(config).each do |path, data|
@@ -375,6 +382,8 @@ class Project < Base
             logger.debug("Directory #{project_path} is a valid sub project for this #{plugin_provider} project")
             
             project = self.class.open(project_path, plugin_provider)
+            
+            extension(:load_project, { :project => project })
             subprojects[path] = project
           else
             logger.warn("Directory #{project_path} is not a valid sub project for this #{plugin_provider} project")   
@@ -393,13 +402,29 @@ class Project < Base
   
   #---
   
-  def add_subproject(path, url, revision, options = {})
+  def add_subproject(path, url, revision, options = {})    
     success = true
+    
     if can_persist?
-      logger.info("Adding a sub project to #{path} from #{url} at #{revision}")
+      config = Config.ensure(options).import({ :path => path, :url => url, :revision => revision })
       
-      success = yield if block_given?
-      update_subprojects if success
+      if extension_check(:add_project, { :config => config })
+        logger.info("Adding a sub project to #{config[:path]} from #{config[:url]} at #{config[:revision]}")
+      
+        success = yield(config) if block_given?
+        
+        if success
+          extension(:add_project_success, { :config => config })
+          
+          config.init(:files, '.')
+          config.init(:message, "Adding project #{config[:url]} to #{config[:path]}")
+          
+          commit(config[:files], { :message => config[:message] })          
+          update_subprojects
+        end
+      else
+        success = false
+      end
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects")   
     end
@@ -408,13 +433,27 @@ class Project < Base
   
   #---
   
-  def delete_subproject(path)
+  def delete_subproject(path)    
     success = true
+    
     if can_persist?
-      logger.info("Deleting a sub project at #{path}")
+      config = Config.new({ :path => path })
       
-      success = yield if block_given?  
-      update_subprojects if success
+      if extension_check(:delete_project, { :config => config })
+        logger.info("Deleting a sub project at #{config[:path]}")
+      
+        success = yield(config) if block_given?
+        
+        if success
+          extension(:delete_project_success, { :config => config })
+          
+          config.init(:files, '.')
+          config.init(:message, "Removing project at #{config[:path]}")
+          
+          commit(config[:files], { :message => config[:message] })      
+          update_subprojects
+        end
+      end
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects") 
     end
@@ -425,10 +464,17 @@ class Project < Base
    
   def update_subprojects
     if can_persist?
-      logger.info("Updating sub projects in project #{name}")
+      if extension_check(:update_projects)
+        logger.info("Updating sub projects in project #{name}")
       
-      yield if block_given?
-      load_subprojects
+        success = false
+        success = yield if block_given?
+        
+        if success
+          extension(:update_projects_success)
+          load_subprojects
+        end
+      end
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects") 
     end
@@ -443,6 +489,8 @@ class Project < Base
       logger.info("Iterating through all sub projects of project #{name}")
       
       subprojects.each do |path, project|
+        extension(:process_project, { :project => project })
+        
         logger.debug("Running process on sub project #{path}")
         yield(path, project)  
       end
@@ -456,10 +504,19 @@ class Project < Base
   # Remote operations
   
   def init_remotes
-    logger.info("Initializing project #{name} remotes")
-    
-    yield if block_given?
-    set_edit_url(translate_edit_url(url))
+    if can_persist?
+      logger.info("Initializing project #{name} remotes")
+      
+      origin_url = url
+      origin_url = yield if block_given?
+      
+      if origin_url && origin_url = extension_set(:init_remotes, origin_url).to_s.strip
+        set(:url, origin_url)
+        set_edit_url(translate_edit_url(url))
+      end
+    else
+      logger.warn("Project #{name} does not meet the criteria for persistence and can not have remotes")
+    end
     return self 
   end
   protected :init_remotes
@@ -468,10 +525,12 @@ class Project < Base
   
   def set_remote(name, url)
     if can_persist?
-      delete_remote(name)
+      if url = extension_set(:set_remote, url, { :name => name })
+        delete_remote(name)
     
-      logger.info("Setting project remote #{name} to #{url}")
-      yield if block_given?
+        logger.info("Setting project remote #{name} to #{url}")
+        yield(url) if block_given?
+      end
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
@@ -484,8 +543,10 @@ class Project < Base
     if can_persist?
       config = Config.ensure(options)
       
-      logger.info("Adding project remote url #{url} to #{name}")    
-      yield(config) if block_given?
+      if url = extension_set(:add_remote_url, url, { :name => name, :config => config })
+        logger.info("Adding project remote url #{url} to #{name}")    
+        yield(config, url) if block_given?
+      end
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
@@ -495,20 +556,23 @@ class Project < Base
   #---
     
   def set_host_remote(name, hosts, path, options = {})
-    config = Config.ensure(options)
-    
     if can_persist?
-      hosts = array(hosts)
+      config = Config.ensure(options).import({ :path => path })
+      hosts  = array(hosts)
+      
       return self if hosts.empty?
       
-      logger.info("Setting host remote #{name} for #{hosts.inspect} at #{path}") 
-      
-      set_remote(name, translate_url(hosts.shift, path, config.export))
-      
-      unless hosts.empty?
-        hosts.each do |host|
-          logger.debug("Adding remote url to #{host}")
-          add_remote_url(name, translate_url(host, path, config.export), config)
+      if hosts = extension_set(:set_host_remote, hosts, { :name => name, :config => config })
+        unless ! hosts || hosts.empty?
+          path = config.delete(:path)
+          
+          logger.info("Setting host remote #{name} for #{hosts.inspect} at #{path}") 
+          set_remote(name, translate_url(hosts.shift, path, config.export))
+        
+          hosts.each do |host|
+            logger.debug("Adding remote url to #{host}")
+            add_remote_url(name, translate_url(host, path, config.export), config)
+          end
         end
       end
     else
@@ -521,8 +585,10 @@ class Project < Base
   
   def delete_remote(name)
     if can_persist?
-      logger.info("Deleting project remote #{name}")  
-      yield if block_given?
+      if extension_check(:delete_remote, { :name => name })
+        logger.info("Deleting project remote #{name}")  
+        yield if block_given?
+      end
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
@@ -532,28 +598,32 @@ class Project < Base
   #---
     
   def syncronize(network, options = {})
-    config = Config.ensure(options)
-    yield(config) if block_given?
-    
     if can_persist?
-      remote_path  = config.delete(:remote_path, '/var/coral')
-      server_hosts = []
-      
-      logger.info("Syncronizing network remotes for project #{name} remote path: #{remote_path}") 
+      config = Config.ensure(options)
+            
+      if extension_check(:syncronize, { :network => network, :config => config })  
+        yield(config) if block_given?
+    
+        remote_path  = config.delete(:remote_path, '/var/coral')
+            
+        logger.info("Syncronizing network remotes for project #{name} remote path: #{remote_path}") 
         
-      network.nodes.each do |provider, nodes|
-        logger.debug("Iterating over nodes of provider #{provider}")
+        node_hosts = []
         
-        nodes.each do |node_name, node|
-          logger.debug("Syncronizing node #{node_name} with hostname: #{node.hostname}")
+        network.nodes.each do |provider, nodes|
+          logger.debug("Iterating over nodes of provider #{provider}")
+        
+          nodes.each do |node_name, node|
+            logger.debug("Syncronizing node #{node_name} with hostname: #{node.hostname}")
           
-          node_hosts << node.hostname          
-          set_host_remote(node_name, node.hostname, remote_path, config)
+            node_hosts << node.hostname          
+            set_host_remote(node_name, node.hostname, remote_path, config)
+          end
         end
-      end
       
-      logger.debug("Setting 'all' remote to bridge hosts: #{node_hosts.inspect}")
-      set_host_remote('all', node_hosts, remote_path, config) unless node_hosts.empty?
+        logger.debug("Setting 'all' remote to bridge hosts: #{node_hosts.inspect}")
+        set_host_remote('all', node_hosts, remote_path, config) unless node_hosts.empty?
+      end
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have remotes") 
     end
@@ -561,30 +631,39 @@ class Project < Base
   end
    
   #-----------------------------------------------------------------------------
-  # SSH operations
+  # Remote operations
  
   def pull!(remote = :origin, options = {})
-    config  = Config.ensure(options)
     success = false
     
     if can_persist?
+      config = Config.ensure(options).import({ :remote => remote })
+      
       prev_dir = Dir.pwd      
       Dir.chdir(directory)
       
-      logger.info("Pulling from #{remote} into #{directory}") 
-      
-      success = yield(config) if block_given?
-      
-      load_revision
-      update_subprojects      
-      
-      if success && ! parent.nil? && config.get(:propogate, true)
-        logger.debug("Commit to parent as parent exists and propogate option was given")
+      if extension_check(:pull, { :directory => directory, :config => config })
+        remote = config.delete(:remote)
         
-        parent.commit(directory, config.import({
-          :message     => "Pulling updates for subproject #{path}",
-          :allow_empty => true
-        }))
+        logger.info("Pulling from #{remote} into #{directory}") 
+      
+        success = yield(config, remote) if block_given?
+      
+        if success
+          load_revision
+          update_subprojects
+          
+          extension(:pull_success, { :directory => directory, :remote => remote, :config => config })          
+             
+          if ! parent.nil? && config.get(:propogate, true)
+            logger.debug("Commit to parent as parent exists and propogate option was given")
+        
+            parent.commit(directory, config.import({
+              :message     => "Pulling updates for subproject #{path}",
+              :allow_empty => true
+            }))
+          end
+        end
       end
       
       Dir.chdir(prev_dir)
@@ -603,24 +682,33 @@ class Project < Base
   #---
     
   def push!(remote = :edit, options = {})
-    config  = Config.ensure(options)
     success = false
     
     if can_persist?
+      config  = Config.ensure(options).import({ :remote => remote })
+      
       prev_dir = Dir.pwd      
       Dir.chdir(directory)
       
-      logger.info("Pushing to #{remote} from #{directory}") 
-      
-      success = yield(config) if block_given?
-      
-      config.delete(:revision)
-      
-      if success && config.get(:propogate, true)
-        logger.debug("Pushing sub projects as propogate option was given")
+      if extension_check(:push, { :directory => directory, :config => config })
+        remote = config.delete(:remote)
         
-        foreach! do |path, project|
-          project.push!(remote, config)
+        logger.info("Pushing to #{remote} from #{directory}") 
+      
+        success = yield(config, remote) if block_given?
+        
+        if success
+          config.delete(:revision)
+          
+          extension(:push_success, { :directory => directory, :remote => remote, :config => config })  
+      
+          if config.get(:propogate, true)
+            logger.debug("Pushing sub projects as propogate option was given")
+        
+            foreach! do |path, project|
+              project.push!(remote, config)
+            end
+          end
         end
       end
       
