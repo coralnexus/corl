@@ -188,6 +188,8 @@ class Git < Plugin::Project
     return super do
       if new?
         logger.debug("Project has no current revision yet (has not been committed to)")
+        nil
+        
       else
         current_revision = git.native(:rev_parse, { :abbrev_ref => true }, 'HEAD').strip
       
