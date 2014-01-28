@@ -1,20 +1,20 @@
 
 module Coral
 module Action
-class Image < Plugin::Action
+class Stop < Plugin::Action
 
   #-----------------------------------------------------------------------------
   # Action operations
   
   def parse(args)
-    return super(args, 'coral image')
+    return super(args, 'coral stop')
   end
   
   #---
    
   def execute
     return super do
-      info('coral.core.actions.image.start')
+      info('coral.core.actions.stop.start')
       
       true
     end
