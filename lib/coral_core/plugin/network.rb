@@ -9,10 +9,11 @@ class Network < Base
   # Cloud plugin interface
   
   def normalize
-    logger.info("Initializing sub configuration from source with: #{self._export}")
-    @config = Config::Source.new(self._export)
-    
     super
+    
+    logger.info("Initializing sub configuration from source with: #{self._export}")
+    
+    config = Coral.configuration(self._export)
     
     init_nodes
   end
