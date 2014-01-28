@@ -30,10 +30,6 @@ class Create < Plugin::Action
         :url       => arguments[:reference],
         :pull      => true
       }))
-      
-      if project
-        extension(:extend_project, { :project => project })
-      end 
       project ? true : false
     end
   end
