@@ -12,6 +12,10 @@ class Create < Plugin::Action
         '--path PROJECT_DIR', 
         'coral.core.actions.create.options.path'
       )
+      parser.option_str(:revision, :master, 
+        '--revision REVISION/BRANCH', 
+        'coral.core.actions.create.options.revision'
+      )
       parser.arg_str(:reference, 
         'github:::coralnexus/puppet-cloud-template', 
         'coral.core.actions.create.options.reference'
@@ -28,6 +32,7 @@ class Create < Plugin::Action
       project = Coral.project(extended_config(:project, {
         :directory => options[:path],
         :url       => arguments[:reference],
+        :revision  => options[:revision],
         :pull      => true
       }))
       project ? true : false

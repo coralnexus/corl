@@ -53,6 +53,8 @@ en:
           options:
             reference: |-
               Git repository URL of Coral cloud to start project from (default %{default_value})
+            revision: |-
+              Revision or branch to initialize the project with (default %{default_value})
             path: |-
               Project path (default %{default_value})
           start: |-
