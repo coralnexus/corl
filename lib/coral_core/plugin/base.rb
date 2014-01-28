@@ -119,7 +119,7 @@ class Base < Core
     
     logger.debug("Executing plugin hook #{hook} (#{method})")
     
-    return Plugin.exec!(method, Config.ensure(options).import({ :plugin => self })) do |op, results|
+    return Plugin.exec!(method, Config.ensure(options).defaults({ :extension_type => :base }).import({ :plugin => self })) do |op, results|
       results = yield(op, results) if block_given?
       results
     end
@@ -132,7 +132,7 @@ class Base < Core
     
     logger.debug("Generating #{type} extended configuration from: #{config.export.inspect}")
       
-    extension("#{type}_config") do |op, results|
+    extension("#{type}_config", Config.new(config.export).import({ :extension_type => :config })) do |op, results|
       if op == :reduce
         results.each do |provider, result|
           config.defaults(result)
@@ -154,7 +154,7 @@ class Base < Core
     
     logger.debug("Checking extension #{plugin_provider} #{hook} given: #{config.export.inspect}")
     
-    success = extension(hook, config) do |op, results|
+    success = extension(hook, config.import({ :extension_type => :check })) do |op, results|
       if op == :reduce
         ! results.values.include?(false)
       else
@@ -175,7 +175,7 @@ class Base < Core
     
     logger.debug("Setting extension #{plugin_provider} #{hook} value given: #{value.inspect}")
     
-    extension(hook, config.import({ :value => value })) do |op, results|
+    extension(hook, config.import({ :value => value, :extension_type => :set })) do |op, results|
       if op == :process
         value = results unless results.nil?  
       end
@@ -231,6 +231,23 @@ class Base < Core
     include Mixin::SubConfig
     
     extend Mixin::Macro::PluginInterface
+  end
+  
+  #---
+  
+  def safe_exec(return_result = true)
+    begin
+      result = yield
+      return result if return_result
+      return true
+      
+    rescue Exception => e
+      logger.error(e.inspect)
+      logger.error(e.message)
+      
+      ui.error(e.message, { :prefix => false }) if e.message
+    end
+    return false
   end
 end
 end
