@@ -15,13 +15,13 @@ class Disk
   # Utilities
   
   def self.exists?(file)
-    return File.exists?(File.expand_path(file))  
+    return ::File.exists?(::File.expand_path(file))  
   end
   
   #---
   
   def self.filename(file_name)
-    return ( file_name.is_a?(Array) ? file_name.join(File::SEPARATOR) : file_name.to_s )
+    return ( file_name.is_a?(Array) ? file_name.join(::File::SEPARATOR) : file_name.to_s )
   end
   
   #---
@@ -38,9 +38,9 @@ class Disk
     
     if ! @@files.has_key?(file_name) || ! @@files[file_name][:file] || reset
       @@files[file_name][:file].close if @@files[file_name] && @@files[file_name][:file]
-      unless mode.empty? || ( mode == 'r' && ! File.exists?(file_name) )
+      unless mode.empty? || ( mode == 'r' && ! ::File.exists?(file_name) )
         @@files[file_name] = {
-          :file => File.open(file_name, mode),
+          :file => ::File.open(file_name, mode),
           :mode => mode,
         }
       end
@@ -72,6 +72,12 @@ class Disk
       return file.write(data)
     end
     return nil
+  end
+  
+  #---
+  
+  def self.delete(file_path)
+    return ::File.delete(file_path)
   end
   
   #---
