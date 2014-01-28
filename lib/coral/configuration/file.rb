@@ -10,11 +10,11 @@ class File < Plugin::Configuration
     super
     
     logger.info("Setting source configuration project")
-    @project = Coral.project({
+    @project = Coral.project(extended_config(:project, {
       :directory => _delete(:directory, Dir.pwd),
       :url       => _delete(:url),
       :revision  => _delete(:revision)
-    }, _delete(:project_provider))
+    }), _delete(:project_provider))
     
     _init(:autocommit, true)
     _init(:commit_message, 'Saving state')
