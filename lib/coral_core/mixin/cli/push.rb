@@ -38,10 +38,10 @@ module Push
     success = true
           
     if project && options[:push]
-      success = project.push(options[:remote], {
+      success = project.push(options[:remote], extended_config(:push, {
         :revision  => options[:revision],
         :propogate => options[:propogate]
-      })
+      }))
     end
     success
   end

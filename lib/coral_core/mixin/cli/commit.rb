@@ -42,12 +42,12 @@ module Commit
     success = true
           
     if project && options[:commit]
-      success = project.commit(files, {
+      success = project.commit(files, extended_config(:commit, {
         :allow_empty => options[:allow_empty],
         :message     => options[:message],
         :author      => options[:author],
         :propogate   => options[:propogate]
-      })
+      }))
     end
     success
   end

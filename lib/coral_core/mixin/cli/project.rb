@@ -38,13 +38,13 @@ module Project
     # 5. Checkout revision if needed
     # 6. Pull down updates if requested
           
-    return Coral.project({
+    return Coral.project(extended_config(:project, {
       :provider  => options[:project_provider],
       :directory => root_dir,
       :url       => options[:reference],
       :revision  => options[:revision],
       :pull      => update
-    })
+    }))
   end       
 end
 end
