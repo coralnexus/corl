@@ -804,7 +804,7 @@ class Project < Base
   
   def self.translate_reference(reference, editable = false)
     # ex: github:::coralnexus/puppet-coral[0.2]
-    if reference && reference.match(/^\s*([a-zA-Z0-9_-]+):::([^\]\s]+)\s*(?:\[\s*([^\]\s]+)\s*\])?\s*$/)
+    if reference && reference.match(/^\s*([a-zA-Z0-9_-]+):::([^\[\s]+)\s*(?:\[\s*([^\]\s]+)\s*\])?\s*$/)
       provider = $1
       url      = $2
       revision = $3
