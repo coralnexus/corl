@@ -178,7 +178,61 @@ class Node < Base
  
   #-----------------------------------------------------------------------------
   # Utilities
-               
+  
+  def self.build_info(type, data)  
+    data = data.split(/\s*,\s*/) if data.is_a?(String)
+    return super(type, data)
+  end
+  
+  #---
+   
+  def self.translate(data)
+    options = super(data)
+    
+    case data        
+    when String
+      options = { :name => data }
+    when Hash
+      options = data
+    end
+    
+    if options.has_key?(:name)
+      if matches = translate_reference(options[:name])
+        options[:provider] = matches[:provider]
+        options[:name]     = matches[:name]
+        
+        logger.debug("Translating node options: #{options.inspect}")  
+      end
+    end
+    return options
+  end
+  
+  #---
+  
+  def self.translate_reference(reference)
+    # ex: rackspace:::web1.staging.example.com
+    if reference && reference.match(/^\s*([a-zA-Z0-9_-]+):::([^\s]+)\s*$/)
+      provider = $1
+      hostname = $2
+      
+      logger.debug("Translating node reference: #{provider}  #{hostname}")
+      
+      info = {
+        :provider => provider,
+        :name     => name
+      }
+      
+      logger.debug("Project reference info: #{info.inspect}")
+      return info
+    end
+    return nil
+  end
+  
+  #---
+  
+  def translate_reference(reference)
+    return self.class.translate_reference(reference)
+  end             
 end
 end
 end
