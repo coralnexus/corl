@@ -13,9 +13,16 @@ class Network < Base
     
     logger.info("Initializing sub configuration from source with: #{self._export}")
     
-    config = Coral.configuration(self._export)
+    self.config = Coral.configuration(self._export)
     
     init_nodes
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Checks
+  
+  def has_nodes?(provider = nil)
+    return nodes(provider).empty? ? false : true
   end
        
   #-----------------------------------------------------------------------------
