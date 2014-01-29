@@ -114,7 +114,7 @@ class File < Plugin::Configuration
     
   def load(options = {})
     return super do |method_config, properties|
-      if File.exists?(location)
+      if Util::Disk.exists?(location)
         logger.info("Loading source configuration from #{location}") 
       
         parser = Coral.translator(method_config, translator)
@@ -163,7 +163,7 @@ class File < Plugin::Configuration
       logger.debug("Clearing absolute configuration file path: (dir: #{project.directory} - file: #{file_name})")      
       _set(:location , '')
     else 
-      _set(:location, File.join(project.directory, file_name))      
+      _set(:location, Util::Disk.filename([ project.directory, file_name ]))      
       logger.debug("Setting absolute configuration file path to #{location}")
       
       ObjectSpace.define_finalizer(self, self.class.finalize(location))
