@@ -40,6 +40,16 @@ en:
               Remote name to push to (default %{default_value})
             revision: |-
               Branch to push (default %{default_value})
+        node:
+          options:
+            parallel: |-
+              Enable or disable parallelism of node action execution (default %{default_value})
+            net_provider: |-
+              Coral network provider to use for managing cloud nodes (default %{default_value})
+            node_provider: |-
+              Default to using a specific node provider but individual node references can override (default %{default_value})
+            nodes: |-
+              Optional nodes on which to execute this action              
       exec:
         help:
           usage: |-
