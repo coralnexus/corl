@@ -213,9 +213,9 @@ class Node < Base
     # ex: rackspace:::web1.staging.example.com
     if reference && reference.match(/^\s*([a-zA-Z0-9_-]+):::([^\s]+)\s*$/)
       provider = $1
-      hostname = $2
+      name     = $2
       
-      logger.debug("Translating node reference: #{provider}  #{hostname}")
+      logger.debug("Translating node reference: #{provider}  #{name}")
       
       info = {
         :provider => provider,
