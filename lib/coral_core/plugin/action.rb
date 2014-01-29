@@ -11,7 +11,7 @@ class Action < Base
   end
   
   #-----------------------------------------------------------------------------
-  # Property accessor / modifiers
+  # Checks
   
   def quiet?
     return get(:quiet, false)
@@ -23,7 +23,18 @@ class Action < Base
     return get(:processed, false)
   end
   
-  #---
+  #-----------------------------------------------------------------------------
+  # Property accessor / modifiers
+  
+  def params=params
+    set(:params, array(params))
+  end
+  
+  def params
+    get_array(:params)
+  end
+  
+  #--
   
   def options
     return get_hash(:options)
@@ -48,6 +59,8 @@ class Action < Base
   def parse(args, banner = '')
     
     logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
+    
+    self.params = args
     
     @parser = Util::CLI::Parser.new(args, banner) do |parser| 
       yield(parser) if block_given?
