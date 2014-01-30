@@ -10,29 +10,19 @@ module Lookup
   #-----------------------------------------------------------------------------
   # Hiera configuration
   
-  @@hiera = nil
+  @@hiera = {}
   
   #---
   
-  def hiera_config
-    config_file = Puppet.settings[:hiera_config]
-    config      = {}
-
-    if File.exist?(config_file)
-      config = Hiera::Config.load(config_file)
-    else
-      ui.warn("Config file #{config_file} not found, using Hiera defaults")
-    end
-
-    config[:logger] = 'puppet'
-    return config
+  def hiera_config(provider = :puppet)
+    return Coral.provisioner(provider).config
   end
   
   #---
 
-  def hiera
-    @@hiera = Hiera.new(:config => hiera_config) unless @@hiera
-    return @@hiera
+  def hiera(provider = :puppet)
+    @@hiera[provider] = Hiera.new(:config => hiera_config(provider)) unless @@hiera.has_key?(provider)
+    return @@hiera[provider]
   end
   
   #-----------------------------------------------------------------------------
@@ -40,18 +30,11 @@ module Lookup
       
   def initialized?(options = {})
     config   = Config.ensure(options)
-    
+    provider = config.get(:provisioner, nil)
     begin
       require 'hiera'
-      puppet_scope = config.get(:puppet_scope, {})
-    
-      prefix_text = config.get(:prefix_text, '::')  
-      init_fact   = prefix_text + config.get(:init_fact, 'hiera_ready')
-      
-      if Puppet::Parser::Functions.function('hiera') && puppet_scope.respond_to?('[]')
-        return true if Util::Data.true?(puppet_scope[init_fact])
-      end
-      return false
+      return true unless provider      
+      return Coral.provisioner(provider).initialized?(config)
     
     rescue Exception # Prevent abortions.
     end    
@@ -64,16 +47,11 @@ module Lookup
     config          = Config.ensure(options)
     value           = nil
     
+    provider        = config.get(:provisioner, :puppet)
+    
     hiera_scope     = config.get(:hiera_scope, {})
     context         = config.get(:context, :priority)    
     override        = config.get(:override, nil)
-    
-    puppet_scope    = config.get(:puppet_scope, {})
-    
-    base_names      = config.get(:search, nil)
-     
-    search_name     = config.get(:search_name, true)
-    reverse_lookup  = config.get(:reverse_lookup, true)
     
     return_property = config.get(:return_property, false)
     
@@ -89,34 +67,17 @@ module Lookup
         unless hiera_scope.respond_to?('[]')
           hiera_scope = Hiera::Scope.new(hiera_scope)
         end
-        value = hiera.lookup(property, nil, hiera_scope, override, context)
+        value = hiera(provider).lookup(property, nil, hiera_scope, override, context)
       end 
     
-      if Util::Data.undef?(value) && puppet_scope.respond_to?(:lookupvar)    
-        log_level = Puppet::Util::Log.level
-        Puppet::Util::Log.level = :err # Don't want failed parameter lookup warnings here.
-      
-        if base_names
-          if base_names.is_a?(String)
-            base_names = [ base_names ]
-          end
-          base_names = base_names.reverse if reverse_lookup
-        
-          base_names.each do |base|
-            value = puppet_scope.lookupvar("::#{base}::#{property}")
-            break unless Util::Data.undef?(value)  
-          end
-        end
-        if Util::Data.undef?(value) && search_name
-          value = puppet_scope.lookupvar("::#{property}")
-        end
-        Puppet::Util::Log.level = log_level
+      if Util::Data.undef?(value)
+        value = Coral.provisioner(provider).lookup(property, default, config)
       end
     end
     value = default if Util::Data.undef?(value)
     value = Util::Data.value(value)
     
-    if ! Config::Collection.get(first_property) || ! Util::Data.undef?(value)
+    if ! @@properties.has_key?(first_property) || ! Util::Data.undef?(value)
       Config::Collection.set(first_property, value)
     end
     return value, first_property if return_property
