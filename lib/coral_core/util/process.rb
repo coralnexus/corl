@@ -6,9 +6,10 @@ class Process
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
-  def initialize(name, &code)
-    @name = name   
-    @code = code
+  def initialize(name, options = {}, &code)
+    @name    = name
+    @options = Util::Data.hash(options)   
+    @code    = code
   end
       
   #-----------------------------------------------------------------------------
@@ -18,6 +19,7 @@ class Process
   
   #---
   
+  # Needed for vagrant support
   def provider_options
     return {
       :parallel => true
@@ -25,18 +27,20 @@ class Process
   end
   
   #-----------------------------------------------------------------------------
-  # Actions
+  # Operations
   
+  # Needed for vagrant support
   def action(action_name, options = {})
     if action_name == :run
-      run(options)  
+      run(Util::Data.merge([ @options, options ], true))  
     end
+    # Nothing else supported
   end
   
   #---
   
-  def run(options = {})
-    @code.call(options)
+  def run
+    @code.call(@options)
   end  
 end
 end

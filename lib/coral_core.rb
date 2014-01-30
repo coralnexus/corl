@@ -86,6 +86,7 @@ require 'yaml'
 require 'multi_json'
 require 'digest/sha1'
 require 'optparse'
+require 'thread'
 
 #---
 
@@ -127,6 +128,7 @@ end
 #---
 
 # Include bootstrap classes
+coral_require(core_dir, :errors)
 coral_require(util_dir, :data)
 coral_require(core_dir, :config)
 coral_require(util_dir, :interface) 
@@ -135,7 +137,7 @@ coral_require(core_dir, :core)
 #---
 
 # Include core utilities
-[ :cli, :disk, :process, :shell ].each do |name| 
+[ :cli, :disk, :process, :batch, :shell ].each do |name| 
   coral_require(util_dir, name)
 end
 
