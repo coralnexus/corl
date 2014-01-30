@@ -27,7 +27,8 @@ class Codes
   def self.code(name, number)
     number = number.to_i
     
-    @@index[number] = name.to_s # TODO: Add more information to the index
+    # TODO: Add more information to the index (like a help message)
+    @@index[number] = name.to_s 
     
     define_method(name) { number }
   end
