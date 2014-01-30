@@ -1,12 +1,9 @@
 
-# Should be included via extend
-#
-# extend Mixin::Lookup
-#
-
 module Coral
 module Mixin
+module CLI
 module Lookup
+
   #-----------------------------------------------------------------------------
   # Hiera configuration
   
@@ -32,7 +29,6 @@ module Lookup
     config   = Config.ensure(options)
     provider = config.get(:provisioner, nil)
     begin
-      require 'hiera'
       return true unless provider      
       return Coral.provisioner(provider).initialized?(config)
     
@@ -77,7 +73,7 @@ module Lookup
     value = default if Util::Data.undef?(value)
     value = Util::Data.value(value)
     
-    if ! @@properties.has_key?(first_property) || ! Util::Data.undef?(value)
+    if ! Config::Collection.get(first_property) || ! Util::Data.undef?(value)
       Config::Collection.set(first_property, value)
     end
     return value, first_property if return_property
@@ -170,3 +166,5 @@ module Lookup
 end
 end
 end
+end
+
