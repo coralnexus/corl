@@ -1,7 +1,7 @@
 
 module Coral
  
-  VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
+  VERSION = File.read(File.join(File.dirname(__FILE__), '..', '..', 'VERSION'))
   
   #-----------------------------------------------------------------------------
   
@@ -154,13 +154,13 @@ module Coral
       initialize
       yield
       
-    rescue Exception => e
+    rescue Exception => error
       logger.error("Coral run experienced an error! Details:")
-      logger.error(e.inspect)
-      logger.error(e.message)
-      logger.error(Util::Data.to_yaml(e.backtrace))
+      logger.error(error.inspect)
+      logger.error(error.message)
+      logger.error(Util::Data.to_yaml(error.backtrace))
   
-      ui.error(e.message) if e.message
+      ui.error(error.message) if error.message
       raise
     end
   end
@@ -172,22 +172,22 @@ module Coral
   def self.batch(parallel = true)
     success = true
     
-    @@batch_lock.syncronize do
+    @@batch_lock.synchronize do
       begin
         logger.debug("Running contained process at #{Time.now}")
         
-        batch = Batch.new(parallel) do |b|
-          yield(b)
-        end
-        batch.run
+        Util::Batch.new(parallel) do |batch|
+          yield(batch)
+          batch.run
+        end        
         
-      rescue Exception => e
+      rescue Exception => error
         logger.error("Coral batch experienced an error! Details:")
-        logger.error(e.inspect)
-        logger.error(e.message)
-        logger.error(Util::Data.to_yaml(e.backtrace))
+        logger.error(error.inspect)
+        logger.error(error.message)
+        logger.error(Util::Data.to_yaml(error.backtrace))
   
-        ui.error(e.message) if e.message
+        ui.error(error.message) if error.message
         success = false
       end      
     end
