@@ -1,7 +1,6 @@
 
 module Coral
-module Provisioner
-module Puppet
+module PuppetExt
 class ResourceGroup < Core
   
   extend Mixin::SubConfig
@@ -201,7 +200,6 @@ class ResourceGroup < Core
     return results
   end
   protected :translate
-end
 end
 end
 end

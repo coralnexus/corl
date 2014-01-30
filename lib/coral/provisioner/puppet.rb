@@ -259,7 +259,7 @@ class Puppet < Plugin::Provisioner
       
   def add(type_name, resources, defaults = {}, options = {})
     info = type_info(type_name)
-    return ResourceGroup.new(self, info, defaults).add(resources, options)
+    return PuppetExt::ResourceGroup.new(self, info, defaults).add(resources, options)
   end
   
   #---
