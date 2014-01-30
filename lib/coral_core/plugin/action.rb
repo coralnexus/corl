@@ -2,6 +2,8 @@
 module Coral
 module Plugin
 class Action < Base
+  
+  include Mixin::CLI::Node
 
   #-----------------------------------------------------------------------------
   # Action plugin interface
@@ -25,10 +27,6 @@ class Action < Base
   
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
-  
-  def params=params
-    set(:params, array(params))
-  end
   
   def params
     get_array(:params)
@@ -60,10 +58,12 @@ class Action < Base
     
     logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
     
-    self.params = args
+    set(:params, array(args))
     
     @parser = Util::CLI::Parser.new(args, banner) do |parser| 
       yield(parser) if block_given?
+      node_options(parser)
+      
       extension(:parse, { :parser => parser })
     end
     
@@ -96,18 +96,18 @@ class Action < Base
     
     logger.info("Executing action #{plugin_provider}")
     
-    begin
-      if processed?
-        success = extension_check(:exec_init)
-        
-        if success
-          success = yield if block_given?
+    if processed?
+      success = node_exec do |node, network|
+        begin
+          success = extension_check(:exec_init)
+          success = yield(node, network) if success && block_given?
+          success = extension_set(:exec_exit, success)
+          
+        ensure
+          cleanup
         end
-        
-        extension(:exec_exit, { :success => success })    
+        success    
       end
-    ensure
-      cleanup
     end
     
     logger.warn("Execution failed for #{plugin_provider} with #{export.inspect}") if processed? && ! success  
