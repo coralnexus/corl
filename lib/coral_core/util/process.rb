@@ -32,15 +32,15 @@ class Process
   # Needed for vagrant support
   def action(action_name, options = {})
     if action_name == :run
-      run(Util::Data.merge([ @options, options ], true))  
+      run(options)  
     end
     # Nothing else supported
   end
   
   #---
   
-  def run
-    @code.call(@options)
+  def run(options = {})
+    @code.call(Util::Data.merge([ @options, options ], true))
   end  
 end
 end
