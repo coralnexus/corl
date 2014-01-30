@@ -46,9 +46,10 @@ class Puppet < Plugin::Provisioner
     end
     return false
   end
-  
-  #---
-  
+   
+  #-----------------------------------------------------------------------------
+  # Property accessor / modifiers
+ 
   def hiera_config
     super
     
@@ -65,11 +66,7 @@ class Puppet < Plugin::Provisioner
     return config
   end
   
-  #-----------------------------------------------------------------------------
-  # Plugin operations
-
-  #-----------------------------------------------------------------------------
-  # Property accessor / modifiers
+  #---
   
   def env(default = nil)
     return get(:env, default)
