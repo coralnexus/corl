@@ -46,15 +46,16 @@ module Node
     
     if network.has_nodes? && ! options[:nodes].empty?
       # Execute action on remote nodes      
-      node_map = translate_node_references(options[:nodes], network)
-            
-      node_map.each do |provider, nodes|
-        nodes.each do |node_name, node|
-          
+      nodes   = translate_node_references(options[:nodes], network)
+      success = true
+      
+      success = Coral.batch(options[:parallel]) do |batch|      
+        nodes.each do |node|
+          batch.add(node.name) do 
+            node.action(plugin_provider, params)
+          end
         end
       end
-      
-      success = true
     else
       # Execute statement locally
       success = yield(local_node(network), network) if block_given?
@@ -88,7 +89,7 @@ module Node
       end
     end
     
-    return node_map  
+    return node_map.values  
   end
   protected :translate_node_references
   
