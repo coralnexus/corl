@@ -6,8 +6,6 @@ Signal.trap("INT") { exit 1 }
 
 require 'coral_core'
 
-#---
-
 logger = Coral.logger
 logger.info("`coral` invoked: #{ARGV.inspect}")
 
@@ -26,15 +24,13 @@ begin
   sub_command    = arg_components.shift
   sub_args       = arg_components
   
-  loaded_actions = Coral::Plugin.loaded_plugins(:action)
-  
   if main_command.processed && sub_command
     exit_status = Coral::Plugin::Action.exec(sub_command, sub_args)
   else
     puts I18n.t('coral.core.exec.help.usage') + ': ' + main_command.help + "\n"
     puts I18n.t('coral.core.exec.help.header') + ":\n\n"
     
-    loaded_actions.each do |provider, action|
+    Coral::Plugin.loaded_plugins(:action).each do |provider, action|
       puts sprintf("   %-10s : %s\n", 
         "<#{provider}>", 
         Coral.action(provider, [ '-h' ], true).help
