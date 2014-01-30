@@ -32,7 +32,9 @@ class Batch < Core
   # Batch operations
 
   def add(name, options = {}, &code)
-    processes[name] = Util::Process.new(name, options, code)
+    processes[name] = Util::Process.new(name, options) do
+      code.call
+    end
   end
   
   #---
@@ -77,18 +79,18 @@ class Batch < Core
       thread = Thread.new do
         Thread.current[:error] = nil
 
-        start_pid = Process.pid
+        start_pid = ::Process.pid
 
         begin
           process.run
           
         rescue Exception => error
-          raise if ! parallel && Process.pid == start_pid
+          raise if ! parallel && ::Process.pid == start_pid
           
           Thread.current[:error] = error
         end
 
-        if Process.pid != start_pid
+        if ::Process.pid != start_pid
           exit_status = true
           
           if Thread.current[:error]
@@ -100,7 +102,7 @@ class Batch < Core
             logger.error(error.backtrace.join("\n"))
           end
 
-          Process.exit!(exit_status)
+          ::Process.exit!(exit_status)
         end
       end
 
