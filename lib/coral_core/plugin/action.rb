@@ -151,6 +151,8 @@ class Action < Base
   def cleanup
     logger.info("Running cleanup for action #{plugin_provider}")
     
+    yield if block_given?
+    
     # Nothing to do right now
     extension(:cleanup)
   end
