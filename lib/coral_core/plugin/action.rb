@@ -16,13 +16,13 @@ class Action < Base
   # Checks
   
   def quiet?
-    return get(:quiet, false)
+    get(:quiet, false)
   end
   
   #---
   
   def processed?
-    return get(:processed, false)
+    get(:processed, false)
   end
   
   #-----------------------------------------------------------------------------
@@ -35,27 +35,26 @@ class Action < Base
   #--
   
   def options
-    return get_hash(:options)
+    get_hash(:options)
   end
   
   #---
   
   def arguments
-    return get_hash(:arguments)
+    get_hash(:arguments)
   end
    
   #---
   
   def help
     return @parser.help if @parser
-    return ''
+    ''
   end
 
   #-----------------------------------------------------------------------------
   # Operations
   
-  def parse(args, banner = '')
-    
+  def parse(args, banner = '')    
     logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
     
     set(:params, array(args))
@@ -86,32 +85,39 @@ class Action < Base
         end
       end
     end 
-    return self  
+    self  
   end
   
   #---
   
   def execute
-    success = false
-    
     logger.info("Executing action #{plugin_provider}")
     
     if processed?
-      success = node_exec do |node, network|
+      status = node_exec do |node, network|
+        hook_config = { :node => node, :network => network }
+        
         begin
-          success = extension_check(:exec_init)
-          success = yield(node, network) if success && block_given?
-          success = extension_set(:exec_exit, success)
+          status = yield(node, network) if extension_check(:exec_init, hook_config) && block_given?
+          status = extension_set(:exec_exit, status, hook_config)
           
         ensure
           cleanup
         end
-        success    
+        status
+      end
+    else
+      if @parser.options[:help]
+        status = Coral.code.help_wanted
+      else
+        status = Coral.code.action_unprocessed
       end
     end
     
-    logger.warn("Execution failed for #{plugin_provider} with #{export.inspect}") if processed? && ! success  
-    return success
+    code_name = Codes.index(status)
+    logger.warn("Execution failed for #{plugin_provider} with status #{status} (#{code_name}): #{export.inspect}") if processed? && status > 1 
+    
+    status
   end
   
   #---

@@ -71,6 +71,15 @@ module Coral
   end
   
   #-----------------------------------------------------------------------------
+  # Status codes
+  
+  @@codes = Codes.new
+  
+  def self.code
+    return @@codes
+  end
+  
+  #-----------------------------------------------------------------------------
   # Core plugin interface
   
   def self.plugin(type, provider, options = {})

@@ -82,6 +82,7 @@ require 'rubygems'
 require 'i18n'
 require 'log4r'
 require 'deep_merge'
+require 'hiera'
 require 'yaml'
 require 'multi_json'
 require 'digest/sha1'
@@ -129,6 +130,7 @@ end
 
 # Include bootstrap classes
 coral_require(core_dir, :errors)
+coral_require(core_dir, :codes)
 coral_require(util_dir, :data)
 coral_require(core_dir, :config)
 coral_require(util_dir, :interface) 
