@@ -46,9 +46,9 @@ module Node
     
     if network.has_nodes? && ! options[:nodes].empty?
       # Execute action on remote nodes      
-      node_map = translate_node_references(options[:nodes])
+      node_map = translate_node_references(options[:nodes], network)
             
-      network.nodes.each do |provider, nodes|
+      node_map.each do |provider, nodes|
         nodes.each do |node_name, node|
           
         end
@@ -57,7 +57,7 @@ module Node
       success = true
     else
       # Execute statement locally
-      success = yield if block_given?
+      success = yield(local_node(network), network) if block_given?
     end
     success
   end
@@ -65,7 +65,7 @@ module Node
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def translate_node_references(references)
+  def translate_node_references(references, network)
     node_map = {}
     
     references.each do |reference|
@@ -80,9 +80,23 @@ module Node
       node_map[provider] = [] unless node_map.has_key?(provider)
       node_map[provider] << info[:name]
     end
+    
+    node_groups = []
+    network.nodes.each do |provider, nodes|
+      nodes.each do |node_name, node|
+        node_groups << node.search(:groups)
+      end
+    end
+    
     return node_map  
   end
   protected :translate_node_references
+  
+  #---
+  
+  def local_node(network)
+    
+  end
 end
 end
 end
