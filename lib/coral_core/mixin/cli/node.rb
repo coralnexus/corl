@@ -49,9 +49,11 @@ module Node
       nodes   = translate_node_references(options[:nodes], network)
       success = Coral.batch(options[:parallel]) do |batch|      
         nodes.each do |node|
-          batch.add(node.name) do
-            node.action(plugin_provider, params)
-          end
+          dbg(node.name)
+          dbg(node)
+          #batch.add(node.name) do
+          #  node.action(plugin_provider, params)
+          #end
         end
       end
     else
@@ -71,10 +73,10 @@ module Node
     registered_nodes = network.nodes
     
     info.each do |provider, names|
-      provider_nodes = registered_nodes[provider.to_sym]
+      provider_nodes = registered_nodes[provider]
       
       names.each do |name|
-        nodes << provider_nodes[name.to_sym]  
+        nodes << provider_nodes[name]  
       end
     end
     
@@ -99,7 +101,7 @@ module Node
           provider = member_info[:provider].to_sym
           
           node_info[provider] = [] unless node_info.has_key?(provider)        
-          node_info[provider] << member_info[:name].to_s  
+          node_info[provider] << member_info[:name]
         end
       else
         # Not a group
