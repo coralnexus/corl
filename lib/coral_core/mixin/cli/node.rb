@@ -49,11 +49,9 @@ module Node
       nodes   = translate_node_references(options[:nodes], network)
       success = Coral.batch(options[:parallel]) do |batch|      
         nodes.each do |node|
-          dbg(node.name)
-          dbg(node)
-          #batch.add(node.name) do
-          #  node.action(plugin_provider, params)
-          #end
+          batch.add(node.name) do
+            node.action(plugin_provider, params)
+          end
         end
       end
     else
