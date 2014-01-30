@@ -8,6 +8,32 @@ class Action < Base
   #-----------------------------------------------------------------------------
   # Action plugin interface
   
+  def self.exec(provider, args)
+    begin
+      logger = Coral.logger
+      
+      loaded_actions = Coral::Plugin.loaded_plugins(:action)
+  
+      logger.debug("Running coral action #{provider} with #{args.inspect}")
+      exit_status = Coral.action(provider, args).execute
+      
+    rescue Exception => error
+      logger.error("Coral action #{provider} experienced an error:")
+      logger.error(error.inspect)
+      logger.error(error.message)
+      logger.error(Coral::Util::Data.to_yaml(error.backtrace))
+
+      Coral.ui.error(error.message, { :prefix => false }) if error.message
+  
+      exit_status = error.status_code if error.respond_to?(:status_code)
+    end
+
+    exit_status = Coral.code.unknown_status unless exit_status.is_a?(Integer)
+    exit_status  
+  end
+  
+  #---
+  
   def normalize
     parse(get_array(:args))
   end
