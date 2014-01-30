@@ -15,7 +15,7 @@ module Lookup
   #---
   
   def hiera_config(provider = :puppet)
-    return Coral.provisioner(provider).config
+    return Coral.provisioner(provider).hiera_config
   end
   
   #---
