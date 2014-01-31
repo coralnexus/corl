@@ -197,12 +197,12 @@ class Resource < Core
         resource_refs = resource_refs.split(/\s*,\s*/)
       end
         
-    when Puppet::Resource
+    when ::Puppet::Resource
       resource_refs = [ resource_refs ]  
     end
     
     resource_refs.collect! do |value|
-      if value.is_a?(Puppet::Resource) || ! value.match(title_regexp)
+      if value.is_a?(::Puppet::Resource) || ! value.match(title_regexp)
         value
           
       elsif resource_names.has_key?(value)
@@ -229,8 +229,8 @@ class Resource < Core
     
     resource_refs.flatten.each do |ref|
       unless ref.nil?        
-        unless ref.is_a?(Puppet::Resource)
-          ref = ref.match(title_regexp) ? Puppet::Resource.new(type_name, ref) : Puppet::Resource.new(ref)
+        unless ref.is_a?(::Puppet::Resource)
+          ref = ref.match(title_regexp) ? ::Puppet::Resource.new(type_name, ref) : ::Puppet::Resource.new(ref)
         end
         values << ref unless ref.nil?
       end

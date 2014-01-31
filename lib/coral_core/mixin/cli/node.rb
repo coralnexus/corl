@@ -27,6 +27,31 @@ module Node
   end
   
   #-----------------------------------------------------------------------------
+  # Facter configuration
+  
+  @@facts = {}
+  
+  def init_facts(reset = false)
+    if reset || @@facts.empty?
+      Facter.list.each do |name|
+        @@facts[name] = Facter.value(name)
+      end
+    end
+  end
+  
+  #---
+  
+  def facts(reset = false)
+    init_facts(reset)
+    @@facts
+  end
+  
+  def fact(name, reset = false)
+    init_facts(reset)
+    @@facts[name]
+  end
+  
+  #-----------------------------------------------------------------------------
   # Hiera configuration
   
   @@hiera = {}
@@ -79,17 +104,20 @@ module Node
 
     first_property = nil
     properties.each do |property|
+      property       = property.to_sym
       first_property = property unless first_property
-          
-      if initialized?(config)
-        unless hiera_scope.respond_to?('[]')
-          hiera_scope = Hiera::Scope.new(hiera_scope)
-        end
-        value = hiera(provider).lookup(property, nil, hiera_scope, override, context)
-      end 
+      
+      unless value = fact(property)
+        if initialized?(config)
+          unless hiera_scope.respond_to?('[]')
+            hiera_scope = Hiera::Scope.new(hiera_scope)
+          end
+          value = hiera(provider).lookup(property, nil, hiera_scope, override, context)
+        end 
     
-      if Util::Data.undef?(value)
-        value = Coral.provisioner(provider).lookup(property, default, config)
+        if Util::Data.undef?(value)
+          value = Coral.provisioner(provider).lookup(property, default, config)
+        end
       end
     end
     value = default if Util::Data.undef?(value)
@@ -201,13 +229,13 @@ module Node
     network = Coral.network(
       Coral.sha1(network_config), 
       network_config, 
-      options[:net_provider]
+      settings[:net_provider]
     )
     
-    if network.has_nodes? && ! options[:nodes].empty?
+    if network.has_nodes? && ! settings[:nodes].empty?
       # Execute action on remote nodes      
-      nodes   = translate_node_references(options[:nodes], network)
-      success = Coral.batch(options[:parallel]) do |batch|      
+      nodes   = translate_node_references(settings[:nodes], network)
+      success = Coral.batch(settings[:parallel]) do |batch|      
         nodes.each do |node|
           batch.add(node.name) do
             node.action(plugin_provider, params)
@@ -250,7 +278,7 @@ module Node
     
     references.each do |reference|
       info = Plugin::Node.translate_reference(reference)
-      info = { :provider => options[:node_provider], :name => reference } unless info
+      info = { :provider => settings[:node_provider], :name => reference } unless info
       name = info[:name].to_sym     
       
       # Check for group membership
@@ -308,7 +336,9 @@ module Node
   
   #---
   
-  def local_node(network)
+  def local_node(network)    
+    ip_address = lookup(:ipaddress)
+        
     nil  # Coming soon 
   end
   protected :local_node

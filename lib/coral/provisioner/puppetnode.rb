@@ -1,7 +1,7 @@
 
 module Coral
 module Provisioner
-class Puppet < Plugin::Provisioner
+class Puppetnode < Plugin::Provisioner
   
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
@@ -11,11 +11,18 @@ class Puppet < Plugin::Provisioner
     
     require 'puppet'
     
-    init(:name, :default)    
-    init(:env, Puppet::Node::Environment.new)
-    init(:compiler, Puppet::Parser::Compiler.new(node))
+    if Coral.log_level == :debug
+      Puppet.debug = true
+    end
+    Puppet.initialize_settings
+    
+    self.name = :default if name.to_sym == :puppetnode
+       
+    @env      = Puppet::Node::Environment.new
+    @compiler = Puppet::Parser::Compiler.new(node)
     
     init_scope
+    register
   end
   
   #---
@@ -41,10 +48,10 @@ class Puppet < Plugin::Provisioner
     prefix_text = config.get(:prefix_text, '::')  
     init_fact   = prefix_text + config.get(:init_fact, 'hiera_ready')
       
-    if Puppet::Parser::Functions.function('hiera') && puppet_scope.respond_to?('[]')
+    if ::Puppet::Parser::Functions.function('hiera') && puppet_scope.respond_to?('[]')
       return true if Util::Data.true?(puppet_scope[init_fact])
     end
-    return false
+    false
   end
    
   #-----------------------------------------------------------------------------
@@ -63,51 +70,31 @@ class Puppet < Plugin::Provisioner
     end
 
     config[:logger] = 'puppet'
-    return config
+    config
   end
   
   #---
   
-  def env(default = nil)
-    return get(:env, default)
+  def env
+    @env
   end
   
   #---
   
-  def compiler(default = nil)
-    return get(:compiler, default)
+  def compiler
+    @compiler
   end
   
-  #---
-  
-  def scope(default = nil)
-    return get(:scope, default)
-  end
-  
-  #---
-  
-  def init_scope
-    set(:scope, Puppet::Parser::Scope.new(compiler))
-    scope.source = Puppet::Resource::Type.new(:node, node.name)
-    scope.parent = compiler.topscope  
-  end
-
   #---
     
   def init_facts
-    if name
-      name_orig = Puppet[:node_name_fact]
-      Puppet[:node_name_fact] = name
+    facts = {}
+    
+    unless Puppet[:node_name_value].empty?
+      facts_obj = Puppet::Node::Facts.indirection.find(Puppet[:node_name_value])
+      facts     = facts_obj.values if facts_obj
     end
     
-    unless Puppet[:node_name_fact].empty?
-      facts = Puppet::Node::Facts.indirection.find(Puppet[:node_name_value])
-
-      Puppet[:node_name_value] = facts.values[Puppet[:node_name_fact]] if facts
-      facts.name = Puppet[:node_name_value]
-    end
-    
-    Puppet[:node_name_fact] = name_orig if name_orig
     set(:facts, facts)  
   end
   protected :init_facts
@@ -118,7 +105,7 @@ class Puppet < Plugin::Provisioner
     if reset || ! get(:facts)
       init_facts
     end
-    return get(:facts)
+    get(:facts)
   end
   
   #---
@@ -137,7 +124,7 @@ class Puppet < Plugin::Provisioner
 
     file = Puppet[:classfile]
     if FileTest.exists?(file)
-      node.classes = ::File.read(file).split(/[\s\n]+/)
+      node.classes = File.read(file).split(/[\s\n]+/)
     end
     
     Puppet[:node_name_value] = name_orig if name_orig
@@ -151,7 +138,21 @@ class Puppet < Plugin::Provisioner
     if reset || ! @node
       init_node
     end
-    return @node
+    @node
+  end
+  
+  #---
+  
+  def init_scope
+    @scope       = Puppet::Parser::Scope.new(compiler)
+    scope.source = Puppet::Resource::Type.new(:node, node.name)
+    scope.parent = compiler.topscope  
+  end
+
+  #---
+  
+  def scope
+    @scope
   end
   
   #---
@@ -179,14 +180,14 @@ class Puppet < Plugin::Provisioner
     if reset || ! @catalog
       init_catalog
     end
-    return @catalog
+    @catalog
   end
   
   #-----------------------------------------------------------------------------
   # Resources
   
   def resource_types
-    return env.known_resource_types
+    env.known_resource_types
   end
   
   #---
@@ -229,19 +230,19 @@ class Puppet < Plugin::Provisioner
       set(:type_info, type_info)
     end
     
-    return type_info[type_name]  
+    type_info[type_name]  
   end
   
   #---
   
   def find_hostclass(name, options = {})
-    return resource_types.find_hostclass(scope.namespaces, name, options)
+    resource_types.find_hostclass(scope.namespaces, name, options)
   end
   
   #---
 
   def find_definition(name)
-    return resource_types.find_definition(scope.namespaces, name)
+    resource_types.find_definition(scope.namespaces, name)
   end
      
   #-----------------------------------------------------------------------------
@@ -249,14 +250,14 @@ class Puppet < Plugin::Provisioner
   
   def clear
     init_catalog
-    return self
+    self
   end
   
   #---
       
   def add(type_name, resources, defaults = {}, options = {})
     info = type_info(type_name)
-    return PuppetExt::ResourceGroup.new(self, info, defaults).add(resources, options)
+    PuppetExt::ResourceGroup.new(self, info, defaults).add(resources, options)
   end
   
   #---
@@ -305,7 +306,7 @@ class Puppet < Plugin::Provisioner
     if type[:type] == :define
       type[:resource].instantiate_resource(scope, resource)
     end
-    return compiler.add_resource(scope, resource)
+    compiler.add_resource(scope, resource)
   end
   protected :add_definition
 
@@ -323,7 +324,7 @@ class Puppet < Plugin::Provisioner
     search_name    = config.get(:search_name, true)
     reverse_lookup = config.get(:reverse_lookup, true)
     
-    log_level = Puppet::Util::Log.level
+    log_level = ::Puppet::Util::Log.level
     Puppet::Util::Log.level = :err # Don't want failed parameter lookup warnings here.
       
     if base_names
@@ -340,15 +341,16 @@ class Puppet < Plugin::Provisioner
     if Util::Data.undef?(value) && search_name
       value = puppet_scope.lookupvar("::#{property}")
     end
+    
     Puppet::Util::Log.level = log_level
-    return value      
+    value      
   end
   
   #--
   
   def import(files, base_dir = nil)
     resource_types.loader.import(file, base_dir + '/')
-    return self  
+    self  
   end
   
   #---
@@ -377,7 +379,7 @@ class Puppet < Plugin::Provisioner
     end
 
     return false unless missing.empty?
-    return true
+    true
   end
   
   #---
@@ -398,14 +400,14 @@ class Puppet < Plugin::Provisioner
     rescue => detail
       Puppet.log_exception(detail)
     end
-    return false
+    false
   end
   
   #-----------------------------------------------------------------------------
   # Utilities
   
   def to_name(name)
-    return Util::Data.value(name).to_s.gsub(/[\/\\\-\.]/, '_')
+    Util::Data.value(name).to_s.gsub(/[\/\\\-\.]/, '_')
   end
   
   #---
@@ -413,7 +415,7 @@ class Puppet < Plugin::Provisioner
   def type_name(value) # Basically borrowed from Puppet (damn private methods!)
     return :main if value == :main
     return "Class" if value == "" or value.nil? or value.to_s.downcase == "component"
-    return value.to_s.split("::").collect { |s| s.capitalize }.join("::")
+    value.to_s.split("::").collect { |s| s.capitalize }.join("::")
   end
   
   #---
@@ -422,9 +424,9 @@ class Puppet < Plugin::Provisioner
     resource = Puppet::Resource.new(type_name.sub(/^\@?\@/, ''), resource_name)
     
     if resource.builtin_type? and type = resource.resource_type and type.key_attributes.length == 1
-      return type.key_attributes.first.to_s
+      type.key_attributes.first.to_s
     else
-      return 'name'
+      'name'
     end
   end
       
@@ -432,7 +434,7 @@ class Puppet < Plugin::Provisioner
   
   def configure
     configurer = Puppet::Configurer.new
-    return configurer.run(:catalog => catalog, :pluginsync => false)
+    configurer.run(:catalog => catalog, :pluginsync => false)
   end
   protected :configure
 end
