@@ -13,7 +13,7 @@ class Update < Plugin::Action
   # Action operations
   
   def parse(args)
-    return super(args, 'coral update') do |parser|
+    super(args, 'coral update') do |parser|
       project_options(parser, true, true)
     end
   end
@@ -21,10 +21,9 @@ class Update < Plugin::Action
   #---
    
   def execute
-    return super do |node, network|
+    super do |node, network, status|
       info('coral.core.actions.update.start')
       
-      status  = Coral.code.success      
       project = project_load(Dir.pwd, true)
           
       status = Coral.code.update_failure unless project

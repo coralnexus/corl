@@ -122,7 +122,7 @@ class Action < Base
         
         begin
           status = Coral.code.success
-          status = yield(node, network) if extension_check(:exec_init, hook_config) && block_given?
+          status = yield(node, network, status) if extension_check(:exec_init, hook_config) && block_given?
           status = extension_set(:exec_exit, status, hook_config)
         ensure
           cleanup
