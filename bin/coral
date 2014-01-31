@@ -25,7 +25,7 @@ begin
   sub_args       = arg_components
   
   if main_command.processed && sub_command
-    exit_status = Coral::Plugin::Action.exec(sub_command, sub_args)
+    exit_status = Coral.action_cli(sub_command, sub_args)
   else
     puts I18n.t('coral.core.exec.help.usage') + ': ' + main_command.help + "\n"
     puts I18n.t('coral.core.exec.help.header') + ":\n\n"
@@ -33,7 +33,7 @@ begin
     Coral::Plugin.loaded_plugins(:action).each do |provider, action|
       puts sprintf("   %-10s : %s\n", 
         "<#{provider}>", 
-        Coral.action(provider, [ '-h' ], true).help
+        Coral.action(provider, { :args => '-h', :quiet => true }).help
       )
     end
     

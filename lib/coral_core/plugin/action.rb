@@ -8,14 +8,12 @@ class Action < Base
   #-----------------------------------------------------------------------------
   # Action plugin interface
   
-  def self.exec(provider, args)
+  def self.exec_safe(provider, options)
     begin
       logger = Coral.logger
       
-      loaded_actions = Coral::Plugin.loaded_plugins(:action)
-  
-      logger.debug("Running coral action #{provider} with #{args.inspect}")
-      exit_status = Coral.action(provider, args).execute
+      logger.debug("Running coral action #{provider} with #{options.inspect}")
+      exit_status = Coral.action(provider, options).execute
       
     rescue Exception => error
       logger.error("Coral action #{provider} experienced an error:")
@@ -32,10 +30,25 @@ class Action < Base
     exit_status  
   end
   
+  def self.exec(provider, options, quiet = true)
+    exec_safe(provider, { :settings => Config.ensure(options), :quiet => quiet })
+  end
+  
+  def self.exec_cli(provider, args, quiet = false)
+    exec_safe(provider, { :args => args, :quiet => quiet })
+  end
+  
   #---
   
   def normalize
-    parse(get_array(:args))
+    args = array(delete(:args, []))
+    
+    if args.empty?
+      init(:settings, Config.new)
+      set(:processed, true)  
+    else
+      parse(args)
+    end
   end
   
   #-----------------------------------------------------------------------------
@@ -60,16 +73,10 @@ class Action < Base
   
   #--
   
-  def options
-    get_hash(:options)
+  def settings
+    get(:settings)
   end
   
-  #---
-  
-  def arguments
-    get_hash(:arguments)
-  end
-   
   #---
   
   def help
@@ -95,8 +102,7 @@ class Action < Base
     if @parser 
       if @parser.processed
         set(:processed, true)
-        set(:options, @parser.options)
-        set(:arguments, @parser.arguments)
+        set(:settings, Config.new(Util::Data.merge([ @parser.options, @parser.arguments ], true)))
         
         logger.debug("Parse successful: #{export.inspect}")
         
@@ -157,29 +163,29 @@ class Action < Base
     extension(:cleanup)
   end
   
-  #-----------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   # Output
         
   def info(name, options = {})
-    ui.info(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true))) unless quiet?
+    ui.info(I18n.t(name, Util::Data.merge([ settings, options ], true))) unless quiet?
   end
         
   #---
        
   def warn(name, options = {})
-    ui.warn(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true))) unless quiet?  
+    ui.warn(I18n.t(name, Util::Data.merge([ settings, options ], true))) unless quiet?  
   end
         
   #---
         
   def error(name, options = {})
-    ui.error(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true))) unless quiet?  
+    ui.error(I18n.t(name, Util::Data.merge([ settings, options ], true))) unless quiet?  
   end
         
   #---
         
   def success(name, options = {})
-    ui.success(I18n.t(name, Util::Data.merge([ self.options, arguments, options ], true))) unless quiet?  
+    ui.success(I18n.t(name, Util::Data.merge([ settings, options ], true))) unless quiet?  
   end
 end
 end
