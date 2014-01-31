@@ -1,5 +1,9 @@
 
 module Coral
+class Codes
+  code(:spawn_failure, 20)
+end
+
 module Action
 class Spawn < Plugin::Action
 
@@ -7,7 +11,7 @@ class Spawn < Plugin::Action
   # Action operations
   
   def parse(args)
-    return super(args, 'coral spawn <node_reference>') do |parser|
+    super(args, 'coral spawn <node_reference>') do |parser|
       parser.option_str(:image, nil, 
         '--image IMAGE_NAME', 
         'coral.core.actions.spawn.options.image'
@@ -15,10 +19,6 @@ class Spawn < Plugin::Action
       parser.option_str(:flavor, nil, 
         '--flavor MACHINE_FLAVOR', 
         'coral.core.actions.spawn.options.flavor'
-      )
-      parser.option_str(:provider, :rackspace,
-        '--provider DEFAULT_NODE_PROVIDER', 
-        'coral.core.actions.spawn.options.provider'
       )
       parser.arg_str(:node_reference, nil, 
         'coral.core.actions.spawn.options.node_reference'
@@ -29,10 +29,10 @@ class Spawn < Plugin::Action
   #---
    
   def execute
-    return super do
+    super do |node, network, status|
       info('coral.core.actions.spawn.start')
       
-      true
+      status
     end
   end
 end
