@@ -156,16 +156,16 @@ module Coral
           
           if error
             if ! arg_messages.empty?
-              self.help = CLI.message('coral.core.util.cli.parse.error') + "\n\n" + arg_messages.join("\n") + "\n\n" + parser.help.chomp + "\n\n"
+              parser.warn(CLI.message('coral.core.util.cli.parse.error') + "\n\n" + arg_messages.join("\n") + "\n\n" + parser.help)
             else
-              self.help = CLI.message('coral.core.util.cli.parse.error') + "\n" + parser.help.chomp + "\n\n"  
+              parser.warn(CLI.message('coral.core.util.cli.parse.error') + "\n\n" + parser.help)  
             end
           else
             self.processed = true
           end
         
         rescue OptionParser::InvalidOption => e
-          self.help =  e.message + "\n\n" + parser.help.chomp
+          parser.warn(e.message + "\n\n" + parser.help)
         end
         
         #---
