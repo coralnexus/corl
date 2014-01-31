@@ -43,6 +43,7 @@ class Codes
   #-----------------------------------------------------------------------------
   # Core status codes
   
+  code(:success, 0)
   code(:help_wanted, 1)
   code(:unknown_status, 2)
   
