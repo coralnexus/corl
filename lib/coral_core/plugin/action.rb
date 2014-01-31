@@ -95,7 +95,6 @@ class Action < Base
       if @parser.processed
         set(:processed, true)
         set(:settings, Config.new(Util::Data.merge([ @parser.options, @parser.arguments ], true)))
-        
         logger.debug("Parse successful: #{export.inspect}")
         
       elsif @parser.options[:help] && ! quiet?
@@ -159,25 +158,25 @@ class Action < Base
   # Output
         
   def info(name, options = {})
-    ui.info(I18n.t(name, Util::Data.merge([ settings, options ], true))) unless quiet?
+    ui.info(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?
   end
         
   #---
        
   def warn(name, options = {})
-    ui.warn(I18n.t(name, Util::Data.merge([ settings, options ], true))) unless quiet?  
+    ui.warn(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?  
   end
         
   #---
         
   def error(name, options = {})
-    ui.error(I18n.t(name, Util::Data.merge([ settings, options ], true))) unless quiet?  
+    ui.error(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?  
   end
         
   #---
         
   def success(name, options = {})
-    ui.success(I18n.t(name, Util::Data.merge([ settings, options ], true))) unless quiet?  
+    ui.success(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?  
   end
 end
 end
