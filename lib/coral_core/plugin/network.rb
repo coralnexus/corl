@@ -29,6 +29,10 @@ class Network < Base
   # Property accessors / modifiers
   
   plugin_collection :node
+  
+  #-----------------------------------------------------------------------------
+  # Operations
+  
 end
 end
 end
