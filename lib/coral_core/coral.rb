@@ -14,6 +14,12 @@ module Coral
   def self.logger
     return Core.logger
   end
+  
+  #---
+  
+  def self.log_level
+    ENV['CORAL_LOG'].downcase.to_sym
+  end
    
   #-----------------------------------------------------------------------------
 
