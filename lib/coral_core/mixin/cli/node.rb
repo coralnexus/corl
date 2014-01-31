@@ -58,13 +58,13 @@ module Node
   
   #---
   
-  def hiera_config(provider = :puppet)
+  def hiera_config(provider = :puppetnode)
     return Coral.provisioner(provider).hiera_config
   end
   
   #---
 
-  def hiera(provider = :puppet)
+  def hiera(provider = :puppetnode)
     @@hiera[provider] = Hiera.new(:config => hiera_config(provider)) unless @@hiera.has_key?(provider)
     return @@hiera[provider]
   end
@@ -90,7 +90,7 @@ module Node
     config          = Config.ensure(options)
     value           = nil
     
-    provider        = config.get(:provisioner, :puppet)
+    provider        = config.get(:provisioner, :puppetnode)
     
     hiera_scope     = config.get(:hiera_scope, {})
     context         = config.get(:context, :priority)    
@@ -218,7 +218,7 @@ module Node
   # Operations
         
   def node_exec
-    success = false
+    status = Coral.code.unknown_status
     
     # Load network if it exists
     network_config = extended_config(:network, {
@@ -234,19 +234,35 @@ module Node
     
     if network.has_nodes? && ! settings[:nodes].empty?
       # Execute action on remote nodes      
-      nodes   = translate_node_references(settings[:nodes], network)
-      success = Coral.batch(settings[:parallel]) do |batch|      
-        nodes.each do |node|
-          batch.add(node.name) do
-            node.action(plugin_provider, params)
+      nodes  = translate_node_references(settings[:nodes], network)
+      status = Coral.batch(settings[:parallel]) do |op, batch|
+        if op == :add
+          # Add batch operations      
+          nodes.each do |node|
+            batch.add(node.name) do
+              node.action(plugin_provider, settings)
+              Coral.code.success
+            end
           end
+        else
+          # Reduce to single status
+          status = Coral.code.success
+          
+          batch.each do |name, code|
+            if code != Coral.code.success
+              status = Coral.code.batch_error
+              break
+            end
+          end
+          
+          status  
         end
       end
     else
       # Execute statement locally
-      success = yield(local_node(network), network) if block_given?
+      status = yield(local_node(network), network) if block_given?
     end
-    success
+    status
   end
         
   #-----------------------------------------------------------------------------
@@ -265,7 +281,6 @@ module Node
         nodes << provider_nodes[name]  
       end
     end
-    
     nodes  
   end
   protected :translate_node_references
@@ -321,12 +336,10 @@ module Node
   def node_groups(network)
     groups = {}
     
-    network.nodes.each do |provider, nodes|
-      nodes.each do |node_name, node|
-        node.search(:groups, [], :array).each do |group|
-          groups[group] = [] unless groups.has_key?(group)
-          groups[group] << { :provider => provider, :name => node_name }
-        end
+    each_node!(network) do |provider, node_name, node|
+      node.groups.each do |group|
+        groups[group] = [] unless groups.has_key?(group)
+        groups[group] << { :provider => provider, :name => node_name }
       end
     end
     
@@ -338,10 +351,27 @@ module Node
   
   def local_node(network)    
     ip_address = lookup(:ipaddress)
+    
+    local_node = nil
+    
+    each_node!(network) do |provider, node_name, node|
+      
+    end
         
-    nil  # Coming soon 
+    local_node
   end
   protected :local_node
+  
+  #---
+  
+  def each_node!(network)
+    network.nodes.each do |provider, nodes|
+      nodes.each do |node_name, node|
+        yield(provider, node_name, node)
+      end
+    end  
+  end
+  protected :each_node!
 end
 end
 end

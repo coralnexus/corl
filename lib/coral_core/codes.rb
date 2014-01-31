@@ -48,6 +48,7 @@ class Codes
   code(:unknown_status, 2)
   
   code(:action_unprocessed, 3)
+  code(:batch_error, 4)
   
 end
 end

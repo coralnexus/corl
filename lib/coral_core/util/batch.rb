@@ -10,6 +10,8 @@ class Batch < Core
     super
     
     set(:parallel, parallel)
+    set(:results, {})
+    
     self.clear
     
     yield(self)
@@ -19,13 +21,23 @@ class Batch < Core
   # Property accessors / modifiers
   
   def parallel
-    return get(:parallel, true)
+    get(:parallel, true)
   end
   
   #---
   
   def processes
-    return get_hash(:processes)
+    get_hash(:processes)
+  end
+  
+  #---
+  
+  def results
+    get_hash(:results)
+  end
+  
+  def set_result(name, value)
+    set([ :results, name ], value)
   end
 
   #-----------------------------------------------------------------------------
@@ -65,6 +77,8 @@ class Batch < Core
     unless errors.empty?
       raise Errors::BatchError, :message => errors.join("\n\n")
     end
+    
+    results
   end
   
   #-----------------------------------------------------------------------------
@@ -82,7 +96,7 @@ class Batch < Core
         start_pid = ::Process.pid
 
         begin
-          process.run
+          set_result(name, process.run)
           
         rescue Exception => error
           raise if ! parallel && ::Process.pid == start_pid

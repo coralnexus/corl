@@ -185,28 +185,28 @@ module Coral
   @@batch_lock = Mutex.new
   
   def self.batch(parallel = true)
-    success = true
+    result = nil
     
     @@batch_lock.synchronize do
       begin
         logger.debug("Running contained process at #{Time.now}")
         
         Util::Batch.new(parallel) do |batch|
-          yield(batch)
-          batch.run
+          yield(:add, batch)          
+          result = yield(:reduce, batch.run)
         end        
         
       rescue Exception => error
-        logger.error("Coral batch experienced an error! Details:")
+        logger.error("Coral batch experienced an error:")
         logger.error(error.inspect)
         logger.error(error.message)
         logger.error(Util::Data.to_yaml(error.backtrace))
   
         ui.error(error.message) if error.message
-        success = false
       end      
     end
-    success
+    
+    result
   end
     
   #-----------------------------------------------------------------------------
