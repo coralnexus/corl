@@ -39,10 +39,10 @@ module Project
     # 6. Pull down updates if requested
           
     return Coral.project(extended_config(:project, {
-      :provider  => options[:project_provider],
+      :provider  => settings[:project_provider],
       :directory => root_dir,
-      :url       => options[:reference],
-      :revision  => options[:revision],
+      :url       => settings[:reference],
+      :revision  => settings[:revision],
       :pull      => update
     }))
   end       

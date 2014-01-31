@@ -37,10 +37,10 @@ module Push
   def push(project, remote = :edit)
     success = true
           
-    if project && options[:push]
-      success = project.push(options[:remote], extended_config(:push, {
-        :revision  => options[:revision],
-        :propogate => options[:propogate]
+    if project && settings[:push]
+      success = project.push(settings[:remote], extended_config(:push, {
+        :revision  => settings[:revision],
+        :propogate => settings[:propogate]
       }))
     end
     success

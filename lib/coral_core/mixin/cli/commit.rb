@@ -41,12 +41,12 @@ module Commit
   def commit(project, files = '.')
     success = true
           
-    if project && options[:commit]
+    if project && settings[:commit]
       success = project.commit(files, extended_config(:commit, {
-        :allow_empty => options[:allow_empty],
-        :message     => options[:message],
-        :author      => options[:author],
-        :propogate   => options[:propogate]
+        :allow_empty => settings[:allow_empty],
+        :message     => settings[:message],
+        :author      => settings[:author],
+        :propogate   => settings[:propogate]
       }))
     end
     success

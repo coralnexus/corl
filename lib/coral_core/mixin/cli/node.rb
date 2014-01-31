@@ -351,11 +351,17 @@ module Node
   
   def local_node(network)    
     ip_address = lookup(:ipaddress)
+    dbg(ip_address, 'ip address')
     
     local_node = nil
     
     each_node!(network) do |provider, node_name, node|
+      dbg(node.public_ip, provider.to_s + node_name.to_s + 'ip address')
       
+      if node.public_ip == ip_address
+        local_node = node
+        break
+      end
     end
         
     local_node
