@@ -67,12 +67,6 @@ class Action < Base
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
   
-  def params
-    get_array(:params)
-  end
-  
-  #--
-  
   def settings
     get(:settings)
   end
@@ -89,8 +83,6 @@ class Action < Base
   
   def parse(args, banner = '')    
     logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
-    
-    set(:params, array(args))
     
     @parser = Util::CLI::Parser.new(args, banner) do |parser| 
       yield(parser) if block_given?
@@ -130,9 +122,9 @@ class Action < Base
         hook_config = { :node => node, :network => network }
         
         begin
+          status = Coral.code.success
           status = yield(node, network) if extension_check(:exec_init, hook_config) && block_given?
           status = extension_set(:exec_exit, status, hook_config)
-          
         ensure
           cleanup
         end
