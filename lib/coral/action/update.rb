@@ -1,5 +1,9 @@
 
 module Coral
+class Codes
+  code(:update_failure, 20)
+end
+
 module Action
 class Update < Plugin::Action
   
@@ -17,14 +21,14 @@ class Update < Plugin::Action
   #---
    
   def execute
-    return super do
+    return super do |node, network|
       info('coral.core.actions.update.start')
       
-      success = false    
+      status  = Coral.code.success      
       project = project_load(Dir.pwd, true)
           
-      success = true if project
-      success
+      status = Coral.code.update_failure unless project
+      status
     end
   end
 end
