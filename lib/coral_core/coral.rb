@@ -18,7 +18,8 @@ module Coral
   #---
   
   def self.log_level
-    ENV['CORAL_LOG'].downcase.to_sym
+    return ENV['CORAL_LOG'].downcase.to_sym if ENV['CORAL_LOG']
+    :none
   end
    
   #-----------------------------------------------------------------------------
