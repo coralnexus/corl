@@ -43,10 +43,10 @@ class Action < Base
   def normalize
     args = array(delete(:args, []))
     
-    if args.empty?
-      init(:settings, Config.new)
+    if get(:settings, nil)
       set(:processed, true)  
     else
+      set(:settings, {})
       parse(args)
     end
   end
