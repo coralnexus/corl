@@ -1,5 +1,9 @@
 
 module Coral
+class Codes
+  code(:seed_failure, 20)
+end
+
 module Action
 class Seed < Plugin::Action
 
