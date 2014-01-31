@@ -6,7 +6,7 @@ Facter.add(:coral_network) do
     begin 
       coral_network = '/var/coral'
       
-      if Dir.directory?(coral_network)
+      if File.directory?(coral_network)
         success = true
       end
       
