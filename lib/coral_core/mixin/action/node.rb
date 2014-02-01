@@ -30,7 +30,7 @@ module Node
   # Operations
         
   def node_exec
-    status = Coral.code.unknown_status
+    status = code.unknown_status
     
     # Load network if it exists
     network_config = extended_config(:network, {
@@ -53,16 +53,16 @@ module Node
           nodes.each do |node|
             batch.add(node.name) do
               node.action(plugin_provider, settings)
-              Coral.code.success
+              code.success
             end
           end
         else
           # Reduce to single status
-          status = Coral.code.success
+          status = code.success
           
           batch.each do |name, code|
-            if code != Coral.code.success
-              status = Coral.code.batch_error
+            if code != code.success
+              status = code.batch_error
               break
             end
           end
