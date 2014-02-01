@@ -164,6 +164,67 @@ module Coral
       results
     end
   end
+  
+  #---
+  
+  def self.config(type, options = {})
+    config = Config.ensure(options)
+    
+    logger.debug("Generating #{type} extended configuration from: #{config.export.inspect}")
+      
+    exec!("#{type}_config", Config.new(config.export).import({ :extension_type => :config })) do |op, results|
+      if op == :reduce
+        results.each do |provider, result|
+          config.defaults(result)
+        end
+        nil
+      else
+        hash(results)
+      end
+    end    
+    config.delete(:extension_type)
+     
+    logger.debug("Final extended configuration: #{config.export.inspect}")   
+    config 
+  end
+  
+  #---
+  
+  def self.check(method, options = {})
+    config = Config.ensure(options)
+    
+    logger.debug("Checking extension #{method} given: #{config.export.inspect}")
+    
+    success = exec!(method, config.import({ :extension_type => :check })) do |op, results|
+      if op == :reduce
+        ! results.values.include?(false)
+      else
+        results ? true : false
+      end
+    end
+    
+    success = success.nil? || success ? true : false
+    
+    logger.debug("Extension #{method} check result: #{success.inspect}")      
+    success
+  end
+  
+  #---
+  
+  def self.set(method, value, options = {})
+    config = Config.ensure(options)
+    
+    logger.debug("Setting extension #{method} value given: #{value.inspect}")
+    
+    exec!(method, config.import({ :value => value, :extension_type => :set })) do |op, results|
+      if op == :process
+        value = results unless results.nil?  
+      end
+    end
+    
+    logger.debug("Extension #{method} set value to: #{value.inspect}")
+    value
+  end
        
   #-----------------------------------------------------------------------------
   # External execution

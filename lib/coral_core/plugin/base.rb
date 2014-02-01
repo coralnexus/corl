@@ -118,8 +118,14 @@ class Base < Core
   #-----------------------------------------------------------------------------
   # Extensions
   
+  def hook_method(hook)
+    "#{plugin_type}_#{plugin_provider}_#{hook}"  
+  end
+  
+  #---
+  
   def extension(hook, options = {})
-    method = "#{plugin_type}_#{plugin_provider}_#{hook}"
+    method = hook_method(hook)
     
     logger.debug("Executing plugin hook #{hook} (#{method})")
     
@@ -145,7 +151,8 @@ class Base < Core
       else
         hash(results)
       end
-    end
+    end    
+    config.delete(:extension_type)
      
     logger.debug("Final extended configuration: #{config.export.inspect}")   
     config 
