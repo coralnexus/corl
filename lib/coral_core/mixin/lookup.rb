@@ -12,7 +12,6 @@ module Lookup
     if reset || @@facts.empty?
       Facter.list.each do |name|
         @@facts[name] = Facter.value(name)
-        Config.set_property(name, @@facts[name])
       end
     end
   end
@@ -37,14 +36,14 @@ module Lookup
   #---
   
   def hiera_config(provider = :puppetnode)
-    return Coral.provisioner(provider).hiera_config
+    Coral.provisioner(provider).hiera_config
   end
   
   #---
 
   def hiera(provider = :puppetnode)
     @@hiera[provider] = Hiera.new(:config => hiera_config(provider)) unless @@hiera.has_key?(provider)
-    return @@hiera[provider]
+    @@hiera[provider]
   end
   
   #-----------------------------------------------------------------------------
@@ -59,7 +58,7 @@ module Lookup
     
     rescue Exception # Prevent abortions.
     end    
-    return false
+    false
   end
   
   #---
@@ -85,27 +84,32 @@ module Lookup
       property       = property.to_sym
       first_property = property unless first_property
       
+      # Try to load facts first (these can not be overridden)
       unless value = fact(property)
-        if initialized?(config)
-          unless hiera_scope.respond_to?('[]')
-            hiera_scope = Hiera::Scope.new(hiera_scope)
-          end
-          value = hiera(provider).lookup(property, nil, hiera_scope, override, context)
-        end 
+        if Coral.admin? 
+          if initialized?(config)
+            # Try to find in Hiera data store (these might be security sensitive)
+            unless hiera_scope.respond_to?('[]')
+              hiera_scope = Hiera::Scope.new(hiera_scope)
+            end
+            value = hiera(provider).lookup(property, nil, hiera_scope, override, context)
+          end 
     
-        if Util::Data.undef?(value)
-          value = Coral.provisioner(provider).lookup(property, default, config)
+          if Util::Data.undef?(value)
+            # Search the provisioner scope (only admins can provision a machine)
+            value = Coral.provisioner(provider).lookup(property, default, config)
+          end
         end
       end
     end
-    value = default if Util::Data.undef?(value)
+    value = default if Util::Data.undef?(value) # Resort to default
     value = Util::Data.value(value)
     
     if ! Config.get_property(first_property) || ! Util::Data.undef?(value)
       Config.set_property(first_property, value)
     end
     return value, first_property if return_property
-    return value
+    value
   end
     
   #---
@@ -128,7 +132,7 @@ module Lookup
     end
     
     Config.set_property(property, value)
-    return value
+    value
   end
     
   #---
@@ -151,7 +155,7 @@ module Lookup
     end
     
     Config.set_property(property, value)
-    return value
+    value
   end
   
   #---
@@ -189,7 +193,7 @@ module Lookup
       results = data
     end
     
-    return results
+    results
   end
 end
 end
