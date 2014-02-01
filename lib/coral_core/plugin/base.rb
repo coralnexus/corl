@@ -186,7 +186,7 @@ class Base < Core
     
     logger.debug("Setting extension #{plugin_provider} #{hook} value given: #{value.inspect}")
     
-    extension(hook, config.import({ :value => value, :extension_type => :set })) do |op, results|
+    extension(hook, config.import({ :value => value, :extension_type => :value })) do |op, results|
       if op == :process
         value = results unless results.nil?  
       end

@@ -211,18 +211,18 @@ module Coral
   
   #---
   
-  def self.set(method, value, options = {})
+  def self.value(method, value, options = {})
     config = Config.ensure(options)
     
     logger.debug("Setting extension #{method} value given: #{value.inspect}")
     
-    exec!(method, config.import({ :value => value, :extension_type => :set })) do |op, results|
+    exec!(method, config.import({ :value => value, :extension_type => :value })) do |op, results|
       if op == :process
         value = results unless results.nil?  
       end
     end
     
-    logger.debug("Extension #{method} set value to: #{value.inspect}")
+    logger.debug("Extension #{method} retrieved value: #{value.inspect}")
     value
   end
        
