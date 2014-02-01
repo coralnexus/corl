@@ -35,6 +35,7 @@ module Node
     if reset || @@facts.empty?
       Facter.list.each do |name|
         @@facts[name] = Facter.value(name)
+        Config.set_property(name, @@facts[name])
       end
     end
   end
@@ -123,8 +124,8 @@ module Node
     value = default if Util::Data.undef?(value)
     value = Util::Data.value(value)
     
-    if ! Config::Collection.get(first_property) || ! Util::Data.undef?(value)
-      Config::Collection.set(first_property, value)
+    if ! Config.get_property(first_property) || ! Util::Data.undef?(value)
+      Config.set_property(first_property, value)
     end
     return value, first_property if return_property
     return value
@@ -149,7 +150,7 @@ module Node
       value = ( Util::Data.empty?(value) ? [] : [ value ] )
     end
     
-    Config::Collection.set(property, value)
+    Config.set_property(property, value)
     return value
   end
     
@@ -172,7 +173,7 @@ module Node
       value = ( Util::Data.empty?(value) ? {} : { :value => value } )
     end
     
-    Config::Collection.set(property, value)
+    Config.set_property(property, value)
     return value
   end
   
