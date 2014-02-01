@@ -3,16 +3,15 @@ Facter.add(:coral_network) do
   confine :kernel => :linux
     
   setcode do
-    begin 
-      coral_network = '/var/coral'
-      
-      if File.directory?(coral_network)
-        success = true
+    require 'coral_core'
+    
+    network_path = '/var/coral'
+    
+    Coral.exec!(:network_location) do |op, results|
+      if op == :process
+        network_path = results unless results.nil? || ! File.directory?(results) 
       end
-      
-    rescue Exception # Prevent abortions.
-    end
-  
-    success ? coral_network : nil
+    end    
+    network_path
   end
 end
