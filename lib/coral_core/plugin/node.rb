@@ -9,10 +9,19 @@ class Node < Base
   def normalize
     super
   end
+  
+  #---
+  
+  def localize
+    @local_context = true
+  end
        
   #-----------------------------------------------------------------------------
   # Checks
-    
+  
+  def local?
+    @local_context ? true : false
+  end  
    
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
