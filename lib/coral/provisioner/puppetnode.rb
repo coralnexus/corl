@@ -37,44 +37,9 @@ class Puppetnode < Plugin::Provisioner
     end
   end
   
-  #---
-    
-  def initialized?(options = {})
-    return false unless super(options)
-    
-    config       = Config.ensure(options)
-    puppet_scope = config.get(:puppet_scope, scope)
-    
-    prefix_text = config.get(:prefix_text, '::')  
-    init_fact   = prefix_text + config.get(:init_fact, 'hiera_ready')
-      
-    if ::Puppet::Parser::Functions.function('hiera') && puppet_scope.respond_to?('[]')
-      return true if Util::Data.true?(puppet_scope[init_fact])
-    end
-    false
-  end
-   
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
  
-  def hiera_config
-    super
-    
-    config_file = Puppet.settings[:hiera_config]
-    config      = {}
-
-    if File.exist?(config_file)
-      config = Hiera::Config.load(config_file)
-    else
-      ui.warn("Config file #{config_file} not found, using Hiera defaults")
-    end
-
-    config[:logger] = 'puppet'
-    config
-  end
-  
-  #---
-  
   def env
     @env
   end

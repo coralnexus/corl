@@ -26,6 +26,7 @@ class Lookup < Plugin::Action
       property = settings[:property]
       value    = lookup(property)
       
+      dbg(facts)
       ui.success(sprintf("#{property} = %s", value.inspect))                
       status
     end

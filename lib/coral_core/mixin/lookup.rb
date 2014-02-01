@@ -31,47 +31,50 @@ module Lookup
   #-----------------------------------------------------------------------------
   # Hiera configuration
   
-  @@hiera = {}
+  @@hiera = nil
   
   #---
   
-  def hiera_config(provider = :puppetnode)
-    Coral.provisioner(provider).hiera_config
+  def hiera_config
+    config_file = Coral.value(:hiera_config_file, nil)
+    config      = {}
+
+    if config_file && File.exist?(config_file)
+      config = Hiera::Config.load(config_file)
+    end
+    Coral.config(:hiera_config, config)
   end
   
   #---
 
-  def hiera(provider = :puppetnode)
-    @@hiera[provider] = Hiera.new(:config => hiera_config(provider)) unless @@hiera.has_key?(provider)
-    @@hiera[provider]
+  def hiera
+    @@hiera = Hiera.new(:config => hiera_config) if @@hiera.nil?
+    @@hiera
   end
   
   #-----------------------------------------------------------------------------
   # Configuration lookup interface
       
-  def initialized?(options = {})
-    config   = Config.ensure(options)
-    provider = config.get(:provisioner, nil)
-    begin
-      return true unless provider      
-      return Coral.provisioner(provider).initialized?(config)
-    
-    rescue Exception # Prevent abortions.
-    end    
-    false
+  def config_initialized?
+    ready = false
+    if Coral.admin? && hiera && network_path = fact(:coral_network)
+      ready = File.directory?(network_path) && File.directory(File.join(network_path, 'config')) ? true : false
+    end
+    ready
   end
   
   #---
     
   def lookup(properties, default = nil, options = {})
-    config          = Config.ensure(options)
-    value           = nil
+    config      = Config.ensure(options)
+    value       = nil
     
-    provider        = config.get(:provisioner, :puppetnode)
+    provisioner = config.get(:provisioner, nil)
     
-    hiera_scope     = config.get(:hiera_scope, {})
-    context         = config.get(:context, :priority)    
-    override        = config.get(:override, nil)
+    hiera_scope = config.get(:hiera_scope, {})
+    override    = config.get(:override, nil)
+    context     = config.get(:context, :priority)    
+    
     
     return_property = config.get(:return_property, false)
     
@@ -87,17 +90,17 @@ module Lookup
       # Try to load facts first (these can not be overridden)
       unless value = fact(property)
         if Coral.admin? 
-          if initialized?(config)
+          if config_initialized?
             # Try to find in Hiera data store (these might be security sensitive)
             unless hiera_scope.respond_to?('[]')
               hiera_scope = Hiera::Scope.new(hiera_scope)
             end
-            value = hiera(provider).lookup(property, nil, hiera_scope, override, context)
+            value = hiera.lookup(property, nil, hiera_scope, override, context)
           end 
     
-          if Util::Data.undef?(value)
+          if provisioner && Util::Data.undef?(value)
             # Search the provisioner scope (only admins can provision a machine)
-            value = Coral.provisioner(provider).lookup(property, default, config)
+            value = Coral.provisioner(provisioner).lookup(property, default, config)
           end
         end
       end
