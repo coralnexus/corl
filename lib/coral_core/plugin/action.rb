@@ -88,9 +88,9 @@ class Action < Base
   
   #-----------------------------------------------------------------------------
   # Status codes
-  
+    
   def code
-    return @@codes
+    return @codes
   end
   
   def codes(codes)
