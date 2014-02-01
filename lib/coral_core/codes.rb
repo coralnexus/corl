@@ -51,7 +51,6 @@ class Codes
   code(:batch_error, 4)
   
   code(:access_denied, 5)
-  code(:project_failed, 6)
   
 end
 end
