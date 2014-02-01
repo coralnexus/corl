@@ -17,6 +17,8 @@ class Update < Plugin::Action
   #---
    
   def execute
+    codes :project_failure => 20
+    
     super do |node, network, status|
       info('coral.core.actions.update.start')
       

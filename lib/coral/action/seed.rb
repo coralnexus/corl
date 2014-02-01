@@ -21,6 +21,8 @@ class Seed < Plugin::Action
   #---
    
   def execute
+    codes :project_failure => 20
+    
     super do |node, network, status|
       info('coral.core.actions.seed.start')
       
@@ -40,7 +42,7 @@ class Seed < Plugin::Action
             # Register this machine with the network
           end          
         else
-          status = Coral.code.project_failed  
+          status = Coral.code.project_failure  
         end
       end
                 

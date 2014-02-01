@@ -1,10 +1,5 @@
 
 module Coral
-class Codes
-  code(:add_failure, 20)
-  code(:push_failure, 21)    
-end
-  
 module Action
 class Add < Plugin::Action
   
@@ -34,18 +29,22 @@ class Add < Plugin::Action
   #---
    
   def execute
+    codes :project_failure => 20,
+          :add_failure     => 21,
+          :push_failure    => 22
+    
     super do |node, network, status|
       info('coral.core.actions.add.start')
       
       if project = project_load(Dir.pwd, false)
-        sub_info = project.translate_reference(arguments[:sub_reference], options[:editable])
-        sub_path = arguments[:sub_path]
+        sub_info = project.translate_reference(settings[:sub_reference], settings[:editable])
+        sub_path = settings[:sub_path]
           
         if sub_info
           sub_url      = sub_info[:url]
           sub_revision = sub_info[:revision]
         else
-          sub_url      = arguments[:sub_reference]
+          sub_url      = settings[:sub_reference]
           sub_revision = nil
         end
           

@@ -1,10 +1,5 @@
 
 module Coral
-class Codes
-  code(:delete_failure, 20)
-  code(:push_failure, 21)    
-end
-  
 module Action
 class Remove < Plugin::Action
   
@@ -27,11 +22,15 @@ class Remove < Plugin::Action
   #---
    
   def execute
+    codes :project_failure => 20,
+          :delete_failure  => 21,
+          :push_failure    => 22
+          
     super do |node, network, status|
       info('coral.core.actions.remove.start')
       
       if project = project_load(Dir.pwd, false)
-        if project.delete_subproject(arguments[:sub_path])
+        if project.delete_subproject(settings[:sub_path])
           status = Coral.code.push_failure unless push(project)
         else
           status = Coral.code.delete_failure

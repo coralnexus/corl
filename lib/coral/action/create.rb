@@ -34,6 +34,8 @@ class Create < Plugin::Action
   #---
    
   def execute
+    codes :project_failure => 20
+          
     super do |node, network, status|
       info('coral.core.actions.create.start')
       
@@ -44,7 +46,7 @@ class Create < Plugin::Action
         :pull      => true
       }))
       
-      project ? status : Coral.code.project_failed
+      project ? status : Coral.code.project_failure
     end
   end
 end

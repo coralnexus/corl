@@ -1,10 +1,5 @@
 
 module Coral
-class Codes
-  code(:commit_failure, 20)
-  code(:push_failure, 21)      
-end
-  
 module Action
 class Save < Plugin::Action
   
@@ -29,11 +24,15 @@ class Save < Plugin::Action
   #---
    
   def execute
+    codes :project_failure => 20,
+          :commit_failure  => 21,
+          :push_failure    => 22
+          
     super do |node, network, status|
       info('coral.core.actions.save.start')
           
       if project = project_load(Dir.pwd, false)
-        if commit(project, arguments[:files])
+        if commit(project, settings[:files])
           status = Coral.code.push_failure unless push(project)
         else
           status = Coral.code.commit_failure
