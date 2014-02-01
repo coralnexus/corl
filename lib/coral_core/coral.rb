@@ -39,6 +39,20 @@ module Coral
   end
   
   #-----------------------------------------------------------------------------
+  
+  def self.admin?
+    is_admin = ( ENV['USER'] == 'root' )
+    is_admin = exec!(:check_admin) do |op, results|
+      if op == :reduce
+        results.values.include?(true)
+      else
+        results ? true : false
+      end
+    end
+    is_admin
+  end
+  
+  #-----------------------------------------------------------------------------
   # Initialization
   
   @@initialized = false

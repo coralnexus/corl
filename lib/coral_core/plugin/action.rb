@@ -122,7 +122,7 @@ class Action < Base
         
         begin
           status = Coral.code.success
-          status = yield(node, network, status) if extension_check(:exec_init, hook_config) && block_given?
+          status = yield(node, network, status) if block_given? && extension_check(:exec_init, hook_config)
           status = extension_set(:exec_exit, status, hook_config)
         ensure
           cleanup
@@ -177,6 +177,19 @@ class Action < Base
         
   def success(name, options = {})
     ui.success(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?  
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def admin_exec(status)
+    if Coral.admin?
+      status = yield if block_given?
+    else
+      ui.warn("The #{plugin_provider} action must be run as a machine administrator")
+      status = Coral.code.access_denied    
+    end
+    status
   end
 end
 end

@@ -1,9 +1,5 @@
 
 module Coral
-class Codes
-  code(:seed_failure, 20)
-end
-
 module Action
 class Seed < Plugin::Action
 
@@ -28,17 +24,20 @@ class Seed < Plugin::Action
     super do |node, network, status|
       info('coral.core.actions.seed.start')
       
-      network_path = lookup(:coral_network)
-      dbg(network_path, 'network path')
+      status = admin_exec(status) do
+        network_path = lookup(:coral_network)
+        Dir.mkdir(network_path) unless File.directory?(network_path)
       
-      #project = Coral.project(extended_config(:project, {
-      #  :directory => options[:path],
-      #  :url       => arguments[:reference],
-      #  :revision  => options[:revision],
-      #  :pull      => true
-      #}))
-      #project ? true : false
-      
+        project = Coral.project(extended_config(:project, {
+          :directory => network_path,
+          :url       => settings[:reference],
+          :revision  => settings[:branch],
+          :pull      => true
+        }))
+        
+        project ? status : Coral.code.project_failed
+      end
+                
       status
     end
   end
