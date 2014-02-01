@@ -77,6 +77,14 @@ class Action < Base
     return @parser.help if @parser
     ''
   end
+  
+  #---
+  
+  def codes(codes)
+    hash(codes).each do |name, number|
+      Codes.code(name, number)
+    end
+  end
 
   #-----------------------------------------------------------------------------
   # Operations
