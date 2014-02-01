@@ -67,7 +67,8 @@ class Machine < Base
       logger.debug("Machine #{name} already exists")
     else
       logger.debug("Creating #{plugin_provider} machine with: #{options.inspect}")
-      success = yield if block_given?  
+      config  = Config.ensure(options)
+      success = yield(config) if block_given?  
     end
     
     logger.warn("There was an error creating the machine #{name}") unless success
@@ -85,7 +86,8 @@ class Machine < Base
       logger.debug("Starting #{plugin_provider} machine with: #{options.inspect}")
       
       if created?
-        success = yield if block_given?    
+        config  = Config.ensure(options)
+        success = yield(config) if block_given?    
       else
         logger.debug("Machine #{name} does not yet exist")
         success = create(options)
@@ -102,8 +104,9 @@ class Machine < Base
     success = true
     
     if running?
-      logger.debug("Stopping #{plugin_provider} machine with: #{options.inspect}")      
-      success = yield if block_given?
+      logger.debug("Stopping #{plugin_provider} machine with: #{options.inspect}")
+      config  = Config.ensure(options)      
+      success = yield(config) if block_given?
     else
       logger.debug("Machine #{name} is not running")  
     end
@@ -119,7 +122,8 @@ class Machine < Base
     
     if created?
       logger.debug("Reloading #{plugin_provider} machine with: #{options.inspect}")
-      success = yield if block_given?
+      config  = Config.ensure(options)
+      success = yield(config) if block_given?
     else
       logger.debug("Machine #{name} does not yet exist")
     end
@@ -135,7 +139,8 @@ class Machine < Base
     
     if created?
       logger.debug("Destroying #{plugin_provider} machine with: #{options.inspect}")
-      success = yield if block_given?
+      config  = Config.ensure(options)
+      success = yield(config) if block_given?
     else
       logger.debug("Machine #{name} does not yet exist")
     end
@@ -150,29 +155,14 @@ class Machine < Base
     success = true
     
     if running?
-      logger.debug("Executing command on #{plugin_provider} machine with: #{options.inspect}")      
-      success = yield if block_given?
+      logger.debug("Executing command on #{plugin_provider} machine with: #{options.inspect}")
+      config  = Config.ensure(options)      
+      success = yield(config) if block_given?
     else
       logger.debug("Machine #{name} is not running")  
     end
     
     logger.warn("There was an error executing command on the machine #{name}") unless success
-    return success
-  end
-    
-  #---
-  
-  def provision(options = {})
-    success = true
-    
-    if running?
-      logger.debug("Provisioning #{plugin_provider} machine with: #{options.inspect}")      
-      success = yield if block_given?
-    else
-      logger.debug("Machine #{name} is not running")  
-    end
-    
-    logger.warn("There was an error provisioning the machine #{name}") unless success
     return success
   end
   
@@ -182,8 +172,9 @@ class Machine < Base
     success = true
     
     if running?
-      logger.debug("Creating image of #{plugin_provider} machine with: #{options.inspect}")      
-      success = yield if block_given?
+      logger.debug("Creating image of #{plugin_provider} machine with: #{options.inspect}")
+      config  = Config.ensure(options)      
+      success = yield(config) if block_given?
     else
       logger.debug("Machine #{name} is not running")  
     end
@@ -195,6 +186,10 @@ class Machine < Base
   #-----------------------------------------------------------------------------
   # Utilities
 
+  def translate_state(state)
+    return string(state).downcase.to_sym if status
+    :unknown
+  end
 end
 end
 end
