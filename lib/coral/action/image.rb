@@ -2,12 +2,18 @@
 module Coral
 module Action
 class Image < Plugin::Action
+ 
+  #-----------------------------------------------------------------------------
+  # Accessors / Modifiers
+  
+  def usage
+    'coral image'
+  end
 
   #-----------------------------------------------------------------------------
   # Action operations
   
-  def parse(args)
-    super(args, 'coral image')
+  def parse(parser)
   end
   
   #---

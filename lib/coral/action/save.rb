@@ -6,19 +6,24 @@ class Save < Plugin::Action
   include Mixin::Action::Project
   include Mixin::Action::Commit
   include Mixin::Action::Push
+ 
+  #-----------------------------------------------------------------------------
+  # Accessors / Modifiers
+  
+  def usage
+    'coral save [ <file> ... ]'
+  end
 
   #-----------------------------------------------------------------------------
   # Action operations
   
-  def parse(args)
-    super(args, 'coral save [ <file> ... ]') do |parser|
-      parser.arg_array(:files, '.', 
-        'coral.core.actions.save.options.files'
-      )
-      project_options(parser, true, false)
-      commit_options(parser, false)
-      push_options(parser, true)
-    end
+  def parse(parser)
+    parser.arg_array(:files, '.', 
+      'coral.core.actions.save.options.files'
+    )
+    project_options(parser, true, false)
+    commit_options(parser, false)
+    push_options(parser, true)
   end
   
   #---
@@ -33,12 +38,12 @@ class Save < Plugin::Action
           
       if project = project_load(Dir.pwd, false)
         if commit(project, settings[:files])
-          status = Coral.code.push_failure unless push(project)
+          status = code.push_failure unless push(project)
         else
-          status = Coral.code.commit_failure
+          status = code.commit_failure
         end
       else
-        status = Coral.code.project_failure
+        status = code.project_failure
       end
       status
     end

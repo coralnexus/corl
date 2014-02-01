@@ -26,7 +26,7 @@ class Action < Base
       exit_status = error.status_code if error.respond_to?(:status_code)
     end
 
-    exit_status = Coral.code.unknown_status unless exit_status.is_a?(Integer)
+    exit_status = Codes.new.unknown_status unless exit_status.is_a?(Integer)
     exit_status  
   end
   
@@ -42,12 +42,14 @@ class Action < Base
   
   def normalize
     args = array(delete(:args, []))
-    
+        
+    @codes = Codes.new
+      
     if get(:settings, nil)
       set(:processed, true)  
     else
       set(:settings, {})
-      parse(args)
+      parse_base(args)
     end
   end
   
@@ -73,12 +75,23 @@ class Action < Base
   
   #---
   
+  def usage
+    ''
+  end
+  
+  #---
+  
   def help
     return @parser.help if @parser
     ''
   end
   
-  #---
+  #-----------------------------------------------------------------------------
+  # Status codes
+  
+  def code
+    return @@codes
+  end
   
   def codes(codes)
     hash(codes).each do |name, number|
@@ -89,11 +102,11 @@ class Action < Base
   #-----------------------------------------------------------------------------
   # Operations
   
-  def parse(args, banner = '')    
+  def parse_base(args)    
     logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
     
-    @parser = Util::CLI::Parser.new(args, banner) do |parser| 
-      yield(parser) if block_given?
+    @parser = Util::CLI::Parser.new(args, usage) do |parser| 
+      parse(parser)
       node_options(parser)
       
       extension(:parse, { :parser => parser })
@@ -121,6 +134,12 @@ class Action < Base
   
   #---
   
+  def parse(parser)
+    #implement in sub classes  
+  end
+  
+  #---
+  
   def execute
     logger.info("Executing action #{plugin_provider}")
     
@@ -129,7 +148,7 @@ class Action < Base
         hook_config = { :node => node, :network => network }
         
         begin
-          status = Coral.code.success
+          status = code.success
           status = yield(node, network, status) if block_given? && extension_check(:exec_init, hook_config)
           status = extension_set(:exec_exit, status, hook_config)
         ensure
@@ -139,9 +158,9 @@ class Action < Base
       end
     else
       if @parser.options[:help]
-        status = Coral.code.help_wanted
+        status = code.help_wanted
       else
-        status = Coral.code.action_unprocessed
+        status = code.action_unprocessed
       end
     end
     
@@ -149,6 +168,12 @@ class Action < Base
     logger.warn("Execution failed for #{plugin_provider} with status #{status} (#{code_name}): #{export.inspect}") if processed? && status > 1 
     
     status
+  end
+  
+  #---
+  
+  def run(provider, options = {}, quiet = true)
+    self.class.exec(provider, options, quiet = true)
   end
   
   #---
@@ -195,7 +220,7 @@ class Action < Base
       status = yield if block_given?
     else
       ui.warn("The #{plugin_provider} action must be run as a machine administrator")
-      status = Coral.code.access_denied    
+      status = code.access_denied    
     end
     status
   end

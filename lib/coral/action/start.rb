@@ -2,20 +2,25 @@
 module Coral
 module Action
 class Start < Plugin::Action
+ 
+  #-----------------------------------------------------------------------------
+  # Accessors / Modifiers
+  
+  def usage
+    'coral start <node_reference>'
+  end
 
   #-----------------------------------------------------------------------------
   # Action operations
   
-  def parse(args)
-    super(args, 'coral start <node_reference>') do |parser|
-      parser.option_str(:provider, :rackspace,
-        '--provider DEFAULT_NODE_PROVIDER', 
-        'coral.core.actions.start.options.provider'
-      )
-      parser.arg_str(:node_reference, nil, 
-        'coral.core.actions.start.options.node_reference'
-      )
-    end
+  def parse(parser)
+    parser.option_str(:provider, :rackspace,
+      '--provider DEFAULT_NODE_PROVIDER', 
+      'coral.core.actions.start.options.provider'
+    )
+    parser.arg_str(:node_reference, nil, 
+      'coral.core.actions.start.options.node_reference'
+    )
   end
   
   #---

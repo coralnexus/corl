@@ -69,12 +69,12 @@ module Coral
           logger.info("Registering Coral plugin defined within Puppet modules")
           
           # Include Coral plugins
-          Puppet::Node::Environment.new.modules.each do |mod|
-            lib_path = File.join(mod.path, 'lib', 'coral')
+          #Puppet::Node::Environment.new.modules.each do |mod|
+          #  lib_path = File.join(mod.path, 'lib', 'coral')
             
-            logger.debug("Registering Puppet module at #{lib_path}")
-            Plugin.register(lib_path)
-          end
+          #  logger.debug("Registering Puppet module at #{lib_path}")
+          #  Plugin.register(lib_path)
+          #end
         rescue
         end
         
@@ -89,15 +89,6 @@ module Coral
   
   def self.initialized?
     return @@initialized
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Status codes
-  
-  @@codes = Codes.new
-  
-  def self.code
-    return @@codes
   end
   
   #-----------------------------------------------------------------------------

@@ -5,18 +5,23 @@ class Remove < Plugin::Action
   
   include Mixin::Action::Project
   include Mixin::Action::Push
+ 
+  #-----------------------------------------------------------------------------
+  # Accessors / Modifiers
+  
+  def usage
+    'coral remove <subproject/path>'
+  end
 
   #-----------------------------------------------------------------------------
   # Action operations
   
-  def parse(args)
-    super(args, 'coral remove <subproject/path>') do |parser|
-      parser.arg_str(:sub_path, nil, 
-        'coral.core.actions.remove.options.sub_path'
-      )
-      project_options(parser, true, true)
-      push_options(parser, true)
-    end
+  def parse(parser)
+    parser.arg_str(:sub_path, nil, 
+      'coral.core.actions.remove.options.sub_path'
+    )
+    project_options(parser, true, true)
+    push_options(parser, true)
   end
   
   #---
@@ -31,12 +36,12 @@ class Remove < Plugin::Action
       
       if project = project_load(Dir.pwd, false)
         if project.delete_subproject(settings[:sub_path])
-          status = Coral.code.push_failure unless push(project)
+          status = code.push_failure unless push(project)
         else
-          status = Coral.code.delete_failure
+          status = code.delete_failure
         end
       else
-        status = Coral.code.project_failure  
+        status = code.project_failure  
       end      
       status
     end

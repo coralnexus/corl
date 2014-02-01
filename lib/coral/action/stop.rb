@@ -2,12 +2,18 @@
 module Coral
 module Action
 class Stop < Plugin::Action
+ 
+  #-----------------------------------------------------------------------------
+  # Accessors / Modifiers
+  
+  def usage
+    'coral stop'
+  end
 
   #-----------------------------------------------------------------------------
   # Action operations
   
-  def parse(args)
-    super(args, 'coral stop')
+  def parse(parser)
   end
   
   #---

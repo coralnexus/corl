@@ -2,16 +2,21 @@
 module Coral
 module Action
 class Lookup < Plugin::Action
+ 
+  #-----------------------------------------------------------------------------
+  # Accessors / Modifiers
+  
+  def usage
+    'coral lookup <property>'
+  end
 
   #-----------------------------------------------------------------------------
   # Action operations
   
-  def parse(args)
-    super(args, 'coral lookup <property>') do |parser|
-      parser.arg_str(:property, nil, 
-        'coral.core.actions.create.options.property'
-      )
-    end
+  def parse(parser)
+    parser.arg_str(:property, nil, 
+      'coral.core.actions.create.options.property'
+    )
   end
   
   #---

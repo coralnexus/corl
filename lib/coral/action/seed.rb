@@ -2,20 +2,25 @@
 module Coral
 module Action
 class Seed < Plugin::Action
+ 
+  #-----------------------------------------------------------------------------
+  # Accessors / Modifiers
+  
+  def usage
+    'coral seed <project:::reference>'
+  end
 
   #-----------------------------------------------------------------------------
   # Action operations
   
-  def parse(args)
-    super(args, 'coral seed <project:::reference>') do |parser|
-      parser.option_str(:branch, :master, 
-        '--branch BRANCH', 
-        'coral.core.actions.seed.options.branch'
-      )
-      parser.arg_str(:reference, nil, 
-        'coral.core.actions.create.options.reference'
-      )
-    end
+  def parse(parser)
+    parser.option_str(:branch, :master, 
+      '--branch BRANCH', 
+      'coral.core.actions.seed.options.branch'
+    )
+    parser.arg_str(:reference, nil, 
+      'coral.core.actions.create.options.reference'
+    )
   end
   
   #---
@@ -42,7 +47,7 @@ class Seed < Plugin::Action
             # Register this machine with the network
           end          
         else
-          status = Coral.code.project_failure  
+          status = code.project_failure  
         end
       end
                 

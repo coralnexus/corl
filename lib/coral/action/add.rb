@@ -5,25 +5,30 @@ class Add < Plugin::Action
   
   include Mixin::Action::Project
   include Mixin::Action::Push
+  
+  #-----------------------------------------------------------------------------
+  # Accessors / Modifiers
+  
+  def usage
+    'coral add <subproject/path> <subproject:::reference>'  
+  end
 
   #-----------------------------------------------------------------------------
   # Action operations
-  
-  def parse(args)
-    super(args, 'coral add <subproject/path> <subproject:::reference>') do |parser|
-      parser.arg_str(:sub_path, nil, 
-        'coral.core.actions.add.options.sub_path'
-      )
-      parser.arg_str(:sub_reference, nil, 
-        'coral.core.actions.add.options.sub_reference'
-      )
-      parser.option_bool(:editable, false, 
-        '--editable', 
-        'coral.core.actions.add.options.editable'
-      )
-      project_options(parser, true, true)
-      push_options(parser, true)
-    end
+   
+  def parse(parser)
+    parser.arg_str(:sub_path, nil, 
+      'coral.core.actions.add.options.sub_path'
+    )
+    parser.arg_str(:sub_reference, nil, 
+      'coral.core.actions.add.options.sub_reference'
+    )
+    parser.option_bool(:editable, false, 
+      '--editable', 
+      'coral.core.actions.add.options.editable'
+    )
+    project_options(parser, true, true)
+    push_options(parser, true)  
   end
   
   #---
@@ -49,12 +54,12 @@ class Add < Plugin::Action
         end
           
         if project.add_subproject(sub_path, sub_url, sub_revision)
-          status = Coral.code.push_failure unless push(project)
+          status = code.push_failure unless push(project)
         else
-          status = Coral.code.add_failure
+          status = code.add_failure
         end
       else
-        status = Coral.code.project_failure               
+        status = code.project_failure               
       end        
       status
     end
