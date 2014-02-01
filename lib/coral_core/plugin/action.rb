@@ -3,7 +3,7 @@ module Coral
 module Plugin
 class Action < Base
   
-  include Mixin::CLI::Node
+  include Mixin::Action::Node
 
   #-----------------------------------------------------------------------------
   # Action plugin interface

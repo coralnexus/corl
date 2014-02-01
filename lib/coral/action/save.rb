@@ -1,17 +1,22 @@
 
 module Coral
+class Codes
+  code(:commit_failure, 20)
+  code(:push_failure, 21)      
+end
+  
 module Action
 class Save < Plugin::Action
   
-  include Mixin::CLI::Project
-  include Mixin::CLI::Commit
-  include Mixin::CLI::Push
+  include Mixin::Action::Project
+  include Mixin::Action::Commit
+  include Mixin::Action::Push
 
   #-----------------------------------------------------------------------------
   # Action operations
   
   def parse(args)
-    return super(args, 'coral save [ <file> ... ]') do |parser|
+    super(args, 'coral save [ <file> ... ]') do |parser|
       parser.arg_array(:files, '.', 
         'coral.core.actions.save.options.files'
       )
@@ -24,16 +29,19 @@ class Save < Plugin::Action
   #---
    
   def execute
-    return super do
+    super do |node, network, status|
       info('coral.core.actions.save.start')
           
-      project = project_load(Dir.pwd, false)
-      
-      if project    
-        success = commit(project, arguments[:files])
-        success = push(project) if success
+      if project = project_load(Dir.pwd, false)
+        if commit(project, arguments[:files])
+          status = Coral.code.push_failure unless push(project)
+        else
+          status = Coral.code.commit_failure
+        end
+      else
+        status = Coral.code.project_failure
       end
-      success
+      status
     end
   end
 end

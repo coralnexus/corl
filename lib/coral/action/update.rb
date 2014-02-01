@@ -1,13 +1,9 @@
 
 module Coral
-class Codes
-  code(:update_failure, 20)
-end
-
 module Action
 class Update < Plugin::Action
   
-  include Mixin::CLI::Project
+  include Mixin::Action::Project
   
   #-----------------------------------------------------------------------------
   # Action operations
@@ -25,8 +21,7 @@ class Update < Plugin::Action
       info('coral.core.actions.update.start')
       
       project = project_load(Dir.pwd, true)
-          
-      status = Coral.code.update_failure unless project
+      status  = Coral.code.project_failure unless project
       status
     end
   end

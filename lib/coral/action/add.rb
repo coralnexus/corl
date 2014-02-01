@@ -1,16 +1,21 @@
 
 module Coral
+class Codes
+  code(:add_failure, 20)
+  code(:push_failure, 21)    
+end
+  
 module Action
 class Add < Plugin::Action
   
-  include Mixin::CLI::Project
-  include Mixin::CLI::Push
+  include Mixin::Action::Project
+  include Mixin::Action::Push
 
   #-----------------------------------------------------------------------------
   # Action operations
   
   def parse(args)
-    return super(args, 'coral add <subproject/path> <subproject:::reference>') do |parser|
+    super(args, 'coral add <subproject/path> <subproject:::reference>') do |parser|
       parser.arg_str(:sub_path, nil, 
         'coral.core.actions.add.options.sub_path'
       )
@@ -29,13 +34,10 @@ class Add < Plugin::Action
   #---
    
   def execute
-    return super do
+    super do |node, network, status|
       info('coral.core.actions.add.start')
       
-      success = false    
-      project = project_load(Dir.pwd, false)
-      
-      if project
+      if project = project_load(Dir.pwd, false)
         sub_info = project.translate_reference(arguments[:sub_reference], options[:editable])
         sub_path = arguments[:sub_path]
           
@@ -47,10 +49,15 @@ class Add < Plugin::Action
           sub_revision = nil
         end
           
-        success = project.add_subproject(sub_path, sub_url, sub_revision)
-        success = push(project) if success          
-      end  
-      success
+        if project.add_subproject(sub_path, sub_url, sub_revision)
+          status = Coral.code.push_failure unless push(project)
+        else
+          status = Coral.code.add_failure
+        end
+      else
+        status = Coral.code.project_failure               
+      end        
+      status
     end
   end
 end

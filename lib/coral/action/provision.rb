@@ -7,7 +7,7 @@ class Provision < Plugin::Action
   # Action operations
   
   def parse(args)
-    return super(args, 'coral provision [ <project_directory> ]') do |parser|
+    super(args, 'coral provision [ <project_directory> ]') do |parser|
       parser.option_str(:provider, nil, 
         '--provider PROVISIONER_PROVIDER', 
         'coral.core.actions.provision.options.provider'
@@ -21,10 +21,10 @@ class Provision < Plugin::Action
   #---
    
   def execute
-    return super do
+    super do |node, network, status|
       info('coral.core.actions.provision.start')
       
-      true
+      status
     end
   end
 end

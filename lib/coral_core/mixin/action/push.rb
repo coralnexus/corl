@@ -1,7 +1,7 @@
 
 module Coral
 module Mixin
-module CLI
+module Action
 module Push
         
   #-----------------------------------------------------------------------------

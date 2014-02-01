@@ -62,7 +62,7 @@ lib_dir          = File.dirname(__FILE__)
 core_dir         = File.join(lib_dir, 'coral_core')
 mixin_dir        = File.join(core_dir, 'mixin')
 mixin_config_dir = File.join(mixin_dir, 'config')
-mixin_cli_dir    = File.join(mixin_dir, 'cli')
+mixin_action_dir = File.join(mixin_dir, 'action')
 macro_dir        = File.join(mixin_dir, 'macro')
 util_dir         = File.join(core_dir, 'util')
 mod_dir          = File.join(core_dir, 'mod')
@@ -120,7 +120,7 @@ end
 Dir.glob(File.join(mixin_config_dir, '*.rb')).each do |file|
   require file
 end
-Dir.glob(File.join(mixin_cli_dir, '*.rb')).each do |file|
+Dir.glob(File.join(mixin_action_dir, '*.rb')).each do |file|
   require file
 end
 Dir.glob(File.join(macro_dir, '*.rb')).each do |file|

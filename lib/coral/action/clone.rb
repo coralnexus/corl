@@ -7,7 +7,7 @@ class Clone < Plugin::Action
   # Action operations
   
   def parse(args)
-    return super(args, 'coral clone <existing_node_reference> <new_node_reference>') do |parser|
+    super(args, 'coral clone <existing_node_reference> <new_node_reference>') do |parser|
       parser.option_str(:provider, :rackspace,
         '--provider DEFAULT_NODE_PROVIDER', 
         'coral.core.actions.start.options.provider'
@@ -24,10 +24,10 @@ class Clone < Plugin::Action
   #---
    
   def execute
-    return super do
+    super do |node, network, status|
       info('coral.core.actions.clone.start')
       
-      true
+      status
     end
   end
 end

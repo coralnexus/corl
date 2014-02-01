@@ -8,7 +8,7 @@ class Seed < Plugin::Action
   
   def parse(args)
     super(args, 'coral seed <project:::reference>') do |parser|
-      parser.option_str(:revision, :master, 
+      parser.option_str(:branch, :master, 
         '--branch BRANCH', 
         'coral.core.actions.seed.options.branch'
       )
@@ -35,7 +35,13 @@ class Seed < Plugin::Action
           :pull      => true
         }))
         
-        project ? status : Coral.code.project_failed
+        if project
+          if node.nil?
+            # Register this machine with the network
+          end          
+        else
+          status = Coral.code.project_failed  
+        end
       end
                 
       status

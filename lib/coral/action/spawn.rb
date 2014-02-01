@@ -1,9 +1,5 @@
 
 module Coral
-class Codes
-  code(:spawn_failure, 20)
-end
-
 module Action
 class Spawn < Plugin::Action
 

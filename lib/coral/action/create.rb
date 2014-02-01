@@ -7,7 +7,7 @@ class Create < Plugin::Action
   # Action operations
   
   def parse(args)
-    return super(args, 'coral create [ <project:::reference> ]') do |parser|
+    super(args, 'coral create [ <project:::reference> ]') do |parser|
       network_path         = lookup(:coral_network)      
       default_project_path = Dir.pwd
       
@@ -34,7 +34,7 @@ class Create < Plugin::Action
   #---
    
   def execute
-    return super do |node, network, status|
+    super do |node, network, status|
       info('coral.core.actions.create.start')
       
       project = Coral.project(extended_config(:project, {

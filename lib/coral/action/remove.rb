@@ -1,16 +1,21 @@
 
 module Coral
+class Codes
+  code(:delete_failure, 20)
+  code(:push_failure, 21)    
+end
+  
 module Action
 class Remove < Plugin::Action
   
-  include Mixin::CLI::Project
-  include Mixin::CLI::Push
+  include Mixin::Action::Project
+  include Mixin::Action::Push
 
   #-----------------------------------------------------------------------------
   # Action operations
   
   def parse(args)
-    return super(args, 'coral remove <subproject/path>') do |parser|
+    super(args, 'coral remove <subproject/path>') do |parser|
       parser.arg_str(:sub_path, nil, 
         'coral.core.actions.remove.options.sub_path'
       )
@@ -22,17 +27,19 @@ class Remove < Plugin::Action
   #---
    
   def execute
-    return super do
+    super do |node, network, status|
       info('coral.core.actions.remove.start')
       
-      success = false    
-      project = project_load(Dir.pwd, false)
-     
-      if project     
-        success = project.delete_subproject(arguments[:sub_path])
-        success = push(project) if success
-      end
-      success
+      if project = project_load(Dir.pwd, false)
+        if project.delete_subproject(arguments[:sub_path])
+          status = Coral.code.push_failure unless push(project)
+        else
+          status = Coral.code.delete_failure
+        end
+      else
+        status = Coral.code.project_failure  
+      end      
+      status
     end
   end
 end

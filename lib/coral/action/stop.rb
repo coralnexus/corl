@@ -7,16 +7,16 @@ class Stop < Plugin::Action
   # Action operations
   
   def parse(args)
-    return super(args, 'coral stop')
+    super(args, 'coral stop')
   end
   
   #---
    
   def execute
-    return super do
+    super do |node, network, status|
       info('coral.core.actions.stop.start')
       
-      true
+      status
     end
   end
 end
