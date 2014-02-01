@@ -6,8 +6,8 @@ module Plugin
               :action        => :update,     # Core
               :project       => :git,        # Core
               :network       => :default,    # Cluster
-              :node          => :rackspace,  # Cluster
-              :machine       => :fog,        # Cluster
+              :node          => :local,      # Cluster
+              :machine       => :physical,   # Cluster
               :provisioner   => :puppetnode, # Cluster
               :command       => :shell,      # Cluster
               :event         => :regex,      # Utility
