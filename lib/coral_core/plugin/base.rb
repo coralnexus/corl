@@ -3,6 +3,10 @@ module Coral
 module Plugin
 class Base < Core
   
+  include Mixin::Lookup
+  
+  #---
+  
   # All Plugin classes should directly or indirectly extend Base
   
   def initialize(type, provider, options)
