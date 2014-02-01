@@ -73,7 +73,7 @@ class Fog < Plugin::Machine
   #---
   
   def state
-    return server.state if server
+    return translate_state(server.state) if server
     return nil
   end
   
@@ -174,36 +174,6 @@ class Fog < Plugin::Machine
       server.destroy(options)  
     end
   end
-   
-  #---
-  
-  def provision(options = {})
-    return super do
-      config = Config.ensure(options)
-      
-      # TODO: Abstract this out so it does not depend on Puppet functionality.
-      # Perhaps this should be moved out of the machine plugin and into the node?
-      
-      puppet  = config.delete(:puppet, :puppet) # puppet (community) or puppetlabs (enterprise)     
-      command = Coral.command({
-        :command    => :puppet,
-        :flags      => config.delete(:puppet_flags, ''),
-        :subcommand => {
-          :command => config.delete(:puppet_op, :apply),
-          :flags   => config.delete(:puppet_op_flags, ''),
-          :data    => config.delete(:puppet_op_data, {}).merge({
-            'modulepath=' => array(config.delete(:puppet_modules, "/etc/#{puppet}/modules")).join(':')
-          }),
-          :args => config.delete(:puppet_manifest, "/etc/#{puppet}/manifests/site.pp")
-        }
-      }, config.get(:provider, :shell))
-      
-      config[:commands] = [ command.to_s ]
-      
-      logger.debug("Provisioning machine #{name} with #{config[:commands].inspect}")   
-      exec(config)
-    end
-  end
   
   #---
   
@@ -233,10 +203,6 @@ class Fog < Plugin::Machine
       end
     end
   end
-   
-  #-----------------------------------------------------------------------------
-  # Utilities
-
 end
 end
 end
