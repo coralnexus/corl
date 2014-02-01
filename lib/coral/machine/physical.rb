@@ -71,7 +71,7 @@ class Physical < Plugin::Machine
 
   def destroy(options = {})
     return super do
-      logger.warn("If you want to destroy your physical machine, buy a hammer")
+      logger.warn("If you want to destroy your physical machine, grab a hammer")
       true  
     end
   end
