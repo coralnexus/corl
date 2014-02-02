@@ -32,7 +32,10 @@ module Lookup
     if config_file && File.exist?(config_file)
       config = Hiera::Config.load(config_file)
     end
-    Coral.config(:hiera_config, config)
+    config[:logger] = :coral
+    
+    results = Coral.config(:hiera_config, { :config => config })
+    results[:config]
   end
   
   #---
