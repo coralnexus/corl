@@ -45,9 +45,9 @@ class Network < Base
   
   def add_node(provider, name, options = {})
     # Set node data
-    set_node(provider, name, options)
+    node = set_node(provider, name, options)
     
-    if provider != :local
+    unless node.local?
       # Spawn new node
     end
     true    
@@ -58,26 +58,26 @@ class Network < Base
   def remove_node(provider, name = nil)
     status = Coral.code.success
     
-    if provider != :local
-      if name.nil?
-        nodes(provider).each do |node_name, node|
-          sub_status = remove_node(provider, node_name)
-          status     = sub_status unless status == sub_status 
-        end  
-      else
-        node = node(provider, name)
-        
+    if name.nil?
+      nodes(provider).each do |node_name, node|
+        sub_status = remove_node(provider, node_name)
+        status     = sub_status unless status == sub_status 
+      end  
+    else
+      node = node(provider, name)
+      
+      unless node.local?  
         # Stop node
         status = node.run(:stop)
+      end
+      
+      if status == Coral.code.success
+        delete_node(provider, name)
+      else
+        ui.warn("Stopping #{provider} node #{name} failed")
+      end       
+    end  
         
-        if status == Coral.code.success
-          delete_node(provider, name)
-        else
-          ui.warn("Stopping #{provider} node #{name} failed")
-        end       
-      end  
-    end
-    
     status
   end  
 end
