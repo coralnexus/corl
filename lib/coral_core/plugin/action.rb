@@ -43,8 +43,6 @@ class Action < Base
   def normalize
     args = array(delete(:args, []))
         
-    @codes = Codes.new
-      
     if get(:settings, nil)
       set(:processed, true)  
     else
@@ -90,7 +88,7 @@ class Action < Base
   # Status codes
     
   def code
-    return @codes
+    @codes
   end
   
   def codes(codes)
@@ -143,6 +141,8 @@ class Action < Base
   def execute
     logger.info("Executing action #{plugin_provider}")
     
+    @codes = Codes.new
+    
     if processed?
       status = node_exec do |node, network|
         hook_config = { :node => node, :network => network }
@@ -163,6 +163,8 @@ class Action < Base
         status = code.action_unprocessed
       end
     end
+    
+    status = code.unknown_status unless status.is_a?(Integer)
     
     code_name = Codes.index(status)
     logger.warn("Execution failed for #{plugin_provider} with status #{status} (#{code_name}): #{export.inspect}") if processed? && status > 1 
