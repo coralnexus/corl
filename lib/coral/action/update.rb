@@ -6,10 +6,12 @@ class Update < Plugin::Action
   include Mixin::Action::Project
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Update action interface
   
-  def usage
-    'coral update'
+  def normalize
+    super('coral update')    
+    
+    codes :project_failure => 20
   end
   
   #-----------------------------------------------------------------------------
@@ -22,8 +24,6 @@ class Update < Plugin::Action
   #---
    
   def execute
-    codes :project_failure => 20
-    
     super do |node, network, status|
       info('coral.core.actions.update.start')
       

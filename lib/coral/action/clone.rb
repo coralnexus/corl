@@ -2,12 +2,12 @@
 module Coral
 module Action
 class Clone < Plugin::Action
-  
+ 
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Clone action interface
   
-  def usage
-    'coral clone <existing_node_reference> <new_node_reference>'
+  def normalize
+    super('coral clone <existing_node_reference> <new_node_reference>')    
   end
 
   #-----------------------------------------------------------------------------

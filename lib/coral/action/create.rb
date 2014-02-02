@@ -4,25 +4,22 @@ module Action
 class Create < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Create action interface
   
-  def usage
-    'coral create [ <project:::reference> ]' 
+  def normalize
+    super('coral create [ <project:::reference> ]')    
+    
+    codes :project_failure => 20
   end
-
+ 
   #-----------------------------------------------------------------------------
   # Action operations
   
   def parse(parser)
-    network_path         = lookup(:coral_network)      
-    default_project_path = Dir.pwd
+    network_path = Dir.pwd     
+    network_path = lookup(:coral_network) if Coral.admin?
       
-    if Coral.admin?
-      Dir.mkdir(network_path) unless File.directory?(network_path)
-      default_project_path = network_path
-    end
-      
-    parser.option_str(:path, default_project_path, 
+    parser.option_str(:path, network_path, 
       '--path PROJECT_DIR', 
       'coral.core.actions.create.options.path'
     )
@@ -39,8 +36,6 @@ class Create < Plugin::Action
   #---
    
   def execute
-    codes :project_failure => 20
-          
     super do |node, network, status|
       info('coral.core.actions.create.start')
       

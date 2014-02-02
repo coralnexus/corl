@@ -5,12 +5,16 @@ class Add < Plugin::Action
   
   include Mixin::Action::Project
   include Mixin::Action::Push
-  
+ 
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Add action interface
   
-  def usage
-    'coral add <subproject/path> <subproject:::reference>'  
+  def normalize
+    super('coral add <subproject/path> <subproject:::reference>')    
+    
+    codes :project_failure => 20,
+          :add_failure     => 21,
+          :push_failure    => 22
   end
 
   #-----------------------------------------------------------------------------
@@ -34,10 +38,6 @@ class Add < Plugin::Action
   #---
    
   def execute
-    codes :project_failure => 20,
-          :add_failure     => 21,
-          :push_failure    => 22
-    
     super do |node, network, status|
       info('coral.core.actions.add.start')
       

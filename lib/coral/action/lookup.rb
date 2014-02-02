@@ -4,10 +4,10 @@ module Action
 class Lookup < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Lookup action interface
   
-  def usage
-    'coral lookup <property>'
+  def normalize
+    super('coral lookup <property>') 
   end
 
   #-----------------------------------------------------------------------------

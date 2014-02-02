@@ -8,10 +8,14 @@ class Save < Plugin::Action
   include Mixin::Action::Push
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Save action interface
   
-  def usage
-    'coral save [ <file> ... ]'
+  def normalize
+    super('coral save [ <file> ... ]')    
+    
+    codes :project_failure => 20,
+          :commit_failure  => 21,
+          :push_failure    => 22
   end
 
   #-----------------------------------------------------------------------------
@@ -28,11 +32,7 @@ class Save < Plugin::Action
   
   #---
    
-  def execute
-    codes :project_failure => 20,
-          :commit_failure  => 21,
-          :push_failure    => 22
-          
+  def execute          
     super do |node, network, status|
       info('coral.core.actions.save.start')
           

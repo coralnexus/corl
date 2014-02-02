@@ -4,10 +4,10 @@ module Action
 class Start < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Start action interface
   
-  def usage
-    'coral start <node_reference>'
+  def normalize
+    super('coral start <node_reference>')
   end
 
   #-----------------------------------------------------------------------------

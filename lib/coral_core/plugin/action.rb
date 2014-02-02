@@ -40,15 +40,19 @@ class Action < Base
   
   #---
   
-  def normalize
+  def normalize(usage = '')
     args = array(delete(:args, []))
-        
+    
+    @codes = Codes.new
+            
     if get(:settings, nil)
       set(:processed, true)  
     else
       set(:settings, {})
       parse_base(args)
     end
+    
+    self.usage = usage
   end
   
   #-----------------------------------------------------------------------------
@@ -73,8 +77,12 @@ class Action < Base
   
   #---
   
+  def usage=usage
+    set(:usage, usage)
+  end
+  
   def usage
-    ''
+    get(:usage, '')
   end
   
   #---
@@ -140,8 +148,6 @@ class Action < Base
   
   def execute
     logger.info("Executing action #{plugin_provider}")
-    
-    @codes = Codes.new
     
     if processed?
       status = node_exec do |node, network|

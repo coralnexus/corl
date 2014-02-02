@@ -7,12 +7,16 @@ class Remove < Plugin::Action
   include Mixin::Action::Push
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Remove action interface
   
-  def usage
-    'coral remove <subproject/path>'
+  def normalize
+    super('coral remove <subproject/path>')    
+    
+    codes :project_failure => 20,
+          :delete_failure  => 21,
+          :push_failure    => 22
   end
-
+ 
   #-----------------------------------------------------------------------------
   # Action operations
   
@@ -27,10 +31,6 @@ class Remove < Plugin::Action
   #---
    
   def execute
-    codes :project_failure => 20,
-          :delete_failure  => 21,
-          :push_failure    => 22
-          
     super do |node, network, status|
       info('coral.core.actions.remove.start')
       

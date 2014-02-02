@@ -4,10 +4,14 @@ module Action
 class Seed < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Seed action interface
   
-  def usage
-    'coral seed <project:::reference>'
+  def normalize
+    super('coral seed <project:::reference>')    
+    
+    codes :project_failure      => 20,
+          :network_load_failure => 21,
+          :node_add_failure     => 22
   end
 
   #-----------------------------------------------------------------------------
@@ -26,10 +30,6 @@ class Seed < Plugin::Action
   #---
    
   def execute
-    codes :project_failure      => 20,
-          :network_load_failure => 21,
-          :node_add_failure     => 22
-    
     super do |node, network, status|
       info('coral.core.actions.seed.start')
       

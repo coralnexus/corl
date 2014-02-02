@@ -4,10 +4,10 @@ module Action
 class Stop < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Stop action interface
   
-  def usage
-    'coral stop'
+  def normalize
+    super('coral stop')
   end
 
   #-----------------------------------------------------------------------------

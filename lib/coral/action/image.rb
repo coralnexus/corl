@@ -4,12 +4,12 @@ module Action
 class Image < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Image action interface
   
-  def usage
-    'coral image'
+  def normalize
+    super('coral image')
   end
-
+ 
   #-----------------------------------------------------------------------------
   # Action operations
   

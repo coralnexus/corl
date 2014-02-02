@@ -4,10 +4,10 @@ module Action
 class Spawn < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Spawn action interface
   
-  def usage
-    'coral spawn <node_reference>'
+  def normalize
+    super('coral spawn <node_reference>')
   end
 
   #-----------------------------------------------------------------------------

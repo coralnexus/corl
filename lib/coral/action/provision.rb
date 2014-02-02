@@ -4,10 +4,10 @@ module Action
 class Provision < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Accessors / Modifiers
+  # Provision action interface
   
-  def usage
-    'coral provision [ <project_directory> ]'
+  def normalize
+    super('coral provision [ <project_directory> ]')
   end
 
   #-----------------------------------------------------------------------------
