@@ -13,10 +13,6 @@ class Interface
     
     @@logger.level      = Log4r.const_get(@@log_level)
     @@logger.outputters = Log4r::StdoutOutputter.new('console')
-    
-    if @@log_level == 'DEBUG'    
-      Grit.debug   = true
-    end
   end
   
   #---
