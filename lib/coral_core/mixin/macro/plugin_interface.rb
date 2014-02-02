@@ -229,7 +229,7 @@ module PluginInterface
         logger.debug("Setting single #{_type} #{provider}: #{options.inspect}")
         
         _set([ _plural, provider ], plugin)
-        self
+        plugin
       end
           
       #---
@@ -303,7 +303,7 @@ module PluginInterface
         logger.debug("Setting #{_type} #{provider} #{name}: #{options.inspect}")
         
         _set([ _plural, provider, name ], plugin)
-        self
+        plugin
       end
           
       #---
