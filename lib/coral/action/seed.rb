@@ -49,6 +49,7 @@ class Seed < Plugin::Action
         else
           status = code.project_failure  
         end
+        status
       end
                 
       status
