@@ -4,28 +4,18 @@ module Mixin
 module Lookup
 
   #-----------------------------------------------------------------------------
-  # Facter configuration
+  # Facter lookup
   
-  @@facts = {}
-  
-  def init_facts(reset = false)
-    if reset || @@facts.empty?
-      Facter.list.each do |name|
-        @@facts[name] = Facter.value(name)
-      end
+  def facts
+    fact_map = {}
+    Facter.list.each do |name|
+      fact_map[name] = Facter.value(name)
     end
+    fact_map
   end
   
-  #---
-  
-  def facts(reset = false)
-    init_facts(reset)
-    @@facts
-  end
-  
-  def fact(name, reset = false)
-    init_facts(reset)
-    @@facts[name]
+  def fact(name)
+    Facter.value(name)
   end
   
   #-----------------------------------------------------------------------------
@@ -58,7 +48,7 @@ module Lookup
   def config_initialized?
     ready = false
     if Coral.admin? && hiera && network_path = fact(:coral_network)
-      ready = File.directory?(network_path) && File.directory(File.join(network_path, 'config')) ? true : false
+      ready = File.directory?(network_path) && File.directory?(File.join(network_path, 'config')) ? true : false
     end
     ready
   end
