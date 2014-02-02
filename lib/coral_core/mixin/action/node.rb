@@ -32,9 +32,16 @@ module Node
   def node_exec
     status = code.unknown_status
     
+    if Coral.admin?
+      network_path = lookup(:coral_network)
+      Dir.mkdir(network_path) unless File.directory?(network_path)
+    else
+      network_path = Dir.pwd
+    end
+    
     # Load network if it exists
     network_config = extended_config(:network, {
-      :directory => Dir.pwd,
+      :directory => network_path,
       :file_name => Coral.config_file
     })
     
@@ -52,7 +59,7 @@ module Node
           # Add batch operations      
           nodes.each do |node|
             batch.add(node.name) do
-              node.action(plugin_provider, settings)
+              node.run(plugin_provider, settings)
               code.success
             end
           end

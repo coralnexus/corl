@@ -33,6 +33,53 @@ class Network < Base
   #-----------------------------------------------------------------------------
   # Operations
   
+  def load
+    config.load
+  end
+  
+  def save
+    config.save
+  end
+  
+  #---
+  
+  def add_node(provider, name, options = {})
+    # Set node data
+    set_node(provider, name, options)
+    
+    if provider != :local
+      # Spawn new node
+    end
+    true    
+  end
+  
+  #---
+  
+  def remove_node(provider, name = nil)
+    status = Coral.code.success
+    
+    if provider != :local
+      if name.nil?
+        nodes(provider).each do |node_name, node|
+          sub_status = remove_node(provider, node_name)
+          status     = sub_status unless status == sub_status 
+        end  
+      else
+        node = node(provider, name)
+        
+        # Stop node
+        status = node.run(:stop)
+        
+        if status == Coral.code.success
+          delete_node(provider, name)
+        else
+          ui.warn("Stopping #{provider} node #{name} failed")
+        end       
+      end  
+    end
+    
+    status
+  end  
 end
 end
 end

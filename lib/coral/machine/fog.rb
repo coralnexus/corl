@@ -15,13 +15,13 @@ class Fog < Plugin::Machine
   # Checks
   
   def created?
-    return server && ! server.state != 'DELETED'
+    server && ! server.state != 'DELETED'
   end
   
   #---
   
   def running?
-    return created? && server.ready?
+    created? && server.ready?
   end
    
   #-----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ class Fog < Plugin::Machine
   
   def compute
     set_connection unless @compute
-    return @compute
+    @compute
   end
   
   #---
@@ -69,21 +69,21 @@ class Fog < Plugin::Machine
   end
   
   def server
-    return @server
+    @server
   end
   
   #---
   
   def state
     return translate_state(server.state) if server
-    return nil
+    nil
   end
   
   #---
   
   def flavors
     return compute.flavors if compute
-    return nil
+    nil
   end
   
   #---
@@ -93,14 +93,14 @@ class Fog < Plugin::Machine
   end
   
   def flavor
-    return get(:flavor, nil)
+    get(:flavor, nil)
   end
   
   #---
   
   def images
     return compute.images if compute
-    return nil
+    nil
   end
   
   #---
@@ -110,14 +110,14 @@ class Fog < Plugin::Machine
   end
   
   def image
-    return get(:image, nil)
+    get(:image, nil)
   end
   
   #-----------------------------------------------------------------------------
   # Management
 
   def create(options = {})
-    return super do
+    super do
       self.server = compute.servers.bootstrap(options)
       self.server ? true : false
     end
@@ -126,7 +126,7 @@ class Fog < Plugin::Machine
   #---
   
   def start(options = {})
-    return super do
+    super do
       server_info = compute.servers.create(options)
       
       logger.info("Waiting for #{plugin_provider} machine to start")
@@ -144,7 +144,7 @@ class Fog < Plugin::Machine
   #---
   
   def stop(options = {})
-    return super do
+    super do
       success = true
       if image_id = create_image(name)      
         logger.info("Waiting for #{plugin_provider} machine to finish creating image: #{image_id}")
@@ -162,7 +162,7 @@ class Fog < Plugin::Machine
   #---
   
   def reload(options = {})
-    return super do
+    super do
       logger.debug("Rebooting machine #{name}")
       server.reboot(options)  
     end
@@ -171,7 +171,7 @@ class Fog < Plugin::Machine
   #---
 
   def destroy(options = {})
-    return super do
+    super do
       logger.debug("Destroying machine #{name}")   
       server.destroy(options)  
     end
@@ -180,7 +180,7 @@ class Fog < Plugin::Machine
   #---
   
   def exec(options = {})
-    return super do
+    super do
       success = true
       if commands = options.delete(:commands)
         logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}") 
@@ -193,7 +193,7 @@ class Fog < Plugin::Machine
   #---
  
   def create_image(name, options = {})
-    return super do
+    super do
       logger.debug("Imaging machine #{self.name}") 
       image = server.create_image(name, options)
       

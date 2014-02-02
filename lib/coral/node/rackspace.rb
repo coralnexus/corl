@@ -8,6 +8,7 @@ class Rackspace < Plugin::Node
    
   def normalize
     super
+    create_machine(:fog, extended_config(:machine))
   end
        
   #-----------------------------------------------------------------------------

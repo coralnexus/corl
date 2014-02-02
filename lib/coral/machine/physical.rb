@@ -8,33 +8,52 @@ class Physical < Plugin::Machine
   
   def normalize
     super
+    self.name = hostname
   end
      
   #-----------------------------------------------------------------------------
   # Checks
   
   def created?
-    return true
+    true
   end
   
   #---
   
   def running?
-    return true
+    true
   end
    
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
+    
+  def public_ip
+    fact(:ipaddress)
+  end
+
+  #---
   
+  def private_ip
+    nil
+  end
+
+  #---
+ 
+  def hostname
+    fact(:hostname)
+  end
+ 
+  #---
+ 
   def state
-    return translate_state('RUNNING')
+    translate_state('RUNNING')
   end
   
   #-----------------------------------------------------------------------------
   # Management
 
   def create(options = {})
-    return super do
+    super do
       logger.warn("Damn!  We can't yet create new instances of physical machines")
       true
     end
@@ -43,7 +62,7 @@ class Physical < Plugin::Machine
   #---
   
   def start(options = {})
-    return super do
+    super do
       logger.warn("This machine is already running so can not be started")
       true
     end
@@ -52,7 +71,7 @@ class Physical < Plugin::Machine
   #---
   
   def stop(options = {})
-    return super do
+    super do
       logger.warn("Stopping the machine we are operating is not supported right now")
       true
     end
@@ -70,7 +89,7 @@ class Physical < Plugin::Machine
   #---
 
   def destroy(options = {})
-    return super do
+    super do
       logger.warn("If you want to destroy your physical machine, grab a hammer")
       true  
     end
@@ -79,7 +98,7 @@ class Physical < Plugin::Machine
   #---
   
   def exec(options = {})
-    return super do |config|
+    super do |config|
       success = true
       if commands = config.delete(:commands)
         commands.each do |command|
@@ -96,7 +115,7 @@ class Physical < Plugin::Machine
   #---
  
   def create_image(name, options = {})
-    return super do
+    super do
       logger.warn("Creating images of local machines not supported yet")
       true
     end

@@ -53,6 +53,15 @@ module Coral
   end
   
   #-----------------------------------------------------------------------------
+  # Status codes
+  
+  @@codes = Codes.new
+  
+  def code
+    @@codes
+  end
+  
+  #-----------------------------------------------------------------------------
   # Initialization
   
   @@initialized = false

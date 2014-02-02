@@ -11,13 +11,13 @@ class Machine < Base
   # Checks
   
   def created?
-    return false
+    false
   end
   
   #---
   
   def running?
-    return ( created? && false )
+    ( created? && false )
   end
    
   #-----------------------------------------------------------------------------
@@ -28,13 +28,13 @@ class Machine < Base
   end
   
   def hostname
-    return get(:hostname, '')
+    get(:hostname, '')
   end
   
   #---
   
   def state
-    return nil
+    nil
   end
   
   #---
@@ -44,7 +44,7 @@ class Machine < Base
   end
   
   def public_ip
-    return get(:public_ip, nil)
+    get(:public_ip, nil)
   end
   
   #---
@@ -54,7 +54,7 @@ class Machine < Base
   end
   
   def private_ip
-    return get(:private_ip, nil)
+    get(:private_ip, nil)
   end
             
   #-----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ class Machine < Base
     end
     
     logger.warn("There was an error creating the machine #{name}") unless success
-    return success
+    success
   end
   
   #---
@@ -95,7 +95,7 @@ class Machine < Base
     end
     
     logger.warn("There was an error starting the machine #{name}") unless success
-    return success
+    success
   end
   
   #---
@@ -112,7 +112,7 @@ class Machine < Base
     end
     
     logger.warn("There was an error stopping the machine #{name}") unless success
-    return success
+    success
   end
   
   #---
@@ -129,7 +129,7 @@ class Machine < Base
     end
     
     logger.warn("There was an error reloading the machine #{name}") unless success
-    return success
+    success
   end
 
   #---
@@ -146,7 +146,7 @@ class Machine < Base
     end
     
     logger.warn("There was an error destroying the machine #{name}") unless success
-    return success
+    success
   end
   
   #---
@@ -163,7 +163,7 @@ class Machine < Base
     end
     
     logger.warn("There was an error executing command on the machine #{name}") unless success
-    return success
+    success
   end
   
   #---
@@ -180,7 +180,7 @@ class Machine < Base
     end
     
     logger.warn("There was an error creating an image of the machine #{name}") unless success
-    return success
+    success
   end
 
   #-----------------------------------------------------------------------------

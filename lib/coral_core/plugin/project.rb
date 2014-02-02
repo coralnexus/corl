@@ -126,7 +126,8 @@ class Project < Base
   #---
   
   def set_edit_url(url)
-    if url && url = extension_set(:set_edit_url, url.strip)      
+    url = url.strip
+    if url && url = extension_set(:set_edit_url, url)      
       logger.info("Setting project #{name} edit url to #{url}")
       
       set(:edit, url)
@@ -270,10 +271,14 @@ class Project < Base
       logger.debug("Project #{name} has no parents to initialize")
     else
       search_dir = directory
+      last_dir   = nil
       
       while File.directory?((search_dir = File.expand_path('..', search_dir)))
         logger.debug("Scanning directory #{search_dir} for parent project")
         
+        unless last_dir.nil? || last_dir != search_dir
+          break
+        end
         if project_directory?(search_dir)
           logger.debug("Directory #{search_dir} is a valid parent for this #{plugin_provider} project")
           
@@ -284,7 +289,8 @@ class Project < Base
           set(:parent, project)
           logger.debug("Setting parent to #{parent.inspect}")
           break;
-        end        
+        end
+        last_dir = search_dir        
       end      
     end
     return self       
@@ -565,7 +571,7 @@ class Project < Base
   def set_remote(name, url)
     if can_persist?
       localize do
-        if url = extension_set(:set_remote, url, { :name => name })
+        if ! url.strip.empty? && url = extension_set(:set_remote, url, { :name => name })
           delete_remote(name)
     
           logger.info("Setting project remote #{name} to #{url}")

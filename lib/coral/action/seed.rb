@@ -26,15 +26,15 @@ class Seed < Plugin::Action
   #---
    
   def execute
-    codes :project_failure => 20
+    codes :project_failure  => 20,
+          :node_add_failure => 21
     
     super do |node, network, status|
       info('coral.core.actions.seed.start')
       
       status = admin_exec(status) do
         network_path = lookup(:coral_network)
-        Dir.mkdir(network_path) unless File.directory?(network_path)
-      
+        
         project = Coral.project(extended_config(:project, {
           :directory => network_path,
           :url       => settings[:reference],
@@ -43,16 +43,19 @@ class Seed < Plugin::Action
         }))
         
         if project
-          if node.nil?
-            # Register this machine with the network
-          end          
+          network.load
+          
+          success = network.add_node(node.plugin_provider, node.hostname, {
+            :public_ip  => node.public_ip,
+            :private_ip => node.private_ip,
+            :revision   => project.revision
+          })
+          status = code.node_add_failure unless success     
         else
           status = code.project_failure  
         end
         status
       end
-                
-      status
     end
   end
 end
