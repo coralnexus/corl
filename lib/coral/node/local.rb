@@ -8,15 +8,15 @@ class Local < Plugin::Node
    
   def normalize
     super
+    create_machine(:physical, extended_config(:machine))
   end
        
   #-----------------------------------------------------------------------------
   # Checks
-    
    
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
-    
+ 
 end
 end
 end
