@@ -16,7 +16,6 @@ class Interface
     
     if @@log_level == 'DEBUG'    
       Grit.debug   = true
-      ENV['DEBUG'] = 'true' # Fog uses this
     end
   end
   

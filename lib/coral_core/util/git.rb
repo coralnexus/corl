@@ -1,7 +1,7 @@
 module Coral
 module Util
 class Git < ::Grit::Repo
-  
+
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
 
@@ -10,6 +10,8 @@ class Git < ::Grit::Repo
     git_dir = File.join(epath, '.git')
     
     @bare = (options[:is_bare] ? true : false)
+    
+    Grit.debug = true if Coral.log_level == :debug
     
     if File.exist?(git_dir)
       self.working_dir = epath

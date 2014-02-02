@@ -31,7 +31,9 @@ class Fog < Plugin::Machine
     logger.info("Initializing Fog Compute connection to cloud hosting provider")
     logger.debug("Compute settings: #{export.inspect}")
     
-    require 'fog'
+    ENV['DEBUG'] = 'true' if Coral.log_level == :debug
+    require 'fog'    
+    
     self.compute = Fog::Compute.new(export)
     self.server  = name if @compute && name    
   end
