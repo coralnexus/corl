@@ -38,20 +38,20 @@ class File < Plugin::Configuration
   def can_persist?
     success = project.can_persist?
     success = false if Util::Data.empty?(location)
-    return success
+    success
   end
       
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
 
   def project
-    return @project
+    @project
   end
    
   #---
   
   def translator(default = :json)
-    return _get(:translator, default)
+    _get(:translator, default)
   end
   
   def translator=translator
@@ -61,7 +61,7 @@ class File < Plugin::Configuration
   #---
   
   def file_name(default = nil)
-    return _get(:file_name, default)
+    _get(:file_name, default)
   end
   
   def file_name=file
@@ -92,7 +92,7 @@ class File < Plugin::Configuration
   #---
   
   def autocommit(default = false)
-    return _get(:autocommit, default)
+    _get(:autocommit, default)
   end
   
   def autocommit=autocommit
@@ -102,7 +102,7 @@ class File < Plugin::Configuration
   #---
   
   def commit_message(default = false)
-    return _get(:commit_message, default)
+    _get(:commit_message, default)
   end
   
   def commit_message=commit_message
@@ -113,7 +113,7 @@ class File < Plugin::Configuration
   # Configuration loading / saving
     
   def load(options = {})
-    return super do |method_config, properties|
+    super do |method_config, properties|
       if Util::Disk.exists?(location)
         logger.info("Loading source configuration from #{location}") 
       
@@ -132,27 +132,33 @@ class File < Plugin::Configuration
   #---
     
   def save(options = {})
-    return super do |method_config|    
+    super do |method_config|    
       logger.debug("Fetching source configuration from #{location}")
+      
+      success = false
       
       if renderer = Coral.translator(method_config, translator)
         rendering = renderer.generate(config.export)
         
-        Util::Disk.write(location, rendering)
-        logger.debug("Source configuration rendering: #{rendering}") 
-        
-        project.commit(location, method_config) if autocommit
+        if Util::Disk.write(location, rendering)
+          logger.debug("Source configuration rendering: #{rendering}")        
+          success = project.commit(location, method_config) if autocommit
+        end
       end
+      success
     end
   end
   
   #---
   
   def delete(options = {})
-    return super do |method_config| 
-      Util::Disk.delete(location)
-      project.commit(location, method_config) if autocommit
-    end 
+    super do |method_config|
+      success = false 
+      if Util::Disk.delete(location)
+        success = project.commit(location, method_config) if autocommit
+      end
+      success
+    end
   end
   
   #-----------------------------------------------------------------------------

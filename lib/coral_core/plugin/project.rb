@@ -8,7 +8,7 @@ class Project < Base
   #---
   
   def self.collection
-    return @@projects
+    @@projects
   end
      
   #-----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ class Project < Base
       logger.info("Opening existing project at #{directory}")
     end
     
-    return @@projects[directory]
+    @@projects[directory]
   end
  
   #-----------------------------------------------------------------------------
@@ -73,20 +73,20 @@ class Project < Base
    
   def can_persist?
     return top?(directory) if directory
-    return false
+    false
   end
  
   #---
           
   def top?(path)
     return true if File.directory?(path)
-    return false
+    false
   end
     
   #---
           
   def subproject?(path)
-    return false
+    false
   end
 
   #---
@@ -94,7 +94,7 @@ class Project < Base
   def project_directory?(path, require_top_level = false)
     path = File.expand_path(path)    
     return true if File.directory?(path) && (! require_top_level || top?(path))
-    return false
+    false
   end
   protected :project_directory?
    
@@ -102,7 +102,7 @@ class Project < Base
   # Property accessor / modifiers
   
   def url(default = nil)
-    return get(:url, default)
+    get(:url, default)
   end
 
   #---
@@ -114,13 +114,13 @@ class Project < Base
       set(:url, url)
       set_remote(:origin, url)
     end
-    return self
+    self
   end
 
   #---
   
   def edit_url(default = nil)
-    return get(:edit, default)
+    get(:edit, default)
   end
   
   #---
@@ -133,13 +133,13 @@ class Project < Base
       set(:edit, url)
       set_remote(:edit, url)
     end
-    return self
+    self
   end
  
   #---
   
   def directory(default = nil)
-    return get(:directory, default)
+    get(:directory, default)
   end
    
   #---
@@ -148,7 +148,7 @@ class Project < Base
     if parent.nil?
       return directory  
     end
-    return directory.gsub(parent.directory + File::SEPARATOR, '')
+    directory.gsub(parent.directory + File::SEPARATOR, '')
   end
   
   #---
@@ -168,7 +168,7 @@ class Project < Base
     
       set(:directory, current_directory)
     end       
-    return self  
+    self  
   end
   protected :set_directory
   
@@ -180,31 +180,31 @@ class Project < Base
     yield if block_given?
     
     init_project           
-    return self
+    self
   end
   
   #---
   
   def parent(default = nil)
-    return get(:parent, default)
+    get(:parent, default)
   end
 
   #---
   
   def subprojects(default = nil)
-    return get(:subprojects, default)
+    get(:subprojects, default)
   end
 
   #---
   
   def revision(default = nil)
-    return get(:revision, default).to_s
+    get(:revision, default).to_s
   end
   
   #---
   
   def config(name, options = {})
-    return localize do
+    localize do
       config = Config.ensure(options)
       can_persist? && block_given? ? yield(config) : nil
     end
@@ -222,7 +222,7 @@ class Project < Base
         yield(config, value) if block_given?
       end
     end
-    return self
+    self
   end
   
   #---
@@ -237,7 +237,7 @@ class Project < Base
         yield(config) if block_given?
       end
     end
-    return self
+    self
   end
   
   #---
@@ -255,7 +255,7 @@ class Project < Base
         logger.debug("Subproject configuration: #{result.inspect}")
       end
     end
-    return result
+    result
   end
   protected :subproject_config
 
@@ -293,7 +293,7 @@ class Project < Base
         last_dir = search_dir        
       end      
     end
-    return self       
+    self       
   end
   protected :init_parent
 
@@ -319,7 +319,7 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and has no revision")
     end
-    return self
+    self
   end
   protected :load_revision
   
@@ -345,12 +345,14 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not checkout a revision")
     end
-    return self 
+    self 
   end
   
   #---
   
   def commit(files = '.', options = {})
+    success = false
+    
     if can_persist?
       localize do
         config = Config.ensure(options)
@@ -366,9 +368,7 @@ class Project < Base
       
           user = 'UNKNOWN' unless user && ! user.empty?
       
-          logger.debug("Commit by #{user} at #{time} with #{message}")
-      
-          success = false
+          logger.debug("Commit by #{user} at #{time} with #{message}")          
           success = yield(config, time, user, message) if block_given?
         
           if success
@@ -390,7 +390,7 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can be committed to")                
     end
-    return self      
+    success     
   end
 
   #-----------------------------------------------------------------------------
@@ -431,7 +431,7 @@ class Project < Base
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects")    
     end
     set(:subprojects, subprojects)
-    return self  
+    self  
   end
   protected :load_subprojects
   
@@ -465,7 +465,7 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects")   
     end
-    return success
+    success
   end
   
   #---
@@ -496,7 +496,7 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects") 
     end
-    return success
+    success
   end
  
   #---
@@ -519,7 +519,7 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects") 
     end
-    return self
+    self
   end
   protected :update_subprojects
   
@@ -540,7 +540,7 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects") 
     end
-    return self
+    self
   end 
          
   #-----------------------------------------------------------------------------
@@ -562,7 +562,7 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have remotes")
     end
-    return self 
+    self 
   end
   protected :init_remotes
  
@@ -581,7 +581,7 @@ class Project < Base
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
-    return self
+    self
   end
   
   #---
@@ -599,7 +599,7 @@ class Project < Base
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
-    return self  
+    self  
   end
   
   #---
@@ -629,7 +629,7 @@ class Project < Base
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
-    return self
+    self
   end
   
   #---
@@ -645,7 +645,7 @@ class Project < Base
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
-    return self  
+    self  
   end
   
   #---
@@ -682,7 +682,7 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have remotes") 
     end
-    return true
+    true
   end
    
   #-----------------------------------------------------------------------------
@@ -722,13 +722,13 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not pull from remotes")       
     end
-    return success
+    success
   end
   
   #---
   
   def pull(remote = :origin, options = {})
-    return pull!(remote, options)
+    pull!(remote, options)
   end  
   
   #---
@@ -765,13 +765,13 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not push to remotes") 
     end
-    return success
+    success
   end
   
   #---
   
   def push(remote = :edit, options = {})
-    return push!(remote, options)
+    push!(remote, options)
   end
     
   #-----------------------------------------------------------------------------
@@ -779,7 +779,7 @@ class Project < Base
   
   def self.build_info(type, data)  
     data = data.split(/\s*,\s*/) if data.is_a?(String)
-    return super(type, data)
+    super(type, data)
   end
   
   #---
@@ -803,7 +803,7 @@ class Project < Base
         logger.debug("Translating project options: #{options.inspect}")  
       end
     end
-    return options
+    options
   end
   
   #---
@@ -833,13 +833,13 @@ class Project < Base
       logger.debug("Project reference info: #{info.inspect}")
       return info
     end
-    return nil
+    nil
   end
   
   #---
   
   def translate_reference(reference, editable = false)
-    return self.class.translate_reference(reference, editable)
+    self.class.translate_reference(reference, editable)
   end
   
   #---
@@ -852,7 +852,7 @@ class Project < Base
       temp_url = yield(config)
       url      = temp_url if temp_url
     end
-    return url
+    url
   end
   
   #---
@@ -864,7 +864,7 @@ class Project < Base
       temp_url = yield(config)
       url      = temp_url if temp_url
     end
-    return url
+    url
   end
   
   #---
@@ -878,7 +878,7 @@ class Project < Base
     end
     
     Dir.chdir(prev_directory)
-    return result
+    result
   end
 end
 end

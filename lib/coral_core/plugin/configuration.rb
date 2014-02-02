@@ -22,14 +22,14 @@ class Configuration < Base
   # Checks
   
   def can_persist?
-    return false
+    false
   end
       
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
   def autoload(default = false)
-    return _get(:autoload, default)
+    _get(:autoload, default)
   end
   
   def autoload=autoload
@@ -39,7 +39,7 @@ class Configuration < Base
   #---
   
   def autosave(default = false)
-    return _get(:autosave, default)
+    _get(:autosave, default)
   end
   
   def autosave=autosave
@@ -51,7 +51,7 @@ class Configuration < Base
   def set(keys, value = '', options = {})
     super(keys, value)
     save(options) if autosave
-    return self
+    self
   end
    
   #---
@@ -59,7 +59,7 @@ class Configuration < Base
   def delete(keys, options = {})
     super(keys)
     save(options) if autosave
-    return self
+    self
   end
   
   #---
@@ -67,7 +67,7 @@ class Configuration < Base
   def clear(options = {})
     super
     save(options) if autosave
-    return self
+    self
   end
 
   #-----------------------------------------------------------------------------
@@ -76,7 +76,7 @@ class Configuration < Base
   def import(properties, options = {})
     super(properties, options)
     save(options) if autosave
-    return self
+    self
   end
       
   #-----------------------------------------------------------------------------
@@ -84,6 +84,7 @@ class Configuration < Base
     
   def load(options = {})
     method_config = Config.ensure(options)
+    success = false
     
     if can_persist? 
       if extension_check(:load, { :config => method_config })
@@ -100,35 +101,38 @@ class Configuration < Base
           extension(:load_process, { :properties => properties, :config => method_config })               
           config.import(properties, method_config)
         end
+        success = true
       end
     else
       logger.warn("Loading of source configuration from #{location} failed")
     end
-    return self
+    success
   end
    
   #---
     
   def save(options = {})
     method_config = Config.ensure(options)
+    success       = false
     
     if can_persist?
       if extension_check(:save, { :config => method_config })
         logger.info("Saving source configuration")
         logger.debug("Source configuration properties: #{config.export}") 
       
-        yield(method_config) if block_given?
+        success = yield(method_config) if block_given?
       end
     else
       logger.warn("Can not save source configuration")
     end
-    return self
+    success
   end
   
   #---
   
   def delete(options = {})
     method_config = Config.ensure(options)
+    success       = false
     
     if can_persist?
       if extension_check(:delete, { :config => method_config })
@@ -136,12 +140,12 @@ class Configuration < Base
       
         config.clear
       
-        yield(method_config) if block_given?
+        success = yield(method_config) if block_given?
       end
     else
       logger.warn("Can not delete source configuration")
     end
-    return self 
+    success
   end
 end
 end
