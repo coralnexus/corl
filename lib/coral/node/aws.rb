@@ -5,7 +5,7 @@ coral_require(File.dirname(__FILE__), :fog)
 
 module Coral
 module Node
-class Rackspace < Node::Fog
+class Aws < Node::Fog
  
   #-----------------------------------------------------------------------------
   # Node plugin interface
@@ -17,26 +17,24 @@ class Rackspace < Node::Fog
   # Property accessors / modifiers
   
   def regions
-    [ 
-      :dfw, # Dallas
-      :ord, # Chicago
-      :lon  # London (for UK accounts)
+    [
+      'us-west-2a',
+      'us-west-2b',
+      'us-west-2c'
     ]
   end
- 
+  
   #-----------------------------------------------------------------------------
   # Settings groups
     
   def provider_info
     super do |config|
       config.import({ 
-        :provider => 'rackspace', 
-        :version  => :v2
+        :provider => 'AWS'
       })
     
-      config[:rackspace_username] = user_name if user_name
-      config[:rackspace_api_key]  = api_key if api_key
-      config[:rackspace_auth_url] = auth_url if auth_url
+      config[:aws_access_key_id] = user_name if user_name
+      config[:aws_secret_access_key]  = api_key if api_key
     end
   end
   
@@ -46,15 +44,19 @@ class Rackspace < Node::Fog
   def create(options = {})
     super do |op, config|
       if op == :config
-        config[:private_key] = private_key if private_key
-        config[:public_key]  = public_key if public_key
-    
+        config[:private_key_path] = private_key if private_key
+        config[:public_key_path]  = public_key if public_key
+        
+        found_images = images.find do |image| 
+          image.name =~ /Ubuntu/
+        end
+        image_name = nil
+        image_name = found_images.first.id if found_images.length
+        
         config.defaults({
-          :name      => hostname,
-          :flavor_id => machine_types.first,
-          :image_id  => images.find do |image| 
-            image.name =~ /Ubuntu/
-          end
+          :name         => hostname,
+          :machine_type => machine_types.first.id,
+          :image_name   => image_name
         })
       end
     end
