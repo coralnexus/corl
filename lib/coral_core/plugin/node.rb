@@ -111,34 +111,129 @@ class Node < Base
  
   #-----------------------------------------------------------------------------
   # Machine operations
+  
+  def create(options = {})
+    success = true
+    
+    if machine
+      config = Config.ensure(options)
+      
+      if extension_check(:create, { :config => config })
+        logger.info("Creating node: #{name}")
+      
+        yield(:config, config) if block_given?      
+        success = machine.create(config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:create_success, { :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine so cannot be created")
+    end
+    success
+  end
+  
+  #---
     
   def start(options = {})
-    return true unless machine
-    machine.start(options)
+    success = true
+    
+    if machine
+      config = Config.ensure(options)
+      
+      if extension_check(:start, { :config => config })
+        logger.info("Starting node: #{name}")
+      
+        yield(:config, config) if block_given?      
+        success = machine.start(config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:start_success, { :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine so cannot be started")
+    end
+    success
   end
   
   #---
     
   def stop(options = {})
-    return true unless machine && machine.running?    
-    machine.stop(options)
+    success = true
+    
+    if machine && machine.running?
+      config = Config.ensure(options)
+      
+      if extension_check(:stop, { :config => config })
+        logger.info("Stopping node: #{name}")
+      
+        yield(:config, config) if block_given?      
+        success = machine.stop(config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:stop_success, { :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not running so cannot be stopped")
+    end
+    success
   end
 
   #---
     
   def reload(options = {})
-    return true unless machine && machine.created?    
-    machine.reload(options)
+    success = true
+    
+    if machine && machine.created?
+      config = Config.ensure(options)
+      
+      if extension_check(:reload, { :config => config })
+        logger.info("Reloading node: #{name}")
+      
+        yield(:config, config) if block_given?      
+        success = machine.reload(config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:reload_success, { :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not created so cannot be reloaded")
+    end
+    success
   end
     
   #---
 
   def destroy(options = {})    
-    return true unless machine
+    success = true
     
-    config = Config.ensure(options)
-    
-    if machine.created?
+    if machine && machine.created?
+      config = Config.ensure(options)
+      
       run = false
 
       if config[:force]
@@ -146,41 +241,102 @@ class Node < Base
       else
         choice = nil
         begin
-          choice = ui.ask("Are you sure you want to remove: #{name}?")
+          choice = ui.ask("Are you sure you want to permanently destroy (Y|N): #{name}?")
           run    = choice.upcase == "Y"
+          
         rescue Errors::UIExpectsTTY
           run = false
         end        
       end
 
       if run
-        return machine.destroy(config)
+        if extension_check(:destroy, { :config => config })
+          logger.info("Destroying node: #{name}")
+      
+          yield(:config, config) if block_given?      
+          success = machine.destroy(config.export)
+        
+          if success && block_given?
+            process_success = yield(:process, config)
+            success         = process_success if process_success == false        
+          end
+        
+          if success
+            extension(:destroy_success, { :config => config })
+          end
+        end
+      else
+        logger.warn("Node #{name} does not have an attached machine or is not created so cannot be destroyed")
       end
+    else
+      logger.info("Node #{name} not destroyed due to user cancellation")  
     end
-    true    
+    success    
   end
 
   #---
   
-  def exec(commands, options = {})
-    return true unless machine && machine.running?
+  def exec(options = {})
+    success = true
     
-    config = Config.ensure(options)        
-    machine.exec(config.import({ :commands => commands }))  
+    if machine && machine.running?
+      config = Config.ensure(options)
+      
+      if extension_check(:exec, { :config => config })
+        logger.info("Executing node: #{name}")
+      
+        yield(:config, config) if block_given?      
+        success = machine.exec(config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:exec_success, { :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not running so cannot execute commands")
+    end
+    success 
   end
-   
+  
   #---
   
-  def provision(options = {})
-    return true unless machine && machine.running?    
-    machine.provision(options)  
+  def command(command, options = {})
+    command = Coral.command(command, :shell) unless command.is_a?(Coral::Plugin::Command)
+    exec(Util::Data.merge([ { :commands => [ command.to_s ] }, options ], false))
   end
- 
+  
   #---
   
   def create_image(options = {})
-    return true unless machine && machine.running?    
-    machine.create_image(options)  
+    success = true
+    
+    if machine && machine.running?
+      config = Config.ensure(options)
+      
+      if extension_check(:create_image, { :config => config })
+        logger.info("Executing node: #{name}")
+      
+        yield(:config, config) if block_given?      
+        success = machine.create_image(config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:create_image_success, { :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not running so cannot create an image")
+    end
+    success   
   end
  
   #-----------------------------------------------------------------------------
