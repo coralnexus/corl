@@ -79,46 +79,12 @@ class Fog < Plugin::Machine
     nil
   end
   
-  #---
-  
-  def flavors
-    return compute.flavors if compute
-    nil
-  end
-  
-  #---
-  
-  def flavor=flavor
-    set(:flavor, flavor)
-  end
-  
-  def flavor
-    get(:flavor, nil)
-  end
-  
-  #---
-  
-  def images
-    return compute.images if compute
-    nil
-  end
-  
-  #---
-  
-  def image=image
-    set(:image, image)
-  end
-  
-  def image
-    get(:image, nil)
-  end
-  
   #-----------------------------------------------------------------------------
   # Management
 
   def create(options = {})
     super do
-      self.server = compute.servers.bootstrap(options)
+      self.server = compute.servers.bootstrap(Config.ensure(options).export)
       self.server ? true : false
     end
   end
@@ -182,9 +148,10 @@ class Fog < Plugin::Machine
   def exec(options = {})
     super do
       success = true
-      if commands = options.delete(:commands)
+      config  = Config.ensure(options)
+      if commands = config.delete(:commands)
         logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}") 
-        success = server.ssh(commands, options)
+        success = server.ssh(commands, config.export)
       end
       success
     end
