@@ -51,10 +51,8 @@ class Rackspace < Node::Fog
     
         config.defaults({
           :name      => hostname,
-          :flavor_id => machine_types.first,
-          :image_id  => images.find do |image| 
-            image.name =~ /Ubuntu/
-          end
+          :flavor_id => machine_type,
+          :image_id  => image
         })
       end
     end

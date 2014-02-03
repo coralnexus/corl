@@ -44,19 +44,13 @@ class Aws < Node::Fog
   def create(options = {})
     super do |op, config|
       if op == :config
-        config[:private_key_path] = private_key if private_key
-        config[:public_key_path]  = public_key if public_key
-        
-        found_images = images.find do |image| 
-          image.name =~ /Ubuntu/
-        end
-        image_name = nil
-        image_name = found_images.first.id if found_images.length
+        config[:private_key] = private_key if private_key
+        config[:public_key]  = public_key if public_key
         
         config.defaults({
-          :name         => hostname,
-          :machine_type => machine_types.first.id,
-          :image_name   => image_name
+          :name      => hostname,
+          :flavor_id => machine_type,
+          :image_id  => image
         })
       end
     end
