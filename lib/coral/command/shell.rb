@@ -2,9 +2,9 @@
 module Coral
 module Command
 class Shell < Plugin::Command
-   
+
   #-----------------------------------------------------------------------------
-  # Command operations
+  # Command plugin interface
   
   def normalize
     super
@@ -13,8 +13,9 @@ class Shell < Plugin::Command
     logger.info("Setting command executable to #{command}")
     set(:command, command)
   end
-
-  #---
+   
+  #-----------------------------------------------------------------------------
+  # Command operations
   
   def build(components = {}, overrides = nil, override_key = false)
     command            = string(components[:command])
@@ -126,7 +127,7 @@ class Shell < Plugin::Command
     return command_string
   end
   
-  #-----------------------------------------------------------------------------
+  #---
     
   def exec!(options = {}, overrides = nil)
     config = Config.ensure(options)

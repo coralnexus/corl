@@ -6,6 +6,12 @@ class Command < Base
   #-----------------------------------------------------------------------------
   # Command plugin interface
   
+  def normalize
+    super
+  end
+  
+  #---
+   
   def to_s
     return build(export)
   end
@@ -67,10 +73,6 @@ class Command < Base
     end
   end
   
-  #-----------------------------------------------------------------------------
-  # Plugin operations
-
-
   #-----------------------------------------------------------------------------
   # Command operations
   
