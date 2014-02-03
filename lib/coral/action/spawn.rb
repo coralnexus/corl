@@ -33,6 +33,12 @@ class Spawn < Plugin::Action
     super do |node, network, status|
       info('coral.core.actions.spawn.start')
       
+      # 1. Spawn new machine on hosting environment
+      # 2. Bootstrap new machine
+      # 2. Seed machine with remote project reference
+      # 3. Save machine to network project
+      # 4. Update local network project
+      
       status
     end
   end
