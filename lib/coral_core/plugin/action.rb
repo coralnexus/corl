@@ -44,15 +44,15 @@ class Action < Base
     args = array(delete(:args, []))
     
     @codes = Codes.new
+    
+    self.usage = usage
             
     if get(:settings, nil)
       set(:processed, true)  
     else
       set(:settings, {})
       parse_base(args)
-    end
-    
-    self.usage = usage
+    end    
   end
   
   #-----------------------------------------------------------------------------
@@ -89,7 +89,7 @@ class Action < Base
   
   def help
     return @parser.help if @parser
-    ''
+    usage
   end
   
   #-----------------------------------------------------------------------------
@@ -125,7 +125,7 @@ class Action < Base
         logger.debug("Parse successful: #{export.inspect}")
         
       elsif @parser.options[:help] && ! quiet?
-        puts I18n.t('coral.core.exec.help.usage') + ': ' + @parser.help + "\n"
+        puts I18n.t('coral.core.exec.help.usage') + ': ' + help + "\n"
         
       else
         if @parser.options[:help]
