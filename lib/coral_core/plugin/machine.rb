@@ -56,6 +56,18 @@ class Machine < Base
   def private_ip
     get(:private_ip, nil)
   end
+  
+  #---
+    
+  def machine_types
+    []
+  end
+  
+  #---
+  
+  def images
+    []
+  end
             
   #-----------------------------------------------------------------------------
   # Management 

@@ -79,6 +79,20 @@ class Fog < Plugin::Machine
     nil
   end
   
+  #---
+    
+  def machine_types
+    return machine.compute.flavors if compute
+    super
+  end
+  
+  #---
+  
+  def images
+    return machine.compute.images if compute
+    super
+  end
+  
   #-----------------------------------------------------------------------------
   # Management
 

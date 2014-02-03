@@ -108,7 +108,57 @@ class Node < Base
     return machine.state if machine
     nil
   end
- 
+  
+  #---
+  
+  def private_key=private_key
+    set(:private_key, private_key)
+  end
+  
+  def private_key
+    get(:private_key, '')
+  end
+  
+  #---
+  
+  def public_key=public_key
+    set(:public_key, public_key)
+  end
+  
+  def public_key
+    get(:public_key, '')
+  end
+  
+  #---
+    
+  def machine_types # Must be set at machine level
+    machine.machine_types if machine
+  end
+    
+  def machine_type=machine_type
+    set(:machine_type, machine_type)
+  end
+  
+  def machine_type
+    get(:machine_type, nil)
+  end
+    
+  #---
+  
+  def images # Must be set at machine level
+    machine.images if machine
+  end
+  
+  #---
+  
+  def image=image
+    set(:image, image)
+  end
+  
+  def image
+    get(:image, nil)
+  end
+   
   #-----------------------------------------------------------------------------
   # Machine operations
   

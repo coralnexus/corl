@@ -69,63 +69,6 @@ class Fog < Plugin::Node
     get(:region, regions.first)
   end
   
-  #---
-  
-  def private_key=private_key
-    set(:private_key, private_key)
-  end
-  
-  def private_key
-    get(:private_key, '')
-  end
-  
-  #---
-  
-  def public_key=public_key
-    set(:public_key, public_key)
-  end
-  
-  def public_key
-    get(:public_key, '')
-  end
-  
-  #---
-  
-  def machine_types
-    nil
-  end
-  
-  #---
-    
-  def machine_types
-    machine.compute.flavors if machine.compute
-  end
-    
-  def machine_type=machine_type
-    set(:machine_type, machine_type)
-  end
-  
-  def machine_type
-    get(:machine_type, nil)
-  end
-    
-  #---
-  
-  def images
-    return machine.compute.images if machine.compute
-    nil
-  end
-  
-  #---
-  
-  def image=image
-    set(:image, image)
-  end
-  
-  def image
-    get(:image, nil)
-  end
-  
   #-----------------------------------------------------------------------------
   # Settings groups
     
