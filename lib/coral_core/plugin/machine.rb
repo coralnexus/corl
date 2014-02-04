@@ -5,8 +5,11 @@ class Machine < Base
 
   #-----------------------------------------------------------------------------
   # Machine plugin interface
- 
-      
+  
+  def normalize
+    self.name = nil if name.to_s == plugin_provider.to_s      
+  end
+       
   #-----------------------------------------------------------------------------
   # Checks
   
@@ -22,6 +25,16 @@ class Machine < Base
    
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
+  
+  def provider=provider
+    set(:provider, provider)
+  end
+  
+  def provider
+    get(:provider, nil)
+  end
+  
+  #---
   
   def hostname=hostname
     set(:hostname, hostname)

@@ -103,19 +103,12 @@ module Coral
   #-----------------------------------------------------------------------------
   # Core plugin interface
   
-  def self.plugin(type, provider, options = {})
-    default_provider = Plugin.type_default(type)
-    
-    if options.is_a?(Hash) || options.is_a?(Coral::Config)
-      config   = Config.ensure(options)
-      provider = config.get(:provider, provider)
-      name     = config.get(:name, nil)
-      options  = config.export
-    end
-    provider = default_provider unless provider # Sanity checking (see plugins)
+  def self.plugin_load(type, provider, options = {})
+    config = Config.ensure(options)
+    name   = config.get(:name, nil)
     
     logger.info("Fetching plugin #{type} provider #{provider} at #{Time.now}")
-    logger.debug("Plugin options: #{options.inspect}")
+    logger.debug("Plugin options: #{config.export.inspect}")
     
     if name
       logger.debug("Looking up existing instance of #{name}")
@@ -125,7 +118,22 @@ module Coral
     end
     
     return existing_instance if existing_instance
-    return Plugin.create_instance(type, provider, options)
+    return Plugin.create_instance(type, provider, config.export)  
+  end
+  
+  #---
+  
+  def self.plugin(type, provider, options = {})
+    default_provider = Plugin.type_default(type)
+    
+    if options.is_a?(Hash) || options.is_a?(Coral::Config)
+      config   = Config.ensure(options)
+      provider = config.get(:provider, provider)
+      options  = config.export
+    end
+    provider = default_provider unless provider # Sanity checking (see plugins)
+    
+    return plugin_load(type, provider, options)
   end
   
   #---

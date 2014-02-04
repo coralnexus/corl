@@ -66,16 +66,6 @@ module Coral
   def self.nodes(data, build_hash = false, keep_array = false)
     plugins(:node, data, build_hash, keep_array)
   end
-   
-  #---
-  
-  def self.machine(options = {}, provider = nil)
-    plugin(:machine, provider, options)
-  end
-  
-  def self.machines(data, build_hash = false, keep_array = false)
-    plugins(:machine, data, build_hash, keep_array)
-  end
   
   #---
   

@@ -76,7 +76,7 @@ class Node < Base
  
   def create_machine(provider, options = {})
     if provider.is_a?(String) || provider.is_a?(Symbol)
-      self.machine = Coral.machine(options, provider)
+      self.machine = Coral.plugin_load(:machine, provider, options)
     end
     self
   end
@@ -131,7 +131,7 @@ class Node < Base
   
   #---
     
-  def machine_types # Must be set at machine level
+  def machine_types # Must be set at machine level (queried)
     machine.machine_types if machine
   end
     
@@ -145,7 +145,7 @@ class Node < Base
     
   #---
   
-  def images # Must be set at machine level
+  def images # Must be set at machine level (queried)
     machine.images if machine
   end
   

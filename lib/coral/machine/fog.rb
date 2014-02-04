@@ -34,8 +34,8 @@ class Fog < Plugin::Machine
     ENV['DEBUG'] = 'true' if Coral.log_level == :debug
     require 'fog'    
     
-    self.compute = Fog::Compute.new(export)
-    self.server  = name if @compute && name    
+    self.compute = ::Fog::Compute.new(export)
+    self.server  = name if @compute && ! name.empty?    
   end
   protected :set_connection
   
@@ -82,14 +82,14 @@ class Fog < Plugin::Machine
   #---
     
   def machine_types
-    return machine.compute.flavors if compute
+    return compute.flavors if compute
     super
   end
   
   #---
   
   def images
-    return machine.compute.images if compute
+    return compute.images if compute
     super
   end
   
@@ -110,7 +110,7 @@ class Fog < Plugin::Machine
       server_info = compute.servers.create(options)
       
       logger.info("Waiting for #{plugin_provider} machine to start")
-      Fog.wait_for do
+      ::Fog.wait_for do
         compute.servers.get(server_info.id).ready? ? true : false
       end
       
@@ -128,7 +128,7 @@ class Fog < Plugin::Machine
       success = true
       if image_id = create_image(name)      
         logger.info("Waiting for #{plugin_provider} machine to finish creating image: #{image_id}")
-        Fog.wait_for do
+        ::Fog.wait_for do
           compute.images.get(image_id).ready? ? true : false
         end
               

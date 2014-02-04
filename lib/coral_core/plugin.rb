@@ -29,9 +29,8 @@ module Plugin
       return nil
     end
     
-    options  = translate_type(type, options)
-    provider = options.delete(:provider).to_sym if options.has_key?(:provider)    
-    info     = @@load_info[type][provider] if Util::Data.exists?(@@load_info, [ type, provider ])
+    options = translate_type(type, options)
+    info    = @@load_info[type][provider] if Util::Data.exists?(@@load_info, [ type, provider ])
         
     if info
       logger.debug("Plugin information for #{provider} #{type} found.  Data: #{info.inspect}")
