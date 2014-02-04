@@ -110,3 +110,11 @@ en:
             Retrieving a list of defined images from %{provider}
           results: |-
             Total of %{images} images found
+        machines:
+          options:
+            provider: |-
+              Node provider to retrieve machine types
+          start: |-
+            Retrieving a list of available machines from %{provider}
+          results: |-
+            Total of %{machines} machine types found

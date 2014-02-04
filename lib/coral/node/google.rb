@@ -38,13 +38,7 @@ class Google < Node::Fog
       'europe-west1-b'     
     ]
   end
- 
-  #---
   
-  def machine_types
-    machine.compute.machine_types if machine.compute
-  end
-    
   #-----------------------------------------------------------------------------
   # Settings groups
     
@@ -80,6 +74,26 @@ class Google < Node::Fog
   
   #-----------------------------------------------------------------------------
   # Utilities
+  
+  def machine_type_id(machine_type)
+    machine_type.name
+  end
+  
+  #---
+  
+  def render_machine_type(machine_type)
+    sprintf("[  %20s  ][ VCPUS: %2i ] %-55s ( RAM: %6iMB | DISK: %3iGB )  ( MAX DISKS: %2i | MAX STORAGE: %6iGB )", 
+      machine_type_id(machine_type), 
+      machine_type.guest_cpus, 
+      machine_type.description, 
+      machine_type.memory_mb, 
+      machine_type.image_space_gb, 
+      machine_type.maximum_persistent_disks, 
+      machine_type.maximum_persistent_disks_size
+    )
+  end
+  
+  #---
   
   def image_id(image)
     image.name

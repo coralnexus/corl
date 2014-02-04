@@ -488,6 +488,18 @@ class Node < Base
   
   #---
   
+  def machine_type_id(machine_type)
+    machine_type.id
+  end
+  
+  #---
+  
+  def render_machine_type(machine_type)
+    ''  
+  end
+  
+  #---
+  
   def image_id(image)
     image.id
   end

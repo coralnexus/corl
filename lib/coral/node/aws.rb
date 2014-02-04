@@ -63,6 +63,19 @@ class Aws < Node::Fog
   #-----------------------------------------------------------------------------
   # Utilities
   
+  def render_machine_type(machine_type)
+    sprintf("[  %20s  ][ VCPUS: %5.1f ] %-40s ( RAM: %6iMB | DISK: %8iGB )  ( BITS: %2i )", 
+      machine_type_id(machine_type), 
+      machine_type.cores, 
+      machine_type.name, 
+      machine_type.ram, 
+      machine_type.disk, 
+      machine_type.bits
+    )
+  end
+  
+  #---
+  
   def render_image(image)
     sprintf("[  %20s  ][ %10s ] %10s - %s", image_id(image), image.state, image.architecture, image.name)
   end

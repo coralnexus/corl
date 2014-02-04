@@ -66,6 +66,18 @@ class Rackspace < Node::Fog
   #-----------------------------------------------------------------------------
   # Utilities
   
+  def render_machine_type(machine_type)
+    sprintf("[  %20s  ][ VCPUS: %2i ] %-30s ( RAM: %6iMB | DISK: %4iGB )", 
+      machine_type_id(machine_type), 
+      machine_type.vcpus, 
+      machine_type.name, 
+      machine_type.ram, 
+      machine_type.disk
+    )
+  end
+  
+  #---
+  
   def render_image(image)
     sprintf("[  %40s  ][ %10s ] %s", image_id(image), image.state, image.name)
   end
