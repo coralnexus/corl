@@ -9,7 +9,6 @@ class Fog < Plugin::Node
   def normalize
     super
     yield if block_given?
-    dbg(provider_info, 'provider info')
     create_machine(:fog, extended_config(:machine, provider_info))
   end
        
