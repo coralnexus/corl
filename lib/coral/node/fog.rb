@@ -73,7 +73,7 @@ class Fog < Plugin::Node
   # Settings groups
     
   def provider_info
-    config = Config.new({ :region => region })
+    config = Config.new
         
     config[:connection_options] = connection_options if connection_options
     

@@ -30,8 +30,9 @@ class Rackspace < Node::Fog
   def provider_info
     super do |config|
       config.import({ 
-        :provider => 'rackspace', 
-        :version  => :v2
+        :provider         => 'rackspace', 
+        :version          => :v2,
+        :rackspace_region => region
       })
     
       config[:rackspace_username] = user_name if user_name
