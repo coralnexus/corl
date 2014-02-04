@@ -46,11 +46,13 @@ class Action < Base
     @codes = Codes.new
     
     self.usage = usage
-            
+    
     if get(:settings, nil)
-      set(:processed, true)  
+      set(:processed, true)
+      node_defaults  
     else
       set(:settings, {})
+      node_defaults
       parse_base(args)
     end    
   end
@@ -112,16 +114,14 @@ class Action < Base
     logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
     
     @parser = Util::CLI::Parser.new(args, usage) do |parser| 
-      parse(parser)
-      node_options(parser)
-      
+      parse(parser)      
       extension(:parse, { :parser => parser })
     end
     
     if @parser 
       if @parser.processed
         set(:processed, true)
-        set(:settings, Config.new(Util::Data.merge([ @parser.options, @parser.arguments ], true)))
+        set(:settings, Config.new(Util::Data.merge([ settings, @parser.options, @parser.arguments ], true)))
         logger.debug("Parse successful: #{export.inspect}")
         
       elsif @parser.options[:help] && ! quiet?

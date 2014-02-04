@@ -6,6 +6,15 @@ module Node
         
   #-----------------------------------------------------------------------------
   # Options
+  
+  def node_defaults
+    settings[:parallel]      = true
+    settings[:net_provider]  = :default
+    settings[:node_provider] = :local
+    settings[:nodes]         = []
+  end
+  
+  #---
          
   def node_options(parser)
     parser.option_bool(:parallel, true, 
@@ -16,7 +25,7 @@ module Node
       '--net-provider PROVIDER', 
       'coral.core.mixins.node.options.net_provider'
     )
-    parser.option_str(:node_provider, :rackspace, 
+    parser.option_str(:node_provider, :local, 
       '--node-provider PROVIDER', 
       'coral.core.mixins.node.options.node_provider'
     )
