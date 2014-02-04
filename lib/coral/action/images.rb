@@ -44,6 +44,8 @@ class Images < Plugin::Action
           images.each do |image|
             render(node.render_image(image), { :prefix => false })
           end
+          
+          self.result = images
           success('coral.core.actions.images.results', { :images => images.length }) if images.length > 1
         else
           status = code.image_load_failure

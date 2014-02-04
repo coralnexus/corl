@@ -33,6 +33,8 @@ class Machines < Plugin::Action
           machine_types.each do |machine_type|
             render(node.render_machine_type(machine_type), { :prefix => false })
           end
+          
+          self.result = machine_types
           success('coral.core.actions.machines.results', { :machines => machine_types.length }) if machine_types.length > 1
         else
           status = code.machine_load_failure
