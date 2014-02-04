@@ -13,8 +13,11 @@ class Core < Config
   def initialize(data = {}, defaults = {}, force = true)
     super(data, defaults, force)
     
+    
+    
     class_label      = self.class.to_s.downcase.gsub(/^coral::/, '')
-    interface_config = Config.new(export).defaults({ :logger => class_label, :resource => class_label })
+    logger_name      = delete(:logger, class_label)
+    interface_config = Config.new(export).defaults({ :logger => logger_name, :resource => class_label })
     
     @ui = Util::Interface.new(interface_config)
     logger.debug("Initialized instance interface")
