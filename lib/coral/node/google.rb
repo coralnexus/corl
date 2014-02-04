@@ -13,6 +13,10 @@ class Google < Node::Fog
   #-----------------------------------------------------------------------------
   # Checks
   
+  def usable_image?(image)
+    image.status == 'READY' && ! image.description.match(/DEPRECATED/i)
+  end
+  
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
@@ -77,6 +81,21 @@ class Google < Node::Fog
   #-----------------------------------------------------------------------------
   # Utilities
   
+  def image_id(image)
+    image.name
+  end
+  
+  #---
+  
+  def render_image(image)
+    sprintf("[  %40s  ][ %10s ] %s - %s", image_id(image), image.status, image.description, image.project)
+  end
+  
+  #---
+  
+  def image_search_text(image)
+    sprintf("%s %s %s %s", image.name, image.description, image.status, image.project)  
+  end
 end
 end
 end

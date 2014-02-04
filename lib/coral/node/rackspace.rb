@@ -13,6 +13,10 @@ class Rackspace < Node::Fog
   #-----------------------------------------------------------------------------
   # Checks
   
+  def usable_image?(image)
+    image.state != 'DELETED'
+  end
+  
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
@@ -62,6 +66,15 @@ class Rackspace < Node::Fog
   #-----------------------------------------------------------------------------
   # Utilities
   
+  def render_image(image)
+    sprintf("[  %40s  ][ %10s ] %s", image_id(image), image.state, image.name)
+  end
+  
+  #---
+  
+  def image_search_text(image)
+    sprintf("%s %s %s", image_id(image), image.name, image.state)  
+  end
 end
 end
 end

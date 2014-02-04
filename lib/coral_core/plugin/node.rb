@@ -21,7 +21,13 @@ class Node < Base
   
   def local?
     @local_context ? true : false
-  end  
+  end
+  
+  #---
+  
+  def usable_image?(image)
+    true
+  end   
    
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
@@ -145,8 +151,41 @@ class Node < Base
     
   #---
   
-  def images # Must be set at machine level (queried)
-    machine.images if machine
+  def images(search_terms = [], options = {})
+    config = Config.ensure(options)
+    images = []
+    
+    if machine
+      loaded_images = machine.images
+    
+      if loaded_images
+        require_all = config.get(:require_all, false)
+        
+        loaded_images.each do |image|
+          if usable_image?(image)
+            include_image = ( search_terms.empty? ? true : require_all )
+            image_text    = image_search_text(image)
+            
+            search_terms.each do |term|
+              if config.get(:match_case, false)
+                success = image_text.match(/#{term}/)
+              else
+                success = image_text.match(/#{term}/i)  
+              end
+              
+              if require_all            
+                include_image = false unless success
+              else
+                include_image = true if success  
+              end
+            end
+        
+            images << image if include_image
+          end
+        end
+      end
+    end
+    images
   end
   
   #---
@@ -445,6 +484,24 @@ class Node < Base
   
   def translate_reference(reference)
     self.class.translate_reference(reference)
+  end
+  
+  #---
+  
+  def image_id(image)
+    image.id
+  end
+  
+  #---
+  
+  def render_image(image)
+    ''  
+  end
+  
+  #---
+  
+  def image_search_text(image)
+    image.to_s
   end             
 end
 end

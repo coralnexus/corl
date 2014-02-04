@@ -13,6 +13,10 @@ class Aws < Node::Fog
   #-----------------------------------------------------------------------------
   # Checks
   
+  def usable_image?(image)
+    image.state == 'available' && image.name
+  end
+  
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
@@ -59,6 +63,15 @@ class Aws < Node::Fog
   #-----------------------------------------------------------------------------
   # Utilities
   
+  def render_image(image)
+    sprintf("[  %20s  ][ %10s ] %10s - %s", image_id(image), image.state, image.architecture, image.name)
+  end
+  
+  #---
+  
+  def image_search_text(image)
+    sprintf("%s %s %s %s %s", image_id(image), image.name, image.description, image.state, image.architecture)
+  end
 end
 end
 end
