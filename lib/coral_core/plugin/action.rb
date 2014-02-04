@@ -9,11 +9,15 @@ class Action < Base
   # Action plugin interface
   
   def self.exec_safe(provider, options)
+    action_result = nil
+    
     begin
       logger = Coral.logger
       
       logger.debug("Running coral action #{provider} with #{options.inspect}")
-      exit_status = Coral.action(provider, options).execute
+      action        = Coral.action(provider, options)
+      exit_status   = action.execute
+      action_result = action.result
       
     rescue Exception => error
       logger.error("Coral action #{provider} experienced an error:")
@@ -27,7 +31,7 @@ class Action < Base
     end
 
     exit_status = Codes.new.unknown_status unless exit_status.is_a?(Integer)
-    exit_status  
+    { :status => exit_status, :result => action_result }  
   end
   
   def self.exec(provider, options, quiet = true)
@@ -35,7 +39,8 @@ class Action < Base
   end
   
   def self.exec_cli(provider, args, quiet = false)
-    exec_safe(provider, { :args => args, :quiet => quiet })
+    results = exec_safe(provider, { :args => args, :quiet => quiet })
+    results[:status]
   end
   
   #---
