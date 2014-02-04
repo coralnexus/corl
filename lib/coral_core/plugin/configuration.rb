@@ -130,7 +130,7 @@ class Configuration < Base
   
   #---
   
-  def delete(options = {})
+  def remove(options = {})
     method_config = Config.ensure(options)
     success       = false
     
@@ -143,7 +143,7 @@ class Configuration < Base
         success = yield(method_config) if block_given?
       end
     else
-      logger.warn("Can not delete source configuration")
+      logger.warn("Can not remove source configuration")
     end
     success
   end

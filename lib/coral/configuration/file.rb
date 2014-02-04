@@ -151,7 +151,7 @@ class File < Plugin::Configuration
   
   #---
   
-  def delete(options = {})
+  def remove(options = {})
     super do |method_config|
       success = false 
       if Util::Disk.delete(location)
