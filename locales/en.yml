@@ -96,3 +96,15 @@ en:
               Optional space separated list of files to save
           start: |-
             Saving project changes with provider %{project_provider} (ref: %{reference} rev: %{revision})
+        images:
+          options:
+            match_case: |-
+              Match case on any search terms given when searching for images (default %{default_value})
+            require_all: |-
+              Require all search terms to be present in image descriptions to be included (default %{default_value})
+            provider: |-
+              Node provider to retrieve images for
+            search: |-
+              Optional array of search terms to filter image results
+          start: |-
+            Retrieving a list of defined images from %{provider}
