@@ -4,7 +4,7 @@ module Action
 class Images < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Spawn action interface
+  # Images action interface
   
   def normalize
     super('coral images <node_provider> [ <search_term> ... ]')
