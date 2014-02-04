@@ -108,3 +108,5 @@ en:
               Optional array of search terms to filter image results
           start: |-
             Retrieving a list of defined images from %{provider}
+          results: |-
+            Total of %{images} images found
