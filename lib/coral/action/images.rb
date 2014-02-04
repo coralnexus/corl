@@ -42,7 +42,7 @@ class Images < Plugin::Action
       if node = Coral.node(:test, {}, settings[:provider])
         if images = node.images(settings[:search], settings)
           images.each do |image|
-            ui.info(node.render_image(image), { :prefix => false })
+            render(node.render_image(image), { :prefix => false })
           end
           success('coral.core.actions.images.results', { :images => images.length }) if images.length > 1
         else

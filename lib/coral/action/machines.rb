@@ -31,7 +31,7 @@ class Machines < Plugin::Action
       if node = Coral.node(:test, {}, settings[:provider])
         if machine_types = node.machine_types
           machine_types.each do |machine_type|
-            ui.info(node.render_machine_type(machine_type), { :prefix => false })
+            render(node.render_machine_type(machine_type), { :prefix => false })
           end
           success('coral.core.actions.machines.results', { :machines => machine_types.length }) if machine_types.length > 1
         else

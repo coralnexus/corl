@@ -197,6 +197,12 @@ class Action < Base
   
   #-----------------------------------------------------------------------------
   # Output
+  
+  def render(display, options = {})
+    ui.info(display, options) unless quiet?
+  end
+  
+  #---
         
   def info(name, options = {})
     ui.info(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?
