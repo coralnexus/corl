@@ -94,6 +94,16 @@ class Action < Base
     usage
   end
   
+  #---
+  
+  def result=result
+    set(:result, result)
+  end
+  
+  def result
+    get(:result, nil)
+  end
+  
   #-----------------------------------------------------------------------------
   # Status codes
     
@@ -148,6 +158,8 @@ class Action < Base
   
   def execute
     logger.info("Executing action #{plugin_provider}")
+    
+    self.result = nil
     
     if processed?
       status = node_exec do |node, network|
