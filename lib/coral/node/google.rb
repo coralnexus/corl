@@ -10,16 +10,6 @@ class Google < Node::Fog
   #-----------------------------------------------------------------------------
   # Node plugin interface
   
-  def normalize
-    super
-    
-    begin
-      require 'google/api_client'
-    rescue LoadError
-      ui.warn("Please install the google-api-client gem before using the Google node provider.")
-    end
-  end
-      
   #-----------------------------------------------------------------------------
   # Checks
   
@@ -59,7 +49,7 @@ class Google < Node::Fog
       config.import({ 
         :provider => 'google'
       })
-    
+      
       config[:google_project] = project_name if project_name
       config[:google_client_email] = user_name if user_name
       config[:google_key_location] = api_key if api_key
