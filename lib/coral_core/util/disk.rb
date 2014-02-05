@@ -69,7 +69,10 @@ class Disk
     file           = open(file_name, options)
     
     if file
-      return file.write(data)
+      file.pos = 0 if options[:mode] == 'w'
+      success  = file.write(data)
+      file.flush
+      return success
     end
     return nil
   end
