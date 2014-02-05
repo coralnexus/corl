@@ -60,6 +60,18 @@ class Node < Base
     return self
   end
   
+  #---
+ 
+  def [](name, default = nil, format = false)
+    setting(name, default, format)
+  end
+  
+  #---
+  
+  def []=(name, value)
+    set_setting(name, value)
+  end
+   
   #-----------------------------------------------------------------------------
   
   def groups
