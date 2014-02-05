@@ -65,7 +65,8 @@ class Spawn < Plugin::Action
                   :public_key   => settings[:public_key],
                   :region       => settings[:region],
                   :machine_type => settings[:machine_type],
-                  :image        => settings[:image]
+                  :image        => settings[:image],
+                  :seed         => settings[:seed]
                 })
               
                 dbg('we are done')
