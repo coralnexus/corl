@@ -146,7 +146,16 @@ class Node < Base
   end
   
   def machine_type
-    get(:machine_type, nil)
+    machine_type = get(:machine_type, nil)
+    
+    if machine_type.nil? && machine
+      if types = machine_types
+        machine_type      = machine_type_id(types.first)
+        self.machine_type = machine_type
+      end
+    end
+    
+    machine_type
   end
     
   #---

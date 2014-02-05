@@ -8,6 +8,8 @@ class Fog < Plugin::Node
    
   def normalize
     super
+    self.region = region
+    
     yield if block_given?
     create_machine(:fog, extended_config(:machine, provider_info))
   end
@@ -67,7 +69,13 @@ class Fog < Plugin::Node
   end
   
   def region
-    get(:region, regions.first)
+    if region = get(:region, nil)
+      region
+    else
+      first_region = regions.first
+      self.region  = first_region
+      first_region
+    end
   end
   
   #-----------------------------------------------------------------------------

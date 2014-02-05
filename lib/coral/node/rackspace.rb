@@ -51,11 +51,11 @@ class Rackspace < Node::Fog
   def create(options = {})
     super do |op, config|
       if op == :config
-        config[:private_key] = private_key if private_key
-        config[:public_key]  = public_key if public_key
+        config[:private_key_path] = private_key if private_key
+        config[:public_key_path]  = public_key if public_key
     
         config.defaults({
-          :name      => hostname,
+          :name      => name,
           :flavor_id => machine_type,
           :image_id  => image
         })
