@@ -1,5 +1,8 @@
 en:
   coral:
+    errors:
+      batch_error: |-
+        An issue was encountered during batch processing
     core:
       util:
         cli:
@@ -9,6 +12,11 @@ en:
           parse:
             error: |-
               There was a problem with the command arguments given
+        batch:
+          unexpected_error: |
+            There was a problem with batch %{process}: %{message}
+          coral_error: |
+            There was a problem with batch %{process}: %{message}
       mixins:
         project:
           options:
