@@ -880,6 +880,18 @@ class Project < Base
     Dir.chdir(prev_directory)
     result
   end
+  
+  #---
+  
+  def local_path(file_path)
+    file_path.gsub(directory + File::SEPARATOR, '')  
+  end
+  
+  #---
+  
+  def full_path(local_path)
+    File.join(directory, local_path)
+  end
 end
 end
 end
