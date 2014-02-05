@@ -68,9 +68,7 @@ class Spawn < Plugin::Action
                   :image        => settings[:image],
                   :seed         => settings[:seed]
                 })
-              
-                dbg('we are done')
-                            
+                         
                 code.success                      
               end                           
             end
