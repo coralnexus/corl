@@ -86,6 +86,13 @@ class Node < Base
     end
     self
   end
+  
+  #---
+  
+  def id # Must be set at machine level
+    return machine.name if machine
+    nil
+  end
  
   #---
   
