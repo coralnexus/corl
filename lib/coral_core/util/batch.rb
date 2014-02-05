@@ -51,7 +51,7 @@ class Batch < Core
   
   #---
   
-  def delete(name)
+  def remove(name)
     processes.delete(name)
     return self
   end
