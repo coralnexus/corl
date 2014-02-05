@@ -11,7 +11,8 @@ class Spawn < Plugin::Action
   def normalize
     super('coral spawn <node_provider> <image_id> <hostname> ...')
     
-    codes :node_create_failure => 20
+    codes :network_failure     => 20,
+          :node_create_failure => 21
   end
 
   #-----------------------------------------------------------------------------
@@ -53,40 +54,37 @@ class Spawn < Plugin::Action
     super do |node, network, status|
       info('coral.core.actions.spawn.start')      
       
-      Coral.batch(settings[:parallel]) do |op, batch|
-        if op == :add
-          # Add batch operations      
-          settings[:hostnames].each do |hostname|
-            batch.add(hostname) do
-              # 1. Spawn new machine on hosting environment
+      if network
+        Coral.batch(settings[:parallel]) do |op, batch|
+          if op == :add
+            # Add batch operations      
+            settings[:hostnames].each do |hostname|
+              batch.add(hostname) do
+                node = network.add_node(settings[:provider], hostname, {
+                  :private_key  => settings[:private_key],
+                  :public_key   => settings[:public_key],
+                  :region       => settings[:region],
+                  :machine_type => settings[:machine_type],
+                  :image        => settings[:image]
+                })
               
-              node = Coral.node(hostname, {
-                :private_key  => settings[:private_key],
-                :public_key   => settings[:public_key],
-                :region       => settings[:region],
-                :machine_type => settings[:machine_type],
-                :image        => settings[:image]
-              }, settings[:provider])
-                          
-              if node.create
-                # 2. Bootstrap new machine
-                # 3. Seed machine with remote project reference
-                # 4. Save machine to network project
-                # 5. Update local network project
+                dbg('we are done')
+                            
+                code.success                      
+              end                           
+            end
+          else
+            # Reduce to single status
+            batch.each do |name, result|
+              unless result == code.success
+                status = code.batch_error
+                break
               end
-              
-              code.success                      
-            end                           
-          end
-        else
-          # Reduce to single status
-          batch.each do |name, result|
-            unless result == code.success
-              status = code.batch_error
-              break
             end
           end
         end
+      else
+        status = code.network_failure    
       end
       status
     end
