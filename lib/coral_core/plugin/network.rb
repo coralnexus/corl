@@ -30,6 +30,16 @@ class Network < Base
   
   plugin_collection :node
   
+  #---
+  
+  def remote(name)
+    config.remote(name)
+  end
+  
+  def set_remote(name, location)
+    config.set_remote(name, location)
+  end
+  
   #-----------------------------------------------------------------------------
   # Operations
   
@@ -37,44 +47,70 @@ class Network < Base
     config.load(options)
   end
   
+  #---
+  
   def save(options = {})
     config.save(options)
   end
   
   #---
   
+  def attach(type, name, files, options = {})
+    included_files = []    
+    files          = [ files ] unless files.is_a?(Array)
+    
+    files.each do |file|
+      if file
+        attached_file = config.attach(type, name, file, options)
+        included_files << attached_file unless attached_file.nil?
+      end  
+    end    
+    included_files
+  end
+  
+  #---
+  
   def add_node(provider, name, options = {})
+    config = Config.ensure(options)
+        
+    remote_name  = config.delete(:remote, :edit)
+    seed_project = config.delete(:seed, nil)
+    
     # Set node data
-    node    = set_node(provider, name, options)
+    node    = set_node(provider, name, config)
     success = true
     
     unless node.local?
       if node.create
+        save_config = { :commit => true, :remote => remote_name, :push => true }
+        
         node.delete_setting(:name) # @TODO: This should really be researched and fixed
         
-        node.set_setting(:id, string(node.id))
-        node.set_setting(:region, string(node.region))
-        node.set_setting(:machine_type, string(node.machine_type))
-        node.set_setting(:hostname, node.hostname)
-        node.set_setting(:public_ip, node.public_ip)
-        node.set_setting(:private_ip, node.private_ip)
+        node[:id]           = string(node.id)
+        node[:region]       = string(node.region)
+        node[:machine_type] = string(node.machine_type)
+        node[:hostname]     = node.hostname
+        node[:public_ip]    = node.public_ip
+        node[:private_ip]   = node.private_ip
         
-        ssh_keys    = []
-        private_key = config.attach(:keys, node.name, options[:private_key]) if options[:private_key]
-        public_key  = config.attach(:keys, node.name, options[:public_key]) if options[:public_key]
+        ssh_keys = attach(:keys, node.public_ip, [ config[:private_key], config[:public_key] ])
         
-        unless private_key.nil?
-          ssh_keys << private_key       
-          node.set_setting(:private_key, private_key)
-        end
-        unless public_key.nil?
-          ssh_keys << public_key
-          node.set_setting(:public_key, public_key)
+        if ssh_keys.length == 2 && ssh_keys[0] && ssh_keys[1]
+          node[:private_key]  = ssh_keys[0]
+          node[:public_key]   = ssh_keys[1]
+                    
+          save_config[:files] = ssh_keys
+        else
+          ssh_keys = []
         end
         
-        dbg(config.export, 'configuration export')
+        if seed_project && remote_name
+          set_remote(:origin, seed_project) if remote_name.to_sym == :edit
+          set_remote(remote_name, seed_project)
+          save_config[:pull] = false
+        end
         
-        save({ :files => ssh_keys, :commit => true, :remote => nil })
+        success = save(save_config)
         
         # 2. Bootstrap new machine
         # 3. Seed machine with remote project reference
