@@ -361,7 +361,7 @@ class Project < Base
           logger.info("Committing changes to project #{name}: #{files.inspect}")
       
           time     = Time.new.strftime("%Y-%m-%d %H:%M:%S")
-          user     = config.delete(:user, ENV['USER'])
+          user     = config.delete(:user, ENV['USER'] + '@' + fact(:hostname))
       
           message  = config.get(:message, '')
           message  = 'Saving state: ' + ( files.is_a?(Array) ? "\n\n" + files.join("\n") : files.to_s ) if message.empty?
@@ -565,6 +565,19 @@ class Project < Base
     self 
   end
   protected :init_remotes
+ 
+  #---
+  
+  def remote(name)
+    url = nil
+    if can_persist?
+      localize do
+        logger.info("Fetching remote url for #{name}")
+        url = yield if block_given?
+      end
+    end
+    url
+  end
  
   #---
   
