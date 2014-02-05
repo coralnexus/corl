@@ -108,7 +108,19 @@ class File < Plugin::Configuration
   def commit_message=commit_message
     _set(:commit_message, string(commit_message))
   end
-    
+  
+  #-----------------------------------------------------------------------------
+  
+  def remote(name)
+    project.remote(name)
+  end
+  
+  #---
+  
+  def set_remote(name, location)
+    project.set_remote(name, location)
+  end
+  
   #-----------------------------------------------------------------------------
   # Configuration loading / saving
     
@@ -173,13 +185,10 @@ class File < Plugin::Configuration
       
       logger.debug("Attaching file #{file} to configuration at #{attach_path}")
     
-      file.match(/(\.[A-Za-z0-9]+)?$/)
-      attach_ext = $1 || ''
+      attach_ext = ::File.basename(file)      
+      new_file   = project.local_path(Util::Disk.filename([ attach_path, "#{name}-#{attach_ext}" ]))
       
-      new_file = project.local_path(Util::Disk.filename([ attach_path, "#{name}#{attach_ext}" ]))
-      dbg(new_file)
-    
-      FileUtils.mkdir(attach_path) unless Dir.exists?(attach_path)
+      FileUtils.mkdir_p(attach_path) unless Dir.exists?(attach_path)
       FileUtils.cp(file, new_file)
     
       logger.debug("Attaching file to project as #{new_file}")
@@ -212,21 +221,24 @@ class File < Plugin::Configuration
     config  = Config.ensure(options)
     success = true
     
+    dbg(config.export, 'configuration for update project')
+    
     if autocommit || config.get(:commit, false)
-      commit_files = location
-      commit_files = [ location, array(files) ].flatten unless files.empty?
+      commit_files = project.local_path(location)
+      commit_files = [ commit_files, array(files) ].flatten unless files.empty?
           
       logger.info("Committing changes to configuration files")        
-      success = project.commit(commit_files, config) if autocommit
+      success = project.commit(commit_files, config)
           
       if success && remote = config.get(:remote, nil)
         logger.info("Pushing configuration updates to remote #{remote}")
-        success = project.pull(remote, config)
-        success = project.push(remote, config) if success       
+        success = project.pull(remote, config) if config.get(:pull, true)
+        success = project.push(remote, config) if success && config.get(:push, true)      
       end
     end
     success
   end
+  protected :update_project
 end
 end
 end
