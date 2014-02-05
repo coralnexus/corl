@@ -41,7 +41,7 @@ class Project < Base
     
     extension(:normalize)
     
-    set_directory(Util::Disk.filename(get(:directory, Dir.pwd)))    
+    set_directory(Util::Disk.filename(get(:directory, Dir.pwd)))
     set_url(get(:url)) if get(:url, false)
     
     self.name = path
@@ -797,7 +797,7 @@ class Project < Base
     if options.has_key?(:url)
       if matches = translate_reference(options[:url])
         options[:provider] = matches[:provider]
-        options[:url]      = matches[:reference]
+        options[:url]      = matches[:url]
         options[:revision] = matches[:revision] unless options.has_key?(:revision)
         
         logger.debug("Translating project options: #{options.inspect}")  
@@ -810,7 +810,7 @@ class Project < Base
   
   def self.translate_reference(reference, editable = false)
     # ex: github:::coralnexus/puppet-coral[0.2]
-    if reference && reference.match(/^\s*([a-zA-Z0-9_-]+):::([^\[\s]+)\s*(?:\[\s*([^\]\s]+)\s*\])?\s*$/)
+    if reference && reference.match(/^\s*([a-zA-Z0-9_-]+):::([^\]\s]+)\s*(?:\[\s*([^\]\s]+)\s*\])?\s*$/)
       provider = $1
       url      = $2
       revision = $3

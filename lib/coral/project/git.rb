@@ -22,6 +22,13 @@ class Git < Plugin::Project
       else
         logger.debug("Ensuring Git instance to manage #{directory}")
         @git_lib = Util::Git.new(directory)
+        
+        if ! @git_lib.nil? && get(:create, false)
+          unless File.directory?(directory) && @git_lib.git.exist?
+            FileUtils.mkdir_p(directory) unless File.directory?(directory)
+            @git_lib.git.init({ :bare => false })
+          end
+        end
       end
     end
     return self

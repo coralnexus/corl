@@ -37,10 +37,10 @@ class Git < ::Grit::Repo
     self.git = ::Grit::Git.new(self.path)
     self.git.work_tree = epath
     
-    unless File.directory?(epath) && self.git.exist?
-      FileUtils.mkdir_p(epath) unless File.directory?(epath)
-      self.git.init({ :bare => @bare })
-    end
+    #unless File.directory?(epath) && self.git.exist?
+    #  FileUtils.mkdir_p(epath) unless File.directory?(epath)
+    #  self.git.init({ :bare => @bare })
+    #end
   end
 end
 end
