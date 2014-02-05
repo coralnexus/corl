@@ -147,6 +147,24 @@ class Configuration < Base
     end
     success
   end
+  
+  #---
+  
+  def attach(type, name, file, options = {})
+    method_config = Config.ensure(options)
+    new_location  = nil
+    
+    if can_persist?
+      if extension_check(:attach, { :config => method_config })
+        logger.info("Attaching file to source configuration")
+      
+        new_location = yield(method_config) if block_given?
+      end
+    else
+      logger.warn("Can not attach file to source configuration")
+    end
+    new_location
+  end
 end
 end
 end

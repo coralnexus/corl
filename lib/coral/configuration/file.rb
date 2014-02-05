@@ -108,7 +108,7 @@ class File < Plugin::Configuration
   def commit_message=commit_message
     _set(:commit_message, string(commit_message))
   end
-   
+    
   #-----------------------------------------------------------------------------
   # Configuration loading / saving
     
@@ -141,8 +141,10 @@ class File < Plugin::Configuration
         rendering = renderer.generate(config.export)
         
         if Util::Disk.write(location, rendering)
+          commit_files = [ location, method_config.get_array(:files) ].flatten
+          
           logger.debug("Source configuration rendering: #{rendering}")        
-          success = project.commit(location, method_config) if autocommit
+          success = update_project(array(method_config.delete(:files)), method_config)
         end
       end
       success
@@ -155,9 +157,35 @@ class File < Plugin::Configuration
     super do |method_config|
       success = false 
       if Util::Disk.delete(location)
-        success = project.commit(location, method_config) if autocommit
+        success = update_project([], method_config)
       end
       success
+    end
+  end
+  
+  #---
+  
+  def attach(type, name, file, options = {})
+    super do |method_config|
+      attach_path = Util::Disk.filename([ project.directory, type.to_s ])
+      file        = ::File.expand_path(file)
+      success     = true
+      
+      logger.debug("Attaching file #{file} to configuration at #{attach_path}")
+    
+      file.match(/(\.[A-Za-z0-9]+)?$/)
+      attach_ext = $1 || ''
+      
+      new_file = project.local_path(Util::Disk.filename([ attach_path, "#{name}#{attach_ext}" ]))
+      dbg(new_file)
+    
+      FileUtils.mkdir(attach_path) unless Dir.exists?(attach_path)
+      FileUtils.cp(file, new_file)
+    
+      logger.debug("Attaching file to project as #{new_file}")
+      success = update_project(new_file, method_config)
+          
+      success ? new_file : nil
     end
   end
   
@@ -177,6 +205,28 @@ class File < Plugin::Configuration
     load if autoload
   end
   protected :set_absolute_location
+  
+  #---
+  
+  def update_project(files = [], options = {})
+    config  = Config.ensure(options)
+    success = true
+    
+    if autocommit || config.get(:commit, false)
+      commit_files = location
+      commit_files = [ location, array(files) ].flatten unless files.empty?
+          
+      logger.info("Committing changes to configuration files")        
+      success = project.commit(commit_files, config) if autocommit
+          
+      if success && remote = config.get(:remote, nil)
+        logger.info("Pushing configuration updates to remote #{remote}")
+        success = project.pull(remote, config)
+        success = project.push(remote, config) if success       
+      end
+    end
+    success
+  end
 end
 end
 end
