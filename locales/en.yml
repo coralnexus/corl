@@ -49,7 +49,13 @@ en:
             node_provider: |-
               Default to using a specific node provider but individual node references can override (default %{default_value})
             nodes: |-
-              Optional nodes on which to execute this action              
+              Optional nodes on which to execute this action
+        keypair:
+          options:
+            private_key: |-
+              File location of the private SSH key to use for operations (default %{default_value})
+            public_key: |-
+              File location of the public SSH key to use for operations (default %{default_value}))             
       exec:
         help:
           usage: |-
@@ -118,3 +124,21 @@ en:
             Retrieving a list of available machines from %{provider}
           results: |-
             Total of %{machines} machine types found
+        spawn:
+          options:
+            parallel: |-
+              Enable or disable parallelism of node creation (default %{default_value})
+            seed: |-
+              Coral project reference with cloud project to seed new machines with (default %{default_value})
+            region: |-
+              Machine provider region in which to create the machines (defaults to first defined in provider)
+            machine_type: |-
+              Provider ID of machine type to create (defaults to first defined in provider - usually smallest)
+            provider: |-
+              Create machines with this node provider
+            image: |-
+              Provider ID of operating system image on which to initialize the new machines           
+            hostnames: |-
+              Hostnames of machines to create on provider infrastructure
+          start: |-
+            Spawning new machines on %{provider} 
