@@ -75,6 +75,7 @@ class Batch < Core
     errors = exec(get_hash(:processes))
 
     unless errors.empty?
+      ui.warn(errors.join("\n\n"))
       raise Errors::BatchError, :message => errors.join("\n\n")
     end
     
