@@ -324,6 +324,15 @@ class Git < Plugin::Project
       origin_url
     end
   end
+  
+  #---
+  
+  def remote(name)
+    return super do
+      url = config("remote.#{name}.url").strip
+      url.empty? ? nil : url
+    end
+  end
  
   #---
   
@@ -379,12 +388,15 @@ class Git < Plugin::Project
  
   def pull!(remote = :origin, options = {})
     return super do |config, processed_remote|
+      flags = []
+      flags << :tags if config.get(:tags, true)
+      
       success = Coral.command({
         :command => :git,
         :data    => { 'git-dir=' => git.git_dir },
         :subcommand => {
           :command => :pull,
-          :flags   => ( config.get(:tags, true) ? :tags : '' ),
+          :flags   => flags,
           :args    => [ processed_remote, config.get(:revision, get(:revision, :master)) ]
         }
       }, config.get(:provider, :shell)).exec!(config) do |line|
@@ -402,12 +414,16 @@ class Git < Plugin::Project
     return super do |config, processed_remote|
       push_branch = config.get(:revision, '')
       
+      flags = []
+      flags << :all if push_branch.empty?
+      flags << :tags if ! push_branch.empty? && config.get(:tags, true)
+      
       success = Coral.command({
         :command => :git,
         :data => { 'git-dir=' => git.git_dir },
         :subcommand => {
           :command => :push,
-          :flags => [ ( push_branch.empty? ? :all : '' ), ( config.get(:tags, true) ? :tags : '' ) ],
+          :flags => flags,
           :args => [ processed_remote, push_branch ]
         }
       }, config.get(:provider, :shell)).exec!(config) do |line|
