@@ -69,7 +69,18 @@ class Configuration < Base
     save(options) if autosave
     self
   end
+  
+  #-----------------------------------------------------------------------------
+  
+  def remote(name)
+    nil
+  end
 
+  #---
+  
+  def set_remote(name, location)
+  end
+  
   #-----------------------------------------------------------------------------
   # Import / Export
   
