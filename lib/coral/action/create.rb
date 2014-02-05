@@ -40,6 +40,7 @@ class Create < Plugin::Action
       info('coral.core.actions.create.start')
       
       project = Coral.project(extended_config(:project, {
+        :create    => true,
         :directory => settings[:path],
         :url       => settings[:reference],
         :revision  => settings[:revision],
