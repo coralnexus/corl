@@ -8,6 +8,10 @@ class Fog < Plugin::Machine
   
   def normalize
     super
+    
+    self.private_key = delete(:private_key_path, nil)
+    self.public_key  = delete(:public_key_path, nil)
+    
     set_connection
   end
      
@@ -32,9 +36,14 @@ class Fog < Plugin::Machine
     logger.debug("Compute settings: #{export.inspect}")
     
     ENV['DEBUG'] = 'true' if Coral.log_level == :debug
-    require 'fog'    
     
-    self.compute = ::Fog::Compute.new(export)
+    require 'fog' 
+    
+    compute_config = Config.new(export)
+    compute_config.delete(:private_key)
+    compute_config.delete(:public_key)   
+    
+    self.compute = ::Fog::Compute.new(compute_config.export)
     self.server  = name if @compute && ! name.empty?    
   end
   protected :set_connection
@@ -66,6 +75,9 @@ class Fog < Plugin::Machine
     
     self.public_ip  = server.public_ip_address
     self.private_ip = server.private_ip_address
+    
+    server.private_key_path = private_key if private_key
+    server.public_key_path  = public_key if public_key
   end
   
   def server
@@ -159,13 +171,66 @@ class Fog < Plugin::Machine
   
   #---
   
-  def exec(options = {})
+  def upload(local_path, remote_path, options = {})
+    super do
+      require 'net/scp'
+      
+      config  = Config.ensure(options)
+      success = true
+      
+      ssh_options = {
+        :port         => server.ssh_port,
+        :keys         => [ private_key ],
+        :key_data     => [],
+        :auth_methods => [ 'publickey' ]
+      } 
+        
+      logger.debug("Executing SCP upload from #{local_path} to #{remote_path} on machine #{name}") 
+      
+      success = ::Fog::SCP.new(server.ssh_ip_address, server.username, ssh_options).upload(local_path, remote_path, config.export)
+      success
+    end  
+  end
+  
+  #---
+  
+  def download(remote_path, local_path, options = {})
+    super do
+      require 'net/scp'
+      
+      config  = Config.ensure(options)
+      success = true
+      
+      ssh_options = {
+        :port         => server.ssh_port,
+        :keys         => [ private_key ],
+        :key_data     => [],
+        :auth_methods => [ 'publickey' ]
+      } 
+        
+      logger.debug("Executing SCP download to #{local_path} from #{remote_path} on machine #{name}") 
+      
+      success = ::Fog::SCP.new(server.ssh_ip_address, server.username, ssh_options).download(remote_path, local_path, config.export)
+      success
+    end  
+  end
+  
+  #---
+  
+  def exec(commands, options = {})
     super do
       success = true
-      config  = Config.ensure(options)
-      if commands = config.delete(:commands)
+      
+      if commands
+        ssh_options = {
+          :port         => server.ssh_port,
+          :keys         => [ private_key ],
+          :key_data     => [],
+          :auth_methods => [ 'publickey' ]
+        }
+         
         logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}") 
-        success = server.ssh(commands, config.export)
+        success = ::Fog::SSH.new(public_ip, server.username, ssh_options).run(commands)
       end
       success
     end

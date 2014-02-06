@@ -81,6 +81,27 @@ class Machine < Base
   def images
     []
   end
+  
+  #---
+  
+  def private_key=private_key
+    set(:private_key, private_key)
+  end
+  
+  def private_key
+    return File.expand_path(get(:private_key)) if get(:private_key, false)
+    nil
+  end
+  
+  #---
+  
+  def public_key=public_key
+    set(:public_key, public_key)
+  end
+  
+  def public_key
+    return File.expand_path(get(:public_key)) if get(:public_key, false)
+  end
             
   #-----------------------------------------------------------------------------
   # Management 
@@ -176,7 +197,41 @@ class Machine < Base
   
   #---
   
-  def exec(options = {})
+  def upload(local_path, remote_path, options = {})
+    success = true
+    
+    if running?
+      logger.debug("Uploading #{local_path} to #{remote_path} on #{plugin_provider} machine with: #{options.inspect}")
+      config  = Config.ensure(options)      
+      success = yield(config) if block_given?
+    else
+      logger.debug("Machine #{name} is not running")  
+    end
+    
+    logger.warn("There was an error uploading to the machine #{name}") unless success
+    success
+  end
+  
+  #---
+  
+  def download(remote_path, local_path, options = {})
+    success = true
+    
+    if running?
+      logger.debug("Downloading #{local_path} from #{remote_path} on #{plugin_provider} machine with: #{options.inspect}")
+      config  = Config.ensure(options)      
+      success = yield(config) if block_given?
+    else
+      logger.debug("Machine #{name} is not running")  
+    end
+    
+    logger.warn("There was an error downloading from the machine #{name}") unless success
+    success
+  end
+  
+  #---
+  
+  def exec(commands, options = {})
     success = true
     
     if running?
