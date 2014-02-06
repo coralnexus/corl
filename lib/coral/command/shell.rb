@@ -92,7 +92,7 @@ class Shell < Plugin::Command
       end      
       space = ( key.match(assignment_pattern) ? '' : ' ' )  
       
-      command_string << " #{dashes}#{key}#{space}'#{value}'"
+      command_string << " #{dashes}#{key}#{space}\"#{value}\""
     end
     
     # Arguments
@@ -111,7 +111,7 @@ class Shell < Plugin::Command
       arg = string(arg).sub(escape_characters, escape_replacement)
       
       unless arg.empty?
-        command_string << " '#{arg}'"
+        command_string << " \"#{arg}\""
       end
     end
     
