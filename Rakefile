@@ -27,7 +27,7 @@ end
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
   gem.name                  = "coral_core"
-  gem.homepage              = "http://github.com/coraltech/ruby-coral_core"
+  gem.homepage              = "http://github.com/coralnexus/ruby-coral_core"
   gem.rubyforge_project     = 'coral_core'
   gem.license               = "GPLv3"
   gem.email                 = "adrian.webb@coraltech.net"
@@ -44,8 +44,6 @@ Jeweler::Tasks.new do |gem|
   
   # Dependencies defined in Gemfile
 end
-
-Jeweler::RubygemsDotOrgTasks.new
 
 #-------------------------------------------------------------------------------
 # Testing
