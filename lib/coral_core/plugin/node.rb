@@ -395,7 +395,7 @@ class Node < Base
   #---
   
   def exec(options = {})
-    success = true
+    results = nil
     
     if machine && machine.running?
       config = Config.ensure(options)
@@ -406,22 +406,21 @@ class Node < Base
         yield(:config, config) if block_given?
         
         commands = config.get(:commands, nil)
-        success = false unless commands
-        success = machine.exec(commands, config.export) if commands
+        results  = machine.exec(commands, config.export) if commands
         
-        if success && block_given?
+        if results && block_given?
           process_success = yield(:process, config)
-          success         = process_success if process_success == false        
+          results         = process_success if process_success == false        
         end
         
-        if success
+        if results
           extension(:exec_success, { :config => config })
         end
       end
     else
       logger.warn("Node #{name} does not have an attached machine or is not running so cannot execute commands")
     end
-    success 
+    results 
   end
   
   #---

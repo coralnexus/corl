@@ -232,18 +232,18 @@ class Machine < Base
   #---
   
   def exec(commands, options = {})
-    success = true
+    results = []
     
     if running?
       logger.debug("Executing command on #{plugin_provider} machine with: #{options.inspect}")
       config  = Config.ensure(options)      
-      success = yield(config) if block_given?
+      results = yield(config, results) if block_given?
     else
       logger.debug("Machine #{name} is not running")  
     end
     
-    logger.warn("There was an error executing command on the machine #{name}") unless success
-    success
+    logger.warn("There was an error executing command on the machine #{name}") unless results
+    results
   end
   
   #---

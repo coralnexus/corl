@@ -218,9 +218,7 @@ class Fog < Plugin::Machine
   #---
   
   def exec(commands, options = {})
-    super do
-      success = true
-      
+    super do |config, results|
       if commands
         ssh_options = {
           :port         => server.ssh_port,
@@ -230,9 +228,19 @@ class Fog < Plugin::Machine
         }
          
         logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}") 
-        success = ::Fog::SSH.new(public_ip, server.username, ssh_options).run(commands)
+        ssh_results = ::Fog::SSH.new(public_ip, server.username, ssh_options).run(commands)
+        
+        if ssh_results
+          ssh_results.each do |result|
+            results << { 
+              :status => result.status, 
+              :result => result.stdout.strip, 
+              :error  => result.stderr.strip 
+            }  
+          end
+        end
       end
-      success
+      results
     end
   end
   
