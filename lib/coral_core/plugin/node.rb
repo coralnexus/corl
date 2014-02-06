@@ -435,6 +435,17 @@ class Node < Base
   
   #---
   
+  def action(provider, options = {})
+    config        = Config.ensure(options)
+    action_config = extended_config(:action, {
+      :command => provider, 
+      :options => { :json => Util::Data.to_json(config.export) } 
+    })
+    command(:coral, { :subcommand => action_config })  
+  end
+  
+  #---
+  
   def create_image(options = {})
     success = true
     
