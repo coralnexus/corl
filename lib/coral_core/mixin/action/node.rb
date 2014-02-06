@@ -68,7 +68,16 @@ module Node
           # Add batch operations      
           nodes.each do |node|
             batch.add(node.name) do
-              node.run(plugin_provider, settings)
+              dbg(plugin_provider, 'action provider')
+                            
+              exec_config = Config.new(settings)
+              exec_config.delete(:parallel)
+              exec_config.delete(:nodes)
+              exec_config.delete(:node_provider)
+              
+              dbg(exec_config, 'action config')
+              
+              node.action(plugin_provider, exec_config)
               code.success
             end
           end
@@ -76,8 +85,8 @@ module Node
           # Reduce to single status
           status = code.success
           
-          batch.each do |name, code|
-            if code != code.success
+          batch.each do |name, action_status|
+            if action_status != code.success
               status = code.batch_error
               break
             end
