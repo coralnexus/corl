@@ -85,6 +85,8 @@ class Fog < Plugin::Node
     config = Config.new({ :name => get(:id, get(:hostname, nil), nil) })
         
     config[:connection_options] = connection_options if connection_options
+        
+    key_config(config)
     
     yield(config) if block_given?
     config.export
@@ -102,7 +104,6 @@ class Fog < Plugin::Node
   def create(options = {})
     super do |op, config|
       if op == :config
-        key_config(config)
         config.import(exec_options(:create))
       end
       yield(op, config) if block_given?
@@ -114,7 +115,6 @@ class Fog < Plugin::Node
   def start(options = {})
     super do |op, config|
       if op == :config
-        key_config(config)
         config.import(exec_options(:start))
       end
       yield(op, config) if block_given?
@@ -126,7 +126,6 @@ class Fog < Plugin::Node
   def stop(options = {})
     super do |op, config|
       if op == :config
-        key_config(config)
         config.import(exec_options(:stop))
       end
       yield(op, config) if block_given?
@@ -138,7 +137,6 @@ class Fog < Plugin::Node
   def reload(options = {})
     super do |op, config|
       if op == :config
-        key_config(config)
         config.import(exec_options(:reload))
       end
       yield(op, config) if block_given?
@@ -150,7 +148,6 @@ class Fog < Plugin::Node
   def destroy(options = {})    
     super do |op, config|
       if op == :config
-        key_config(config)
         config.import(exec_options(:destroy))
       end
       yield(op, config) if block_given?
@@ -159,10 +156,9 @@ class Fog < Plugin::Node
 
   #---
   
-  def exec(commands, options = {})
+  def exec(options = {})
     super do |op, config|
       if op == :config
-        key_config(config)
         config.import(exec_options(:exec))
       end
       yield(op, config) if block_given?
@@ -174,7 +170,6 @@ class Fog < Plugin::Node
   def create_image(options = {})
     super do |op, config|
       if op == :config
-        key_config(config)
         config.import(exec_options(:image))
       end
       yield(op, config) if block_given?
