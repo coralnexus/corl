@@ -403,8 +403,11 @@ class Node < Base
       if extension_check(:exec, { :config => config })
         logger.info("Executing node: #{name}")
       
-        yield(:config, config) if block_given?      
-        success = machine.exec(config.export)
+        yield(:config, config) if block_given?
+        
+        commands = config.get(:commands, nil)
+        success = false unless commands
+        success = machine.exec(commands, config.export) if commands
         
         if success && block_given?
           process_success = yield(:process, config)
@@ -424,8 +427,10 @@ class Node < Base
   #---
   
   def command(command, options = {})
-    command = Coral.command(command, :shell) unless command.is_a?(Coral::Plugin::Command)
-    exec(Util::Data.merge([ { :commands => [ command.to_s ] }, options ], false))
+    unless command.is_a?(Coral::Plugin::Command)
+      command = Coral.command(Config.new({ :command => command }).import(options), :shell)
+    end
+    exec({ :commands => [ command.to_s ] }).first
   end
   
   #---
