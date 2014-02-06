@@ -72,6 +72,10 @@ en:
             Available actions
           footer: |-
             For help on any individual action run `coral <action> -h`
+      action:
+        options:
+          json: |-
+            Optional JSON string that contains action settings to use (mainly for machine use)
       actions:        
         create:
           options:
