@@ -25,6 +25,7 @@ class Seed < Plugin::Action
     parser.arg_str(:reference, nil, 
       'coral.core.actions.create.options.reference'
     )
+    node_options(parser)
   end
   
   #---
