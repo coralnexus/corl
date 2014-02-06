@@ -149,4 +149,8 @@ en:
             hostnames: |-
               Hostnames of machines to create on provider infrastructure
           start: |-
-            Spawning new machines on %{provider} 
+            Spawning new machines on %{provider}
+        bootstrap:
+          options:
+          start: |-
+            Starting bootstrap of %{provider} machine %{node_name} 
