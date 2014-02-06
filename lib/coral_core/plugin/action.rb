@@ -54,12 +54,15 @@ class Action < Base
     
     if get(:settings, nil)
       set(:processed, true)
+      set(:settings, Config.ensure(get(:settings)))
       node_defaults  
     else
-      set(:settings, {})
+      set(:settings, Config.new)
       node_defaults
       parse_base(args)
-    end    
+    end
+    
+    parse_json    
   end
   
   #-----------------------------------------------------------------------------
@@ -129,6 +132,10 @@ class Action < Base
     logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
     
     @parser = Util::CLI::Parser.new(args, usage) do |parser| 
+      parser.option_str(:json_params, false, 
+        '--json JSON_PARAMS', 
+        'coral.core.action.options.json'
+      )
       parse(parser)      
       extension(:parse, { :parser => parser })
     end
@@ -136,7 +143,7 @@ class Action < Base
     if @parser 
       if @parser.processed
         set(:processed, true)
-        set(:settings, Config.new(Util::Data.merge([ settings, @parser.options, @parser.arguments ], true)))
+        settings.import(Util::Data.merge([ @parser.options, @parser.arguments ], true))
         logger.debug("Parse successful: #{export.inspect}")
         
       elsif @parser.options[:help] && ! quiet?
@@ -245,6 +252,19 @@ class Action < Base
   
   #-----------------------------------------------------------------------------
   # Utilities
+  
+  def parse_json
+    if settings[:json_params]
+      json_properties = Util::Data.parse_json(settings[:json_params])
+      
+      unless json_properties.empty?
+        settings.defaults(json_properties)  
+      end
+    end
+    settings.delete(:json_params)
+  end
+  
+  #---
   
   def admin_exec(status)
     if Coral.admin?
