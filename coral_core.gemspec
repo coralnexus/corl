@@ -158,7 +158,7 @@ Gem::Specification.new do |s|
     "spec/coral_test_kernel.rb",
     "spec/spec_helper.rb"
   ]
-  s.homepage = "http://github.com/coraltech/ruby-coral_core"
+  s.homepage = "http://github.com/coralnexus/ruby-coral_core"
   s.licenses = ["GPLv3"]
   s.rdoc_options = ["--title", "Coral Core library", "--main", "README.rdoc", "--line-numbers"]
   s.require_paths = ["lib"]
