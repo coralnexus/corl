@@ -1,0 +1,4 @@
+
+[submodule "bootstrap"]
+	path = bootstrap
+	url = git://github.com/coralnexus/coral-bootstrap.git
