@@ -40,7 +40,7 @@ Jeweler::Tasks.new do |gem|
                       '--main' << 'README.rdoc' <<
                       '--line-numbers'
                       
-  gem.files.exclude 'lib/dependency' 
+  gem.files.include 'bootstrap' 
   
   # Dependencies defined in Gemfile
 end
