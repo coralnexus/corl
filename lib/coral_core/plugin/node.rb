@@ -141,7 +141,8 @@ class Node < Base
   end
   
   def private_key
-    get(:private_key, '')
+    return File.expand_path(get(:private_key)) if get(:private_key, false)
+    nil
   end
   
   #---
@@ -151,7 +152,7 @@ class Node < Base
   end
   
   def public_key
-    get(:public_key, '')
+    return File.expand_path(get(:public_key)) if get(:public_key, false)
   end
   
   #---
