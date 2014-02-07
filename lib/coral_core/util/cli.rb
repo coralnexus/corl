@@ -107,8 +107,8 @@ module Coral
             return
           end
           
-          parse_encoded
           parser.parse!(args)
+          parse_encoded
           
           remaining_args = args.dup
           arg_messages   = []
@@ -178,8 +178,10 @@ module Coral
         #---
         
         def parse_encoded
+          require 'base64'
+          
           if options[:encoded_params]
-            encoded_properties = symbol_map(Util::Data.parse_json(Base64.decode64(options[:encoded_params])))
+            encoded_properties = Util::Data.symbol_map(Util::Data.parse_json(Base64.decode64(options[:encoded_params])))
             
             @arg_settings.each do |settings|
               if encoded_properties.has_key?(settings[:name].to_sym)

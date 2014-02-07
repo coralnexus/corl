@@ -495,7 +495,7 @@ class Node < Base
   #---
   
   def action(provider, options = {})
-    require 'shellwords'
+    require 'base64'
     
     config         = Config.ensure(options)
     encoded_config = Base64.encode64(Util::Data.to_json(config.export, false))
