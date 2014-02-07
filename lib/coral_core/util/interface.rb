@@ -149,7 +149,7 @@ class Interface
 
   def format_message(type, message, options = {})
     return @delegate.format_message(type, message, options) if check_delegate('format_message')    
-    return '' if message.strip.empty?
+    return '' if message.to_s.strip.empty?
     
     if @resource && ! @resource.empty? && options[:prefix]
       prefix = "[#{@resource}]"
