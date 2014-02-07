@@ -68,16 +68,12 @@ module Node
           # Add batch operations      
           nodes.each do |node|
             batch.add(node.name) do
-              dbg(plugin_provider, 'action provider')
-                            
               exec_config = Config.new(settings)
               exec_config.delete(:parallel)
               exec_config.delete(:nodes)
               exec_config.delete(:node_provider)
               
-              dbg(exec_config, 'action config')
-              
-              node.action(plugin_provider, exec_config)
+              results = node.action(plugin_provider, exec_config)
               code.success
             end
           end
