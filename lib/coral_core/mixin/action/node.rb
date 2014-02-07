@@ -74,7 +74,11 @@ module Node
               exec_config.delete(:node_provider)
               
               results = node.action(plugin_provider, exec_config)
-              code.success
+              
+              render(results[:result], { :prefix => false }) unless results[:result].empty?
+              alert(results[:error], { :prefix => false }) unless results[:error].empty?
+              
+              results[:status]
             end
           end
         else
