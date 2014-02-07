@@ -233,6 +233,7 @@ class Fog < Plugin::Machine
          
         logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}") 
         ssh_results = ::Fog::SSH.new(public_ip, server.username, ssh_options).run(commands)
+        dbg(ssh_results, 'SSH results')
         
         if ssh_results
           ssh_results.each do |result|
