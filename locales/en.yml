@@ -157,4 +157,9 @@ en:
         bootstrap:
           options:
           start: |-
-            Starting bootstrap of %{provider} machine %{node_name} 
+            Starting bootstrap of %{provider} machine %{node_name}
+          error: |-
+            Bootstrap returned with status: %{status}
+          success: |-
+            Machine %{node_name} from %{provider} successfully bootstrapped
+          
