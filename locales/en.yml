@@ -156,6 +156,16 @@ en:
             Spawning new machines on %{provider}
         bootstrap:
           options:
+            bootstrap: |-
+              Bootstrap script top level local directory (default %{default_value})
+            gateway: |-
+              Gateway bootstrap script within the bootstrap project directory (default %{default_value})
+            home_env_var: |-
+              Home directory environment variable on remote server (default %{default_value})
+            provider: |-
+              Node provider hosting the machine to bootstrap
+            node_name: |-
+              Node name of the machine to bootstrap
           start: |-
             Starting bootstrap of %{provider} machine %{node_name}
           error: |-
