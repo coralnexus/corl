@@ -46,6 +46,7 @@ Gem::Specification.new do |s|
     "lib/coral/action/bootstrap.rb",
     "lib/coral/action/clone.rb",
     "lib/coral/action/create.rb",
+    "lib/coral/action/exec.rb",
     "lib/coral/action/image.rb",
     "lib/coral/action/images.rb",
     "lib/coral/action/lookup.rb",
