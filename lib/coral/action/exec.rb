@@ -26,24 +26,10 @@ class Exec < Plugin::Action
    
   def execute
     super do |node, network, status|
-      info('coral.core.actions.exec.start')
-      
-      dbg(node, 'node')
-      dbg(network, 'network')
-      
       if network && node
-        dbg(node.export, 'node')
-        dbg(node.name)
-        dbg(node.public_ip)
-        dbg(node.private_ip)
-        dbg(node.hostname)
-        dbg(node.private_key)
-        dbg(node.public_key)
-         
-        #results = node.exec({ :commands => [ settings[:command].join(' ') ] }).first
-        #ui.info(results.stdout, { :prefix => false })
-        #ui.warn(results.stderr, { :prefix => false })
-        #status = results.status
+        command_str = settings[:command].join(' ')
+        result      = node.exec({ :commands => [ command_str ] }).first
+        status      = result[:status]
       else
         status = code.network_failure
       end
