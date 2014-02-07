@@ -236,10 +236,6 @@ class Fog < Plugin::Machine
                 
         if ssh_results
           ssh_results.each do |result|
-            ui.info(result.stdout, { :prefix => false })
-            ui.warn(result.stderr, { :prefix => false })
-            ui.success(result.status)
-            
             results << { 
               :status => result.status, 
               :result => result.stdout.strip, 
