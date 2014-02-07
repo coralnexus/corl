@@ -60,9 +60,7 @@ class Action < Base
       set(:settings, Config.new)
       node_defaults
       parse_base(args)
-    end
-        
-    parse_encoded    
+    end   
   end
   
   #-----------------------------------------------------------------------------
@@ -132,10 +130,6 @@ class Action < Base
     logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
     
     @parser = Util::CLI::Parser.new(args, usage) do |parser| 
-      parser.option_str(:encoded_params, false, 
-        '--encoded PARAMS', 
-        'coral.core.action.options.encoded'
-      )
       parse(parser)      
       extension(:parse, { :parser => parser })
     end
@@ -252,19 +246,6 @@ class Action < Base
   
   #-----------------------------------------------------------------------------
   # Utilities
-  
-  def parse_encoded
-    if settings[:encoded_params]
-      encoded_properties = symbol_map(Util::Data.parse_json(Base64.decode64(settings[:encoded_params])))
-      
-      unless encoded_properties.empty?
-        settings.defaults(encoded_properties)  
-      end
-    end
-    settings.delete(:encoded_params)
-  end
-  
-  #---
   
   def admin_exec(status)
     if Coral.admin?

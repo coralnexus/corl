@@ -9,6 +9,8 @@ en:
           options:
             help: |-
               Display help information for this command
+            encoded: |-
+              Optional encoded parameter set that contains default action settings (machine use only)
           parse:
             error: |-
               There was a problem with the command arguments given
@@ -72,10 +74,6 @@ en:
             Available actions
           footer: |-
             For help on any individual action run `coral <action> -h`
-      action:
-        options:
-          encoded: |-
-            Optional encoded parameter set that contains default action settings (machine use only)
       actions:        
         create:
           options:

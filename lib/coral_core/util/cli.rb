@@ -98,61 +98,68 @@ module Coral
           
           self.processed = false
           
+          option_str(:encoded_params, false, 
+            '--encoded PARAMS', 
+            'coral.core.util.cli.options.encoded'
+          )
           parser.on_tail('-h', '--help', CLI.message('coral.core.util.cli.options.help')) do
             options[:help] = true
             return
           end
           
+          parse_encoded
           parser.parse!(args)
           
           remaining_args = args.dup
           arg_messages   = []
           
-          @arg_settings.each_with_index do |settings, index|
-            if index >= args.length
-              value = nil
-            else
-              value = Util::Data.value(args[index])
-            end
+          if arguments.empty?
+            @arg_settings.each_with_index do |settings, index|
+              if index >= args.length
+                value = nil
+              else
+                value = Util::Data.value(args[index])
+              end
             
-            if !value.nil? && settings.has_key?(:allowed)
-              allowed = settings[:allowed]
-              case allowed
-              when Class
-                if (allowed == Array)
-                  value          = remaining_args
-                  remaining_args = []
+              if !value.nil? && settings.has_key?(:allowed)
+                allowed = settings[:allowed]
+                case allowed
+                when Class
+                  if (allowed == Array)
+                    value          = remaining_args
+                    remaining_args = []
+                  end
+                  unless value.is_a?(allowed)
+                    arg_messages << CLI.message(settings[:message])
+                    error = true
+                  end
+                when Array
+                  unless allowed.include(value)
+                    arg_messages << CLI.message(settings[:message])
+                    error = true  
+                  end
                 end
-                unless value.is_a?(allowed)
-                  arg_messages << CLI.message(settings[:message])
+              end
+            
+              if value.nil?
+                if settings.has_key?(:default)
+                  value = settings[:default]
+                else
                   error = true
                 end
-              when Array
-                unless allowed.include(value)
-                  arg_messages << CLI.message(settings[:message])
-                  error = true  
-                end
               end
-            end
             
-            if value.nil?
-              if settings.has_key?(:default)
-                value = settings[:default]
-              else
-                error = true
+              if !value.nil? && settings.has_key?(:block)
+                value = settings[:block].call(value)
+                error = true if value.nil?
               end
-            end
             
-            if !value.nil? && settings.has_key?(:block)
-              value = settings[:block].call(value)
-              error = true if value.nil?
-            end
+              break if error
             
-            break if error
-            
-            remaining_args.shift unless remaining_args.empty?
-            self.arguments[settings[:name]] = value
-          end          
+              remaining_args.shift unless remaining_args.empty?
+              self.arguments[settings[:name]] = value
+            end          
+          end
           
           if error
             if ! arg_messages.empty?
@@ -169,7 +176,26 @@ module Coral
         end
         
         #---
-                
+        
+        def parse_encoded
+          if options[:encoded_params]
+            encoded_properties = symbol_map(Util::Data.parse_json(Base64.decode64(options[:encoded_params])))
+            
+            @arg_settings.each do |settings|
+              if encoded_properties.has_key?(settings[:name].to_sym)
+                self.arguments[settings[:name]] = encoded_properties.delete(settings[:name].to_sym)
+              end
+            end
+            
+            encoded_properties.each do |name, value|
+              self.options[name] = value unless options.has_key?(name)
+            end
+          end
+          options.delete(:encoded_params)
+        end
+  
+        #---
+          
         def option(name, default, option_str, allowed_values, message_id, config = {})
           config        = Config.ensure(config)
           name          = name.to_sym
