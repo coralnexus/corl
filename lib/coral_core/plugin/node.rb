@@ -467,14 +467,14 @@ class Node < Base
         
         commands = config.get(:commands, nil)
         results  = machine.exec(commands, config.export) if commands
+        success  = true
         
-        if results && block_given?
-          process_success = yield(:process, config)
-          results         = process_success if process_success == false        
+        results.each do |result|
+          success = false if result[:status] != Coral.code.success  
         end
-        
-        if results
-          extension(:exec_success, { :config => config })
+        if success
+          yield(:process, config) if block_given?
+          extension(:exec_success, { :config => config }) 
         end
       end
     else
@@ -495,10 +495,19 @@ class Node < Base
   #---
   
   def action(provider, options = {})
-    config        = Config.ensure(options)
+    require 'shellwords'
+    
+    config         = Config.ensure(options)
+    encoded_config = Base64.encode64(Util::Data.to_json(config.export, false))
+    decoded_config = symbol_map(Util::Data.parse_json(Base64.decode64(encoded_config)))
+    
+    dbg(config.export, 'original config')
+    dbg(encoded_config, 'encoded config')
+    dbg(decoded_config, 'decoded config')
+    
     action_config = extended_config(:action, {
       :command => provider, 
-      :options => { :json => Util::Data.to_json(config.export) } 
+      :data    => { :encoded => Base64.encode64(Util::Data.to_json(config.export, false)) }
     })
     command(:coral, { :subcommand => action_config })  
   end

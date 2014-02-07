@@ -61,8 +61,8 @@ class Action < Base
       node_defaults
       parse_base(args)
     end
-    
-    parse_json    
+        
+    parse_encoded    
   end
   
   #-----------------------------------------------------------------------------
@@ -132,9 +132,9 @@ class Action < Base
     logger.info("Parsing action #{plugin_provider} with: #{args.inspect}")
     
     @parser = Util::CLI::Parser.new(args, usage) do |parser| 
-      parser.option_str(:json_params, false, 
-        '--json JSON_PARAMS', 
-        'coral.core.action.options.json'
+      parser.option_str(:encoded_params, false, 
+        '--encoded PARAMS', 
+        'coral.core.action.options.encoded'
       )
       parse(parser)      
       extension(:parse, { :parser => parser })
@@ -253,15 +253,15 @@ class Action < Base
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def parse_json
-    if settings[:json_params]
-      json_properties = Util::Data.parse_json(settings[:json_params])
+  def parse_encoded
+    if settings[:encoded_params]
+      encoded_properties = symbol_map(Util::Data.parse_json(Base64.decode64(settings[:encoded_params])))
       
-      unless json_properties.empty?
-        settings.defaults(json_properties)  
+      unless encoded_properties.empty?
+        settings.defaults(encoded_properties)  
       end
     end
-    settings.delete(:json_params)
+    settings.delete(:encoded_params)
   end
   
   #---
