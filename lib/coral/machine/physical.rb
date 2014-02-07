@@ -97,18 +97,13 @@ class Physical < Plugin::Machine
   
   #---
   
-  def exec(options = {})
-    super do |config|
-      success = true
-      if commands = config.delete(:commands)
-        commands.each do |command|
-          success = Util::Shell.exec!(command.to_s, config) do |line|
-            yield(line) if block_given?
-          end
-          break unless success
-        end
+  def exec(commands, options = {})
+    super do |config, results|
+      commands.each do |command|
+        result = Util::Shell.exec!(command.to_s, config)
+        results << { :status => $?.exitstatus, :result => '', :error => '' }
       end
-      success
+      results
     end
   end
   
