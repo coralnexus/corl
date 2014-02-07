@@ -225,6 +225,12 @@ class Action < Base
   def info(name, options = {})
     ui.info(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?
   end
+  
+  #---
+   
+  def alert(display, options = {})
+    ui.warn(display, options) unless quiet?
+  end
         
   #---
        
