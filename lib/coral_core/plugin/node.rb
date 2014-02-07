@@ -394,6 +394,66 @@ class Node < Base
 
   #---
   
+  def download(remote_path, local_path, options = {})
+    success = false
+    
+    if machine && machine.running?
+      config = Config.ensure(options)
+      
+      if extension_check(:download, { :local_path => local_path, :remote_path => remote_path, :config => config })
+        logger.info("Downloading from #{name}")
+      
+        yield(:config, config) if block_given?
+        
+        success = machine.download(remote_path, local_path, config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:download_success, { :local_path => local_path, :remote_path => remote_path, :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not running so cannot download")
+    end
+    success
+  end
+  
+  #---
+  
+  def upload(local_path, remote_path, options = {})
+    success = false
+    
+    if machine && machine.running?
+      config = Config.ensure(options)
+      
+      if extension_check(:upload, { :local_path => local_path, :remote_path => remote_path, :config => config })
+        logger.info("Uploading to #{name}")
+      
+        yield(:config, config) if block_given?
+        
+        success = machine.upload(local_path, remote_path, config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:upload_success, { :local_path => local_path, :remote_path => remote_path, :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not running so cannot upload")
+    end
+    success
+  end
+  
+  #---
+  
   def exec(options = {})
     results = nil
     

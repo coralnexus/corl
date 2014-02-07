@@ -197,35 +197,35 @@ class Machine < Base
   
   #---
   
-  def upload(local_path, remote_path, options = {})
-    success = true
-    
-    if running?
-      logger.debug("Uploading #{local_path} to #{remote_path} on #{plugin_provider} machine with: #{options.inspect}")
-      config  = Config.ensure(options)      
-      success = yield(config) if block_given?
-    else
-      logger.debug("Machine #{name} is not running")  
-    end
-    
-    logger.warn("There was an error uploading to the machine #{name}") unless success
-    success
-  end
-  
-  #---
-  
   def download(remote_path, local_path, options = {})
     success = true
     
     if running?
       logger.debug("Downloading #{local_path} from #{remote_path} on #{plugin_provider} machine with: #{options.inspect}")
       config  = Config.ensure(options)      
-      success = yield(config) if block_given?
+      success = yield(config, success) if block_given?
     else
       logger.debug("Machine #{name} is not running")  
     end
     
     logger.warn("There was an error downloading from the machine #{name}") unless success
+    success
+  end
+  
+  #---
+  
+  def upload(local_path, remote_path, options = {})
+    success = true
+    
+    if running?
+      logger.debug("Uploading #{local_path} to #{remote_path} on #{plugin_provider} machine with: #{options.inspect}")
+      config  = Config.ensure(options)      
+      success = yield(config, success) if block_given?
+    else
+      logger.debug("Machine #{name} is not running")  
+    end
+    
+    logger.warn("There was an error uploading to the machine #{name}") unless success
     success
   end
   

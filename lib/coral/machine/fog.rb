@@ -171,35 +171,9 @@ class Fog < Plugin::Machine
   
   #---
   
-  def upload(local_path, remote_path, options = {})
-    super do
-      require 'net/scp'
-      
-      config  = Config.ensure(options)
-      success = true
-      
-      ssh_options = {
-        :port         => server.ssh_port,
-        :keys         => [ private_key ],
-        :key_data     => [],
-        :auth_methods => [ 'publickey' ]
-      } 
-        
-      logger.debug("Executing SCP upload from #{local_path} to #{remote_path} on machine #{name}") 
-      
-      success = ::Fog::SCP.new(server.ssh_ip_address, server.username, ssh_options).upload(local_path, remote_path, config.export)
-      success
-    end  
-  end
-  
-  #---
-  
   def download(remote_path, local_path, options = {})
-    super do
+    super do |config, success|
       require 'net/scp'
-      
-      config  = Config.ensure(options)
-      success = true
       
       ssh_options = {
         :port         => server.ssh_port,
@@ -210,8 +184,38 @@ class Fog < Plugin::Machine
         
       logger.debug("Executing SCP download to #{local_path} from #{remote_path} on machine #{name}") 
       
-      success = ::Fog::SCP.new(server.ssh_ip_address, server.username, ssh_options).download(remote_path, local_path, config.export)
-      success
+      begin
+        ::Fog::SCP.new(public_ip, server.username, ssh_options).download(remote_path, local_path, config.export)
+        true
+      rescue
+        false
+      end
+    end  
+  end
+  
+  #---
+  
+  def upload(local_path, remote_path, options = {})
+    super do |config, success|
+      require 'net/scp'
+      
+      config.defaults({ :recursive => true })
+      
+      ssh_options = {
+        :port         => server.ssh_port,
+        :keys         => [ private_key ],
+        :key_data     => [],
+        :auth_methods => [ 'publickey' ]
+      } 
+        
+      logger.debug("Executing SCP upload from #{local_path} to #{remote_path} on machine #{name}") 
+      
+      begin
+        ::Fog::SCP.new(public_ip, server.username, ssh_options).upload(local_path, remote_path, config.export)
+        true
+      rescue
+        false
+      end
     end  
   end
   

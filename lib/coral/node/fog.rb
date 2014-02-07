@@ -156,6 +156,28 @@ class Fog < Plugin::Node
 
   #---
   
+  def download(remote_path, local_path, options = {})
+    super do |op, config|
+      if op == :config
+        config.import(exec_options(:download))
+      end
+      yield(op, config) if block_given?
+    end
+  end
+  
+  #---
+  
+  def upload(local_path, remote_path, options = {})
+    super do |op, config|
+      if op == :config
+        config.import(exec_options(:upload))
+      end
+      yield(op, config) if block_given?
+    end
+  end
+  
+  #---
+  
   def exec(options = {})
     super do |op, config|
       if op == :config
