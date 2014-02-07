@@ -81,6 +81,7 @@ require 'rubygems'
 
 require 'i18n'
 require 'log4r'
+require 'base64'
 require 'deep_merge'
 require 'hiera'
 require 'facter'

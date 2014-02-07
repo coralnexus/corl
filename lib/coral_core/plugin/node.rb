@@ -495,19 +495,12 @@ class Node < Base
   #---
   
   def action(provider, options = {})
-    require 'base64'
-    
     config         = Config.ensure(options)
-    encoded_config = Base64.encode64(Util::Data.to_json(config.export, false))
-    decoded_config = symbol_map(Util::Data.parse_json(Base64.decode64(encoded_config)))
-    
-    dbg(config.export, 'original config')
-    dbg(encoded_config, 'encoded config')
-    dbg(decoded_config, 'decoded config')
+    encoded_config = Util::CLI.encode(config.export)
     
     action_config = extended_config(:action, {
       :command => provider, 
-      :data    => { :encoded => Base64.encode64(Util::Data.to_json(config.export, false)) }
+      :data    => { :encoded => encoded_config }
     })
     command(:coral, { :subcommand => action_config })  
   end
