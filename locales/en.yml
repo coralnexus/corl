@@ -74,8 +74,8 @@ en:
             For help on any individual action run `coral <action> -h`
       action:
         options:
-          json: |-
-            Optional JSON string that contains action settings to use (mainly for machine use)
+          encoded: |-
+            Optional encoded parameter set that contains default action settings (machine use only)
       actions:        
         create:
           options:
