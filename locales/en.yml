@@ -170,4 +170,8 @@ en:
             Bootstrap returned with status: %{status}
           success: |-
             Machine %{node_name} from %{provider} successfully bootstrapped
+        exec:
+          options:
+            command: |-
+              Command line executable and arguments to execute on machine
           
