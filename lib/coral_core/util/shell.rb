@@ -49,7 +49,6 @@ class Shell < Core
         output_success = close_exec_pipe(t1, $stdout, output_orig, output_new, 'output')
         error_success  = close_exec_pipe(t2, $stderr, error_orig, error_new, 'error')
       end
-      ui.info('')
       
       success = ( system_success && output_success && error_success )
                   
