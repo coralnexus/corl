@@ -21,6 +21,18 @@ class Bootstrap < Plugin::Action
   # Action operations
   
   def parse(parser)
+    parser.option_str(:bootstrap, File.join(Plugin.core.full_gem_path, 'bootstrap'), 
+      '--bootstrap BOOTSTRAP_PROJ_PATH', 
+      'coral.core.actions.bootstrap.options.bootstrap'
+    )
+    parser.option_str(:gateway, 'bootstrap.sh', 
+      '--gateway BOOTSTRAP_SCRIPT', 
+      'coral.core.actions.bootstrap.options.gateway'
+    )
+    parser.option_str(:home_env_var, "HOME", 
+      '--home-env ENV_VAR', 
+      'coral.core.actions.bootstrap.options.home_env_var'
+    )
     parser.arg_str(:provider, nil, 
       'coral.core.actions.bootstrap.options.provider'
     )
@@ -35,17 +47,12 @@ class Bootstrap < Plugin::Action
     super do |node, network, status|
       info('coral.core.actions.bootstrap.start')
       
-      # Extra settings (TODO)
-      # 1. bootstrap path
-      # 2. remote home environment variable
-      # 3. gateway bootstrap shell script
-      
       if network
         if bootstrap_node = network.node(settings[:provider], settings[:node_name])
-          bootstrap_path = File.join(Plugin.core.full_gem_path, 'bootstrap')
+          bootstrap_path = settings[:bootstrap]
           
           if File.directory?(bootstrap_path)
-            results = bootstrap_node.command(:echo, { :args => "$HOME" })
+            results = bootstrap_node.command(:echo, { :args => '$' + settings[:home_env_var].gsub('$', '') })
           
             ui.warn(results[:error], { :prefix => false }) unless results[:error].empty?
             
@@ -56,7 +63,7 @@ class Bootstrap < Plugin::Action
                 bootstrap_node.command(:rm, { :flags => [ 'R', 'f' ], :args => remote_dir })
           
                 if bootstrap_node.upload(bootstrap_path, remote_dir)
-                  gateway_script = 'bootstrap.sh'
+                  gateway_script = settings[:gateway]
                   remote_script  = File.join(remote_dir, gateway_script)                  
                   results        = bootstrap_node.command(remote_script)
                   
