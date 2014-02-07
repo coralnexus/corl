@@ -26,7 +26,7 @@ class Shell < Core
     $stderr.sync = true  
     
     for i in tries.downto(1)
-      ui.info(">> running: #{command}")
+      logger.info(">> running: #{command}")
       
       begin
         t1, output_new, output_orig, output_reader = pipe_exec_stream!($stdout, conditions, { 
