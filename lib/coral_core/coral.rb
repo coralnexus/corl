@@ -57,7 +57,7 @@ module Coral
   
   @@codes = Codes.new
   
-  def code
+  def self.code
     @@codes
   end
   
