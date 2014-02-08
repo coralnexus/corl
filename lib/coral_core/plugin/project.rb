@@ -46,6 +46,11 @@ class Project < Base
     
     self.name = path
     
+    if keys = delete(:keys, nil)
+      set(:private_key, keys[:private_key])
+      set(:public_key, keys[:public_key])
+    end
+    
     init_project
     extension(:init)
     
@@ -55,6 +60,7 @@ class Project < Base
   #---
   
   def init_project
+    init_auth
     init_parent
     init_remotes    
     load_revision
@@ -100,6 +106,26 @@ class Project < Base
    
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
+  
+  def private_key
+    get(:private_key, nil)
+  end
+  
+  def private_key_str
+    return Util::Disk.read(private_key) if private_key
+    nil
+  end
+  
+  def public_key
+    get(:public_key, nil)
+  end
+  
+  def public_key_str
+    return Util::Disk.read(public_key) if public_key
+    nil
+  end
+  
+  #---
   
   def url(default = nil)
     get(:url, default)
@@ -258,9 +284,24 @@ class Project < Base
     result
   end
   protected :subproject_config
-
+  
   #-----------------------------------------------------------------------------
   # Project operations
+  
+  def init_auth
+    if can_persist?
+      localize do
+        logger.info("Initializing project #{name} authorization")
+        yield if block_given?
+      end
+    else
+      logger.warn("Project #{name} does not meet the criteria for persistence can not be authorized")
+    end
+    self  
+  end
+  protected :init_auth
+  
+  #---
   
   def init_parent
     delete(:parent)
