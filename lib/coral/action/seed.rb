@@ -46,7 +46,7 @@ class Seed < Plugin::Action
         
           dbg(keypair, 'key pair')
           
-          results = bootstrap_node.command(:echo, { :args => '$' + settings[:home_env_var].gsub('$', '') })
+          results = node.command(:echo, { :args => '$' + settings[:home_env_var].gsub('$', '') })
           ui.warn(results[:error], { :prefix => false }) unless results[:error].empty?
             
           if results[:status] == code.success
