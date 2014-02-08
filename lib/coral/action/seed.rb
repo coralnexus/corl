@@ -9,19 +9,20 @@ class Seed < Plugin::Action
   def normalize
     super('coral seed <project:::reference>')    
     
-    codes :project_failure      => 20,
-          :network_load_failure => 21,
-          :home_lookup_failure  => 22,
-          :no_remote_directory  => 23
+    codes :key_store_failure    => 20,
+          :project_failure      => 20,
+          :network_load_failure => 21
   end
 
   #-----------------------------------------------------------------------------
   # Action operations
   
   def parse(parser)
-    parser.option_str(:home_env_var, "HOME", 
-      '--home-env ENV_VAR', 
-      'coral.core.actions.seed.options.home_env_var'
+    home_dir = ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] )
+        
+    parser.option_str(:home, home_dir, 
+      '--home USER_HOME_DIR', 
+      'coral.core.actions.seed.options.home'
     )
     parser.option_str(:branch, :master, 
       '--branch BRANCH', 
@@ -40,27 +41,20 @@ class Seed < Plugin::Action
       info('coral.core.actions.seed.start')
       
       if node && network
-        dbg(node, 'node')
         status = admin_exec(status) do
           network_path = lookup(:coral_network)
           keypair      = Util::SSH.generate
-        
-          dbg(keypair, 'key pair')
+          ssh_dir      = File.join(settings[:home], '.ssh')
           
-          results = node.command(:echo, { :args => '$' + settings[:home_env_var].gsub('$', '') })
-          ui.warn(results[:error], { :prefix => false }) unless results[:error].empty?
-            
-          if results[:status] == code.success
-            if ! results[:result].empty?
-              ssh_dir = File.join(results[:result], '.ssh')
-              dbg(ssh_dir, 'ssh directory')
-            else
-              status = code.no_ssh_directory  
-            end
+          dbg(keypair, 'key pair')
+          dbg(ssh_dir)
+          
+          if keys = keypair.store(ssh_dir)
+            dbg(keys, 'keys')
           else
-            status = code.home_lookup_failure
-          end
-        
+            status = code.key_store_failure
+          end          
+                  
           #project = Coral.project(extended_config(:project, {
           #  :directory => network_path,
           #  :url       => settings[:reference],
