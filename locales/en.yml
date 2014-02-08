@@ -174,4 +174,8 @@ en:
           options:
             command: |-
               Command line executable and arguments to execute on machine
+        seed:
+          options:
+            home: |-
+              Home directory in which to initialize the deploy SSH keys (default %default_value})
           
