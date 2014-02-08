@@ -170,8 +170,10 @@ class Node < Base
     
     if machine_type.nil? && machine
       if types = machine_types
-        machine_type      = machine_type_id(types.first)
-        self.machine_type = machine_type
+        unless types.empty?
+          machine_type      = machine_type_id(types.first)
+          self.machine_type = machine_type
+        end
       end
     end
     
