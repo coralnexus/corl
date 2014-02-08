@@ -249,6 +249,15 @@ class Data
   #-----------------------------------------------------------------------------
   # Operations
   
+  def self.clean(data)
+    data.keys.each do |key|
+      data.delete(key) if data[key].nil?
+    end
+    data
+  end
+  
+  #---
+  
   def self.merge(data, force = true)
     value = data
     
