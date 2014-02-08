@@ -11,7 +11,8 @@ class Seed < Plugin::Action
     
     codes :project_failure      => 20,
           :network_load_failure => 21,
-          :node_add_failure     => 22
+          :home_lookup_failure  => 22,
+          :no_remote_directory  => 23
   end
 
   #-----------------------------------------------------------------------------
@@ -51,7 +52,9 @@ class Seed < Plugin::Action
           if results[:status] == code.success
             if ! results[:result].empty?
               ssh_dir = File.join(results[:result], 'ssh')
-              dbg(ssh_dir, 'ssh directory')  
+              dbg(ssh_dir, 'ssh directory')
+            else
+              status = code.no_ssh_directory  
             end
           else
             status = code.home_lookup_failure
