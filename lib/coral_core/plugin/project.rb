@@ -44,7 +44,7 @@ class Project < Base
     set_directory(Util::Disk.filename(get(:directory, Dir.pwd)))
     set_url(get(:url)) if get(:url, false)
     
-    self.name = path
+    self.name = path if self.name == plugin_provider
     
     if keys = delete(:keys, nil)
       set(:private_key, keys[:private_key])
@@ -106,6 +106,12 @@ class Project < Base
    
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
+  
+  def reference
+    get(:reference, nil)
+  end
+  
+  #---
   
   def private_key
     get(:private_key, nil)
