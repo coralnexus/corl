@@ -6,8 +6,11 @@ class SSH
   #-----------------------------------------------------------------------------
   # Instance generators
   
-  def self.generate(private_key = nil)
-    key_comment = congig.get(:comment, '')    
+  def self.generate(options = {})
+    config      = Config.ensure(options)
+    
+    private_key = config.get(:private_key, nil)
+    key_comment = config.get(:comment, '')    
     
     if private_key.nil?
       key_type    = config.get(:type, "RSA")
