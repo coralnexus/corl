@@ -67,6 +67,12 @@ class Config
       
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
+  
+  def keys
+    @properties.keys
+  end
+  
+  #---
     
   def fetch(data, keys, default = nil, format = false)    
     if keys.is_a?(String) || keys.is_a?(Symbol)
