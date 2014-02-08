@@ -10,7 +10,7 @@ class Base < Core
   # All Plugin classes should directly or indirectly extend Base
   
   def initialize(type, provider, options)
-    config = Config.ensure(options)
+    config = Util::Data.clean(Config.ensure(options))
     name   = Util::Data.ensure_value(config.delete(:name), provider)
        
     set_meta(config.delete(:meta, Config.new))
