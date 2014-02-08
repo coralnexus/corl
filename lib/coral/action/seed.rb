@@ -46,36 +46,40 @@ class Seed < Plugin::Action
           keypair      = Util::SSH.generate
           ssh_dir      = File.join(settings[:home], '.ssh')
           
-          dbg(keypair, 'key pair')
-          dbg(ssh_dir)
-          
           if keys = keypair.store(ssh_dir)
-            dbg(keys, 'keys')
+            if project_info = Plugin::Project.translate_reference(settings[:reference], true)
+              project_info = Config.new(project_info)
+            else
+              project_info = Config.new({ :provider => :git })
+            end
+            
+            project = Coral.project(extended_config(:project, {
+              :directory => network_path,
+              :reference => project_info.get(:reference, nil),
+              :url       => project_info.get(:url, settings[:reference]),
+              :revision  => project_info.get(:revision, settings[:branch]),
+              :create    => true,
+              :pull      => true,
+              :keys      => keys
+            }), project_info[:provider])
+        
+            if project
+            #  if network.load
+            #    success = network.add_node(node.plugin_provider, node.hostname, {
+            #      :public_ip  => node.public_ip,
+            #      :private_ip => node.private_ip,
+            #      :revision   => project.revision
+            #    })
+            #    status = code.node_add_failure unless success
+            #  else
+            #    status = code.network_load_failure    
+            #  end     
+            else
+              status = code.project_failure  
+            end            
           else
             status = code.key_store_failure
-          end          
-                  
-          #project = Coral.project(extended_config(:project, {
-          #  :directory => network_path,
-          #  :url       => settings[:reference],
-          #  :revision  => settings[:branch],
-          #  :pull      => true
-          #}))
-        
-          #if project
-          #  if network.load
-          #    success = network.add_node(node.plugin_provider, node.hostname, {
-          #      :public_ip  => node.public_ip,
-          #      :private_ip => node.private_ip,
-          #      :revision   => project.revision
-          #    })
-          #    status = code.node_add_failure unless success
-          #  else
-          #    status = code.network_load_failure    
-          #  end     
-          #else
-          #  status = code.project_failure  
-          #end
+          end
           status
         end
       end
