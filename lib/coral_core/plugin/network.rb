@@ -162,13 +162,6 @@ class Network < Base
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def each_node!
-    self.nodes.each do |provider, nodes|
-      nodes.each do |node_name, node|
-        yield(provider, node_name, node)
-      end
-    end  
-  end  
 end
 end
 end
