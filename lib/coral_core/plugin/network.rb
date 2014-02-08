@@ -40,6 +40,15 @@ class Network < Base
     config.set_remote(name, location)
   end
   
+  #---
+  
+  def node_by_ip(public_ip)
+    each_node! do |provider, node_name, node|
+      return node if node.public_ip == public_ip  
+    end
+    return nil
+  end
+  
   #-----------------------------------------------------------------------------
   # Operations
   
@@ -148,6 +157,17 @@ class Network < Base
     end  
         
     status
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def each_node!
+    self.nodes.each do |provider, nodes|
+      nodes.each do |node_name, node|
+        yield(provider, node_name, node)
+      end
+    end  
   end  
 end
 end
