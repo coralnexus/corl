@@ -13,6 +13,9 @@ class Github < Git
   def normalize
     require 'octokit'
     
+    client = Octokit::Client.new :netrc => true
+    client.login
+
     set(:url, self.class.expand_url(get(:url), get(:ssh, false))) if get(:url)
     super
   end
