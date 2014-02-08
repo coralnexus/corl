@@ -135,12 +135,12 @@ class Shell < Plugin::Command
     logger.info("Executing command #{command}")
     
     config[:ui] = @ui
-    success = Util::Shell.exec!(build(export, overrides), config) do |line|
+    result = Util::Shell.exec!(build(export, overrides), config) do |line|
       block_given? ? yield(line) : true
     end
     
-    logger.warn("Command #{command} failed to execute") unless success    
-    return success
+    logger.warn("Command #{command} failed to execute") unless result[:status] == Coral.code.success    
+    return result
   end
   
   #-----------------------------------------------------------------------------

@@ -391,7 +391,7 @@ class Git < Plugin::Project
       flags = []
       flags << :tags if config.get(:tags, true)
       
-      success = Coral.command({
+      result = Coral.command({
         :command => :git,
         :data    => { 'git-dir=' => git.git_dir },
         :subcommand => {
@@ -403,8 +403,12 @@ class Git < Plugin::Project
         block_given? ? yield(line) : true
       end
       
-      new?(true) if success
-      success    
+      if result[:status] == Coral.code.success
+        new?(true)
+        true
+      else
+        false
+      end    
     end
   end
   
@@ -418,7 +422,7 @@ class Git < Plugin::Project
       flags << :all if push_branch.empty?
       flags << :tags if ! push_branch.empty? && config.get(:tags, true)
       
-      success = Coral.command({
+      result = Coral.command({
         :command => :git,
         :data => { 'git-dir=' => git.git_dir },
         :subcommand => {
@@ -429,6 +433,8 @@ class Git < Plugin::Project
       }, config.get(:provider, :shell)).exec!(config) do |line|
         block_given? ? yield(line) : true
       end
+      
+      result[:status] == Coral.code.success
     end
   end
  
