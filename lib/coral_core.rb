@@ -82,6 +82,7 @@ require 'rubygems'
 require 'i18n'
 require 'log4r'
 require 'base64'
+require 'sshkey'
 require 'deep_merge'
 require 'hiera'
 require 'facter'
@@ -141,7 +142,7 @@ coral_require(core_dir, :core)
 #---
 
 # Include core utilities
-[ :cli, :disk, :process, :batch, :shell ].each do |name| 
+[ :cli, :disk, :process, :batch, :shell, :ssh ].each do |name| 
   coral_require(util_dir, name)
 end
 
