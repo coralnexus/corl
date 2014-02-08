@@ -55,11 +55,15 @@ class SSH
       @ssh_key       = key_data.ssh_public_key
     end
     
+    #---
+    
     def store(key_path, key_base = 'id')
       private_key_file = File.join(key_path, "#{key_base}_#{type.downcase}")
       public_key_file  = File.join(key_path, "#{key_base}_#{type.downcase}.pub")
       
       private_success = Disk.write(private_key_file, encrypted_key)
+      FileUtils.chmod(0600, private_key_file) if private_success
+      
       public_success  = Disk.write(public_key_file, ssh_key)
       
       if private_success && public_success
