@@ -10,7 +10,9 @@ class Github < Git
   #-----------------------------------------------------------------------------
   # Project plugin interface
  
-  def normalize 
+  def normalize
+    require 'octokit'
+    
     set(:url, self.class.expand_url(get(:url), get(:ssh, false))) if get(:url)
     super
   end
