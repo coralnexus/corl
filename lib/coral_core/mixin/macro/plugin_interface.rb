@@ -54,11 +54,11 @@ module PluginInterface
               if plugins.is_a?(Hash)
                 plugins.each do |name, plugin|
                   logger.debug("Processing plugin: #{name}")
-                  yield(type, provider, plugin)  
+                  yield(type, provider, name, plugin)  
                 end
               else
                 logger.debug("Processing plugin: #{plugin.name}")
-                yield(type, provider, plugin)
+                yield(type, provider, plugin.name, plugin)
               end
             end
           end 
@@ -71,8 +71,8 @@ module PluginInterface
     logger.debug("Defining plugin interface method: each_#{_type}!")
     
     define_method "each_#{_type}!" do |providers = nil|
-      each_plugin!(_type, providers) do |type, provider, plugin|
-        yield(type, provider, plugin)    
+      each_plugin!(_type, providers) do |type, provider, name, plugin|
+        yield(provider, name, plugin)    
       end
     end
     

@@ -173,7 +173,7 @@ module Node
   def node_groups(network)
     groups = {}
     
-    each_node!(network) do |provider, node_name, node|
+    network.each_node! do |provider, node_name, node|
       node.groups.each do |group|
         groups[group] = [] unless groups.has_key?(group)
         groups[group] << { :provider => provider, :name => node_name }
@@ -190,7 +190,7 @@ module Node
     ip_address = lookup(:ipaddress)
     local_node = nil
     
-    each_node!(network) do |provider, node_name, node|
+    network.each_node! do |provider, node_name, node|
       if node.public_ip == ip_address
         local_node = node
         local_node.localize
@@ -206,17 +206,6 @@ module Node
     local_node
   end
   protected :local_node
-  
-  #---
-  
-  def each_node!(network)
-    network.nodes.each do |provider, nodes|
-      nodes.each do |node_name, node|
-        yield(provider, node_name, node)
-      end
-    end  
-  end
-  protected :each_node!
 end
 end
 end
