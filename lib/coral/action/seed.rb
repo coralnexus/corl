@@ -40,6 +40,7 @@ class Seed < Plugin::Action
       info('coral.core.actions.seed.start')
       
       if node && network
+        dbg(node, 'node')
         status = admin_exec(status) do
           network_path = lookup(:coral_network)
           keypair      = Util::SSH.generate
@@ -51,7 +52,7 @@ class Seed < Plugin::Action
             
           if results[:status] == code.success
             if ! results[:result].empty?
-              ssh_dir = File.join(results[:result], 'ssh')
+              ssh_dir = File.join(results[:result], '.ssh')
               dbg(ssh_dir, 'ssh directory')
             else
               status = code.no_ssh_directory  
