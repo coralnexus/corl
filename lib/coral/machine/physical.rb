@@ -101,7 +101,7 @@ class Physical < Plugin::Machine
     super do |config, results|
       commands.each do |command|
         result = Util::Shell.exec!(command.to_s, config)
-        results << { :status => $?.exitstatus, :result => '', :error => '' }
+        results << { :status => result[:status], :result => result[:output], :error => result[:errors] }
       end
       results
     end
