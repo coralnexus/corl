@@ -11,9 +11,7 @@ class Core < Config
   # Constructor / Destructor
   
   def initialize(data = {}, defaults = {}, force = true)
-    super(data, defaults, force)
-    
-    
+    super(data, defaults, force)   
     
     class_label      = self.class.to_s.downcase.gsub(/^coral::/, '')
     logger_name      = delete(:logger, class_label)
@@ -60,6 +58,14 @@ class Core < Config
  
   #-----------------------------------------------------------------------------
   # General utilities
- 
+  
+  def ui_group!(resource)
+    ui_resource = ui.resource
+    ui.resource = resource
+    yield
+    
+  ensure
+    ui.resource = ui_resource  
+  end 
 end
 end
