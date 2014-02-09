@@ -223,25 +223,63 @@ class Fog < Plugin::Machine
   
   def exec(commands, options = {})
     super do |config, results|
+      require 'net/ssh'
+      
       if commands
         ssh_options = {
           :port         => server.ssh_port,
           :keys         => [ private_key ],
           :key_data     => [],
+          :keys_only    => false,
           :auth_methods => [ 'publickey' ]
         }
-         
+        
         logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}") 
-        ssh_results = ::Fog::SSH.new(public_ip, server.username, ssh_options).run(commands)
-                
-        if ssh_results
-          ssh_results.each do |result|
-            results << { 
-              :status => result.status, 
-              :result => result.stdout.strip, 
-              :error  => result.stderr.strip 
-            }  
+        
+        begin
+          Net::SSH.start(public_ip, server.username, ssh_options) do |ssh|
+            commands.each do |command|
+              result = Util::Shell::Result.new(command)
+              
+              ssh.open_channel do |ssh_channel|
+                ssh_channel.request_pty
+                ssh_channel.exec(command) do |channel, success|
+                  unless success
+                    raise "Could not execute command: #{command.inspect}"
+                  end
+
+                  channel.on_data do |ch, data|
+                    result.append_output(data)
+                    ui_group!(hostname) do
+                      ui.info(data)
+                    end
+                  end
+
+                  channel.on_extended_data do |ch, type, data|
+                    next unless type == 1
+                    result.append_errors(data)
+                    ui_group!(hostname) do
+                      ui.error(data)
+                    end
+                  end
+
+                  channel.on_request('exit-status') do |ch, data|
+                    result.status = data.read_long
+                  end
+
+                  channel.on_request('exit-signal') do |ch, data|
+                    result.status = 255
+                  end
+                end
+              end
+              ssh.loop              
+              results << result
+            end
           end
+        rescue Net::SSH::HostKeyMismatch => error
+          error.remember_host!
+          sleep 0.2
+          retry
         end
       end
       results
