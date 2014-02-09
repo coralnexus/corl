@@ -472,11 +472,11 @@ class Node < Base
         success  = true
         
         results.each do |result|
-          success = false if result[:status] != Coral.code.success  
+          success = false if result.status != Coral.code.success  
         end
         if success
           yield(:process, config) if block_given?
-          extension(:exec_success, { :config => config }) 
+          extension(:exec_success, { :config => config, :results => results }) 
         end
       end
     else
@@ -499,6 +499,8 @@ class Node < Base
   def action(provider, options = {})
     config         = Config.ensure(options)
     encoded_config = Util::CLI.encode(config.export)
+    
+    logger.info("Executing remote action #{provider} with encoded arguments: #{config.export.inspect}")
     
     action_config = extended_config(:action, {
       :command => provider, 
