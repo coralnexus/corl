@@ -4,6 +4,31 @@ module Util
 class Shell < Core
   
   #-----------------------------------------------------------------------------
+  # Execution result interface
+  
+  class Result
+    attr_accessor :status
+    attr_reader :command, :output, :errors
+    
+    def initialize(command)
+      @command = command
+      @output  = ''
+      @errors  = ''
+      @status  = Coral.code.success
+    end
+    
+    #---
+    
+    def append_output(output_str)
+      @output << output_str
+    end
+    
+    def append_errors(error_str)
+      @errors << error_str
+    end  
+  end
+  
+  #-----------------------------------------------------------------------------
   # Utilities
   
   def self.exec!(command, options = {})
@@ -25,8 +50,7 @@ class Shell < Core
     $stdout.sync = true
     $stderr.sync = true
     
-    system_output = ''
-    system_errors = ''  
+    system_result = Shell::Result.new(command)
     
     for i in tries.downto(1)
       logger.info(">> running: #{command}")
@@ -36,7 +60,7 @@ class Shell < Core
           :prefix => info_prefix, 
           :suffix => info_suffix, 
         }, 'output') do |line|
-          system_output << line
+          system_result.append_output(line)
           block_given? ? yield(line) : true
         end
       
@@ -44,12 +68,12 @@ class Shell < Core
           :prefix => error_prefix, 
           :suffix => error_suffix, 
         }, 'error') do |line|
-          system_errors << line
+          system_result.append_errors(line)
           block_given? ? yield(line) : true
         end
       
-        system_success = system(command)
-        system_status  = $?.exitstatus
+        system_success       = system(command)
+        system_result.status = $?.exitstatus
       
       ensure
         output_success = close_exec_pipe(t1, $stdout, output_orig, output_new, 'output')
@@ -60,13 +84,8 @@ class Shell < Core
                   
       min -= 1
       break if success && min <= 0 && conditions.empty?
-    end
-    
-    return { 
-      :status => system_status, 
-      :output => system_output, 
-      :errors => system_errors 
-    }  
+    end    
+    return system_result
   end
   
   #---
