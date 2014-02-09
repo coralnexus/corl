@@ -403,7 +403,7 @@ class Git < Plugin::Project
         block_given? ? yield(line) : true
       end
       
-      if result[:status] == Coral.code.success
+      if result.status == Coral.code.success
         new?(true)
         true
       else
@@ -434,7 +434,7 @@ class Git < Plugin::Project
         block_given? ? yield(line) : true
       end
       
-      result[:status] == Coral.code.success
+      result.status == Coral.code.success
     end
   end
  

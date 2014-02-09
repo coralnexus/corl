@@ -100,8 +100,13 @@ class Physical < Plugin::Machine
   def exec(commands, options = {})
     super do |config, results|
       commands.each do |command|
-        result = Util::Shell.exec!(command.to_s, config)
-        results << { :status => result[:status], :result => result[:output], :error => result[:errors] }
+        shell_result = Util::Shell.exec!(command, config)
+        
+        result = Util::Shell::Result.new(command)
+        result.append_output(shell_result[:output])
+        result.append_errors(shell_result[:errors])
+        result.status = shell_result[:status]
+        results << result
       end
       results
     end

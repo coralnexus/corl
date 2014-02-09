@@ -139,7 +139,7 @@ class Shell < Plugin::Command
       block_given? ? yield(line) : true
     end
     
-    logger.warn("Command #{command} failed to execute") unless result[:status] == Coral.code.success    
+    logger.warn("Command #{command} failed to execute") unless result.status == Coral.code.success    
     return result
   end
   
