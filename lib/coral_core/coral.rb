@@ -61,6 +61,10 @@ module Coral
     @@codes
   end
   
+  def self.codes(*codes)
+    Codes.codes(*codes)
+  end
+
   #-----------------------------------------------------------------------------
   # Initialization
   

@@ -5,18 +5,28 @@ class Codes
   #-----------------------------------------------------------------------------
   # Code index
   
-  @@index = {}
+  @@registry     = {}
+  @@status_index = {}
+  @@next_code    = 0
   
-  def self.index(number = nil)
-    if number.nil?
-      @@index
+  #---
+  
+  def self.registry
+    @@registry
+  end
+  
+  #---
+  
+  def self.index(status_code = nil)
+    if status_code.nil? || ! status_code.integer?
+      @@status_index
     else
-      number = number.to_i
+      status_code = status_code.to_i
           
-      if @@index.has_key?(number)
-        @@index[number]
+      if @@status_index.has_key?(status_code)
+        @@status_index[status_code]
       else
-        @@index[2] # Unknown status
+        @@status_index[registry[:unknown_status]]
       end  
     end    
   end
@@ -24,33 +34,58 @@ class Codes
   #-----------------------------------------------------------------------------
   # Code construction
   
-  def self.code(name, number)
-    number = number.to_i
+  def self.code(name)
+    name = name.to_sym
     
-    # TODO: Add more information to the index (like a help message)
-    @@index[number] = name.to_s 
+    unless registry.has_key?(name)
+      status_code = @@next_code    
+      @@next_code = @@next_code + 1
     
-    define_method(name) { number }
+      # TODO: Add more information to the index (like a help message)
+      @@registry[name]            = status_code
+      @@status_index[status_code] = name.to_s
+    end
   end
   
-  #-----------------------------------------------------------------------------
-  # Code of last resort
+  #---
   
-  def method_missing(method, *args, &block)  
-    return unknown_status  
+  def self.codes(*codes)
+    codes.each do |name|
+      code(name)
+    end
+  end
+
+  #-----------------------------------------------------------------------------
+  # Return status codes on demand
+  
+  def [](name)
+    name = name.to_sym
+    
+    if @@registry.has_key?(name)
+      @@registry[name]  
+    else
+      @@registry[:unknown_status]
+    end
+  end
+  
+  #---
+ 
+  def method_missing(method, *args, &block)
+    self[method]
   end
   
   #-----------------------------------------------------------------------------
   # Core status codes
   
-  code(:success, 0)
-  code(:help_wanted, 1)
-  code(:unknown_status, 2)
+  code(:success) # This must be added first (needs to be 0)
+  code(:help_wanted)
+  code(:unknown_status)
   
-  code(:action_unprocessed, 3)
-  code(:batch_error, 4)
+  code(:action_unprocessed)
+  code(:batch_error)
   
-  code(:access_denied, 5)
+  code(:access_denied)
   
+  code(:validation_failed)
 end
 end
