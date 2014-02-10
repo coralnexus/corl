@@ -8,6 +8,14 @@ class Node < Base
    
   def normalize
     super
+    
+    @cli_interface = Util::Liquid.new do |method, args|
+      exec({ :commands => [ method, args ].flatten }).first
+    end
+    
+    @action_interface = Util::Liquid.new do |method, args|
+      action(method, *args)
+    end
   end
   
   #---
@@ -487,6 +495,12 @@ class Node < Base
   
   #---
   
+  def cli
+    @cli_interface
+  end
+  
+  #---
+  
   def command(command, options = {})
     unless command.is_a?(Coral::Plugin::Command)
       command = Coral.command(Config.new({ :command => command }).import(options), :shell)
@@ -507,6 +521,12 @@ class Node < Base
       :data    => { :encoded => encoded_config }
     })
     command(:coral, { :subcommand => action_config })  
+  end
+  
+  #---
+  
+  def run
+    @action_interface
   end
   
   #---
