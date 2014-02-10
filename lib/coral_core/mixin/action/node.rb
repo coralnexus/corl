@@ -5,13 +5,45 @@ module Action
 module Node
         
   #-----------------------------------------------------------------------------
-  # Options
+  # Settings
   
   def node_config
-    register :parallel, :bool, true
-    register :net_provider, :str, :default
-    register :node_provider, :str, :local
-    register :nodes, :array, []
+    node_plugins = Plugin.loaded_plugins(:node)
+    
+    register :parallel, :bool, true, 'coral.core.mixins.node.options.parallel'
+    register :net_provider, :str, :default, 'coral.core.mixins.node.options.net_provider' do |value|
+      value           = value.to_sym
+      network_plugins = Plugin.loaded_plugins(:network)
+      
+      unless network_plugins.keys.include?(value)
+        warn('coral.core.mixins.node.errors.network_provider', { :value => value, :choices => network_plugins.keys.join(", ") })
+        next false 
+      end
+      true
+    end
+    register :node_provider, :str, :local, 'coral.core.mixins.node.options.node_provider' do |value|
+      value = value.to_sym
+      
+      unless node_plugins.keys.include?(value)
+        warn('coral.core.mixins.node.errors.node_provider', { :value => value, :choices => node_plugins.keys.join(", ") })
+        next false
+      end
+      true  
+    end
+    register :nodes, :array, [], 'coral.core.mixins.node.options.nodes' do |values|
+      values.each do |value|
+        info    = Plugin::Node.translate_reference(value)
+        success = true
+        
+        if info
+          if ! node_plugins.keys.include?(info[:provider].to_sym) || info[:name].empty?
+            warn('coral.core.mixins.node.errors.nodes', { :value => value, :provider => info[:provider],  :name => info[:name] })
+            success = false
+          end
+        end
+      end
+      success
+    end
   end
   
   #---
@@ -24,8 +56,6 @@ module Node
   # Operations
         
   def node_exec
-    status = code.unknown_status
-    
     if Coral.admin?
       network_path = lookup(:coral_network)
       Dir.mkdir(network_path) unless File.directory?(network_path)
@@ -47,8 +77,9 @@ module Node
     
     if network.has_nodes? && ! settings[:nodes].empty?
       # Execute action on remote nodes      
-      nodes  = translate_node_references(settings[:nodes], network)
-      status = Coral.batch(settings[:parallel]) do |op, batch|
+      nodes = translate_node_references(settings[:nodes], network)
+      
+      Coral.batch(settings[:parallel]) do |op, batch|
         if op == :add
           # Add batch operations      
           nodes.each do |node|
@@ -64,23 +95,25 @@ module Node
           end
         else
           # Reduce to single status
-          status = code.success
-          
-          batch.each do |name, action_status|
-            if action_status != code.success
-              status = code.batch_error
+          batch.each do |name, status_code|
+            if status_code != code.success
+              self.status = code.batch_error
               break
             end
           end
-          
-          status  
         end
       end
     else
       # Execute statement locally
-      status = yield(local_node(network), network) if block_given?
+      node = local_node(network)
+      
+      if validate(node, network)
+        yield(node, network) if block_given?
+      else
+        puts "\n" + I18n.t('coral.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
+        self.status = code.validation_failed 
+      end
     end
-    status
   end
         
   #-----------------------------------------------------------------------------
