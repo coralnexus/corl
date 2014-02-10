@@ -8,13 +8,23 @@ class Shell < Core
   
   class Result
     attr_accessor :status
-    attr_reader :command, :output, :errors
+    attr_reader :command
     
     def initialize(command)
       @command = command
       @output  = ''
       @errors  = ''
       @status  = Coral.code.success
+    end
+    
+    #---
+    
+    def output
+      @output.strip
+    end
+    
+    def errors
+      @errors.strip
     end
     
     #---
