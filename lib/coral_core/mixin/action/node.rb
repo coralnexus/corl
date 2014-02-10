@@ -31,11 +31,9 @@ module Node
       true  
     end
     register :nodes, :array, [], 'coral.core.mixins.node.options.nodes' do |values|
+      success = true
       values.each do |value|
-        info    = Plugin::Node.translate_reference(value)
-        success = true
-        
-        if info
+        if info = Plugin::Node.translate_reference(value)
           if ! node_plugins.keys.include?(info[:provider].to_sym) || info[:name].empty?
             warn('coral.core.mixins.node.errors.nodes', { :value => value, :provider => info[:provider],  :name => info[:name] })
             success = false

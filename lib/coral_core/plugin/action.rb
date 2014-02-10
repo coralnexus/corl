@@ -90,15 +90,16 @@ class Action < Base
     end
     
     set(:config, Config.new)
-    configure
-    
+        
     if get(:settings, nil)
       # Internal processing
+      configure
       set(:processed, true)
       set(:settings, Config.ensure(get(:settings)))
     else
       # External processing
       set(:settings, Config.new)
+      configure
       parse_base(args)
     end   
   end
@@ -123,6 +124,14 @@ class Action < Base
     get(:config)
   end
   
+  #---
+   
+  def settings
+    get(:settings)
+  end
+  
+  #---
+  
   def register(name, type, default, locale = nil)
     name = name.to_sym
         
@@ -130,10 +139,12 @@ class Action < Base
       option = Option.new(plugin_provider, name, type, default, locale) do |value, success|
         yield(value, success)
       end
-      config.set(name, option)
     else
-      config.set(name, Option.new(plugin_provider, name, type, default, locale))  
+      option = Option.new(plugin_provider, name, type, default, locale)
     end
+    
+    config[name]   = option
+    settings[name] = option.default if settings[name].nil?
   end
   
   #---
@@ -161,12 +172,6 @@ class Action < Base
          
     node_config
     yield if block_given?
-  end
-  
-  #---
-   
-  def settings
-    get(:settings)
   end
   
   #---
@@ -244,7 +249,7 @@ class Action < Base
           logger.warn("Parse failed for unknown reasons")
         end
       end
-    end 
+    end
     self  
   end
   
@@ -295,12 +300,11 @@ class Action < Base
   #---
   
   def validate(node, network)
-    # TODO: Add extension hooks
+    # TODO: Add extension hooks and logging
     
     # Validate all of the configurations
     success = true
     config.export.each do |name, option|
-      settings.init(name, option.default)
       success = false unless option.validate(settings[name], node, network)
     end
     if success
