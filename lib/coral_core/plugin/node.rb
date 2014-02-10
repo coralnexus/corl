@@ -164,6 +164,23 @@ class Node < Base
   end
   
   #---
+  
+  def home(env_var = 'HOME')
+    home    = nil
+    env_var = env_var.to_s
+    result  = cli.echo('$' + env_var.gsub('$', ''))
+              
+    ui_group!(hostname) do          
+      alert(result.errors)
+    end
+              
+    if result.status == code.success && ! result.output.empty? 
+      home = result.output
+    end
+    home 
+  end
+  
+  #---
     
   def machine_types # Must be set at machine level (queried)
     machine.machine_types if machine
