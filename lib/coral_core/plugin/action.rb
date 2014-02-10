@@ -9,23 +9,26 @@ class Action < Base
   # Default option interface
   
   class Option
-    def initialize(name, type, default, &validator)
+    def initialize(provider, name, type, default, locale = nil, &validator)
+      @provider  = provider
       @name      = name
       @type      = type
       @default   = default
+      @locale    = locale.nil? ? "coral.actions.#{provider}.options.#{name}" : locale
       @validator = validator if validator
     end
     
     #---
     
-    attr_reader :name, :type, :default
+    attr_reader :provider, :name, :type
+    attr_accessor :default, :locale
     
     #---
     
-    def validate(value)
+    def validate(value, node, network)
       success = true
       if @validator
-        success = @validator.call(value, success)
+        success = @validator.call(value, node, network)
       end
       success
     end
@@ -55,6 +58,8 @@ class Action < Base
   
       exit_status = error.status_code if error.respond_to?(:status_code)
     end
+    
+    Coral.remove_plugin(action) if action
 
     exit_status = Coral.code.unknown_status unless exit_status.is_a?(Integer)
     { :status => exit_status, :result => action_result }  
@@ -118,16 +123,16 @@ class Action < Base
     get(:config)
   end
   
-  def register(name, type, default)
+  def register(name, type, default, locale = nil)
     name = name.to_sym
         
     if block_given?
-      option = Option.new(name, type, default) do |value, success|
+      option = Option.new(plugin_provider, name, type, default, locale) do |value, success|
         yield(value, success)
       end
       config.set(name, option)
     else
-      config.set(name, Option.new(name, type, default))  
+      config.set(name, Option.new(plugin_provider, name, type, default, locale))  
     end
   end
   
@@ -256,30 +261,20 @@ class Action < Base
         option_config = config[name]
         type          = option_config.type
         default       = option_config.default
-      
+        locale        = option_config.locale        
+        
         if types.include?(type.to_sym)
           value_label = "#{type.to_s.upcase}"
       
           if type == :bool
-            parser.send("option_#{type}", name, default, 
-              "--[no-]#{name}", 
-              "coral.actions.#{plugin_provider}.options.#{name}"
-            )        
+            parser.send("option_#{type}", name, default, "--[no-]#{name}", locale)        
           elsif format == :arg
-            parser.send("#{format}_#{type}", name, default, 
-              "coral.actions.#{plugin_provider}.args.#{name}"
-            )  
+            parser.send("#{format}_#{type}", name, default, locale)  
           else
             if type == :array
-              parser.send("option_#{type}", name, default, 
-                "--#{name} #{value_label},...", 
-                "coral.actions.#{plugin_provider}.options.#{name}"
-              )  
+              parser.send("option_#{type}", name, default, "--#{name} #{value_label},...", locale)  
             else
-              parser.send("option_#{type}", name, default, 
-                "--#{name} #{value_label}", 
-                "coral.actions.#{plugin_provider}.options.#{name}"
-              )
+              parser.send("option_#{type}", name, default, "--#{name} #{value_label}", locale)
             end
           end
         end           
@@ -299,11 +294,23 @@ class Action < Base
   
   #---
   
-  def validate
+  def validate(node, network)
+    # TODO: Add extension hooks
+    
+    # Validate all of the configurations
     success = true
     config.export.each do |name, option|
       settings.init(name, option.default)
-      success = false unless option.validate(settings[name])
+      success = false unless option.validate(settings[name], node, network)
+    end
+    if success
+      # Check for missing arguments (in case of internal execution mode)
+      arguments.each do |name|
+        warn('coral.core.exec.errors.missing_argument', { :name => name })
+        if settings[name.to_sym].nil?
+          success = false
+        end
+      end
     end
     success
   end
@@ -317,20 +324,15 @@ class Action < Base
     self.result = nil
     
     if processed?
-      if validate
-        node_exec do |node, network|
-          hook_config = { :node => node, :network => network }
+      node_exec do |node, network|
+        hook_config = { :node => node, :network => network }
         
-          begin
-            yield(node, network) if block_given? && extension_check(:exec_init, hook_config)
-            self.status = extension_set(:exec_exit, status, hook_config)
-          ensure
-            cleanup
-          end
+        begin
+          yield(node, network) if block_given? && extension_check(:exec_init, hook_config)
+          self.status = extension_set(:exec_exit, status, hook_config)
+        ensure
+          cleanup
         end
-      else
-        puts I18n.t('coral.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
-        self.status = code.validation_failed    
       end
     else
       if @parser.options[:help]
