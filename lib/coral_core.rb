@@ -142,7 +142,15 @@ coral_require(core_dir, :core)
 #---
 
 # Include core utilities
-[ :cli, :disk, :process, :batch, :shell, :ssh ].each do |name| 
+[ :liquid, 
+  :cli, 
+  :disk, 
+  :process, 
+  :batch, 
+  :package, 
+  :shell, 
+  :ssh 
+].each do |name| 
   coral_require(util_dir, name)
 end
 
