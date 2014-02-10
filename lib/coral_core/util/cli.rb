@@ -109,7 +109,7 @@ module Coral
           self.processed = false
           
           option_str(:encoded_params, false, 
-            '--encoded PARAMS', 
+            '--encoded STR', 
             'coral.core.util.cli.options.encoded'
           )
           parser.on_tail('-h', '--help', CLI.message('coral.core.util.cli.options.help')) do
@@ -339,7 +339,7 @@ module Coral
           arg(name, default, Array, message_id, config) do |value|
             block_given? ? yield(value) : value 
           end  
-        end 
+        end
       end    
     end
   end
