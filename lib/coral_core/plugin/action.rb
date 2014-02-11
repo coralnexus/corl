@@ -193,33 +193,12 @@ class Action < Base
   
   #---
   
-  def status=status
-    set(:status, status)
-  end
-  
-  def status
-    get(:status, code.success)
-  end
-
-  #---
-  
   def result=result
     set(:result, result)
   end
   
   def result
     get(:result, nil)
-  end
-
-  #-----------------------------------------------------------------------------
-  # Status codes
-    
-  def code
-    Coral.code
-  end
-  
-  def codes(*codes)
-    Coral.codes(*codes)
   end
 
   #-----------------------------------------------------------------------------
@@ -309,9 +288,9 @@ class Action < Base
     end
     if success
       # Check for missing arguments (in case of internal execution mode)
-      arguments.each do |name|
-        warn('coral.core.exec.errors.missing_argument', { :name => name })
+      arguments.each do |name|        
         if settings[name.to_sym].nil?
+          warn('coral.core.exec.errors.missing_argument', { :name => name })
           success = false
         end
       end
@@ -348,8 +327,10 @@ class Action < Base
     
     self.status = code.unknown_status unless status.is_a?(Integer)
     
-    code_name = Codes.index(status)
-    logger.warn("Execution failed for #{plugin_provider} with status #{status} (#{code_name}): #{export.inspect}") if processed? && status > 1 
+    if processed? && status != code.success
+      logger.warn("Execution failed for #{plugin_provider} with status #{status} (#{code_name}): #{export.inspect}")
+      alert(Codes.render_index(status))
+    end  
     
     status
   end
