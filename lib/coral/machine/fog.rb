@@ -13,8 +13,8 @@ class Fog < Plugin::Machine
     self.public_key  = delete(:public_key_path, nil)
     
     set_connection
-  end
-     
+  end   
+  
   #-----------------------------------------------------------------------------
   # Checks
   
@@ -38,7 +38,7 @@ class Fog < Plugin::Machine
     ENV['DEBUG'] = 'true' if Coral.log_level == :debug
     
     require 'fog' 
-    
+        
     compute_config = Config.new(export)
     compute_config.delete(:private_key)
     compute_config.delete(:public_key)   
@@ -78,6 +78,8 @@ class Fog < Plugin::Machine
     
     server.private_key_path = private_key if private_key
     server.public_key_path  = public_key if public_key
+    
+    Util::SSH.init_session(public_ip, server.username, server.ssh_port, private_key)
   end
   
   def server
@@ -117,6 +119,57 @@ class Fog < Plugin::Machine
   
   #---
   
+  def download(remote_path, local_path, options = {})
+    super do |config, success|
+      logger.debug("Executing SCP download to #{local_path} from #{remote_path} on machine #{name}") 
+      
+      begin
+        Util::SSH.download!(public_ip, server.username, remote_path, local_path, config.export) do |name, received, total|
+          yield(name, received, total) if block_given?
+        end
+        true
+      rescue Exception => error
+        ui.error(error.message)
+        false
+      end
+    end  
+  end
+  
+  #---
+  
+  def upload(local_path, remote_path, options = {})
+    super do |config, success|
+      logger.debug("Executing SCP upload from #{local_path} to #{remote_path} on machine #{name}") 
+      
+      begin
+        Util::SSH.upload!(public_ip, server.username, local_path, remote_path, config.export) do |name, sent, total|
+          yield(name, sent, total) if block_given?
+        end
+        true
+      rescue Exception => error
+        ui.error(error.message)
+        false
+      end
+    end  
+  end
+  
+  #---
+  
+  def exec(commands, options = {})
+    super do |config, results|
+      if commands
+        logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}")
+        
+        results = Util::SSH.exec!(public_ip, server.username, commands) do |type, command, data|
+          yield(type, command, data) if block_given?  
+        end
+      end
+      results
+    end
+  end
+  
+  #---
+  
   def start(options = {})
     super do
       server_info = compute.servers.create(options)
@@ -130,6 +183,31 @@ class Fog < Plugin::Machine
             
       self.server = compute.servers.get(server_info.id)
       self.server ? true : false
+    end
+  end
+  
+  #---
+  
+  def reload(options = {})
+    super do
+      logger.debug("Rebooting machine #{name}")
+      server.reboot(options)  
+    end
+  end
+
+  #---
+ 
+  def create_image(name, options = {})
+    super do
+      logger.debug("Imaging machine #{self.name}") 
+      image = server.create_image(name, options)
+      
+      if image
+        self.image = image.id
+        true
+      else
+        false
+      end
     end
   end
   
@@ -152,153 +230,11 @@ class Fog < Plugin::Machine
   end
   
   #---
-  
-  def reload(options = {})
-    super do
-      logger.debug("Rebooting machine #{name}")
-      server.reboot(options)  
-    end
-  end
-
-  #---
 
   def destroy(options = {})
     super do
       logger.debug("Destroying machine #{name}")   
       server.destroy(options)  
-    end
-  end
-  
-  #---
-  
-  def download(remote_path, local_path, options = {})
-    super do |config, success|
-      require 'net/scp'
-      
-      ssh_options = {
-        :port         => server.ssh_port,
-        :keys         => [ private_key ],
-        :key_data     => [],
-        :auth_methods => [ 'publickey' ]
-      } 
-        
-      logger.debug("Executing SCP download to #{local_path} from #{remote_path} on machine #{name}") 
-      
-      begin
-        ::Fog::SCP.new(public_ip, server.username, ssh_options).download(remote_path, local_path, config.export)
-        true
-      rescue
-        false
-      end
-    end  
-  end
-  
-  #---
-  
-  def upload(local_path, remote_path, options = {})
-    super do |config, success|
-      require 'net/scp'
-      
-      config.defaults({ :recursive => true })
-      
-      ssh_options = {
-        :port         => server.ssh_port,
-        :keys         => [ private_key ],
-        :key_data     => [],
-        :auth_methods => [ 'publickey' ]
-      } 
-        
-      logger.debug("Executing SCP upload from #{local_path} to #{remote_path} on machine #{name}") 
-      
-      begin
-        ::Fog::SCP.new(public_ip, server.username, ssh_options).upload(local_path, remote_path, config.export)
-        true
-      rescue
-        false
-      end
-    end  
-  end
-  
-  #---
-  
-  def exec(commands, options = {})
-    super do |config, results|
-      require 'net/ssh'
-      
-      if commands
-        ssh_options = {
-          :port         => server.ssh_port,
-          :keys         => [ private_key ],
-          :key_data     => [],
-          :keys_only    => false,
-          :auth_methods => [ 'publickey' ]
-        }
-        
-        logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}") 
-        
-        begin
-          Net::SSH.start(public_ip, server.username, ssh_options) do |ssh|
-            commands.each do |command|
-              result = Util::Shell::Result.new(command)
-              
-              ssh.open_channel do |ssh_channel|
-                ssh_channel.request_pty
-                ssh_channel.exec(command) do |channel, success|
-                  unless success
-                    raise "Could not execute command: #{command.inspect}"
-                  end
-
-                  channel.on_data do |ch, data|
-                    result.append_output(data)
-                    ui_group!(hostname) do
-                      ui.info(data)
-                    end
-                  end
-
-                  channel.on_extended_data do |ch, type, data|
-                    next unless type == 1
-                    result.append_errors(data)
-                    ui_group!(hostname) do
-                      ui.error(data)
-                    end
-                  end
-
-                  channel.on_request('exit-status') do |ch, data|
-                    result.status = data.read_long
-                  end
-
-                  channel.on_request('exit-signal') do |ch, data|
-                    result.status = 255
-                  end
-                end
-              end
-              ssh.loop              
-              results << result
-            end
-          end
-        rescue Net::SSH::HostKeyMismatch => error
-          error.remember_host!
-          sleep 0.2
-          retry
-        end
-      end
-      results
-    end
-  end
-  
-  #---
- 
-  def create_image(name, options = {})
-    super do
-      logger.debug("Imaging machine #{self.name}") 
-      image = server.create_image(name, options)
-      
-      if image
-        self.image = image.id
-        true
-      else
-        false
-      end
     end
   end
 end

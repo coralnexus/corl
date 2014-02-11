@@ -99,13 +99,12 @@ class Physical < Plugin::Machine
   
   def exec(commands, options = {})
     super do |config, results|
+      logger.debug("Executing shell commands ( #{commands.inspect} ) on machine #{name}")
+      
       commands.each do |command|
-        shell_result = Util::Shell.exec!(command, config)
-        
-        result = Util::Shell::Result.new(command)
-        result.append_output(shell_result[:output])
-        result.append_errors(shell_result[:errors])
-        result.status = shell_result[:status]
+        result = Util::Shell.exec!(command, config) do |type, command_str, data|
+          yield(type, command_str, data) if block_given?   
+        end        
         results << result
       end
       results
