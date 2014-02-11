@@ -81,7 +81,7 @@ en:
             Available actions
           footer: |-
             For help on any individual action run `coral <action> -h`
-        errors: |-
+        errors:
           missing_argument: |-
             Argument <%{name}> must be specified
     actions:
