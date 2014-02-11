@@ -110,6 +110,27 @@ class Base < Core
   end
 
   #-----------------------------------------------------------------------------
+  # Status codes
+    
+  def code
+    Coral.code
+  end
+  
+  def codes(*codes)
+    Coral.codes(*codes)
+  end
+
+  #---
+  
+  def status=status
+    meta.set(:status, status)
+  end
+  
+  def status
+    meta.get(:status, code.unknown_status)
+  end
+
+  #-----------------------------------------------------------------------------
   # Plugin operations
     
   def normalize
