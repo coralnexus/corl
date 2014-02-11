@@ -10,7 +10,12 @@ class Node < Base
     super
     
     @cli_interface = Util::Liquid.new do |method, args|
-      exec({ :commands => [ method, args ].flatten }).first
+      result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }).first
+      
+      ui_group!(hostname) do          
+        ui.alert(result.errors) unless result.errors.empty?
+      end
+      result
     end
     
     @action_interface = Util::Liquid.new do |method, args|
@@ -71,7 +76,7 @@ class Node < Base
   #---
  
   def [](name, default = nil, format = false)
-    setting(name, default, format)
+    search(name, default, format)
   end
   
   #---
@@ -145,39 +150,33 @@ class Node < Base
   #---
   
   def private_key=private_key
-    set(:private_key, private_key)
+    self[:private_key] = private_key
   end
   
   def private_key
-    return File.expand_path(get(:private_key)) if get(:private_key, false)
+    config_key = self[:private_key]
+    return File.expand_path(config_key) if config_key
     nil
   end
   
   #---
   
   def public_key=public_key
-    set(:public_key, public_key)
+    self[:public_key] = public_key
   end
   
   def public_key
-    return File.expand_path(get(:public_key)) if get(:public_key, false)
+    config_key = self[:private_key]
+    return File.expand_path(config_key) if config_key
   end
   
   #---
   
-  def home(env_var = 'HOME')
-    home    = nil
-    env_var = env_var.to_s
-    result  = cli.echo('$' + env_var.gsub('$', ''))
-              
-    ui_group!(hostname) do          
-      alert(result.errors)
+  def home(env_var = 'HOME', reset = false)
+    if reset || ! self[:user_home]
+      self[:user_home] = cli_capture(:echo, '$' + env_var.to_s.gsub('$', '')) if machine
     end
-              
-    if result.status == code.success && ! result.output.empty? 
-      home = result.output
-    end
-    home 
+    self[:user_home]
   end
   
   #---
@@ -187,11 +186,11 @@ class Node < Base
   end
     
   def machine_type=machine_type
-    set(:machine_type, machine_type)
+    self[:machine_type] = machine_type
   end
   
   def machine_type
-    machine_type = get(:machine_type, nil)
+    machine_type = self[:machine_type]
     
     if machine_type.nil? && machine
       if types = machine_types
@@ -247,11 +246,11 @@ class Node < Base
   #---
   
   def image=image
-    set(:image, image)
+    self[:image] = image
   end
   
   def image
-    get(:image, nil)
+    self[:image]
   end
    
   #-----------------------------------------------------------------------------
@@ -285,7 +284,249 @@ class Node < Base
   end
   
   #---
+  
+  def download(remote_path, local_path, options = {})
+    success = false
     
+    if machine && machine.running?
+      config      = Config.ensure(options)
+      hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config })
+      
+      if extension_check(:download, hook_config)
+        logger.info("Downloading from #{name}")
+      
+        yield(:config, hook_config) if block_given?
+        
+        success = machine.download(remote_path, local_path, config.export) do |name, received, total|
+          yield(:progress, { :name => name, :received => received, :total => total })
+        end
+        
+        if success && block_given?
+          process_success = yield(:process, hook_config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:download_success, hook_config)
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not running so cannot download")
+    end
+    success
+  end
+  
+  #---
+  
+  def upload(local_path, remote_path, options = {})
+    success = false
+    
+    if machine && machine.running?
+      config      = Config.ensure(options)
+      hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config })
+      
+      if extension_check(:upload, hook_config)
+        logger.info("Uploading to #{name}")
+      
+        yield(:config, hook_config) if block_given?
+        
+        success = machine.upload(local_path, remote_path, config.export) do |name, sent, total|
+          yield(:progress, { :name => name, :sent => sent, :total => total })  
+        end
+        
+        if success && block_given?
+          process_success = yield(:process, hook_config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:upload_success, hook_config)
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not running so cannot upload")
+    end
+    success
+  end
+  
+  #---
+  
+  def send_files(local_path, remote_path, files = nil, permission = '0644', &code)
+    local_path = File.expand_path(local_path)
+    return false unless File.directory?(local_path)
+    
+    success = true
+    
+    send_file = lambda do |local_file, remote_file|
+      send_success = upload(local_file, remote_file) do |op, options|
+        code.call(op, options) if code
+      end
+      send_success = cli_check(:chmod, permission, remote_file) if send_success
+      send_success  
+    end
+    
+    if files && files.is_a?(Array)
+      files.flatten.each do |rel_file_name|
+        local_file  = "#{local_path}/#{rel_file_name}"
+        remote_file = "#{remote_path}/#{rel_file_name}"
+    
+        if File.exists?(local_file)
+          send_success = send_file.call(local_file, remote_file) 
+          success      = false unless send_success
+        end
+      end
+    else
+      send_success = send_file.call(local_path, remote_path)
+      success      = false unless send_success
+    end
+    success
+  end
+  
+  #---
+  
+  def exec(options = {})
+    results = nil
+    
+    if machine && machine.running?
+      config = Config.ensure(options)
+      
+      if extension_check(:exec, { :config => config })
+        logger.info("Executing node: #{name}")
+      
+        yield(:config, config) if block_given?
+        
+        if commands = config.get(:commands, nil)
+          results = machine.exec(commands, config.export) do |type, command, data|
+            yield(:progress, { :type => type, :command => command, :data => data })    
+          end
+        end
+        
+        success  = true
+        results.each do |result|
+          success = false if result.status != Coral.code.success  
+        end
+        if success
+          yield(:process, config) if block_given?
+          extension(:exec_success, { :config => config, :results => results }) 
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not running so cannot execute commands")
+    end
+    results 
+  end
+  
+  #---
+  
+  def cli
+    @cli_interface
+  end
+  
+  #---
+  
+  def command(command, options = {})
+    unless command.is_a?(Coral::Plugin::Command)
+      command = Coral.command(Config.new({ :command => command }).import(options), :shell)
+    end
+    exec({ :commands => [ command.to_s ] }) do |op, results|
+      yield(op, results) if block_given?  
+    end.first
+  end
+  
+  #---
+  
+  def action(provider, options = {})
+    config         = Config.ensure(options)
+    encoded_config = Util::CLI.encode(config.export)
+    
+    logger.info("Executing remote action #{provider} with encoded arguments: #{config.export.inspect}")
+    
+    action_config = extended_config(:action, {
+      :command => provider, 
+      :data    => { :encoded => encoded_config }
+    })
+    command(:coral, { :subcommand => action_config }) do |op, results|
+      yield(op, results) if block_given?  
+    end  
+  end
+  
+  #---
+  
+  def run
+    @action_interface
+  end
+  
+  #---
+   
+  def bootstrap(local_path, options = {})
+    config      = Config.ensure(options)
+    self.status = code.unknown_status
+    
+    bootstrap_name = 'bootstrap'    
+    bootstrap_path = config.get(:bootstrap_path, File.join(Plugin.core.full_gem_path, bootstrap_name))
+    bootstrap_glob = config.get(:bootstrap_glob, '**/*.sh')
+    bootstrap_init = config.get(:bootstrap_init, 'bootstrap.sh')
+    
+    user_home  = config[:home]
+    auth_files = config.get_array(:auth_files)
+    
+    codes :local_path_not_found,
+          :home_path_lookup_failure,
+          :auth_upload_failure,
+          :bootstrap_upload_failure,
+          :bootstrap_exec_failure
+    
+    if File.directory?(local_path)      
+      if user_home || user_home = home(config.get(:home_env_var, 'HOME'), config.get(:force, false))
+        self.status = code.success
+        
+        # Transmit authorisation / credential files
+        package_files = [ '.fog', '.netrc', '.google-privatekey.p12' ]
+        auth_files.each do |file|
+          package_files = file.gsub(local_path + '/', '')
+        end
+        send_success = send_files(local_path, user_home, package_files, '0600') do |op, results|
+          yield("send_#{op}".to_sym, results) if block_given?
+        end
+        unless send_success
+          self.status = code.auth_upload_failure
+        end
+    
+        # Send bootstrap package
+        if status == code.success
+          remote_bootstrap_path = File.join(user_home, bootstrap_name)
+          
+          cli.rm('-Rf', remote_bootstrap_path)
+          send_success = send_files(bootstrap_path, remote_bootstrap_path, nil, '0700') do |op, results|
+            yield("send_#{op}".to_sym, results) if block_given?
+          end
+          unless send_success
+            self.status = code.bootstrap_upload_failure
+          end
+          
+          # Execute bootstrap process
+          if status == code.success
+            remote_script = File.join(remote_bootstrap_path, bootstrap_init)                  
+            result = command(remote_script) do |op, results|
+              yield("exec_#{op}".to_sym, results) if block_given?  
+            end
+            
+            if result.status != code.success
+              self.status = code.bootstrap_exec_failure  
+            end
+          end
+        end
+      else
+        self.status = code.home_path_lookup_failure            
+      end
+    else
+      self.status = code.local_path_not_found
+    end
+    status == code.success
+  end
+  
+  #---
+   
   def start(options = {})
     success = true
     
@@ -315,6 +556,64 @@ class Node < Base
   
   #---
     
+  def reload(options = {})
+    success = true
+    
+    if machine && machine.created?
+      config = Config.ensure(options)
+      
+      if extension_check(:reload, { :config => config })
+        logger.info("Reloading node: #{name}")
+      
+        yield(:config, config) if block_given?      
+        success = machine.reload(config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:reload_success, { :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not created so cannot be reloaded")
+    end
+    success
+  end
+  
+  #---
+  
+  def create_image(options = {})
+    success = true
+    
+    if machine && machine.running?
+      config = Config.ensure(options)
+      
+      if extension_check(:create_image, { :config => config })
+        logger.info("Executing node: #{name}")
+      
+        yield(:config, config) if block_given?      
+        success = machine.create_image(config.export)
+        
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
+        end
+        
+        if success
+          extension(:create_image_success, { :config => config })
+        end
+      end
+    else
+      logger.warn("Node #{name} does not have an attached machine or is not running so cannot create an image")
+    end
+    success   
+  end
+   
+  #---
+    
   def stop(options = {})
     success = true
     
@@ -342,35 +641,6 @@ class Node < Base
     success
   end
 
-  #---
-    
-  def reload(options = {})
-    success = true
-    
-    if machine && machine.created?
-      config = Config.ensure(options)
-      
-      if extension_check(:reload, { :config => config })
-        logger.info("Reloading node: #{name}")
-      
-        yield(:config, config) if block_given?      
-        success = machine.reload(config.export)
-        
-        if success && block_given?
-          process_success = yield(:process, config)
-          success         = process_success if process_success == false        
-        end
-        
-        if success
-          extension(:reload_success, { :config => config })
-        end
-      end
-    else
-      logger.warn("Node #{name} does not have an attached machine or is not created so cannot be reloaded")
-    end
-    success
-  end
-    
   #---
 
   def destroy(options = {})    
@@ -419,162 +689,6 @@ class Node < Base
     success    
   end
 
-  #---
-  
-  def download(remote_path, local_path, options = {})
-    success = false
-    
-    if machine && machine.running?
-      config = Config.ensure(options)
-      
-      if extension_check(:download, { :local_path => local_path, :remote_path => remote_path, :config => config })
-        logger.info("Downloading from #{name}")
-      
-        yield(:config, config) if block_given?
-        
-        success = machine.download(remote_path, local_path, config.export)
-        
-        if success && block_given?
-          process_success = yield(:process, config)
-          success         = process_success if process_success == false        
-        end
-        
-        if success
-          extension(:download_success, { :local_path => local_path, :remote_path => remote_path, :config => config })
-        end
-      end
-    else
-      logger.warn("Node #{name} does not have an attached machine or is not running so cannot download")
-    end
-    success
-  end
-  
-  #---
-  
-  def upload(local_path, remote_path, options = {})
-    success = false
-    
-    if machine && machine.running?
-      config = Config.ensure(options)
-      
-      if extension_check(:upload, { :local_path => local_path, :remote_path => remote_path, :config => config })
-        logger.info("Uploading to #{name}")
-      
-        yield(:config, config) if block_given?
-        
-        success = machine.upload(local_path, remote_path, config.export)
-        
-        if success && block_given?
-          process_success = yield(:process, config)
-          success         = process_success if process_success == false        
-        end
-        
-        if success
-          extension(:upload_success, { :local_path => local_path, :remote_path => remote_path, :config => config })
-        end
-      end
-    else
-      logger.warn("Node #{name} does not have an attached machine or is not running so cannot upload")
-    end
-    success
-  end
-  
-  #---
-  
-  def exec(options = {})
-    results = nil
-    
-    if machine && machine.running?
-      config = Config.ensure(options)
-      
-      if extension_check(:exec, { :config => config })
-        logger.info("Executing node: #{name}")
-      
-        yield(:config, config) if block_given?
-        
-        commands = config.get(:commands, nil)
-        results  = machine.exec(commands, config.export) if commands
-        success  = true
-        
-        results.each do |result|
-          success = false if result.status != Coral.code.success  
-        end
-        if success
-          yield(:process, config) if block_given?
-          extension(:exec_success, { :config => config, :results => results }) 
-        end
-      end
-    else
-      logger.warn("Node #{name} does not have an attached machine or is not running so cannot execute commands")
-    end
-    results 
-  end
-  
-  #---
-  
-  def cli
-    @cli_interface
-  end
-  
-  #---
-  
-  def command(command, options = {})
-    unless command.is_a?(Coral::Plugin::Command)
-      command = Coral.command(Config.new({ :command => command }).import(options), :shell)
-    end
-    exec({ :commands => [ command.to_s ] }).first
-  end
-  
-  #---
-  
-  def action(provider, options = {})
-    config         = Config.ensure(options)
-    encoded_config = Util::CLI.encode(config.export)
-    
-    logger.info("Executing remote action #{provider} with encoded arguments: #{config.export.inspect}")
-    
-    action_config = extended_config(:action, {
-      :command => provider, 
-      :data    => { :encoded => encoded_config }
-    })
-    command(:coral, { :subcommand => action_config })  
-  end
-  
-  #---
-  
-  def run
-    @action_interface
-  end
-  
-  #---
-  
-  def create_image(options = {})
-    success = true
-    
-    if machine && machine.running?
-      config = Config.ensure(options)
-      
-      if extension_check(:create_image, { :config => config })
-        logger.info("Executing node: #{name}")
-      
-        yield(:config, config) if block_given?      
-        success = machine.create_image(config.export)
-        
-        if success && block_given?
-          process_success = yield(:process, config)
-          success         = process_success if process_success == false        
-        end
-        
-        if success
-          extension(:create_image_success, { :config => config })
-        end
-      end
-    else
-      logger.warn("Node #{name} does not have an attached machine or is not running so cannot create an image")
-    end
-    success   
-  end
- 
   #-----------------------------------------------------------------------------
   # Utilities
   
@@ -633,7 +747,30 @@ class Node < Base
     self.class.translate_reference(reference)
   end
   
+  #-----------------------------------------------------------------------------
+  # CLI utilities
+  
+  def cli_capture(cli_command, *args)
+    dbg(cli_command, 'CLI command')
+    dbg(args, 'arguments')
+    result = cli.send(cli_command, args)
+             
+    if result.status == code.success && ! result.output.empty? 
+      result.output
+    else
+      nil
+    end  
+  end
+  
   #---
+  
+  def cli_check(cli_command, *args)
+    result = cli.send(cli_command, args)
+    result.status == code.success ? true : false  
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Machine type utilities
   
   def machine_type_id(machine_type)
     machine_type.id
@@ -645,7 +782,8 @@ class Node < Base
     ''  
   end
   
-  #---
+  #-----------------------------------------------------------------------------
+  # Image utilities
   
   def image_id(image)
     image.id
@@ -661,7 +799,7 @@ class Node < Base
   
   def image_search_text(image)
     image.to_s
-  end             
+  end          
 end
 end
 end
