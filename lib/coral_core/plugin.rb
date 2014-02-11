@@ -42,7 +42,7 @@ module Plugin
       
       unless instance_name && @@plugins[type].has_key?(instance_name)
         info[:instance_name] = instance_name
-        options[:meta]       = info
+        options[:meta]       = Config.new(info).import(Util::Data.hash(options[:meta]))
         
         logger.info("Creating new plugin #{provider} #{type} with #{options.inspect}")
         
