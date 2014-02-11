@@ -111,50 +111,6 @@ class Fog < Plugin::Node
   end
   
   #---
-    
-  def start(options = {})
-    super do |op, config|
-      if op == :config
-        config.import(exec_options(:start))
-      end
-      yield(op, config) if block_given?
-    end
-  end
-  
-  #---
-    
-  def stop(options = {})
-    super do |op, config|
-      if op == :config
-        config.import(exec_options(:stop))
-      end
-      yield(op, config) if block_given?
-    end
-  end
-
-  #---
-    
-  def reload(options = {})
-    super do |op, config|
-      if op == :config
-        config.import(exec_options(:reload))
-      end
-      yield(op, config) if block_given?
-    end
-  end
-    
-  #---
-
-  def destroy(options = {})    
-    super do |op, config|
-      if op == :config
-        config.import(exec_options(:destroy))
-      end
-      yield(op, config) if block_given?
-    end
-  end
-
-  #---
   
   def download(remote_path, local_path, options = {})
     super do |op, config|
@@ -188,6 +144,28 @@ class Fog < Plugin::Node
   end
   
   #---
+    
+  def start(options = {})
+    super do |op, config|
+      if op == :config
+        config.import(exec_options(:start))
+      end
+      yield(op, config) if block_given?
+    end
+  end
+  
+  #---
+    
+  def reload(options = {})
+    super do |op, config|
+      if op == :config
+        config.import(exec_options(:reload))
+      end
+      yield(op, config) if block_given?
+    end
+  end
+  
+  #---
   
   def create_image(options = {})
     super do |op, config|
@@ -198,6 +176,28 @@ class Fog < Plugin::Node
     end
   end
   
+  #---
+    
+  def stop(options = {})
+    super do |op, config|
+      if op == :config
+        config.import(exec_options(:stop))
+      end
+      yield(op, config) if block_given?
+    end
+  end
+  
+  #---
+
+  def destroy(options = {})    
+    super do |op, config|
+      if op == :config
+        config.import(exec_options(:destroy))
+      end
+      yield(op, config) if block_given?
+    end
+  end
+
   #-----------------------------------------------------------------------------
   # Utilities
   
