@@ -31,6 +31,21 @@ class Codes
     end    
   end
   
+  #---
+  
+  def self.render_index(status_code = nil)
+    output = "Status index mappings: (actual result in [])\n"
+    @@status_index.each do |code, name|
+      if ! status_code.nil? && status_code == code
+        output << sprintf("  [ %3i ] - %s\n", code, name)
+      else
+        output << sprintf("    %3i   - %s\n", code, name)
+      end      
+    end
+    output << "\n"
+    output
+  end
+  
   #-----------------------------------------------------------------------------
   # Code construction
   
