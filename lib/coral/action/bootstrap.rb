@@ -8,24 +8,10 @@ class Bootstrap < Plugin::Action
   
   def configure
     super do
-      @bootstrap_name = 'bootstrap' # Bootstrap directory relative to top level gem path
-            
       codes :network_failure,
-            :bootstrap_path_failure,
-            :package_failure,
-            :home_lookup_failure,
-            :extract_failure,
-            :bootstrap_exec_failure
+            :node_load_failure
       #---
-          
-      register :bootstrap, :str, File.join(Plugin.core.full_gem_path, @bootstrap_name) do |value|
-        unless File.directory?(value)
-          warn('coral.actions.bootstrap.errors.bootstrap', { :value => value })
-          next false
-        end
-        true
-      end
-      register :gateway, :str, 'bootstrap.sh'
+      
       register :auth_files, :array, [] do |values|
         success = true
         values.each do |value|
@@ -37,9 +23,18 @@ class Bootstrap < Plugin::Action
         success
       end
       register :home_env_var, :str, 'HOME'
-      register :home, :str, nil
-      register :node_name, :str, nil
+      register :home, :str, nil    
+      register :bootstrap_path, :str, File.join(Plugin.core.full_gem_path, 'bootstrap') do |value|
+        unless File.directory?(value)
+          warn('coral.actions.bootstrap.errors.bootstrap_path', { :value => value })
+          next false
+        end
+        true
+      end
+      register :bootstrap_glob, :str, '**/*.sh'
+      register :bootstrap_init, :str, 'bootstrap.sh'
       
+      register :node_name, :str, nil      
       config[:node_provider].default = nil
     end
   end
@@ -63,88 +58,49 @@ class Bootstrap < Plugin::Action
       
       if network
         if bootstrap_node = network.node(settings[:node_provider], settings[:node_name])
-          bootstrap_path = settings[:bootstrap]
+          ui_group!(bootstrap_node.hostname) do
+            home_path = extension_set(:home_path, ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] ), { :node => bootstrap_node }) 
           
-          if File.directory?(bootstrap_path)
-            # Create initiation package            
-            home_path   = ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] )     
-            package     = initiation_package(home_path, settings[:auth_files])
-            self.status = code.package_failure if package.nil?
-            
-            # Get remote user home directory
-            if status = code.success
-              if settings[:home]
-                remote_home = settings[:home] 
-              else
-                remote_home = bootstrap_node.home(settings[:home_env_var])
-                self.status = code.home_lookup_failure if remote_home.nil?
-              end
-            end
-            
-            # Clean remote bootstrap (if exists)
-            if status = code.success
-              remote_bootstrap = File.join(remote_home, @bootstrap_name)
-              bootstrap_node.cli.rm('-Rf', remote_bootstrap)
-            end
-            
-            if status = code.success
-              # Transmit initiation package
-              if bootstrap_node.run.extract({ :path => remote_home, :encoded => package.encode }).status == code.success
-                # Execute bootstrap scripts
-                gateway_script = settings[:gateway]
-                remote_script  = File.join(remote_bootstrap, gateway_script)                  
-                result         = bootstrap_node.command("HOSTNAME=#{bootstrap_node.hostname} #{remote_script}")
-                
-                ui_group!(bootstrap_node.hostname) do  
-                  render(result.output)
-                  alert(result.errors)
-                end
-                  
-                if result.status == code.success
-                  success('coral.core.actions.bootstrap.success')
+            success = bootstrap_node.bootstrap(home_path, extended_config(:bootstrap, {
+              :auth_files     => settings[:auth_files],
+              :home           => settings[:home],
+              :home_env_var   => settings[:home_env_var],
+              :bootstrap_path => settings[:bootstrap_path],
+              :bootstrap_glob => settings[:bootstrap_glob],
+              :bootstrap_init => settings[:bootstrap_init]
+            })) do |op, results|
+              case op
+              when :send_config # Modify upload configurations
+                render("Starting upload of #{results[:local_path]} to #{results[:remote_path]}")  
+              when :send_progress # Report progress of uploading files
+                render("#{results[:name]}: Sent #{results[:sent]} of #{results[:total]}")  
+              when :send_process # Process final result
+                render("Successfully finished upload of #{results[:local_path]} to #{results[:remote_path]}")
+              when :exec_config # Modify bootstrap execution configurations
+                render("Starting execution of bootstrap package")  
+              when :exec_progress # Report progress of bootstrap execution
+                if results[:type] == :error
+                  alert(results[:data], { :prefix => false })
                 else
-                  warn('coral.core.actions.bootstrap.error', { :status => result.status })
-                  self.status = code.bootstrap_exec_failure
+                  render(results[:data], { :prefix => false })
                 end  
-              else
-                self.status = code.extract_failure
-              end               
-            end           
-          else
-            self.status = code.bootstrap_path_failure
+              when :exec_process # Process final result
+                render("Successfully finished execution of bootstrap package")     
+              end
+              results  
+            end
+            self.status = bootstrap_node.status unless success
+            render('We are all good!') if success
           end
+        else
+          alert("Failed to load bootstrap node: #{settings[:node_provider]} #{settings[:node_name]}")
+          self.status = code.node_load_failure    
         end
       else
+        alert("Failed to load network")
         self.status = code.network_failure
       end
     end
-  end
-  
-  #---
-  
-  def initiation_package(home_path, auth_files = [])
-    # Create initiation package            
-    package = nil
-    
-    if File.directory?(home_path)
-      package = Util::Package.new
-                
-      # Pluggable authentication files
-      package.add_file("#{home_path}/.fog", '.fog')
-      package.add_file("#{home_path}/.netrc", '.netrc')
-            
-      # Special cases :-(   
-      package.add_file("#{home_path}/.google-privatekey.p12", '.google-privatekey.p12')
-            
-      # Extra credential files given
-      auth_files.each do |file|
-        package.add_file(file, file.gsub(home_path + '/', ''))
-      end
-            
-      # Add bootstrap scripts
-      package.add_files(bootstrap_path, '**/*.sh', 'bootstrap', 0700)
-    end
-    package
   end
 end
 end
