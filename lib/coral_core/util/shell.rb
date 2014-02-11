@@ -60,7 +60,7 @@ class Shell < Core
     $stdout.sync = true
     $stderr.sync = true
     
-    system_result = Shell::Result.new(command)
+    system_result = Result.new(command)
     
     for i in tries.downto(1)
       logger.info(">> running: #{command}")
@@ -69,17 +69,17 @@ class Shell < Core
         t1, output_new, output_orig, output_reader = pipe_exec_stream!($stdout, conditions, { 
           :prefix => info_prefix, 
           :suffix => info_suffix, 
-        }, 'output') do |line|
-          system_result.append_output(line)
-          block_given? ? yield(line) : true
+        }, 'output') do |data|
+          system_result.append_output(data)
+          block_given? ? yield(:output, command, data) : true
         end
       
         t2, error_new, error_orig, error_reader = pipe_exec_stream!($stderr, conditions, { 
           :prefix => error_prefix, 
           :suffix => error_suffix, 
-        }, 'error') do |line|
-          system_result.append_errors(line)
-          block_given? ? yield(line) : true
+        }, 'error') do |data|
+          system_result.append_errors(data)
+          block_given? ? yield(:error, command, data) : true
         end
       
         system_success       = system(command)
