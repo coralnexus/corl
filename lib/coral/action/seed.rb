@@ -86,7 +86,6 @@ class Seed < Plugin::Action
               FileUtils.chmod_R(0600, network_path)
               
               if network.load
-                dbg(node, 'node')
                 self.status = code.node_save_failure unless node.save
               else
                 self.status = code.network_load_failure    

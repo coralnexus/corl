@@ -221,8 +221,6 @@ class File < Plugin::Configuration
     config  = Config.ensure(options)
     success = true
     
-    dbg(config.export, 'configuration for update project')
-    
     if autocommit || config.get(:commit, false)
       commit_files = project.local_path(location)
       commit_files = [ commit_files, array(files) ].flatten unless files.empty?
