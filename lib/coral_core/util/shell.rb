@@ -66,28 +66,28 @@ class Shell < Core
       logger.info(">> running: #{command}")
       
       begin
-        #t1, output_new, output_orig, output_reader = pipe_exec_stream!($stdout, conditions, { 
-        #  :prefix => info_prefix, 
-        #  :suffix => info_suffix, 
-        #}, 'output') do |data|
-        #  system_result.append_output(data)
-        #  block_given? ? yield(:output, command, data) : true
-        #end
+        t1, output_new, output_orig, output_reader = pipe_exec_stream!($stdout, conditions, { 
+          :prefix => info_prefix, 
+          :suffix => info_suffix, 
+        }, 'output') do |data|
+          system_result.append_output(data)
+          block_given? ? yield(:output, command, data) : true
+        end
       
-        #t2, error_new, error_orig, error_reader = pipe_exec_stream!($stderr, conditions, { 
-        #  :prefix => error_prefix, 
-        #  :suffix => error_suffix, 
-        #}, 'error') do |data|
-        #  system_result.append_errors(data)
-        #  block_given? ? yield(:error, command, data) : true
-        #end
+        t2, error_new, error_orig, error_reader = pipe_exec_stream!($stderr, conditions, { 
+          :prefix => error_prefix, 
+          :suffix => error_suffix, 
+        }, 'error') do |data|
+          system_result.append_errors(data)
+          block_given? ? yield(:error, command, data) : true
+        end
       
         system_success       = system(command)
         system_result.status = $?.exitstatus
       
       ensure
-        #output_success = close_exec_pipe(t1, $stdout, output_orig, output_new, 'output')
-        #error_success  = close_exec_pipe(t2, $stderr, error_orig, error_new, 'error')
+        output_success = close_exec_pipe(t1, $stdout, output_orig, output_new, 'output')
+        error_success  = close_exec_pipe(t2, $stderr, error_orig, error_new, 'error')
       end
       
       success = ( system_success && output_success && error_success )
