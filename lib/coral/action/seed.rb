@@ -14,8 +14,8 @@ class Seed < Plugin::Action
             :node_save_failure
       #---
       
-      register :home, :str, ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] ) do |value|
-        unless File.directory?(value)
+      register :home, :str, nil do |value|
+        unless value.nil? || File.directory?(value)
           warn('coral.actions.seed.errors.home', { :value => value })
           next false
         end
@@ -59,8 +59,9 @@ class Seed < Plugin::Action
           network_path = lookup(:coral_network)
           backup_path  = File.join(Dir.tmpdir(), 'coral')
           
-          keypair = Util::SSH.generate
-          ssh_dir = File.join(settings[:home], '.ssh')
+          keypair  = Util::SSH.generate
+          home_dir = settings[:home].nil? ? ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] ) : settings[:home]
+          ssh_dir  = File.join(home_dir, '.ssh')
           
           if keys = keypair.store(ssh_dir)
             if @project_info
