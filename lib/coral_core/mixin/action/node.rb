@@ -212,7 +212,7 @@ module Node
     
     if local_node.nil?
       node_name  = Util::Data.ensure_value(lookup(:hostname), ip_address)    
-      local_node = Coral.node(node_name, extended_config(:local_node), :local)            
+      local_node = Coral.node(node_name, extended_config(:local_node).import({ :meta => { :parent => network }}), :local)            
     end
     
     local_node
