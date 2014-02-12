@@ -10,7 +10,9 @@ class Seed < Plugin::Action
     super do
       codes :key_store_failure,
             :project_failure,
+            :network_init_failure,
             :network_load_failure,
+            :node_load_failure,
             :node_save_failure
       #---
       
@@ -87,10 +89,18 @@ class Seed < Plugin::Action
               FileUtils.chmod_R(0600, network_path)
               FileUtils.rm_rf(backup_path)
               
-              if network.load
-                self.status = code.node_save_failure unless node.save
+              if network = init_network
+                if network.load
+                  if node = local_node(network)
+                    self.status = code.node_save_failure unless node.save  
+                  else
+                    self.status = code.node_load_failure
+                  end                  
+                else
+                  self.status = code.network_load_failure    
+                end
               else
-                self.status = code.network_load_failure    
+                self.status = code.network_init_failure
               end     
             else
               self.status = code.project_failure  
