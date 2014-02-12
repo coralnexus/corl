@@ -877,7 +877,7 @@ class Project < Base
       
       logger.debug("Translating project reference: #{provider}  #{url}  #{revision}")
       
-      if provider
+      if provider && Plugin.loaded_plugins(:project).keys.include?(provider.to_sym)
         klass        = Coral.class_const([ :coral, :project, provider ])          
         expanded_url = klass.send(:expand_url, url, editable) if klass.respond_to?(:expand_url)
       end
