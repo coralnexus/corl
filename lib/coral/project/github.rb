@@ -62,9 +62,13 @@ class Github < Git
           end
           
           if github_id
-            client.edit_deploy_key(self.name, github_id, { :key => ssh_key }) unless keys_match  
+            unless keys_match  
+              client.edit_deploy_key(self.name, github_id, { :key => ssh_key })
+              Net::SSH::KnownHosts.add('github.com', ssh_key)
+            end
           else
             client.add_deploy_key(self.name, key_id, ssh_key)
+            Net::SSH::KnownHosts.add('github.com', ssh_key)
           end
                   
         rescue Exception => error
