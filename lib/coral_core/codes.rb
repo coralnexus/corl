@@ -34,12 +34,14 @@ class Codes
   #---
   
   def self.render_index(status_code = nil)
-    output = "Status index mappings: (actual result in [])\n"
+    output = "Status index:\n"
     @@status_index.each do |code, name|
+      name = name.gsub(/_/, ' ').capitalize
+      
       if ! status_code.nil? && status_code == code
-        output << sprintf("  [ %3i ] - %s\n", code, name)
+        output << sprintf(" [ %3i ] - %s\n", code, name)
       else
-        output << sprintf("    %3i   - %s\n", code, name)
+        output << sprintf("   %3i   - %s\n", code, name)
       end      
     end
     output << "\n"
@@ -99,8 +101,7 @@ class Codes
   code(:action_unprocessed)
   code(:batch_error)
   
-  code(:access_denied)
-  
   code(:validation_failed)
+  code(:access_denied) 
 end
 end
