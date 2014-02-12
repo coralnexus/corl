@@ -91,6 +91,7 @@ require 'multi_json'
 require 'digest/sha1'
 require 'optparse'
 require 'thread'
+require 'tmpdir'
 
 #---
 
