@@ -85,6 +85,7 @@ class Seed < Plugin::Action
         
             if project
               FileUtils.chmod_R(0600, network_path)
+              FileUtils.rm_rf(backup_path)
               
               if network.load
                 self.status = code.node_save_failure unless node.save
