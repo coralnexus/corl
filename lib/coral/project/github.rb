@@ -10,9 +10,7 @@ class Github < Git
   #-----------------------------------------------------------------------------
   # Project plugin interface
  
-  def normalize
-    require 'octokit'
-    
+  def normalize    
     if reference = delete(:reference, nil)
       self.name = reference
     else
@@ -22,6 +20,23 @@ class Github < Git
       end  
     end    
     super
+  end
+  
+  #---
+  
+  def set_connection
+    require 'octokit'
+    
+    @client = Octokit::Client.new :netrc => true
+    @client.login
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Property accessor / modifiers
+  
+  def client
+    set_connection unless @client
+    @client
   end
   
   #-----------------------------------------------------------------------------
@@ -34,11 +49,24 @@ class Github < Git
       
       if private_key && ssh_key
         begin
-          client = Octokit::Client.new :netrc => true
-          client.login        
+          deploy_keys = client.deploy_keys(self.name) 
+          github_id   = nil
+          keys_match  = true
+                   
+          deploy_keys.each do |key_resource|
+            if key_resource.title == key_id
+              github_id  = key_resource.id              
+              keys_match = false if key_resource.key != ssh_key
+              break
+            end  
+          end
           
-          result = client.add_deploy_key(self.name, key_id, ssh_key)
-        
+          if github_id
+            client.edit_deploy_key(self.name, github_id, { :key => ssh_key }) unless keys_match  
+          else
+            client.add_deploy_key(self.name, key_id, ssh_key)
+          end
+                  
         rescue Exception => error
           logger.error(error.inspect)
           logger.error(error.message)
