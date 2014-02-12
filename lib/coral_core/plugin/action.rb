@@ -164,14 +164,20 @@ class Action < Base
   #---
     
   def configure
-    usage = "coral #{plugin_provider} "    
-    arguments.each do |arg|
-      usage << "<#{arg}> "
-    end
-    self.usage = usage
-         
     node_config
     yield if block_given?
+    
+    usage = "coral #{plugin_provider} "    
+    arguments.each do |arg|
+      arg_config = config[arg.to_sym]
+      
+      if arg_config.type == :array
+        usage << "<#{arg}> ..."
+      else
+        usage << "<#{arg}> "  
+      end      
+    end
+    self.usage = usage
   end
   
   #---
