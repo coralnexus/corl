@@ -52,8 +52,8 @@ module Node
      
   #-----------------------------------------------------------------------------
   # Operations
-        
-  def node_exec
+  
+  def init_network
     if Coral.admin?
       network_path = lookup(:coral_network)
       Dir.mkdir(network_path) unless File.directory?(network_path)
@@ -72,6 +72,13 @@ module Node
       network_config, 
       settings[:net_provider]
     )
+    network  
+  end
+  
+  #---
+        
+  def node_exec
+    network = init_network
     
     if network.has_nodes? && ! settings[:nodes].empty?
       # Execute action on remote nodes      
