@@ -526,6 +526,26 @@ class Node < Base
   end
   
   #---
+  
+  def save(options = {})
+    config = Config.ensure(options)
+    
+    # Record machine parameters
+    self[:id]         = id
+    self[:public_ip]  = public_ip
+    self[:private_ip] = private_ip
+    self[:hostname]   = hostname
+    self[:state]      = state
+    
+    # Provider or external configuration preparation
+    yield(config) if block_given?
+    
+    remote = config.get(:remote, :edit)
+    
+    network.save(config.import({ :commit => true, :remote => remote }))    
+  end
+  
+  #---
    
   def start(options = {})
     success = true
