@@ -542,7 +542,12 @@ class Node < Base
     
     remote = config.get(:remote, :edit)
     
-    network.save(config.import({ :commit => true, :remote => remote }))    
+    network.save(config.import({ 
+      :commit      => true,
+      :allow_empty => true,
+      :message     => config.get(:message, "Saving #{plugin_provider} node #{name}"),
+      :remote      => remote 
+    }))    
   end
   
   #---
