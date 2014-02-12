@@ -206,3 +206,6 @@ en:
         options:
           home: |-
             Home directory in which to initialize the deploy SSH keys (default %default_value})
+        errors:
+          project_reference: |-
+            Project reference %{value} failed to parse or provider %{provider} isn't loaded >> Possible providers: %{choices}
