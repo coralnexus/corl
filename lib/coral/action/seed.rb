@@ -4,54 +4,73 @@ module Action
 class Seed < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Seed action interface
+  # Settings
   
-  def normalize
-    super('coral seed <project:::reference>')    
-    
-    codes :key_store_failure    => 20,
-          :project_failure      => 20,
-          :network_load_failure => 21
-  end
-
-  #-----------------------------------------------------------------------------
-  # Action operations
-  
-  def parse(parser)
-    home_dir = ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] )
+  def configure
+    super do
+      codes :key_store_failure,
+            :project_failure,
+            :network_load_failure,
+            :node_save_failure
+      #---
+      
+      register :home, :str, ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] ) do |value|
+        unless File.directory?(value)
+          warn('coral.actions.seed.errors.home', { :value => value })
+          next false
+        end
+        true  
+      end
+      register :project_branch, :str, 'master'
+      register :project_reference, :str, nil do |value|
+        value           = value.to_sym
+        project_plugins = Plugin.loaded_plugins(:project)
         
-    parser.option_str(:home, home_dir, 
-      '--home USER_HOME_DIR', 
-      'coral.core.actions.seed.options.home'
-    )
-    parser.option_str(:branch, :master, 
-      '--branch BRANCH', 
-      'coral.core.actions.seed.options.branch'
-    )
-    parser.arg_str(:reference, nil, 
-      'coral.core.actions.create.options.reference'
-    )
-    node_options(parser)
+        if @project_info = Plugin::Project.translate_reference(value, true)
+          provider = @project_info[:provider]
+        else
+          provider = value
+        end
+        
+        unless project_plugins.keys.include?(provider.to_sym)
+          warn('coral.actions.seed.errors.project_reference', { :value => value, :provider => provider, :choices => project_plugins.keys.join(', ') })
+          next false
+        end
+        true
+      end      
+    end
   end
   
   #---
+  
+  def arguments
+    [ :project_reference ]
+  end
+
+  #-----------------------------------------------------------------------------
+  # Operations
    
   def execute
-    super do |node, network, status|
+    super do |node, network|
       info('coral.core.actions.seed.start')
       
       if node && network
-        status = admin_exec(status) do
+        admin_exec do
           network_path = lookup(:coral_network)
-          keypair      = Util::SSH.generate
-          ssh_dir      = File.join(settings[:home], '.ssh')
+          backup_path  = File.join(Dir.tmpdir(), 'coral')
+          
+          keypair = Util::SSH.generate
+          ssh_dir = File.join(settings[:home], '.ssh')
           
           if keys = keypair.store(ssh_dir)
-            if project_info = Plugin::Project.translate_reference(settings[:reference], true)
-              project_info = Config.new(project_info)
+            if @project_info
+              project_info = Config.new(@project_info)
             else
               project_info = Config.new({ :provider => :git })
             end
+            
+            FileUtils.rm_rf(backup_path)
+            FileUtils.mv(network_path, backup_path)
             
             project = Coral.project(extended_config(:project, {
               :directory => network_path,
@@ -64,26 +83,24 @@ class Seed < Plugin::Action
             }), project_info[:provider])
         
             if project
-            #  if network.load
-            #    success = network.add_node(node.plugin_provider, node.hostname, {
-            #      :public_ip  => node.public_ip,
-            #      :private_ip => node.private_ip,
-            #      :revision   => project.revision
-            #    })
-            #    status = code.node_add_failure unless success
-            #  else
-            #    status = code.network_load_failure    
-            #  end     
+              FileUtils.chmod_R(0600, network_path)
+              
+              if network.load
+                dbg(node, 'node')
+                self.status = code.node_save_failure unless node.save
+              else
+                self.status = code.network_load_failure    
+              end     
             else
-              status = code.project_failure  
+              self.status = code.project_failure  
             end            
           else
-            status = code.key_store_failure
+            self.status = code.key_store_failure
           end
-          status
         end
+      else
+        self.status = code.network_load_failure    
       end
-      status
     end
   end
 end
