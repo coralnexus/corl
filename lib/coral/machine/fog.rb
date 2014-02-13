@@ -86,7 +86,29 @@ class Fog < Plugin::Machine
   
   #---
   
+  def hostname
+    compute
+    super
+  end
+  
+  #---
+  
+  def public_ip
+    compute
+    super
+  end
+  
+  #---
+  
+  def private_ip
+    compute
+    super
+  end
+  
+  #---
+  
   def state
+    compute
     return translate_state(server.state) if server
     nil
   end
@@ -94,15 +116,13 @@ class Fog < Plugin::Machine
   #---
     
   def machine_types
-    return compute.flavors if compute
-    super
+    compute.flavors
   end
   
   #---
   
   def images
-    return compute.images if compute
-    super
+    compute.images
   end
   
   #-----------------------------------------------------------------------------
