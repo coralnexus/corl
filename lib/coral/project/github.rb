@@ -62,13 +62,13 @@ class Github < Git
           end
           
           if github_id
-            unless keys_match  
+            unless keys_match
               client.edit_deploy_key(self.name, github_id, { :key => ssh_key })
-              Net::SSH::KnownHosts.add('github.com', ssh_key)
+              verify_key
             end
           else
             client.add_deploy_key(self.name, key_id, ssh_key)
-            Net::SSH::KnownHosts.add('github.com', ssh_key)
+            verify_key
           end
                   
         rescue Exception => error
@@ -95,6 +95,14 @@ class Github < Git
     end
     return "#{protocol}github.com#{separator}" + path + '.git'  
   end
+  
+  #---
+  
+  def verify_key
+    Util::SSH.init_session('github.com', 'git', 22, private_key)
+    Util::SSH.close('github.com', 'git')
+  end
+  protected :verify_key
 end
 end
 end
