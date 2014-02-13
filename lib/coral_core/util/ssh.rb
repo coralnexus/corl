@@ -2,7 +2,24 @@
 module Coral
 module Util
 class SSH < Core
-
+  
+  #-----------------------------------------------------------------------------
+  # User key home
+  
+  @@key_path = nil
+  
+  #---
+  
+  def self.key_path
+    unless @@key_path
+      home_path  = ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] ) # In case we are using sudo
+      @@key_path = File.join(home_path, '.ssh')
+    
+      FileUtils.mkdir(@@key_path) unless File.directory?(@@key_path)
+    end
+    @@key_path
+  end
+  
   #-----------------------------------------------------------------------------
   # Instance generators
   
@@ -57,7 +74,8 @@ class SSH < Core
     
     #---
     
-    def store(key_path, key_base = 'id')
+    def store(key_path = nil, key_base = 'id')
+      key_path         = SSH.key_path if key_path.nil?
       private_key_file = File.join(key_path, "#{key_base}_#{type.downcase}")
       public_key_file  = File.join(key_path, "#{key_base}_#{type.downcase}.pub")
       
@@ -80,53 +98,72 @@ class SSH < Core
   
   #---
   
-  def self.session_id(public_ip, user)
-    "#{public_ip}-#{user}"  
+  def self.session_id(hostname, user)
+    "#{hostname}-#{user}"  
   end
   
   #---
   
-  def self.session(public_ip, user, port = 22, private_key = nil, reset = false)
+  def self.session(hostname, user, port = 22, private_key = nil, reset = false, options = {})
     require 'net/ssh'
     
-    ssh_options = {
-      :port         => port,
-      :keys         => private_key.nil? ? [] : [ private_key ],
-      :key_data     => [],
-      :keys_only    => false,
-      :auth_methods => [ 'publickey' ]
-    }
+    ssh_options = Config.new({
+      :user_known_hosts_file => [ File.join(key_path, 'known_hosts'), File.join(key_path, 'known_hosts2') ],
+      :key_data              => [],
+      :keys_only             => false,
+      :auth_methods          => [ 'publickey' ],
+      :paranoid              => :very,
+      :verbose               => :warn
+    }).import(options)
     
-    session_id = session_id(public_ip, user)
+    ssh_options[:port] = port
+    ssh_options[:keys] = private_key.nil? ? [] : [ private_key ]
     
-    unless reset || @@sessions.has_key?(session_id)
-      @@sessions[session_id] = Net::SSH.start(public_ip, user, ssh_options)
+    session_id = session_id(hostname, user)
+    
+    if reset || ! @@sessions.has_key?(session_id)
+      @@sessions[session_id] = Net::SSH.start(hostname, user, ssh_options.export)
     end
-    yield(@@sessions[session_id]) if block_given?
+    yield(@@sessions[session_id]) if block_given? && @@sessions[session_id]
     @@sessions[session_id] 
   end
   
-  def self.init_session(public_ip, user, port = 22, private_key = nil)
-    session(public_ip, user, port, private_key, true)  
+  def self.init_session(hostname, user, port = 22, private_key = nil, options = {})
+    session(hostname, user, port, private_key, true, options)  
   end
   
   #---
   
-  def self.close
-    @@sessions.keys.each do |session_id|
-      session = @@sessions[session_id]
-      session.close
-      @@sessions.delete(session_id)      
+  def self.close(hostname = nil, user = nil)
+    if hostname && user.nil? # Assume we entered a session id
+      if @@sessions.has_key?(hostname)
+        @@sessions[hostname].close
+        @@sessions.delete(hostname)  
+      end
+      
+    elsif hostname && user # Generate session id from args
+      session_id = session_id(hostname, user)
+      
+      if @@sessions.has_key?(session_id)
+        @@sessions[session_id].close
+        @@sessions.delete(session_id)  
+      end
+      
+    else # Close all connections
+      @@sessions.keys.each do |id|
+        @@sessions[id].close
+        @@sessions.delete(id)      
+      end
     end
   end
   
   #---
   
-  def self.exec!(public_ip, user, commands)
+  def self.exec!(hostname, user, commands)
     results = []
         
     begin
-      session(public_ip, user) do |ssh|
+      session(hostname, user) do |ssh|
         Data.array(commands).each do |command|
           command = command.flatten.join(' ') if command.is_a?(Array)
           command = command.to_s
@@ -171,13 +208,13 @@ class SSH < Core
     results  
   end
   
-  def self.exec(public_ip, user, commands, options = {})
-    exec!(public_ip, user, commands, options)
+  def self.exec(hostname, user, commands, options = {})
+    exec!(hostname, user, commands, options)
   end
   
   #---
   
-  def self.download!(public_ip, user, remote_path, local_path, options = {})
+  def self.download!(hostname, user, remote_path, local_path, options = {})
     config = Config.ensure(options)
     
     require 'net/scp'
@@ -196,7 +233,7 @@ class SSH < Core
     
     blocking = config.delete(:blocking, true)
     
-    session(public_ip, user) do |ssh|
+    session(hostname, user) do |ssh|
       if blocking
         ssh.scp.download!(remote_path, local_path, config.export) do |ch, name, received, total|
           yield(name, received, total) if block_given?
@@ -207,13 +244,13 @@ class SSH < Core
     end
   end
   
-  def self.download(public_ip, user, remote_path, local_path, options = {})
-    download!(public_ip, user, remote_path, local_path, options)
+  def self.download(hostname, user, remote_path, local_path, options = {})
+    download!(hostname, user, remote_path, local_path, options)
   end
   
   #---
   
-  def self.upload!(public_ip, user, local_path, remote_path, options = {})
+  def self.upload!(hostname, user, local_path, remote_path, options = {})
     config = Config.ensure(options)
     
     require 'net/scp'
@@ -236,7 +273,7 @@ class SSH < Core
     
     blocking = config.delete(:blocking, true)
     
-    session(public_ip, user) do |ssh|
+    session(hostname, user) do |ssh|
       if blocking
         ssh.scp.upload!(local_path, remote_path, config.export) do |ch, name, sent, total|
           yield(name, sent, total) if block_given?
@@ -247,8 +284,8 @@ class SSH < Core
     end
   end
   
-  def self.upload(public_ip, user, remote_path, local_path, options = {})
-    upload!(public_ip, user, remote_path, local_path, options)
+  def self.upload(hostname, user, remote_path, local_path, options = {})
+    upload!(hostname, user, remote_path, local_path, options)
   end
 end
 end
