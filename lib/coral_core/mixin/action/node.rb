@@ -53,12 +53,12 @@ module Node
   #-----------------------------------------------------------------------------
   # Operations
   
-  def init_network
+  def init_network(path = nil)
     if Coral.admin?
       network_path = lookup(:coral_network)
       Dir.mkdir(network_path) unless File.directory?(network_path)
     else
-      network_path = Dir.pwd
+      network_path = ( path.nil? ? Dir.pwd : File.expand_path(path) )
     end
     
     # Load network if it exists
@@ -80,9 +80,12 @@ module Node
   def node_exec
     network = init_network
     
+    #
+    # A fork in the road...
+    #
     if network.has_nodes? && ! settings[:nodes].empty?
       # Execute action on remote nodes      
-      nodes = translate_node_references(settings[:nodes], network)
+      nodes = network.nodes_by_reference(settings[:nodes], settings[:node_provider])
       
       Coral.batch(settings[:parallel]) do |op, batch|
         if op == :add
@@ -110,7 +113,7 @@ module Node
       end
     else
       # Execute statement locally
-      node = local_node(network)
+      node = network.local_node
       
       if validate(node, network)
         yield(node, network) if block_given?
@@ -120,111 +123,6 @@ module Node
       end
     end
   end
-        
-  #-----------------------------------------------------------------------------
-  # Utilities
-  
-  def translate_node_references(references, network)
-    info  = node_info(references, network)    
-    nodes = []
-    
-    registered_nodes = network.nodes
-    
-    info.each do |provider, names|
-      provider_nodes = registered_nodes[provider]
-      
-      names.each do |name|
-        nodes << provider_nodes[name]  
-      end
-    end
-    nodes  
-  end
-  protected :translate_node_references
-  
-  #---
-  
-  def node_info(references, network)
-    groups    = symbol_map(node_groups(network))
-    node_info = {}
-    
-    references.each do |reference|
-      info = Plugin::Node.translate_reference(reference)
-      info = { :provider => settings[:node_provider], :name => reference } unless info
-      name = info[:name].to_sym     
-      
-      # Check for group membership
-      if groups.has_key?(name)
-        groups[name].each do |member_info|
-          provider = member_info[:provider].to_sym
-          
-          node_info[provider] = [] unless node_info.has_key?(provider)        
-          node_info[provider] << member_info[:name]
-        end
-      else
-        # Not a group
-        provider = info[:provider].to_sym
-        
-        if network.nodes.has_key?(provider)
-          node_found = false
-          
-          network.nodes(provider).each do |node_name, node|
-            if node_name == name
-              node_info[provider] = [] unless node_info.has_key?(provider)        
-              node_info[provider] << node_name
-              node_found = true
-              break
-            end
-          end
-          
-          unless node_found
-            # TODO:  Error or something?
-          end
-        end 
-      end     
-    end
-    
-    node_info  
-  end
-  protected :node_info
-  
-  #---
-  
-  def node_groups(network)
-    groups = {}
-    
-    network.each_node! do |provider, node_name, node|
-      node.groups.each do |group|
-        groups[group] = [] unless groups.has_key?(group)
-        groups[group] << { :provider => provider, :name => node_name }
-      end
-    end
-    
-    groups
-  end
-  protected :node_groups
-  
-  #---
-  
-  def local_node(network)    
-    ip_address = lookup(:ipaddress)
-    local_node = nil
-    
-    network.each_node! do |provider, node_name, node|
-      if node.public_ip == ip_address
-        local_node = node
-        local_node.localize
-        break
-      end
-    end
-    
-    if local_node.nil?
-      node_name  = Util::Data.ensure_value(lookup(:hostname), ip_address)    
-      local_node = Coral.node(node_name, extended_config(:local_node).import({ :meta => { :parent => network }}), :local)            
-    end
-    
-    local_node
-  end
-  protected :local_node
 end
 end
 end

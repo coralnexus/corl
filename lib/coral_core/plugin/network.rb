@@ -19,8 +19,8 @@ class Network < Base
   #-----------------------------------------------------------------------------
   # Checks
   
-  def has_nodes?(provider = nil)
-    return nodes(provider).empty? ? false : true
+  def has_nodes?(provider = nil)   
+    node_config(provider).export.empty? ? false : true
   end
        
   #-----------------------------------------------------------------------------
@@ -40,11 +40,100 @@ class Network < Base
   
   #---
   
+  def node_groups
+    groups = {}
+    
+    each_node_config! do |provider, name, info|
+      search_node(provider, name, :groups, [], :array).each do |group|
+        group = group.to_sym
+        groups[group] = [] unless groups.has_key?(group)
+        groups[group] << { :provider => provider, :name => node_name }
+      end
+    end    
+    groups
+  end
+  
+  #---
+  
+  def node_info(references, default_provider = nil)
+    groups    = node_groups
+    node_info = {}
+    
+    default_provider = Plugin.type_default(:node) if default_provider.nil?
+        
+    references.each do |reference|
+      info = Plugin::Node.translate_reference(reference)
+      info = { :provider => default_provider, :name => reference } unless info
+      name = info[:name].to_sym     
+      
+      # Check for group membership
+      if groups.has_key?(name)
+        groups[name].each do |member_info|
+          provider = member_info[:provider].to_sym
+          
+          node_info[provider] = [] unless node_info.has_key?(provider)        
+          node_info[provider] << member_info[:name]
+        end
+      else
+        # Not a group
+        provider = info[:provider].to_sym
+        
+        if node_config.export.has_key?(provider)
+          node_found = false
+          
+          each_node_config!(provider) do |node_provider, node_name, node|
+            if node_name == name
+              node_info[node_provider] = [] unless node_info.has_key?(node_provider)        
+              node_info[node_provider] << node_name
+              node_found = true
+              break
+            end
+          end
+          
+          unless node_found
+            # TODO:  Error or something?
+          end
+        end 
+      end     
+    end    
+    node_info  
+  end
+  
+  #---
+  
   def node_by_ip(public_ip)
-    each_node! do |provider, node_name, node|
-      return node if node.public_ip == public_ip  
+    each_node_config! do |provider, name, info|
+      return node(provider, name) if info[:public_ip] == public_ip  
     end
-    return nil
+    nil
+  end
+  
+  #---
+  
+  def local_node
+    ip_address = lookup(:ipaddress)
+    local_node = node_by_ip(ip_address)
+        
+    if local_node.nil?
+      name       = Util::Data.ensure_value(lookup(:hostname), ip_address)    
+      local_node = Coral.node(name, extended_config(:local_node).import({ :meta => { :parent => self }}), :local) 
+    else
+      local_node.localize               
+    end    
+    local_node
+  end
+  
+  #---
+  
+  def nodes_by_reference(references)
+    nodes = []
+    
+    node_info(references).each do |provider, names|
+      names.each do |name|
+        nodes << node(provider, name)
+      end
+    end
+    nodes  
   end
   
   #-----------------------------------------------------------------------------
@@ -159,7 +248,16 @@ class Network < Base
   
   #-----------------------------------------------------------------------------
   # Utilities
-  
+
+  def each_node_config!(provider = nil)
+    node_config.export.each do |node_provider, nodes|
+      if provider.nil? || provider == node_provider
+        nodes.each do |name, info|
+          yield(node_provider, name, info)
+        end
+      end
+    end
+  end 
 end
 end
 end
