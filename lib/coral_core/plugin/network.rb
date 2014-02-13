@@ -14,8 +14,6 @@ class Network < Base
     logger.info("Initializing sub configuration from source with: #{self._export}")
     
     self.config = Coral.configuration(Config.new(self._export).import({ :autocommit => false }))
-    
-    init_nodes
   end
   
   #-----------------------------------------------------------------------------
