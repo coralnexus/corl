@@ -112,8 +112,7 @@ class SSH < Core
       :key_data              => [],
       :keys_only             => false,
       :auth_methods          => [ 'publickey' ],
-      :paranoid              => :very,
-      :verbose               => :warn
+      :paranoid              => :very
     }).import(options)
     
     ssh_options[:port] = port
