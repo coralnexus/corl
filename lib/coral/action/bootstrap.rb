@@ -73,7 +73,7 @@ class Bootstrap < Plugin::Action
       if network
         if network.has_nodes? && ! settings[:bootstrap_nodes].empty?
           # Execute action on remote nodes      
-          nodes = translate_node_references(settings[:bootstrap_nodes], network)
+          nodes = network.nodes_by_reference(settings[:bootstrap_nodes], settings[:node_provider])
       
           Coral.batch(settings[:parallel]) do |batch_op, batch|
             if batch_op == :add
