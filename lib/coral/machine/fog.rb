@@ -11,8 +11,6 @@ class Fog < Plugin::Machine
     
     self.private_key = delete(:private_key_path, nil)
     self.public_key  = delete(:public_key_path, nil)
-    
-    set_connection
   end   
   
   #-----------------------------------------------------------------------------
