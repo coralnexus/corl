@@ -125,10 +125,10 @@ class Network < Base
   
   #---
   
-  def nodes_by_reference(references)
+  def nodes_by_reference(references, default_provider = nil)
     nodes = []
     
-    node_info(references).each do |provider, names|
+    node_info(references, default_provider).each do |provider, names|
       names.each do |name|
         nodes << node(provider, name)
       end
