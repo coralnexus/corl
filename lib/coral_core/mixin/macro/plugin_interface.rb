@@ -180,8 +180,10 @@ module PluginInterface
     if _single_instance
       logger.debug("Defining single instance plugin interface method: #{_type}_config")
       
-      define_method "#{_type}_config" do |provider|
-        Config.new(get([ _type, provider ], {}))
+      define_method "#{_type}_config" do |provider = nil|
+        keys = [ _plural ]
+        keys << provider unless provider.nil?
+        Config.new(get(keys, {}))
       end
       
       #---
@@ -189,7 +191,7 @@ module PluginInterface
       logger.debug("Defining single instance plugin interface method: #{_type}_setting")
       
       define_method "#{_type}_setting" do |provider, property, default = nil, format = false|
-        get([ _type, provider, property ], default, format)
+        get([ _plural, provider, property ], default, format)
       end
       
       #---
@@ -279,8 +281,11 @@ module PluginInterface
     else
       logger.debug("Defining multi instance plugin interface method: #{_type}_config")
       
-      define_method "#{_type}_config" do |provider, name = nil|
-        Config.new( name ? get([ _plural, provider, name ], {}) : get(_plural, provider, {}) )
+      define_method "#{_type}_config" do |provider = nil, name = nil|
+        keys = [ _plural ]
+        keys << provider unless provider.nil?
+        keys << name unless name.nil?
+        Config.new(get(keys, {}))
       end
       
       #---
