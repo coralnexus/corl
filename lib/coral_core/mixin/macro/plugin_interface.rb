@@ -78,44 +78,12 @@ module PluginInterface
     
     #---------------------------------------------------------------------------
     
-    if _single_instance
-      logger.debug("Defining single instance plugin interface method: #{_type}_config")
-      
-      define_method "#{_type}_config" do |provider|
-        Config.new(get([ _type, provider ], {}))
-      end
-      
-      #---
-      
-      logger.debug("Defining single instance plugin interface method: #{_type}_setting")
-      
-      define_method "#{_type}_setting" do |provider, property, default = nil, format = false|
-        get([ _type, provider, property ], default, format)
-      end
-      
-    #---------------------------------------------------------------------------  
-    else
-      logger.debug("Defining multi instance plugin interface method: #{_type}_config")
-      
-      define_method "#{_type}_config" do |provider, name = nil|
-        Config.new( name ? get([ _plural, provider, name ], {}) : get(_plural, provider, {}) )
-      end
-      
-      #---
-      
-      logger.debug("Defining multi instance plugin interface method: #{_type}_setting")
-      
-      define_method "#{_type}_setting" do |provider, name, property, default = nil, format = false|
-        get([ _plural, provider, name, property ], default, format)
-      end
-    end
-   
-    #---------------------------------------------------------------------------
-    
     logger.debug("Defining plugin interface method: #{_plural}")
     
-    define_method "#{_plural}" do |provider = nil|
-      ( provider ? _get([ _plural, provider ], {}) : _get(_plural, {}) )
+    define_method "#{_plural}" do |provider = nil, reset = false|
+      keys = ( provider ? [ _plural, provider ] : _plural )
+      send("init_#{_plural}", provider) if reset || _get(keys, {}).empty?
+      _get(keys, {})
     end
     
     #---
@@ -193,10 +161,16 @@ module PluginInterface
     logger.debug("Defining plugin interface method: clear_#{_plural}")
     
     define_method "clear_#{_plural}" do
-      _get(_plural).keys.each do |name|
-        logger.debug("Clearing #{_type} #{name}")
+      get(_plural).keys.each do |provider|
+        logger.debug("Clearing #{_type} #{provider}")
         
-        send("delete_#{_type}", name)
+        if _single_instance
+          send("delete_#{_type}", provider)
+        else
+          get_hash([ _plural, provider ]).keys.each do |name|
+            send("delete_#{_type}", provider, name)
+          end
+        end
       end
       self
     end
@@ -204,9 +178,36 @@ module PluginInterface
     #---------------------------------------------------------------------------
     
     if _single_instance
+      logger.debug("Defining single instance plugin interface method: #{_type}_config")
+      
+      define_method "#{_type}_config" do |provider|
+        Config.new(get([ _type, provider ], {}))
+      end
+      
+      #---
+      
+      logger.debug("Defining single instance plugin interface method: #{_type}_setting")
+      
+      define_method "#{_type}_setting" do |provider, property, default = nil, format = false|
+        get([ _type, provider, property ], default, format)
+      end
+      
+      #---
+      
       logger.debug("Defining single instance plugin interface method: #{_type}")
       
-      define_method "#{_type}" do |provider|
+      define_method "#{_type}" do |provider, reset = false|
+        if reset || _get([ _plural, provider ], nil).nil?        
+          options = get([ _plural, provider ], nil)
+         
+          unless options.nil?
+            plugin = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
+        
+            logger.debug("Initializing plugin #{_plugin_type} #{provider}: #{options.inspect}")
+        
+            _set([ _plural, provider ], plugin)
+          end
+        end
         _get([ _plural, provider ])
       end
       
@@ -221,7 +222,7 @@ module PluginInterface
     
         plugin = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
         
-        logger.debug("Setting single #{_type} #{provider}: #{options.inspect}")
+        logger.debug("Setting single #{_plugin_type} #{provider}: #{options.inspect}")
         
         _set([ _plural, provider ], plugin)
         plugin
@@ -249,7 +250,7 @@ module PluginInterface
         delete([ _plural, provider ])
         _delete([ _plural, provider ])
     
-        Coral.remove_plugin(plugin)
+        Coral.remove_plugin(plugin) unless plugin.nil?
         self
       end
   
@@ -276,9 +277,37 @@ module PluginInterface
       
     #---------------------------------------------------------------------------
     else
+      logger.debug("Defining multi instance plugin interface method: #{_type}_config")
+      
+      define_method "#{_type}_config" do |provider, name = nil|
+        Config.new( name ? get([ _plural, provider, name ], {}) : get(_plural, provider, {}) )
+      end
+      
+      #---
+      
+      logger.debug("Defining multi instance plugin interface method: #{_type}_setting")
+      
+      define_method "#{_type}_setting" do |provider, name, property, default = nil, format = false|
+        get([ _plural, provider, name, property ], default, format)
+      end
+      
+      #---
+      
       logger.debug("Defining multi instance plugin interface method: #{_type}")
       
       define_method "#{_type}" do |provider, name|
+        if reset || _get([ _plural, provider, name ], nil).nil?        
+          options = get([ _plural, provider, name ], nil)
+         
+          unless options.nil?
+            options[:name] = name
+            plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
+        
+            logger.debug("Initializing plugin #{_plugin_type} #{provider}: #{options.inspect}")
+        
+            _set([ _plural, provider, name ], plugin)
+          end
+        end
         _get([ _plural, provider, name ])
       end
       
@@ -294,7 +323,7 @@ module PluginInterface
         options[:name] = name
         plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
         
-        logger.debug("Setting #{_type} #{provider} #{name}: #{options.inspect}")
+        logger.debug("Setting #{_plugin_type} #{provider} #{name}: #{options.inspect}")
         
         _set([ _plural, provider, name ], plugin)
         plugin
@@ -322,7 +351,7 @@ module PluginInterface
         delete([ _plural, provider, name ])
         _delete([ _plural, provider, name ])
     
-        Coral.remove_plugin(plugin)
+        Coral.remove_plugin(plugin) unless plugin.nil?
         self
       end
   

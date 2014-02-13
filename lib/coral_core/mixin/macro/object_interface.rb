@@ -37,23 +37,6 @@ module ObjectInterface
     #---------------------------------------------------------------------------
     
     object_utilities
-    
-    #---
-    
-    unless respond_to? :each_object!
-      logger.debug("Defining object interface method: each_object!")
-      
-      define_method :each_object! do |object_types = nil|
-        each_object_type!(object_types) do |type, plural, options|
-          logger.debug("Processing object type #{type}/#{plural} with: #{options.inspect}")
-          
-          send(plural).each do |name, obj|
-            logger.debug("Processing object: #{name}")
-            yield(type, name, obj)  
-          end 
-        end  
-      end
-    end
      
     #---------------------------------------------------------------------------
     
@@ -75,7 +58,8 @@ module ObjectInterface
     
     logger.debug("Defining object interface method: #{_plural}")
     
-    define_method "#{_plural}" do
+    define_method "#{_plural}" do |reset = false|
+      send("init_#{_plural}") if reset || _get(_plural, {}).empty?
       _get(_plural, {})
     end
     
@@ -128,7 +112,19 @@ module ObjectInterface
     
     logger.debug("Defining object interface method: #{_type}")
     
-    define_method "#{_type}" do |name|
+    define_method "#{_type}" do |name, reset = false|
+      if reset || _get([ _plural, name ], nil).nil?        
+        options = get([ _plural, name ], nil)
+         
+        unless options.nil?
+          options[:object_container] = self
+          
+          logger.debug("Initializing object: #{name}")
+          
+          obj = _ensure_proc.call(name, options)
+          _set([ _plural, name ], obj)
+        end
+      end
       _get([ _plural, name ])
     end
     
@@ -172,7 +168,7 @@ module ObjectInterface
       delete([ _plural, name ])
       _delete([ _plural, name ])
     
-      _delete_proc.call(obj) if _delete_proc
+      _delete_proc.call(obj) if _delete_proc && ! obj.nil?
       self
     end
   
@@ -192,7 +188,7 @@ module ObjectInterface
     logger.debug("Defining object interface method: clear_#{_plural}")
   
     define_method "clear_#{_plural}" do
-      _get(_plural).keys.each do |name|
+      get(_plural).keys.each do |name|
         logger.debug("Clearing #{_type} #{name}")
         
         send("delete_#{_type}", name)
@@ -215,10 +211,10 @@ module ObjectInterface
   
   def object_utilities
     
-    unless respond_to? :foreach_object_type!
-      logger.debug("Defining object utility method: foreach_object_type!")
+    unless respond_to? :each_object_type!
+      logger.debug("Defining object utility method: each_object_type!")
       
-      define_method :foreach_object_type! do |object_types = nil, filter_proc = nil|
+      define_method :each_object_type! do |object_types = nil, filter_proc = nil|
         object_types = @@object_types.keys unless object_types
         object_types = [ object_types ] unless object_types.is_a?(Array)
       
@@ -234,6 +230,23 @@ module ObjectInterface
         end  
       end
     end
+    
+    #---
+    
+    unless respond_to? :each_object!
+      logger.debug("Defining object utility method: each_object!")
+      
+      define_method :each_object! do |object_types = nil|
+        each_object_type!(object_types) do |type, plural, options|
+          logger.debug("Processing object type #{type}/#{plural} with: #{options.inspect}")
+          
+          send(plural).each do |name, obj|
+            logger.debug("Processing object: #{name}")
+            yield(type, name, obj)  
+          end 
+        end  
+      end
+    end
            
     #---
     
@@ -243,7 +256,7 @@ module ObjectInterface
       define_method :init_objects do |object_types = nil, filter_proc = nil|
         logger.debug("Initializing object collection")
         
-        foreach_object_type!(object_types, filter_proc) do |type, plural, options|
+        each_object_type!(object_types, filter_proc) do |type, plural, options|
           send("init_#{plural}")  
         end   
       end
@@ -257,7 +270,7 @@ module ObjectInterface
       define_method :clear_objects do |object_types = nil, filter_proc = nil|
         logger.debug("Clearing object collection")
         
-        foreach_object_type!(object_types, filter_proc) do |type, plural, options|
+        each_object_type!(object_types, filter_proc) do |type, plural, options|
           send("clear_#{plural}")  
         end
       end
@@ -332,8 +345,7 @@ module ObjectInterface
         logger.debug("Loading configuration if possible") 
         if config.respond_to?(:load)
           clear_objects  
-          config.load(options)    
-          init_objects
+          config.load(options)
         end
         self  
       end
