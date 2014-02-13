@@ -86,7 +86,7 @@ class Seed < Plugin::Action
               render("Reinitializing network")
               if network = init_network
                 if network.load
-                  if node = local_node(network)
+                  if node = network.local_node
                     render("Updating node network configurations")
                     self.status = code.node_save_failure unless node.save  
                   else
