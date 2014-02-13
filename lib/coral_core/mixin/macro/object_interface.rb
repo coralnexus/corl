@@ -214,18 +214,18 @@ module ObjectInterface
     unless respond_to? :each_object_type!
       logger.debug("Defining object utility method: each_object_type!")
       
-      define_method :each_object_type! do |object_types = nil, filter_proc = nil|
+      define_method :each_object_type! do |object_types = nil, filter_proc = nil, &code|
         object_types = @@object_types.keys unless object_types
         object_types = [ object_types ] unless object_types.is_a?(Array)
       
-        object_types.keys.each do |type|
+        object_types.each do |type|
           logger.debug("Processing object type: #{type}")
           
           unless filter_proc && ! filter_proc.call(type, @@object_types[type])
             plural = @@object_types[type][:plural]
             
             logger.debug("Passing: #{@@object_types[type].inspect}")
-            yield(type, plural, @@object_types[type])
+            code.call(type, plural, @@object_types[type])
           end
         end  
       end
@@ -236,13 +236,13 @@ module ObjectInterface
     unless respond_to? :each_object!
       logger.debug("Defining object utility method: each_object!")
       
-      define_method :each_object! do |object_types = nil|
+      define_method :each_object! do |object_types = nil, &code|
         each_object_type!(object_types) do |type, plural, options|
           logger.debug("Processing object type #{type}/#{plural} with: #{options.inspect}")
           
           send(plural).each do |name, obj|
             logger.debug("Processing object: #{name}")
-            yield(type, name, obj)  
+            code.call(type, name, obj)  
           end 
         end  
       end
