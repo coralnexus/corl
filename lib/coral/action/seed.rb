@@ -54,6 +54,8 @@ class Seed < Plugin::Action
           network_path = lookup(:coral_network)
           backup_path  = File.join(Dir.tmpdir(), 'coral')
           
+          render("Generating network SSH deploy keys")
+          
           if keys = Util::SSH.generate.store
             if @project_info
               project_info = Config.new(@project_info)
@@ -61,9 +63,11 @@ class Seed < Plugin::Action
               project_info = Config.new({ :provider => :git })
             end
             
+            render("Backing up current network configuration")
             FileUtils.rm_rf(backup_path)
             FileUtils.mv(network_path, backup_path)
             
+            render("Seeding network configuration from #{settings[:project_reference]}")
             project = Coral.project(extended_config(:project, {
               :directory => network_path,
               :reference => project_info.get(:reference, nil),
@@ -75,12 +79,15 @@ class Seed < Plugin::Action
             }), project_info[:provider])
         
             if project
+              render("Finalizing network path and removing temporary backup")
               FileUtils.chmod_R(0600, network_path)
               FileUtils.rm_rf(backup_path)
               
+              render("Reinitializing network")
               if network = init_network
                 if network.load
                   if node = local_node(network)
+                    render("Updating node network configurations")
                     self.status = code.node_save_failure unless node.save  
                   else
                     self.status = code.node_load_failure
