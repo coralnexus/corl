@@ -104,7 +104,8 @@ class Fog < Plugin::Machine
   #---
     
   def machine_types
-    compute.flavors
+    return compute.flavors if compute
+    []
   end
   
   #---
@@ -117,7 +118,8 @@ class Fog < Plugin::Machine
   #---
   
   def images
-    compute.images
+    return compute.images if compute
+    []
   end
   
   #---
