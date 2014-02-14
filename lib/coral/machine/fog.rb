@@ -113,7 +113,7 @@ class Fog < Plugin::Machine
   #---
   
   def machine_type
-    return server.flavor if server
+    return server.flavor.id if server
     nil
   end
   
@@ -127,7 +127,7 @@ class Fog < Plugin::Machine
   #---
   
   def image
-    return server.image if server
+    return server.image.id if server
     nil
   end
   
