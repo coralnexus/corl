@@ -257,7 +257,40 @@ class Network < Base
         end
       end
     end
-  end 
+  end
+  
+  #---
+  
+  def batch(node_references, default_provider = nil, parallel = true)
+    success = true
+    
+    if has_nodes? && ! node_references.empty?
+      # Execute action on remote nodes      
+      nodes = nodes_by_reference(node_references, default_provider)
+      
+      Coral.batch(parallel) do |batch_op, batch|
+        if batch_op == :add
+          # Add batch operations      
+          nodes.each do |node|
+            batch.add(node.name) do
+              ui_group!(node.hostname) do
+                yield(node) if block_given?
+              end  
+            end
+          end
+        else
+          # Reduce to single status
+          batch.each do |name, process_success|
+            unless process_success
+              success = false
+              break
+            end
+          end
+        end
+      end
+    end
+    success
+  end
 end
 end
 end
