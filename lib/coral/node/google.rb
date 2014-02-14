@@ -42,7 +42,7 @@ class Google < Node::Fog
   #-----------------------------------------------------------------------------
   # Settings groups
     
-  def provider_info
+  def machine_config
     super do |config|          
       config.import({ 
         :provider => 'google'
