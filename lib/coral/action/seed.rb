@@ -110,6 +110,24 @@ class Seed < Plugin::Action
       end
     end
   end
+  
+  #---
+  
+  def execute_remote(node, network, op, data)
+    case op
+    when :config # Modify seed execution configurations
+      render("Starting remote execution of seed action")  
+    when :progress # Report progress of seed execution
+      if data[:type] == :error
+        alert(data[:data])
+      else
+        render(data[:data])
+      end  
+    when :process # Process final result
+      render("Successfully finished remote execution of seed package")     
+    end
+    data  
+  end
 end
 end
 end
