@@ -2,17 +2,7 @@
 module Coral
 module Machine
 class Fog < Plugin::Machine
-  
-  #-----------------------------------------------------------------------------
-  # Machine plugin interface
-  
-  def normalize
-    super
-    
-    self.private_key = delete(:private_key_path, nil)
-    self.public_key  = delete(:public_key_path, nil)
-  end   
-  
+ 
   #-----------------------------------------------------------------------------
   # Checks
   
@@ -37,12 +27,7 @@ class Fog < Plugin::Machine
     
     require 'fog' 
         
-    compute_config = Config.new(export)
-    compute_config.delete(:private_key)
-    compute_config.delete(:public_key)   
-    
-    self.compute = ::Fog::Compute.new(compute_config.export)
-    self.server  = name if @compute && ! name.empty?    
+    self.compute = ::Fog::Compute.new(export)
   end
   protected :set_connection
   
@@ -66,50 +51,53 @@ class Fog < Plugin::Machine
       @server = id
     end
     
-    self.name       = server.id
-    self.hostname   = server.name
-    self.image      = server.image
-    self.flavor     = server.flavor
+    unless @server.nil?
+      self.name = @server.id
+      
+      node[:id]         = name
+      node[:hostname]   = @server.name
+      node[:public_ip]  = @server.public_ip_address
+      node[:private_ip] = @server.private_ip_address
     
-    self.public_ip  = server.public_ip_address
-    self.private_ip = server.private_ip_address
+      node.machine_type = @server.flavor
+      node.image        = @server.image      
     
-    server.private_key_path = private_key if private_key
-    server.public_key_path  = public_key if public_key
-    
-    Util::SSH.init_session(public_ip, server.username, server.ssh_port, private_key)
+      @server.private_key_path = node.private_key if node.private_key
+      @server.public_key_path  = node.public_key if node.public_key
+    end
   end
   
   def server
+    compute
+    load unless @server
     @server
+  end
+   
+  #---
+  
+  def state
+    return translate_state(server.state) if server
+    nil
   end
   
   #---
   
   def hostname
-    compute
-    super
+    return server.name if server
+    nil
   end
   
   #---
   
   def public_ip
-    compute
-    super
+    return server.public_ip_address if server
+    nil
   end
   
   #---
   
   def private_ip
-    compute
-    super
-  end
-  
-  #---
-  
-  def state
-    compute
-    return translate_state(server.state) if server
+    return server.private_ip_address if server
     nil
   end
   
@@ -121,16 +109,39 @@ class Fog < Plugin::Machine
   
   #---
   
+  def machine_type
+    return server.flavor if server
+    nil
+  end
+  
+  #---
+  
   def images
     compute.images
   end
   
+  #---
+  
+  def image
+    return server.image if server
+    nil
+  end
+  
   #-----------------------------------------------------------------------------
   # Management
-
+  
+  def load
+    super do
+      self.server = name if compute && ! name.empty?
+      server.nil? ? false : true
+    end    
+  end
+  
+  #---
+  
   def create(options = {})
     super do
-      self.server = compute.servers.bootstrap(Config.ensure(options).export)
+      self.server = compute.servers.bootstrap(Config.ensure(options).export) if compute
       self.server ? true : false
     end
   end
@@ -142,10 +153,14 @@ class Fog < Plugin::Machine
       logger.debug("Executing SCP download to #{local_path} from #{remote_path} on machine #{name}") 
       
       begin
-        Util::SSH.download!(public_ip, server.username, remote_path, local_path, config.export) do |name, received, total|
-          yield(name, received, total) if block_given?
+        if init_ssh_session
+          Util::SSH.download!(node.public_ip, node.user, remote_path, local_path, config.export) do |name, received, total|
+            yield(name, received, total) if block_given?
+          end
+          true
+        else
+          false
         end
-        true
       rescue Exception => error
         ui.error(error.message)
         false
@@ -160,10 +175,14 @@ class Fog < Plugin::Machine
       logger.debug("Executing SCP upload from #{local_path} to #{remote_path} on machine #{name}") 
       
       begin
-        Util::SSH.upload!(public_ip, server.username, local_path, remote_path, config.export) do |name, sent, total|
-          yield(name, sent, total) if block_given?
+        if init_ssh_session
+          Util::SSH.upload!(node.public_ip, node.user, local_path, remote_path, config.export) do |name, sent, total|
+            yield(name, sent, total) if block_given?
+          end
+          true
+        else
+          false
         end
-        true
       rescue Exception => error
         ui.error(error.message)
         false
@@ -178,8 +197,12 @@ class Fog < Plugin::Machine
       if commands
         logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}")
         
-        results = Util::SSH.exec!(public_ip, server.username, commands) do |type, command, data|
-          yield(type, command, data) if block_given?  
+        if init_ssh_session
+          results = Util::SSH.exec!(node.public_ip, node.user, commands) do |type, command, data|
+            yield(type, command, data) if block_given?  
+          end
+        else
+          results = nil
         end
       end
       results
@@ -190,17 +213,21 @@ class Fog < Plugin::Machine
   
   def start(options = {})
     super do
-      server_info = compute.servers.create(options)
+      if compute
+        server_info = compute.servers.create(options)
       
-      logger.info("Waiting for #{plugin_provider} machine to start")
-      ::Fog.wait_for do
-        compute.servers.get(server_info.id).ready? ? true : false
-      end
+        logger.info("Waiting for #{plugin_provider} machine to start")
+        ::Fog.wait_for do
+          compute.servers.get(server_info.id).ready? ? true : false
+        end
       
-      logger.debug("Setting machine #{server_info.id}")
+        logger.debug("Setting machine #{server_info.id}")
             
-      self.server = compute.servers.get(server_info.id)
-      self.server ? true : false
+        self.server = compute.servers.get(server_info.id)
+        self.server ? true : false
+      else
+        false
+      end      
     end
   end
   
@@ -208,8 +235,12 @@ class Fog < Plugin::Machine
   
   def reload(options = {})
     super do
-      logger.debug("Rebooting machine #{name}")
-      server.reboot(options)  
+      if server
+        logger.debug("Rebooting machine #{name}")
+        server.reboot(options)
+      else
+        false
+      end  
     end
   end
 
@@ -217,12 +248,16 @@ class Fog < Plugin::Machine
  
   def create_image(name, options = {})
     super do
-      logger.debug("Imaging machine #{self.name}") 
-      image = server.create_image(name, options)
+      if server
+        logger.debug("Imaging machine #{self.name}")
+        image = server.create_image(name, options)
       
-      if image
-        self.image = image.id
-        true
+        if image
+          node.image = image.id
+          true
+        else
+          false
+        end
       else
         false
       end
@@ -251,9 +286,20 @@ class Fog < Plugin::Machine
 
   def destroy(options = {})
     super do
-      logger.debug("Destroying machine #{name}")   
-      server.destroy(options)  
+      if server
+        logger.debug("Destroying machine #{name}")
+        server.destroy(options)
+      else
+        false  
+      end  
     end
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def init_ssh_session
+    Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key)
   end
 end
 end

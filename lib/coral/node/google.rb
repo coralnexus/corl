@@ -21,11 +21,11 @@ class Google < Node::Fog
   # Property accessors / modifiers
   
   def project_name=project_name
-    set(:project_name, project_name)
+    self[:project_name] = project_name
   end
   
   def project_name
-    get(:project_name, nil)
+    self[:project_name]
   end
   
   #---
@@ -48,8 +48,8 @@ class Google < Node::Fog
         :provider => 'google'
       })
       
-      config[:google_project] = project_name if project_name
-      config[:google_client_email] = user_name if user_name
+      config[:google_project]      = project_name if project_name
+      config[:google_client_email] = api_user if api_user
       config[:google_key_location] = api_key if api_key
     end
   end

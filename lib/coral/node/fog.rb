@@ -11,7 +11,7 @@ class Fog < Plugin::Node
     self.region = region
     
     yield if block_given?
-    create_machine(:fog, extended_config(:machine, provider_info))
+    create_machine(:fog, machine_config)
   end
        
   #-----------------------------------------------------------------------------
@@ -20,42 +20,42 @@ class Fog < Plugin::Node
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  def user_name=user_name
-    set(:user_name, nil)
+  def api_user=api_user
+    self[:api_user] = api_user
   end
   
-  def user_name
-    get(:user_name, nil)
+  def api_user
+    self[:api_user]
   end
   
   #---
   
   def api_key=api_key
-    set(:api_key, api_key)
+    self[:api_key] = api_key
   end
   
   def api_key
-    get(:api_key, nil)
+    self[:api_key]
   end
   
   #---
   
   def auth_url=auth_url
-    set(:auth_url, auth_url)
+    self[:auth_url] = auth_url
   end
   
   def auth_url
-    get(:auth_url, nil)
+    self[:auth_url]
   end
   
   #---
   
   def connection_options=options
-    set(:connection_options, options)
+    self[:connection_options] = options
   end
   
   def connection_options
-    get(:connection_options, nil)
+    self[:connection_options]
   end
   
   #---
@@ -65,11 +65,11 @@ class Fog < Plugin::Node
   end
   
   def region=region
-    set(:region, region)
+    self[:region] = region
   end
   
   def region
-    if region = get(:region, nil)
+    if region = self[:region]
       region
     else
       first_region = regions.first
@@ -81,21 +81,17 @@ class Fog < Plugin::Node
   #-----------------------------------------------------------------------------
   # Settings groups
     
-  def provider_info
-    config = Config.new({ :name => get(:id, get(:hostname, nil), nil) })
-        
-    config[:connection_options] = connection_options if connection_options
-        
-    key_config(config)
-    
-    yield(config) if block_given?
-    config.export
+  def machine_config
+    super do |config|        
+      config[:connection_options] = connection_options if connection_options
+      yield(config) if block_given?
+    end
   end
   
   #---
   
-  def exec_options(name)
-    extended_config(name, {}).export
+  def exec_options(name, options = {})
+    extended_config(name, options).export
   end
   
   #-----------------------------------------------------------------------------
@@ -197,15 +193,6 @@ class Fog < Plugin::Node
       yield(op, config) if block_given?
     end
   end
-
-  #-----------------------------------------------------------------------------
-  # Utilities
-  
-  def key_config(config)
-    config[:private_key_path] = private_key if private_key
-    config[:public_key_path]  = public_key if public_key
-  end
-  protected :key_config
 end
 end
 end

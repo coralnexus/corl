@@ -37,8 +37,8 @@ class Aws < Node::Fog
         :provider => 'AWS'
       })
     
-      config[:aws_access_key_id] = user_name if user_name
-      config[:aws_secret_access_key]  = api_key if api_key
+      config[:aws_access_key_id]     = api_user if api_user
+      config[:aws_secret_access_key] = api_key if api_key
     end
   end
   

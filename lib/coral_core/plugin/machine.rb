@@ -26,22 +26,12 @@ class Machine < Base
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  def provider=provider
-    set(:provider, provider)
+  def node
+    plugin_parent
   end
-  
-  def provider
-    get(:provider, nil)
-  end
-  
-  #---
-  
-  def hostname=hostname
-    set(:hostname, hostname)
-  end
-  
-  def hostname
-    get(:hostname, '')
+ 
+  def node=node
+    self.plugin_parent = node
   end
   
   #---
@@ -52,22 +42,20 @@ class Machine < Base
   
   #---
   
-  def public_ip=public_ip
-    set(:public_ip, public_ip)
-  end
-  
-  def public_ip
-    get(:public_ip, nil)
+  def hostname
+    nil
   end
   
   #---
   
-  def private_ip=private_ip
-    set(:private_ip, private_ip)
+  def public_ip
+    nil
   end
   
+  #---
+  
   def private_ip
-    get(:private_ip, nil)
+    nil
   end
   
   #---
@@ -78,34 +66,37 @@ class Machine < Base
   
   #---
   
+  def machine_type
+    nil
+  end
+  
+  #---
+  
   def images
     []
   end
   
   #---
   
-  def private_key=private_key
-    set(:private_key, private_key)
-  end
-  
-  def private_key
-    return File.expand_path(get(:private_key)) if get(:private_key, false)
+  def image
     nil
-  end
-  
-  #---
-  
-  def public_key=public_key
-    set(:public_key, public_key)
-  end
-  
-  def public_key
-    return File.expand_path(get(:public_key)) if get(:public_key, false)
   end
             
   #-----------------------------------------------------------------------------
   # Management 
 
+  def load
+    success = true
+    
+    logger.debug("Loading #{plugin_provider} machine: #{name}")
+    success = yield if block_given?  
+        
+    logger.warn("There was an error loading the machine #{name}") unless success
+    success
+  end
+  
+  #---
+  
   def create(options = {})
     success = true
     
@@ -118,80 +109,6 @@ class Machine < Base
     end
     
     logger.warn("There was an error creating the machine #{name}") unless success
-    success
-  end
-  
-  #---
-  
-  def start(options = {})
-    success = true
-    
-    if running?
-      logger.debug("Machine #{name} is already running")  
-    else
-      logger.debug("Starting #{plugin_provider} machine with: #{options.inspect}")
-      
-      if created?
-        config  = Config.ensure(options)
-        success = yield(config) if block_given?    
-      else
-        logger.debug("Machine #{name} does not yet exist")
-        success = create(options)
-      end      
-    end
-    
-    logger.warn("There was an error starting the machine #{name}") unless success
-    success
-  end
-  
-  #---
-  
-  def stop(options = {})
-    success = true
-    
-    if running?
-      logger.debug("Stopping #{plugin_provider} machine with: #{options.inspect}")
-      config  = Config.ensure(options)      
-      success = yield(config) if block_given?
-    else
-      logger.debug("Machine #{name} is not running")  
-    end
-    
-    logger.warn("There was an error stopping the machine #{name}") unless success
-    success
-  end
-  
-  #---
-  
-  def reload(options = {})
-    success = true
-    
-    if created?
-      logger.debug("Reloading #{plugin_provider} machine with: #{options.inspect}")
-      config  = Config.ensure(options)
-      success = yield(config) if block_given?
-    else
-      logger.debug("Machine #{name} does not yet exist")
-    end
-    
-    logger.warn("There was an error reloading the machine #{name}") unless success
-    success
-  end
-
-  #---
-
-  def destroy(options = {})   
-    success = true
-    
-    if created?
-      logger.debug("Destroying #{plugin_provider} machine with: #{options.inspect}")
-      config  = Config.ensure(options)
-      success = yield(config) if block_given?
-    else
-      logger.debug("Machine #{name} does not yet exist")
-    end
-    
-    logger.warn("There was an error destroying the machine #{name}") unless success
     success
   end
   
@@ -248,6 +165,46 @@ class Machine < Base
   
   #---
   
+  def start(options = {})
+    success = true
+    
+    if running?
+      logger.debug("Machine #{name} is already running")  
+    else
+      logger.debug("Starting #{plugin_provider} machine with: #{options.inspect}")
+      
+      if created?
+        config  = Config.ensure(options)
+        success = yield(config) if block_given?    
+      else
+        logger.debug("Machine #{name} does not yet exist")
+        success = create(options)
+      end      
+    end
+    
+    logger.warn("There was an error starting the machine #{name}") unless success
+    success
+  end
+  
+  #---
+  
+  def reload(options = {})
+    success = true
+    
+    if created?
+      logger.debug("Reloading #{plugin_provider} machine with: #{options.inspect}")
+      config  = Config.ensure(options)
+      success = yield(config) if block_given?
+    else
+      logger.debug("Machine #{name} does not yet exist")
+    end
+    
+    logger.warn("There was an error reloading the machine #{name}") unless success
+    success
+  end
+
+  #---
+  
   def create_image(options = {})
     success = true
     
@@ -263,6 +220,40 @@ class Machine < Base
     success
   end
 
+  #---
+  
+  def stop(options = {})
+    success = true
+    
+    if running?
+      logger.debug("Stopping #{plugin_provider} machine with: #{options.inspect}")
+      config  = Config.ensure(options)      
+      success = yield(config) if block_given?
+    else
+      logger.debug("Machine #{name} is not running")  
+    end
+    
+    logger.warn("There was an error stopping the machine #{name}") unless success
+    success
+  end
+  
+  #---
+
+  def destroy(options = {})   
+    success = true
+    
+    if created?
+      logger.debug("Destroying #{plugin_provider} machine with: #{options.inspect}")
+      config  = Config.ensure(options)
+      success = yield(config) if block_given?
+    else
+      logger.debug("Machine #{name} does not yet exist")
+    end
+    
+    logger.warn("There was an error destroying the machine #{name}") unless success
+    success
+  end
+  
   #-----------------------------------------------------------------------------
   # Utilities
 

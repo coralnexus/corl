@@ -88,7 +88,7 @@ class Node < Base
   #-----------------------------------------------------------------------------
   
   def groups
-    search(:groups, [], :array)
+    array(self[:groups])
   end
   
   #-----------------------------------------------------------------------------
@@ -107,44 +107,74 @@ class Node < Base
  
   def create_machine(provider, options = {})
     if provider.is_a?(String) || provider.is_a?(Symbol)
-      self.machine = Coral.plugin_load(:machine, provider, options)
+      self.machine = Coral.plugin_load(:machine, provider, extended_config(:machine, options).import({ :meta => { :parent => self }}))
     end
     self
   end
   
   #---
   
-  def id # Must be set at machine level
-    return machine.name if machine
-    nil
+  def id(reset = false)
+    self[:id] = machine.name if reset || self[:id].nil?
+    self[:id]
   end
  
   #---
   
-  def public_ip # Must be set at machine level
-    return machine.public_ip if machine
-    nil
+  def public_ip(reset = false)
+    self[:public_ip] = machine.public_ip if reset || self[:public_ip].nil?
+    self[:public_ip]
   end
-
+  
   #---
   
-  def private_ip # Must be set at machine level
-    return machine.private_ip if machine
-    nil
+  def private_ip(reset = false)
+    self[:private_ip] = machine.private_ip if reset || self[:private_ip].nil?
+    self[:private_ip]
   end
-
+  
   #---
- 
-  def hostname # Must be set at machine level
-    return machine.hostname if machine
-    ''
+  
+  def hostname(reset = false)
+    self[:hostname] = machine.hostname if reset || self[:hostname].nil?
+    self[:hostname]
   end
- 
+  
   #---
- 
-  def state # Must be set at machine level
-    return machine.state if machine
-    nil
+  
+  def state(reset = false)
+    self[:state] = machine.state if reset || self[:state].nil?
+    self[:state]
+  end
+  
+  #---
+  
+  def user=user
+    self[:user] = user
+  end
+  
+  def user
+    self[:user]
+  end
+  
+  #---
+  
+  def ssh_port=ssh_port
+    self[:ssh_port] = ssh_port
+  end
+  
+  def ssh_port
+    self[:ssh_port] = 22 if self[:ssh_port].nil?
+    self[:ssh_port]
+  end
+  
+  #---
+  
+  def home(env_var = 'HOME', reset = false)
+    if reset || self[:user_home].nil?
+      self[:user_home] = cli_capture(:echo, '$' + env_var.to_s.gsub('$', '')) if machine
+    end
+    self[:user_home]
   end
   
   #---
@@ -171,15 +201,6 @@ class Node < Base
   end
   
   #---
-  
-  def home(env_var = 'HOME', reset = false)
-    if reset || ! self[:user_home]
-      self[:user_home] = cli_capture(:echo, '$' + env_var.to_s.gsub('$', '')) if machine
-    end
-    self[:user_home]
-  end
-  
-  #---
     
   def machine_types # Must be set at machine level (queried)
     machine.machine_types if machine
@@ -189,8 +210,9 @@ class Node < Base
     self[:machine_type] = machine_type
   end
   
-  def machine_type
-    machine_type = self[:machine_type]
+  def machine_type(reset = false)
+    self[:machine_type] = machine.machine_type if reset || self[:machine_type].nil?
+    machine_type     = self[:machine_type]
     
     if machine_type.nil? && machine
       if types = machine_types
@@ -249,10 +271,23 @@ class Node < Base
     self[:image] = image
   end
   
-  def image
+  def image(reset = false)
+    self[:image] = machine.image if reset || self[:image].nil?
     self[:image]
   end
-   
+  
+  #-----------------------------------------------------------------------------
+  # Settings groups
+  
+  def machine_config
+    name   = self[:id]
+    name   = self[:hostname] if name.nil?
+    config = Config.new({ :name => name })
+    
+    yield(config) if block_given?
+    config
+  end
+    
   #-----------------------------------------------------------------------------
   # Machine operations
   
@@ -428,9 +463,10 @@ class Node < Base
     unless command.is_a?(Coral::Plugin::Command)
       command = Coral.command(Config.new({ :command => command }).import(options), :shell)
     end
-    exec({ :commands => [ command.to_s ] }) do |op, results|
-      yield(op, results) if block_given?  
-    end.first
+    results = exec({ :commands => [ command.to_s ] }) do |op, op_results|
+      yield(op, op_results) if block_given?  
+    end
+    results.first
   end
   
   #---
@@ -531,22 +567,22 @@ class Node < Base
     config = Config.ensure(options)
     
     # Record machine parameters
-    self[:id]         = id
-    self[:public_ip]  = public_ip
-    self[:private_ip] = private_ip
-    self[:hostname]   = hostname
-    self[:state]      = state
+    id(true)
+    public_ip(true)
+    private_ip(true)
+    hostname(true)
+    state(true)
+    machine_type(true)
+    image(true)
     
     # Provider or external configuration preparation
     yield(config) if block_given?
-    
-    remote = config.get(:remote, :edit)
     
     network.save(config.import({ 
       :commit      => true,
       :allow_empty => true,
       :message     => config.get(:message, "Saving #{plugin_provider} node #{name}"),
-      :remote      => remote 
+      :remote      => config.get(:remote, :edit)
     }))    
   end
   
@@ -776,8 +812,6 @@ class Node < Base
   # CLI utilities
   
   def cli_capture(cli_command, *args)
-    dbg(cli_command, 'CLI command')
-    dbg(args, 'arguments')
     result = cli.send(cli_command, args)
              
     if result.status == code.success && ! result.output.empty? 

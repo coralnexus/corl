@@ -31,7 +31,7 @@ class Rackspace < Node::Fog
   #-----------------------------------------------------------------------------
   # Settings groups
     
-  def provider_info
+  def machine_config
     super do |config|
       config.import({ 
         :provider         => 'rackspace', 
@@ -39,7 +39,7 @@ class Rackspace < Node::Fog
         :rackspace_region => region
       })
     
-      config[:rackspace_username] = user_name if user_name
+      config[:rackspace_username] = api_user if api_user
       config[:rackspace_api_key]  = api_key if api_key
       config[:rackspace_auth_url] = auth_url if auth_url
     end
