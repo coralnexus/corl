@@ -8,9 +8,7 @@ class Bootstrap < Plugin::Action
   
   def configure
     super do
-      codes :network_failure,
-            :node_load_failure
-      #---
+      codes :network_failure
       
       register :auth_files, :array, [] do |values|
         success = true
@@ -71,62 +69,41 @@ class Bootstrap < Plugin::Action
       info('coral.core.actions.bootstrap.start')
       
       if network
-        if network.has_nodes? && ! settings[:bootstrap_nodes].empty?
-          # Execute action on remote nodes      
-          nodes = network.nodes_by_reference(settings[:bootstrap_nodes], settings[:node_provider])
-      
-          Coral.batch(settings[:parallel]) do |batch_op, batch|
-            if batch_op == :add
-              # Add batch operations      
-              nodes.each do |node|
-                batch.add(node.name) do
-                  ui_group!(node.hostname) do
-                    home_path = extension_set(:home_path, ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] ), { :node => node }) 
+        batch_success = network.batch(settings[:bootstrap_nodes], settings[:node_provider], settings[:parallel]) do |node|
+          home_path = extension_set(:home_path, ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] ), { :node => node }) 
           
-                    success = node.bootstrap(home_path, extended_config(:bootstrap, {
-                      :auth_files     => settings[:auth_files],
-                      :home           => settings[:home],
-                      :home_env_var   => settings[:home_env_var],
-                      :bootstrap_path => settings[:bootstrap_path],
-                      :bootstrap_glob => settings[:bootstrap_glob],
-                      :bootstrap_init => settings[:bootstrap_init]
-                    })) do |bootstrap_op, results|
-                      case bootstrap_op
-                      when :send_config # Modify upload configurations
-                        render("Starting upload of #{results[:local_path]} to #{results[:remote_path]}")  
-                      when :send_progress # Report progress of uploading files
-                        render("#{results[:name]}: Sent #{results[:sent]} of #{results[:total]}")  
-                      when :send_process # Process final result
-                        render("Successfully finished upload of #{results[:local_path]} to #{results[:remote_path]}")
-                      when :exec_config # Modify bootstrap execution configurations
-                        render("Starting execution of bootstrap package")  
-                      when :exec_progress # Report progress of bootstrap execution
-                        if results[:type] == :error
-                          alert(results[:data], { :prefix => false })
-                        else
-                          render(results[:data], { :prefix => false })
-                        end  
-                      when :exec_process # Process final result
-                        render("Successfully finished execution of bootstrap package")     
-                      end
-                      results  
-                    end
-                    self.status = node.status unless success
-                    render('We are all good!') if success
-                  end  
-                end
-              end
-            else
-              # Reduce to single status
-              batch.each do |name, status_code|
-                if status_code != code.success
-                  self.status = code.batch_error
-                  break
-                end
-              end
+          success = node.bootstrap(home_path, extended_config(:bootstrap, {
+            :auth_files     => settings[:auth_files],
+            :home           => settings[:home],
+            :home_env_var   => settings[:home_env_var],
+            :bootstrap_path => settings[:bootstrap_path],
+            :bootstrap_glob => settings[:bootstrap_glob],
+            :bootstrap_init => settings[:bootstrap_init]
+          })) do |op, data|
+            case op
+            when :send_config # Modify upload configurations
+              render("Starting upload of #{data[:local_path]} to #{data[:remote_path]}")  
+            when :send_progress # Report progress of uploading files
+              render("#{data[:name]}: Sent #{data[:sent]} of #{data[:total]}")  
+            when :send_process # Process final result
+              render("Successfully finished upload of #{data[:local_path]} to #{data[:remote_path]}")
+            when :exec_config # Modify bootstrap execution configurations
+              render("Starting execution of bootstrap package")  
+            when :exec_progress # Report progress of bootstrap execution
+              if data[:type] == :error
+                alert(data[:data])
+              else
+                render(data[:data])
+              end  
+            when :exec_process # Process final result
+              render("Successfully finished execution of bootstrap package")     
             end
+            data  
           end
+          render('We are all good!') if success
+          success  
         end
+        self.status = code.batch_error unless batch_success
       else
         alert("Failed to load network")
         self.status = code.network_failure

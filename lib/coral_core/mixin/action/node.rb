@@ -84,37 +84,19 @@ module Node
     # A fork in the road...
     #
     if network.has_nodes? && ! settings[:nodes].empty?
-      # Execute action on remote nodes      
-      nodes = network.nodes_by_reference(settings[:nodes], settings[:node_provider])
-      
-      Coral.batch(settings[:parallel]) do |op, batch|
-        if op == :add
-          # Add batch operations      
-          nodes.each do |node|
-            batch.add(node.name) do
-              ui_group!(node.name) do
-                exec_config = Config.new(settings)
-                exec_config.delete(:parallel)
-                exec_config.delete(:nodes)
-                exec_config.delete(:node_provider)
+      # Execute action on remote nodes 
+      success = network.batch(settings[:nodes], settings[:node_provider], settings[:parallel]) do |node|
+        exec_config = Config.new(settings)
+        exec_config.delete(:parallel)
+        exec_config.delete(:nodes)
+        exec_config.delete(:node_provider)
               
-                result = node.action(plugin_provider, exec_config) do |action_op, action_result|
-                  execute_remote(node, network, action_op, action_result)
-                end
-                result.status
-              end              
-            end
-          end
-        else
-          # Reduce to single status
-          batch.each do |name, status_code|
-            if status_code != code.success
-              self.status = code.batch_error
-              break
-            end
-          end
+        result = node.action(plugin_provider, exec_config) do |op, data|
+          execute_remote(node, network, op, data)
         end
+        result.status == code.success 
       end
+      self.status = code.batch_error unless success
     else
       # Execute statement locally
       node = network.local_node
