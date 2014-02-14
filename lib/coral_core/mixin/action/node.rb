@@ -101,13 +101,11 @@ module Node
       # Execute statement locally
       node = network.local_node
       
-      ui_group!(node.name) do
-        if validate(node, network)
-          yield(node, network) if block_given?
-        else
-          puts "\n" + I18n.t('coral.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
-          self.status = code.validation_failed 
-        end
+      if validate(node, network)
+        yield(node, network) if block_given?
+      else
+        puts "\n" + I18n.t('coral.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
+        self.status = code.validation_failed 
       end
     end
   end
@@ -115,7 +113,9 @@ module Node
   #---
   
   def execute_remote(node, network, op, data)
-    # Implement in sub classes
+    ui_group!(node.name) do
+      data = yield if block_given?
+    end
     data  
   end
 end

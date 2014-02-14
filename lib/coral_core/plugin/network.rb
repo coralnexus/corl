@@ -273,9 +273,7 @@ class Network < Base
           # Add batch operations      
           nodes.each do |node|
             batch.add(node.name) do
-              ui_group!(node.hostname) do
-                yield(node) if block_given?
-              end  
+              yield(node) if block_given?  
             end
           end
         else
