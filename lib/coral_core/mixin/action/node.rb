@@ -92,13 +92,17 @@ module Node
           # Add batch operations      
           nodes.each do |node|
             batch.add(node.name) do
-              exec_config = Config.new(settings)
-              exec_config.delete(:parallel)
-              exec_config.delete(:nodes)
-              exec_config.delete(:node_provider)
+              ui_group!(node.name) do
+                exec_config = Config.new(settings)
+                exec_config.delete(:parallel)
+                exec_config.delete(:nodes)
+                exec_config.delete(:node_provider)
               
-              result = node.action(plugin_provider, exec_config)
-              result.status
+                result = node.action(plugin_provider, exec_config) do |action_op, action_result|
+                  execute_remote(node, network, action_op, action_result)
+                end
+                result.status
+              end              
             end
           end
         else
@@ -115,13 +119,22 @@ module Node
       # Execute statement locally
       node = network.local_node
       
-      if validate(node, network)
-        yield(node, network) if block_given?
-      else
-        puts "\n" + I18n.t('coral.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
-        self.status = code.validation_failed 
+      ui_group!(node.name) do
+        if validate(node, network)
+          yield(node, network) if block_given?
+        else
+          puts "\n" + I18n.t('coral.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
+          self.status = code.validation_failed 
+        end
       end
     end
+  end
+  
+  #---
+  
+  def execute_remote(node, network, op, data)
+    # Implement in sub classes
+    data  
   end
 end
 end
