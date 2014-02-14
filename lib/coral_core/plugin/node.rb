@@ -26,7 +26,8 @@ class Node < Base
   #---
   
   def localize
-    @local_context = true
+    @local_context     = true
+    self.local_machine = create_machine(:local_machine, :physical)
   end
        
   #-----------------------------------------------------------------------------
@@ -97,19 +98,18 @@ class Node < Base
     @machine
   end
   
-  #---
-  
   def machine=machine
     @machine = machine  
   end
   
   #---
- 
-  def create_machine(provider, options = {})
-    if provider.is_a?(String) || provider.is_a?(Symbol)
-      self.machine = Coral.plugin_load(:machine, provider, extended_config(:machine, options).import({ :meta => { :parent => self }}))
-    end
-    self
+  
+  def local_machine
+    @local_machine
+  end
+  
+  def local_machine=local_machine
+    @local_machine = local_machine  
   end
   
   #---
@@ -125,8 +125,6 @@ class Node < Base
     self[:public_ip] = machine.public_ip if reset || self[:public_ip].nil?
     self[:public_ip]
   end
-  
-  #---
   
   def private_ip(reset = false)
     self[:private_ip] = machine.private_ip if reset || self[:private_ip].nil?
@@ -291,6 +289,12 @@ class Node < Base
   #-----------------------------------------------------------------------------
   # Machine operations
   
+  def create_machine(name, provider, options = {})
+    Coral.plugin_load(:machine, provider, extended_config(name, options).import({ :meta => { :parent => self }}))
+  end
+  
+  #---
+  
   def create(options = {})
     success = true
     
@@ -332,7 +336,9 @@ class Node < Base
       
         yield(:config, hook_config) if block_given?
         
-        success = machine.download(remote_path, local_path, config.export) do |name, received, total|
+        active_machine = local? ? local_machine : machine
+        
+        success = active_machine.download(remote_path, local_path, config.export) do |name, received, total|
           yield(:progress, { :name => name, :received => received, :total => total })
         end
         
@@ -365,7 +371,9 @@ class Node < Base
       
         yield(:config, hook_config) if block_given?
         
-        success = machine.upload(local_path, remote_path, config.export) do |name, sent, total|
+        active_machine = local? ? local_machine : machine
+        
+        success = active_machine.upload(local_path, remote_path, config.export) do |name, sent, total|
           yield(:progress, { :name => name, :sent => sent, :total => total })  
         end
         
@@ -430,8 +438,10 @@ class Node < Base
       
         yield(:config, config) if block_given?
         
+        active_machine = local? ? local_machine : machine
+        
         if commands = config.get(:commands, nil)
-          results = machine.exec(commands, config.export) do |type, command, data|
+          results = active_machine.exec(commands, config.export) do |type, command, data|
             yield(:progress, { :type => type, :command => command, :data => data })    
           end
         end
