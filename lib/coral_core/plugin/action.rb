@@ -312,7 +312,7 @@ class Action < Base
     self.status = code.success
     self.result = nil
     
-    if processed?
+    if processed?      
       node_exec do |node, network|
         hook_config = { :node => node, :network => network }
         
@@ -334,7 +334,7 @@ class Action < Base
     self.status = code.unknown_status unless status.is_a?(Integer)
     
     if processed? && status != code.success
-      logger.warn("Execution failed for #{plugin_provider} with status #{status} (#{code_name}): #{export.inspect}")
+      logger.warn("Execution failed for #{plugin_provider} with status #{status}: #{export.inspect}")
       alert(Codes.render_index(status))
     end  
     
@@ -362,7 +362,7 @@ class Action < Base
   # Output
   
   def render(display, options = {})
-    ui.info(display, options) unless quiet? || display.empty?
+    ui.info(display.strip, options) unless quiet? || display.strip.empty?
   end
   
   #---
@@ -374,7 +374,7 @@ class Action < Base
   #---
    
   def alert(display, options = {})
-    ui.warn(display, options) unless quiet? || display.empty?
+    ui.warn(display.strip, options) unless quiet? || display.strip.empty?
   end
         
   #---
