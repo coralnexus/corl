@@ -10,8 +10,8 @@ class Fog < Plugin::Node
     super
     self.region = region
     
-    yield if block_given?
-    create_machine(:fog, machine_config)
+    yield if block_given?    
+    self.machine = create_machine(:machine, :fog, machine_config)
   end
        
   #-----------------------------------------------------------------------------
