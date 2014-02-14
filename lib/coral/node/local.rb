@@ -8,7 +8,7 @@ class Local < Plugin::Node
    
   def normalize
     super
-    create_machine(:physical, extended_config(:machine))
+    self.machine = create_machine(:machine, :physical, machine_config)
   end
        
   #-----------------------------------------------------------------------------
