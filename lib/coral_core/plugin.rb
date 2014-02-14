@@ -2,6 +2,10 @@
 module Coral
 module Plugin
   
+  @@plugin_lock = Mutex.new
+  
+  #-----------------------------------------------------------------------------
+  
   def self.logger
     return Core.logger
   end
@@ -33,24 +37,25 @@ module Plugin
     info    = @@load_info[type][provider] if Util::Data.exists?(@@load_info, [ type, provider ])
         
     if info
-      logger.debug("Plugin information for #{provider} #{type} found.  Data: #{info.inspect}")
+      @@plugin_lock.synchronize do
+        logger.debug("Plugin information for #{provider} #{type} found.  Data: #{info.inspect}")
       
-      options       = translate(type, provider, options)      
-      instance_name = "#{provider}_" + Coral.sha1(options)
+        options       = translate(type, provider, options)      
+        instance_name = "#{provider}_" + Coral.sha1(options)
       
-      @@plugins[type] = {} unless @@plugins.has_key?(type)
+        @@plugins[type] = {} unless @@plugins.has_key?(type)
       
-      unless instance_name && @@plugins[type].has_key?(instance_name)
-        info[:instance_name] = instance_name
-        options[:meta]       = Config.new(info).import(Util::Data.hash(options[:meta]))
+        unless instance_name && @@plugins[type].has_key?(instance_name)
+          info[:instance_name] = instance_name
+          options[:meta]       = Config.new(info).import(Util::Data.hash(options[:meta]))
         
-        logger.info("Creating new plugin #{provider} #{type} with #{options.inspect}")
+          logger.info("Creating new plugin #{provider} #{type} with #{options.inspect}")
         
-        plugin = Coral.class_const([ :coral, type, provider ]).new(type, provider, options)
+          plugin = Coral.class_const([ :coral, type, provider ]).new(type, provider, options)
         
-        @@plugins[type][instance_name] = plugin 
-      end
-           
+          @@plugins[type][instance_name] = plugin 
+        end
+      end     
       return @@plugins[type][instance_name]
     end
     
@@ -143,8 +148,10 @@ module Plugin
       logger.info("Defining plugin types at #{Time.now}")
       
       type_info.each do |type, default_provider|
-        logger.debug("Mapping plugin type #{type} to default provider #{default_provider}")
-        @@types[type.to_sym] = default_provider
+        @@plugin_lock.synchronize do
+          logger.debug("Mapping plugin type #{type} to default provider #{default_provider}")
+          @@types[type.to_sym] = default_provider
+        end
       end
     else
       logger.warn("Defined types must be specified as a hash to be registered properly")      
@@ -188,24 +195,26 @@ module Plugin
   def self.add_build_info(type, file)
     type = type.to_sym
     
-    @@load_info[type] = {} unless @@load_info.has_key?(type)
+    @@plugin_lock.synchronize do
+      @@load_info[type] = {} unless @@load_info.has_key?(type)
     
-    components = file.split(File::SEPARATOR)
-    provider   = components.pop.sub(/\.rb/, '').to_sym
-    directory  = components.join(File::SEPARATOR) 
+      components = file.split(File::SEPARATOR)
+      provider   = components.pop.sub(/\.rb/, '').to_sym
+      directory  = components.join(File::SEPARATOR) 
     
-    logger.info("Loading coral #{type} plugin #{provider} at #{Time.now}")
+      logger.info("Loading coral #{type} plugin #{provider} at #{Time.now}")
         
-    unless @@load_info[type].has_key?(provider)
-      data = {
-        :type      => type,
-        :provider  => provider,        
-        :directory => directory,
-        :file      => file
-      }
+      unless @@load_info[type].has_key?(provider)
+        data = {
+          :type      => type,
+          :provider  => provider,        
+          :directory => directory,
+          :file      => file
+        }
       
-      logger.debug("Plugin #{type} loaded: #{data.inspect}")
-      @@load_info[type][provider] = data
+        logger.debug("Plugin #{type} loaded: #{data.inspect}")
+        @@load_info[type][provider] = data
+      end
     end
   end
  
@@ -253,12 +262,14 @@ module Plugin
       logger.debug("Autoloading type: #{type}")
       
       @@load_info[type].each do |provider, plugin|
-        logger.debug("Autoloading provider #{provider} at #{plugin[:directory]}")
+        @@plugin_lock.synchronize do
+          logger.debug("Autoloading provider #{provider} at #{plugin[:directory]}")
         
-        coral_require(plugin[:directory], provider)
+          coral_require(plugin[:directory], provider)
         
-        @@load_info[type][provider][:class] = Coral.class_const([ :coral, type, provider ])
-        logger.debug("Updated #{type} #{provider} load info: #{@@load_info[type][provider].inspect}")
+          @@load_info[type][provider][:class] = Coral.class_const([ :coral, type, provider ])
+          logger.debug("Updated #{type} #{provider} load info: #{@@load_info[type][provider].inspect}")
+        end
       end      
     end 
   end

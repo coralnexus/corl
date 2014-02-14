@@ -6,7 +6,8 @@ class Interface
   #-----------------------------------------------------------------------------
   # Properties
   
-  @@logger = Log4r::Logger.new('core')
+  @@ui_lock = Mutex.new  
+  @@logger  = Log4r::Logger.new('core')
     
   if ENV['CORAL_LOG']
     @@log_level         = ENV['CORAL_LOG'].upcase
@@ -86,14 +87,16 @@ class Interface
 
   def say(type, message, options = {})
     return @delegate.say(type, message, options) if check_delegate('say')
-  
+    
     defaults = { :new_line => true, :prefix => true }
-    options = defaults.merge(options)
-    printer = options[:new_line] ? :puts : :print
-    channel = type == :error || options[:channel] == :error ? @error : @output
-
-    safe_puts(format_message(type, message, options),
-              :channel => channel, :printer => printer)
+    options  = defaults.merge(options)
+    printer  = options[:new_line] ? :puts : :print
+    channel  = type == :error || options[:channel] == :error ? @error : @output
+    
+    @@ui_lock.synchronize do
+      safe_puts(format_message(type, message, options),
+                :channel => channel, :printer => printer)
+    end
   end
   
   #---
@@ -104,8 +107,11 @@ class Interface
     options[:new_line] = false if ! options.has_key?(:new_line)
     options[:prefix] = false if ! options.has_key?(:prefix)
 
-    say(:info, message, options)
-    return @input.gets.chomp
+    @@ui_lock.synchronize do
+      say(:info, message, options)
+      user_input = @input.gets.chomp
+    end
+    user_input
   end
   
   #-----------------------------------------------------------------------------
@@ -171,9 +177,6 @@ class Interface
   
   def safe_puts(message = nil, options = {})
     return @delegate.safe_puts(message, options) if check_delegate('safe_puts')
-    
-    #dbg(message, 'message')
-    #dbg(options, 'options')
     
     message ||= ""
     options = {
