@@ -64,6 +64,13 @@ class Config
   def inspect
     "#<#{self.class}: #{@properties.to_s}>"
   end
+  
+  #-----------------------------------------------------------------------------
+  # Checks
+  
+  def has_key?(keys)
+    get(keys) ? true : false
+  end
       
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
