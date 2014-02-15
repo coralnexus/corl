@@ -226,7 +226,7 @@ class Interface
     if @resource && ! @resource.empty? && options[:prefix]
       prefix = "[#{@resource}]"
     end
-    message = "#{prefix} #{message}".gsub(/\n+$/, '')
+    message = "#{prefix} #{message}".lstrip.gsub(/\n+$/, '')
     
     if @color
       if options.has_key?(:color)
