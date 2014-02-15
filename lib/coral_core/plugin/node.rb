@@ -9,8 +9,11 @@ class Node < Base
   def normalize
     super
     
-    @cli_interface = Util::Liquid.new do |method, args|
-      result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }).first
+    @cli_interface = Util::Liquid.new do |method, args, &code|
+      result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }) do |op, data|
+        code.call(op, data) if code
+      end
+      result = result.first
       
       ui_group!(hostname) do          
         ui.alert(result.errors) unless result.errors.empty?
@@ -18,8 +21,18 @@ class Node < Base
       result
     end
     
-    @action_interface = Util::Liquid.new do |method, args|
-      action(method, *args)
+    @action_interface = Util::Liquid.new do |method, args, &code|
+      action(method, *args) do |op, data|
+        code.call(op, data) if code
+      end
+    end
+  end
+  
+  #---
+  
+  def method_missing(method, *args, &code)  
+    action(method, *args) do |op, data|
+      code.call(op, data) if code
     end
   end
   
@@ -473,8 +486,8 @@ class Node < Base
     unless command.is_a?(Coral::Plugin::Command)
       command = Coral.command(Config.new({ :command => command }).import(options), :shell)
     end
-    results = exec({ :commands => [ command.to_s ] }) do |op, op_results|
-      yield(op, op_results) if block_given?  
+    results = exec({ :commands => [ command.to_s ] }) do |op, data|
+      yield(op, data) if block_given?  
     end
     results.first
   end
@@ -482,7 +495,7 @@ class Node < Base
   #---
   
   def action(provider, options = {})
-    config         = Config.ensure(options)
+    config         = Config.ensure(options).defaults({ :net_provider => network.plugin_provider })
     encoded_config = Util::CLI.encode(config.export)
     
     logger.info("Executing remote action #{provider} with encoded arguments: #{config.export.inspect}")
@@ -491,8 +504,8 @@ class Node < Base
       :command => provider, 
       :data    => { :encoded => encoded_config }
     })
-    command(:coral, { :subcommand => action_config }) do |op, results|
-      yield(op, results) if block_given?  
+    command(:coral, { :subcommand => action_config }) do |op, data|
+      yield(op, data) if block_given?  
     end  
   end
   
