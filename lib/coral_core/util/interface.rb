@@ -93,9 +93,19 @@ class Interface
     printer  = options[:new_line] ? :puts : :print
     channel  = type == :error || options[:channel] == :error ? @error : @output
     
-    @@ui_lock.synchronize do
+    options[:sync] = true unless options.has_key?(:sync)
+    
+    render = lambda do 
       safe_puts(format_message(type, message, options),
-                :channel => channel, :printer => printer)
+                :channel => channel, :printer => printer)  
+    end
+    
+    if options[:sync]
+      @@ui_lock.synchronize do
+        render.call
+      end
+    else
+      render.call
     end
   end
   
@@ -106,12 +116,68 @@ class Interface
 
     options[:new_line] = false if ! options.has_key?(:new_line)
     options[:prefix] = false if ! options.has_key?(:prefix)
-
-    @@ui_lock.synchronize do
-      say(:info, message, options)
-      user_input = @input.gets.chomp
+    options[:echo] = true if ! options.has_key?(:echo)
+    
+    options[:sync] = true unless options.has_key?(:sync)
+    
+    user_input = nil
+    
+    collect = lambda do 
+      say(:info, message, Config.ensure(options).import({ :sync => false }).export)
+      
+      if options[:echo]
+        user_input = @input.gets.chomp
+      else
+        require 'io/console'        
+        user_input = @input.noecho(&:gets).chomp
+      end
+      safe_puts("\n")
+      user_input  
     end
-    user_input
+
+    if options[:sync]
+      @@ui_lock.synchronize do
+        return collect.call
+      end
+    else
+      return collect.call  
+    end
+  end
+  
+  #---
+  
+  def password(type, options = {})
+    return @delegate.password(type, options) if check_delegate('password')
+    
+    options[:sync] = true unless options.has_key?(:sync)
+    
+    collect = lambda do
+      try_again = true
+      password  = nil
+      
+      while try_again
+        # Get and check a password from the keyboard
+        password              = ask("Enter #{type} password: ", { :echo => false, :sync => false })
+        confirmation_password = ask("Confirm #{type} password: ", { :echo => false, :sync => false })
+    
+        if password != confirmation_password
+          choice    = ask('Passwords do not match!  Try again? (Y|N): ', { :sync => false })
+          try_again = choice.upcase == "Y"
+          password  = nil unless try_again
+        else
+          try_again = false
+        end
+      end
+      password
+    end
+    
+    if options[:sync]
+      @@ui_lock.synchronize do
+        return collect.call
+      end
+    else
+      return collect.call  
+    end
   end
   
   #-----------------------------------------------------------------------------
@@ -160,7 +226,7 @@ class Interface
     if @resource && ! @resource.empty? && options[:prefix]
       prefix = "[#{@resource}]"
     end
-    message = "#{prefix} #{message}".strip
+    message = "#{prefix} #{message}".gsub(/\n+$/, '')
     
     if @color
       if options.has_key?(:color)
