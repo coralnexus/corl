@@ -32,7 +32,8 @@ class Puppetnode < Plugin::Provisioner
     env.modules.each do |mod|
       lib_dir = File.join(mod.path, 'lib', 'coral')
       if File.directory?(lib_dir)
-        Plugin.register(lib_dir)
+        logger.debug("Registering Puppet module at #{lib_dir}")
+        Manager.connection.register(lib_dir)
       end
     end
   end
