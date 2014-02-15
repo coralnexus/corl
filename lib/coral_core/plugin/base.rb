@@ -4,6 +4,7 @@ module Plugin
 class Base < Core
   
   include Mixin::Lookup
+  include Celluloid
   
   #---
   
@@ -150,7 +151,7 @@ class Base < Core
     
     logger.debug("Executing plugin hook #{hook} (#{method})")
     
-    return Plugin.exec!(method, Config.ensure(options).defaults({ :extension_type => :base }).import({ :plugin => self })) do |op, results|
+    return Manager.connection.exec(method, Config.ensure(options).defaults({ :extension_type => :base }).import({ :plugin => self })) do |op, results|
       results = yield(op, results) if block_given?
       results
     end
@@ -235,7 +236,7 @@ class Base < Core
           info = translate(info)
           
           if Util::Data.empty?(info[:provider])
-            info[:provider] = Plugin.type_default(type)
+            info[:provider] = Manager.connection.type_default(type)
           end
           
           logger.debug("Translated plugin info: #{info.inspect}")
