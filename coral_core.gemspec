@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-02-14"
+  s.date = "2014-02-15"
   s.description = "= coral_core\n\nThis library provides core data elements and utilities used in other Coral gems.\n\nThe Coral core library contains functionality that is utilized by other\nCoral gems by providing basic utilities like Git, Shell, Disk, and Data\nmanipulation libraries, a UI system, and a core data model that supports\nEvents, Commands, Repositories, and Memory (version controlled JSON \nobjects).  This library is only used as a starting point for other systems.\n\nNote:  This library is still very early in development!\n\n== Contributing to coral_core\n \n* Check out the latest {major}.{minor} branch to make sure the feature hasn't \n  been implemented or the bug hasn't been fixed yet.\n* Check out the issue tracker to make sure someone already hasn't requested \n  it and/or contributed it.\n* Fork the project.\n* Start a feature/bugfix branch.\n* Commit and push until you are happy with your contribution.\n* Make sure to add tests for it. This is important so I don't break it in a \n  future version unintentionally.\n* Please try not to mess with the Rakefile, version, or history. If you want \n  to have your own version, or is otherwise necessary, that is fine, but \n  please isolate to its own commit so I can cherry-pick around it.\n\n== Copyright\n\nLicensed under GPLv3.  See LICENSE.txt for further details.\n\nCopyright (c) 2013  Adrian Webb <adrian.webb@coraltech.net>\nCoral Technology Group LLC"
   s.email = "adrian.webb@coraltech.net"
   s.executables = ["coral"]
@@ -64,6 +64,7 @@ Gem::Specification.new do |s|
     "lib/coral/configuration/file.rb",
     "lib/coral/event/puppet.rb",
     "lib/coral/event/regex.rb",
+    "lib/coral/extension/puppetloader.rb",
     "lib/coral/machine/fog.rb",
     "lib/coral/machine/physical.rb",
     "lib/coral/network/default.rb",
@@ -92,6 +93,8 @@ Gem::Specification.new do |s|
     "lib/coral_core/core.rb",
     "lib/coral_core/errors.rb",
     "lib/coral_core/facade.rb",
+    "lib/coral_core/gems.rb",
+    "lib/coral_core/manager.rb",
     "lib/coral_core/mixin/action/commit.rb",
     "lib/coral_core/mixin/action/keypair.rb",
     "lib/coral_core/mixin/action/node.rb",
@@ -107,7 +110,6 @@ Gem::Specification.new do |s|
     "lib/coral_core/mixin/sub_config.rb",
     "lib/coral_core/mod/hash.rb",
     "lib/coral_core/mod/hiera_backend.rb",
-    "lib/coral_core/plugin.rb",
     "lib/coral_core/plugin/action.rb",
     "lib/coral_core/plugin/base.rb",
     "lib/coral_core/plugin/command.rb",
@@ -121,7 +123,6 @@ Gem::Specification.new do |s|
     "lib/coral_core/plugin/provisioner.rb",
     "lib/coral_core/plugin/template.rb",
     "lib/coral_core/plugin/translator.rb",
-    "lib/coral_core/types.rb",
     "lib/coral_core/util/batch.rb",
     "lib/coral_core/util/cli.rb",
     "lib/coral_core/util/data.rb",
@@ -181,6 +182,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<log4r>, ["~> 1.1"])
       s.add_runtime_dependency(%q<i18n>, ["~> 0.6"])
       s.add_runtime_dependency(%q<deep_merge>, ["~> 1.0"])
+      s.add_runtime_dependency(%q<celluloid>, ["~> 0.15"])
       s.add_runtime_dependency(%q<sshkey>, ["~> 1.6"])
       s.add_runtime_dependency(%q<hiera>, ["~> 1.3"])
       s.add_runtime_dependency(%q<multi_json>, ["~> 1.7"])
@@ -200,6 +202,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<log4r>, ["~> 1.1"])
       s.add_dependency(%q<i18n>, ["~> 0.6"])
       s.add_dependency(%q<deep_merge>, ["~> 1.0"])
+      s.add_dependency(%q<celluloid>, ["~> 0.15"])
       s.add_dependency(%q<sshkey>, ["~> 1.6"])
       s.add_dependency(%q<hiera>, ["~> 1.3"])
       s.add_dependency(%q<multi_json>, ["~> 1.7"])
@@ -220,6 +223,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<log4r>, ["~> 1.1"])
     s.add_dependency(%q<i18n>, ["~> 0.6"])
     s.add_dependency(%q<deep_merge>, ["~> 1.0"])
+    s.add_dependency(%q<celluloid>, ["~> 0.15"])
     s.add_dependency(%q<sshkey>, ["~> 1.6"])
     s.add_dependency(%q<hiera>, ["~> 1.3"])
     s.add_dependency(%q<multi_json>, ["~> 1.7"])
