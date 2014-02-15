@@ -70,6 +70,8 @@ module Coral
   
   def self.initialize
     current_time = Time.now
+    
+    Celluloid.logger = logger
       
     logger.info("Initializing the Coral plugin system at #{current_time}")
     Config.set_property('time', current_time.to_i)
