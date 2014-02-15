@@ -41,7 +41,7 @@ class Shell < Core
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def self.exec!(command, options = {})
+  def self.exec(command, options = {})
     config = Config.ensure(options)
     
     min   = config.get(:min, 1).to_i
@@ -66,7 +66,7 @@ class Shell < Core
       logger.info(">> running: #{command}")
       
       begin
-        t1, output_new, output_orig, output_reader = pipe_exec_stream!($stdout, conditions, { 
+        t1, output_new, output_orig, output_reader = pipe_exec_stream($stdout, conditions, { 
           :prefix => info_prefix, 
           :suffix => info_suffix, 
         }, 'output') do |data|
@@ -74,7 +74,7 @@ class Shell < Core
           block_given? ? yield(:output, command, data) : true
         end
       
-        t2, error_new, error_orig, error_reader = pipe_exec_stream!($stderr, conditions, { 
+        t2, error_new, error_orig, error_reader = pipe_exec_stream($stderr, conditions, { 
           :prefix => error_prefix, 
           :suffix => error_suffix, 
         }, 'error') do |data|
@@ -100,20 +100,14 @@ class Shell < Core
   
   #---
   
-  def self.exec(command, options = {})
-    return exec!(command, options)
-  end
-  
-  #---
-  
-  def self.pipe_exec_stream!(output, conditions, options, label)
+  def self.pipe_exec_stream(output, conditions, options, label)
     original     = output.dup
     read, write  = IO.pipe
     
     match_prefix = ( options[:match_prefix] ? options[:match_prefix] : 'EXIT' )
             
-    thread = process_stream!(read, original, options, label) do |line|
-      check_conditions!(line, conditions, match_prefix) do
+    thread = process_stream(read, original, options, label) do |line|
+      check_conditions(line, conditions, match_prefix) do
         block_given? ? yield(line) : true
       end
     end
@@ -138,7 +132,7 @@ class Shell < Core
   
   #---
   
-  def self.check_conditions!(line, conditions, match_prefix = '')
+  def self.check_conditions(line, conditions, match_prefix = '')
     prefix = ''
     
     unless ! conditions || conditions.empty?
@@ -168,7 +162,7 @@ class Shell < Core
   
   #---
   
-  def self.process_stream!(input, output, options, label)
+  def self.process_stream(input, output, options, label)
     return Thread.new do
       success        = true      
       default_prefix = ( options[:prefix] ? options[:prefix] : '' )

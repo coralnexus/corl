@@ -129,13 +129,13 @@ class Shell < Plugin::Command
   
   #---
     
-  def exec!(options = {}, overrides = nil)
+  def exec(options = {}, overrides = nil)
     config = Config.ensure(options)
     
     logger.info("Executing command #{command}")
     
     config[:ui] = @ui
-    result = Util::Shell.exec!(build(export, overrides), config) do |line|
+    result = Util::Shell.exec(build(export, overrides), config) do |line|
       block_given? ? yield(line) : true
     end
     

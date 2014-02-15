@@ -158,7 +158,7 @@ class Fog < Plugin::Machine
       
       begin
         if init_ssh_session
-          Util::SSH.download!(node.public_ip, node.user, remote_path, local_path, config.export) do |name, received, total|
+          Util::SSH.download(node.public_ip, node.user, remote_path, local_path, config.export) do |name, received, total|
             yield(name, received, total) if block_given?
           end
           true
@@ -180,7 +180,7 @@ class Fog < Plugin::Machine
       
       begin
         if init_ssh_session
-          Util::SSH.upload!(node.public_ip, node.user, local_path, remote_path, config.export) do |name, sent, total|
+          Util::SSH.upload(node.public_ip, node.user, local_path, remote_path, config.export) do |name, sent, total|
             yield(name, sent, total) if block_given?
           end
           true
@@ -202,7 +202,7 @@ class Fog < Plugin::Machine
         logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}")
         
         if init_ssh_session
-          results = Util::SSH.exec!(node.public_ip, node.user, commands) do |type, command, data|
+          results = Util::SSH.exec(node.public_ip, node.user, commands) do |type, command, data|
             yield(type, command, data) if block_given?  
           end
         else

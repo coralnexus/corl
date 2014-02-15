@@ -30,7 +30,7 @@ begin
     puts I18n.t('coral.core.exec.help.usage') + ': ' + main_command.help + "\n"
     puts I18n.t('coral.core.exec.help.header') + ":\n\n"
     
-    Coral::Plugin.loaded_plugins(:action).each do |provider, action|
+    Coral::Manager.connection.loaded_plugins(:action).each do |provider, action|
       puts sprintf("   %-10s : %s\n", 
         "<#{provider}>", 
         Coral.action(provider, { :args => '-h', :quiet => true }).help

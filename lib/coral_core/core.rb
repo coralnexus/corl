@@ -59,7 +59,7 @@ class Core < Config
   #-----------------------------------------------------------------------------
   # General utilities
   
-  def ui_group!(resource)
+  def ui_group(resource)
     ui_resource = ui.resource
     ui.resource = resource
     yield

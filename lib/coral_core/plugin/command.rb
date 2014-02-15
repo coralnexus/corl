@@ -86,18 +86,12 @@ class Command < Base
   
   #---
   
-  def exec!(options = {}, overrides = nil)
+  def exec(options = {}, overrides = nil)
     logger.debug("Executing command with #{options.inspect}")
     logger.debug("Overrides: #{overrides.inspect}")
     
     # Implement in sub classes (don't forget the yield!)
     return true
-  end
-    
-  #---
-  
-  def exec(options = {}, overrides = nil)
-    return exec!(options, overrides)
   end
 end
 end

@@ -211,10 +211,10 @@ module ObjectInterface
   
   def object_utilities
     
-    unless respond_to? :each_object_type!
-      logger.debug("Defining object utility method: each_object_type!")
+    unless respond_to? :each_object_type
+      logger.debug("Defining object utility method: each_object_type")
       
-      define_method :each_object_type! do |object_types = nil, filter_proc = nil, &code|
+      define_method :each_object_type do |object_types = nil, filter_proc = nil, &code|
         object_types = @@object_types.keys unless object_types
         object_types = [ object_types ] unless object_types.is_a?(Array)
       
@@ -233,11 +233,11 @@ module ObjectInterface
     
     #---
     
-    unless respond_to? :each_object!
-      logger.debug("Defining object utility method: each_object!")
+    unless respond_to? :each_object
+      logger.debug("Defining object utility method: each_object")
       
-      define_method :each_object! do |object_types = nil, &code|
-        each_object_type!(object_types) do |type, plural, options|
+      define_method :each_object do |object_types = nil, &code|
+        each_object_type(object_types) do |type, plural, options|
           logger.debug("Processing object type #{type}/#{plural} with: #{options.inspect}")
           
           send(plural).each do |name, obj|
@@ -256,7 +256,7 @@ module ObjectInterface
       define_method :init_objects do |object_types = nil, filter_proc = nil|
         logger.debug("Initializing object collection")
         
-        each_object_type!(object_types, filter_proc) do |type, plural, options|
+        each_object_type(object_types, filter_proc) do |type, plural, options|
           send("init_#{plural}")  
         end   
       end
@@ -270,7 +270,7 @@ module ObjectInterface
       define_method :clear_objects do |object_types = nil, filter_proc = nil|
         logger.debug("Clearing object collection")
         
-        each_object_type!(object_types, filter_proc) do |type, plural, options|
+        each_object_type(object_types, filter_proc) do |type, plural, options|
           send("clear_#{plural}")  
         end
       end

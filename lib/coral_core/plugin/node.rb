@@ -15,7 +15,7 @@ class Node < Base
       end
       result = result.first
       
-      ui_group!(hostname) do          
+      ui_group(hostname) do          
         ui.alert(result.errors) unless result.errors.empty?
       end
       result
@@ -522,7 +522,7 @@ class Node < Base
     self.status = code.unknown_status
     
     bootstrap_name = 'bootstrap'    
-    bootstrap_path = config.get(:bootstrap_path, File.join(Plugin.core.full_gem_path, bootstrap_name))
+    bootstrap_path = config.get(:bootstrap_path, File.join(Gems.core.full_gem_path, bootstrap_name))
     bootstrap_glob = config.get(:bootstrap_glob, '**/*.sh')
     bootstrap_init = config.get(:bootstrap_init, 'bootstrap.sh')
     

@@ -22,7 +22,7 @@ class Bootstrap < Plugin::Action
       end
       register :home_env_var, :str, 'HOME'
       register :home, :str, nil    
-      register :bootstrap_path, :str, File.join(Plugin.core.full_gem_path, 'bootstrap') do |value|
+      register :bootstrap_path, :str, File.join(Gems.core.full_gem_path, 'bootstrap') do |value|
         unless File.directory?(value)
           warn('coral.actions.bootstrap.errors.bootstrap_path', { :value => value })
           next false
@@ -33,7 +33,7 @@ class Bootstrap < Plugin::Action
       register :bootstrap_init, :str, 'bootstrap.sh'
       
       register :bootstrap_nodes, :array, nil do |values|
-        node_plugins = Plugin.loaded_plugins(:node)
+        node_plugins = Manager.connection.loaded_plugins(:node)
         success      = true
         
         values.each do |value|
@@ -70,9 +70,7 @@ class Bootstrap < Plugin::Action
       
       if network
         batch_success = network.batch(settings[:bootstrap_nodes], settings[:node_provider], settings[:parallel]) do |node|
-          home_path = extension_set(:home_path, ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] ), { :node => node }) 
-          
-          success = node.bootstrap(home_path, extended_config(:bootstrap, {
+          success = node.bootstrap(network.home, extended_config(:bootstrap, {
             :auth_files     => settings[:auth_files],
             :home           => settings[:home],
             :home_env_var   => settings[:home_env_var],

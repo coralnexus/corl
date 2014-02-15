@@ -6,13 +6,13 @@ module Coral
   #-----------------------------------------------------------------------------
   
   def self.ui
-    return Core.ui
+    Core.ui
   end
   
   #---
   
   def self.logger
-    return Core.logger
+    Core.logger
   end
   
   #---
@@ -35,14 +35,14 @@ module Coral
   #---
   
   def self.config_file
-    return @@config_file
+    @@config_file
   end
   
   #-----------------------------------------------------------------------------
   
   def self.admin?
     is_admin  = ( ENV['USER'] == 'root' )
-    ext_admin = exec!(:check_admin) do |op, results|
+    ext_admin = exec(:check_admin) do |op, results|
       if op == :reduce
         results.values.include?(true)
       else
@@ -68,40 +68,30 @@ module Coral
   #-----------------------------------------------------------------------------
   # Initialization
   
-  @@initialized = false
-  
   def self.initialize
-    unless @@initialized
-      current_time = Time.now
+    current_time = Time.now
       
-      logger.info("Initializing the Coral plugin system at #{current_time}")
-      Config.set_property('time', current_time.to_i)
+    logger.info("Initializing the Coral plugin system at #{current_time}")
+    Config.set_property('time', current_time.to_i)
+    
+    connection = Manager.connection
       
-      Plugin.initialize do
-        begin
-          logger.info("Registering Coral plugin defined within Puppet modules")
-          
-          # Include Coral plugins
-          #Puppet::Node::Environment.new.modules.each do |mod|
-          #  lib_path = File.join(mod.path, 'lib', 'coral')
-            
-          #  logger.debug("Registering Puppet module at #{lib_path}")
-          #  Plugin.register(lib_path)
-          #end
-        rescue
-        end
-        
-        logger.info("Finished initializing Coral plugin system at #{Time.now}")
-      end
-            
-      @@initialized = true
-    end    
-  end
-  
-  #---
-  
-  def self.initialized?
-    return @@initialized
+    connection.define_type :extension     => nil,         # Core
+                           :configuration => :file,       # Core
+                           :action        => :update,     # Core
+                           :project       => :git,        # Core
+                           :network       => :default,    # Cluster
+                           :node          => :local,      # Cluster
+                           :machine       => :physical,   # Cluster
+                           :provisioner   => :puppetnode, # Cluster
+                           :command       => :shell,      # Cluster
+                           :event         => :regex,      # Utility
+                           :template      => :json,       # Utility
+                           :translator    => :json        # Utility
+                           
+    connection.load_plugins(true)
+                                  
+    logger.info("Finished initializing Coral plugin system at #{Time.now}")    
   end
   
   #-----------------------------------------------------------------------------
@@ -114,21 +104,23 @@ module Coral
     logger.info("Fetching plugin #{type} provider #{provider} at #{Time.now}")
     logger.debug("Plugin options: #{config.export.inspect}")
     
+    connection = Manager.connection
+    
     if name
       logger.debug("Looking up existing instance of #{name}")
       
-      existing_instance = Plugin.get_instance(type, name)
+      existing_instance = connection.get(type, name)
       logger.info("Using existing instance of #{type}, #{name}") if existing_instance
     end
     
     return existing_instance if existing_instance
-    return Plugin.create_instance(type, provider, config.export)  
+    connection.create(type, provider, config.export)  
   end
   
   #---
   
   def self.plugin(type, provider, options = {})
-    default_provider = Plugin.type_default(type)
+    default_provider = Manager.connection.type_default(type)
     
     if options.is_a?(Hash) || options.is_a?(Coral::Config)
       config   = Config.ensure(options)
@@ -137,7 +129,7 @@ module Coral
     end
     provider = default_provider unless provider # Sanity checking (see plugins)
     
-    return plugin_load(type, provider, options)
+    plugin_load(type, provider, options)
   end
   
   #---
@@ -161,90 +153,47 @@ module Coral
       end
     end
     return group.shift if ! build_hash && group.length == 1 && ! keep_array
-    return group  
+    group  
   end
   
   #---
   
   def self.get_plugin(type, name)
-    return Plugin.get_instance(type, name)
+    Manager.connection.get(type, name)
   end
   
   #---
   
   def self.remove_plugin(plugin)
-    return Plugin.remove_instance(plugin)
+    Manager.connection.remove(plugin)
   end
 
   #-----------------------------------------------------------------------------
   # Plugin extensions
    
-  def self.exec!(method, options = {})
-    return Plugin.exec!(method, options) do |op, results|
-      results = yield(op, results) if block_given?
-      results
+  def self.exec(method, options = {})
+    Manager.connection.exec(method, options) do |op, data|
+      data = yield(op, data) if block_given?
+      data
     end
   end
   
   #---
   
   def self.config(type, options = {})
-    config = Config.ensure(options)
-    
-    logger.debug("Generating #{type} extended configuration from: #{config.export.inspect}")
-      
-    exec!("#{type}_config", Config.new(config.export).import({ :extension_type => :config })) do |op, results|
-      if op == :reduce
-        results.each do |provider, result|
-          config.defaults(result)
-        end
-        nil
-      else
-        hash(results)
-      end
-    end    
-    config.delete(:extension_type)
-     
-    logger.debug("Final extended configuration: #{config.export.inspect}")   
-    config 
+    Manager.connection.config(method, options)
   end
   
   #---
   
   def self.check(method, options = {})
-    config = Config.ensure(options)
-    
-    logger.debug("Checking extension #{method} given: #{config.export.inspect}")
-    
-    success = exec!(method, config.import({ :extension_type => :check })) do |op, results|
-      if op == :reduce
-        ! results.values.include?(false)
-      else
-        results ? true : false
-      end
-    end
-    
-    success = success.nil? || success ? true : false
-    
-    logger.debug("Extension #{method} check result: #{success.inspect}")      
-    success
+    Manager.connection.check(method, options)
   end
   
   #---
   
   def self.value(method, value, options = {})
-    config = Config.ensure(options)
-    
-    logger.debug("Setting extension #{method} value given: #{value.inspect}")
-    
-    exec!(method, config.import({ :value => value, :extension_type => :value })) do |op, results|
-      if op == :process
-        value = results unless results.nil?  
-      end
-    end
-    
-    logger.debug("Extension #{method} retrieved value: #{value.inspect}")
-    value
+    Manager.connection.value(method, value, options)
   end
        
   #-----------------------------------------------------------------------------
@@ -253,8 +202,6 @@ module Coral
   def self.run
     begin
       logger.debug("Running contained process at #{Time.now}")
-      
-      initialize
       yield
       
     rescue Exception => error
@@ -292,8 +239,7 @@ module Coral
   
         ui.error(error.message) if error.message
       end      
-    end
-    
+    end    
     result
   end
     
@@ -317,7 +263,7 @@ module Coral
     if want_array
       return components
     end    
-    return components.join(separator)
+    components.join(separator)
   end
   
   #---
@@ -331,13 +277,12 @@ module Coral
                   constant.const_get(component) : 
                   constant.const_missing(component)
     end
-    
-    return constant
+    constant
   end
   
   #---
   
   def self.sha1(data)
-    return Digest::SHA1.hexdigest(Util::Data.to_json(data, false))
+    Digest::SHA1.hexdigest(Util::Data.to_json(data, false))
   end  
 end

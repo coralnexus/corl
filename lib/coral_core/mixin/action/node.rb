@@ -8,12 +8,12 @@ module Node
   # Settings
   
   def node_config
-    node_plugins = Plugin.loaded_plugins(:node)
+    node_plugins = Manager.connection.loaded_plugins(:node)
     
     register :parallel, :bool, true, 'coral.core.mixins.node.options.parallel'
     register :net_provider, :str, :default, 'coral.core.mixins.node.options.net_provider' do |value|
       value           = value.to_sym
-      network_plugins = Plugin.loaded_plugins(:network)
+      network_plugins = Manager.connection.loaded_plugins(:network)
       
       unless network_plugins.keys.include?(value)
         warn('coral.core.mixins.node.errors.network_provider', { :value => value, :choices => network_plugins.keys.join(", ") })
@@ -113,7 +113,7 @@ module Node
   #---
   
   def execute_remote(node, network, op, data)
-    ui_group!(node.name) do
+    ui_group(node.name) do
       data = yield if block_given?
     end
     data  

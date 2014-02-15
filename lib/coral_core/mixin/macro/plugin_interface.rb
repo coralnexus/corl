@@ -37,14 +37,14 @@ module PluginInterface
       
     #---
     
-    unless respond_to? :each_plugin!
-      logger.debug("Defining plugin interface method: each_plugin!")
+    unless respond_to? :each_plugin
+      logger.debug("Defining plugin interface method: each_plugin")
       
-      define_method :each_plugin! do |plugin_types = nil, providers = nil, &code|
+      define_method :each_plugin do |plugin_types = nil, providers = nil, &code|
         providers = [ providers ] if providers && ! providers.is_a?(Array)
         
         filter_proc = Proc.new {|type, config| config[:plugin] }
-        each_object_type!(plugin_types, filter_proc) do |type, plural, options|
+        each_object_type(plugin_types, filter_proc) do |type, plural, options|
           logger.debug("Processing plugin type #{type}/#{plural} with: #{options.inspect}")
           
           send(plural).each do |provider, plugins|
@@ -68,10 +68,10 @@ module PluginInterface
     
     #---
     
-    logger.debug("Defining plugin interface method: each_#{_type}!")
+    logger.debug("Defining plugin interface method: each_#{_type}")
     
-    define_method "each_#{_type}!" do |providers = nil, &code|
-      each_plugin!(_type, providers) do |type, provider, name, plugin|
+    define_method "each_#{_type}" do |providers = nil, &code|
+      each_plugin(_type, providers) do |type, provider, name, plugin|
         code.call(provider, name, plugin)    
       end
     end

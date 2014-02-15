@@ -748,7 +748,7 @@ class Project < Base
   #-----------------------------------------------------------------------------
   # Remote operations
  
-  def pull!(remote = :origin, options = {})
+  def pull(remote = :origin, options = {})
     success = false
     
     if can_persist?
@@ -786,14 +786,8 @@ class Project < Base
   end
   
   #---
-  
-  def pull(remote = :origin, options = {})
-    pull!(remote, options)
-  end  
-  
-  #---
     
-  def push!(remote = :edit, options = {})
+  def push(remote = :edit, options = {})
     success = false
     
     if can_persist?
@@ -816,7 +810,7 @@ class Project < Base
               logger.debug("Pushing sub projects as propogate option was given")
         
               foreach! do |path, project|
-                project.push!(remote, config)
+                project.push(remote, config)
               end
             end
           end
@@ -827,13 +821,7 @@ class Project < Base
     end
     success
   end
-  
-  #---
-  
-  def push(remote = :edit, options = {})
-    push!(remote, options)
-  end
-    
+     
   #-----------------------------------------------------------------------------
   # Utilities
   
@@ -877,7 +865,7 @@ class Project < Base
       
       logger.debug("Translating project reference: #{provider}  #{url}  #{revision}")
       
-      if provider && Plugin.loaded_plugins(:project).keys.include?(provider.to_sym)
+      if provider && Manager.connection.loaded_plugins(:project).keys.include?(provider.to_sym)
         klass        = Coral.class_const([ :coral, :project, provider ])          
         expanded_url = klass.send(:expand_url, url, editable) if klass.respond_to?(:expand_url)
       end

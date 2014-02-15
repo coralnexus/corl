@@ -104,7 +104,7 @@ class Physical < Plugin::Machine
       logger.debug("Executing shell commands ( #{commands.inspect} ) on machine #{name}")
       
       commands.each do |command|
-        result = Util::Shell.exec!(command, config) do |type, command_str, data|
+        result = Util::Shell.exec(command, config) do |type, command_str, data|
           yield(type, command_str, data) if block_given?   
         end        
         results << result

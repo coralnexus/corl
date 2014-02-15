@@ -7,7 +7,7 @@ Facter.add(:coral_network) do
     
     network_path = '/var/coral'
     
-    Coral.exec!(:network_location) do |op, results|
+    Coral.exec(:network_location) do |op, results|
       if op == :process
         network_path = results unless results.nil? || ! File.directory?(results) 
       end

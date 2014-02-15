@@ -158,7 +158,7 @@ class SSH < Core
   
   #---
   
-  def self.exec!(hostname, user, commands)
+  def self.exec(hostname, user, commands)
     results = []
         
     begin
@@ -207,13 +207,9 @@ class SSH < Core
     results  
   end
   
-  def self.exec(hostname, user, commands, options = {})
-    exec!(hostname, user, commands, options)
-  end
-  
   #---
   
-  def self.download!(hostname, user, remote_path, local_path, options = {})
+  def self.download(hostname, user, remote_path, local_path, options = {})
     config = Config.ensure(options)
     
     require 'net/scp'
@@ -243,13 +239,9 @@ class SSH < Core
     end
   end
   
-  def self.download(hostname, user, remote_path, local_path, options = {})
-    download!(hostname, user, remote_path, local_path, options)
-  end
-  
   #---
   
-  def self.upload!(hostname, user, local_path, remote_path, options = {})
+  def self.upload(hostname, user, local_path, remote_path, options = {})
     config = Config.ensure(options)
     
     require 'net/scp'
@@ -281,10 +273,6 @@ class SSH < Core
         ssh.scp.upload(local_path, remote_path, config.export)
       end
     end
-  end
-  
-  def self.upload(hostname, user, remote_path, local_path, options = {})
-    upload!(hostname, user, remote_path, local_path, options)
   end
 end
 end

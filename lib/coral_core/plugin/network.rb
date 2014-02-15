@@ -30,6 +30,12 @@ class Network < Base
   
   #---
   
+  def home
+    extension_set(:home, ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] )) 
+  end
+  
+  #---
+  
   def remote(name)
     config.remote(name)
   end
@@ -59,7 +65,7 @@ class Network < Base
     groups    = node_groups
     node_info = {}
     
-    default_provider = Plugin.type_default(:node) if default_provider.nil?
+    default_provider = Manager.connection.type_default(:node) if default_provider.nil?
         
     references.each do |reference|
       info = Plugin::Node.translate_reference(reference)
@@ -81,7 +87,7 @@ class Network < Base
         if node_config.export.has_key?(provider)
           node_found = false
           
-          each_node_config!(provider) do |node_provider, node_name, node|
+          each_node_config(provider) do |node_provider, node_name, node|
             if node_name == name
               node_info[node_provider] = [] unless node_info.has_key?(node_provider)        
               node_info[node_provider] << node_name
@@ -166,52 +172,92 @@ class Network < Base
   
   #---
   
+  def add_keys(private_key = nil, public_key = nil)
+    # Get and check a password from the keyboard
+    password = ui.password('SSH')
+    dbg(password, 'password')
+    password
+  end
+  
+  #---
+  
   def add_node(provider, name, options = {})
     config = Config.ensure(options)
         
     remote_name  = config.delete(:remote, :edit)
     seed_project = config.delete(:seed, nil)
+    seed_branch  = config.delete(:branch, :master)
     
     # Set node data
-    node    = set_node(provider, name, config)
+    node        = set_node(provider, name, config)
+    hook_config = { :node => node, :remote => remote_name, :seed => seed_project, :config => config }
     success = true
     
-    unless node.local?
-      if node.create
+    yield(:preprocess, hook_config) if block_given?
+    
+    if ! node.local? && extension_check(:add_node, hook_config)
+      # Create new node / machine
+      success = node.create do |op, data|
+        data = yield("create_#{op}".to_sym, data) if block_given?
+        data  
+      end
+      
+      if success
+        # Attach SSH keys
         save_config = { :commit => true, :remote => remote_name, :push => true }
-        
-        node.delete_setting(:name) # @TODO: This should really be researched and fixed
-        
-        node[:id]           = string(node.id)
-        node[:region]       = string(node.region)
-        node[:machine_type] = string(node.machine_type)
-        node[:hostname]     = node.hostname
-        node[:public_ip]    = node.public_ip
-        node[:private_ip]   = node.private_ip
-        
-        ssh_keys = attach(:keys, node.public_ip, [ config[:private_key], config[:public_key] ])
+        ssh_keys    = attach(:keys, node.public_ip, [ config[:private_key], config[:public_key] ])
         
         if ssh_keys.length == 2 && ssh_keys[0] && ssh_keys[1]
-          node[:private_key]  = ssh_keys[0]
-          node[:public_key]   = ssh_keys[1]
+          node[:private_key] = ssh_keys[0]
+          node[:public_key]  = ssh_keys[1]
                     
           save_config[:files] = ssh_keys
         else
           ssh_keys = []
         end
+        yield(:keys, ssh_keys) if block_given?
         
-        if seed_project && remote_name
-          set_remote(:origin, seed_project) if remote_name.to_sym == :edit
-          set_remote(remote_name, seed_project)
-          save_config[:pull] = false
+        # Bootstrap new machine
+        success = node.bootstrap(home, extended_config(:bootstrap, config)) do |op, data|
+          data = yield("bootstrap_#{op}".to_sym, data) if block_given?
+          data
+        end  
+        
+        if success     
+          if seed_project && remote_name
+            # Reset project remote
+            seed_info = Plugin::Project.translate_reference(seed_project)
+          
+            if seed_info
+              seed_url    = seed_info[:url]
+              seed_branch = seed_info[:revision] if seed_info[:revision]
+            else
+              seed_url = seed_project                
+            end
+            set_remote(:origin, seed_url) if remote_name.to_sym == :edit
+            set_remote(remote_name, seed_url)
+            save_config[:pull] = false
+          end
+        
+          # Save network changes (preliminary)
+          success = node.save(extended_config(:node_save, save_config))
+        
+          if success && seed_project
+            # Seed machine with remote project reference
+            result = node.seed({
+              :net_provider      => plugin_provider,
+              :project_reference => seed_project,
+              :project_branch    => seed_branch
+            }) do |op, data|
+              yield("seed_#{op}".to_sym, data)
+            end
+            success = result.status == code.success
+          end
+        
+          # Save machine to network project
+          # Update local network project
+        
         end
-        
-        success = save(save_config)
-        
-        # 2. Bootstrap new machine
-        # 3. Seed machine with remote project reference
-        # 4. Save machine to network project
-        # 5. Update local network project
       end
     end
     
@@ -249,7 +295,7 @@ class Network < Base
   #-----------------------------------------------------------------------------
   # Utilities
 
-  def each_node_config!(provider = nil)
+  def each_node_config(provider = nil)
     node_config.export.each do |node_provider, nodes|
       if provider.nil? || provider == node_provider
         nodes.each do |name, info|

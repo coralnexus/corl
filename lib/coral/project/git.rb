@@ -386,7 +386,7 @@ class Git < Plugin::Project
   #-----------------------------------------------------------------------------
   # SSH operations
  
-  def pull!(remote = :origin, options = {})
+  def pull(remote = :origin, options = {})
     return super do |config, processed_remote|
       flags = []
       flags << :tags if config.get(:tags, true)
@@ -399,7 +399,7 @@ class Git < Plugin::Project
           :flags   => flags,
           :args    => [ processed_remote, config.get(:revision, get(:revision, :master)) ]
         }
-      }, config.get(:provider, :shell)).exec!(config) do |line|
+      }, config.get(:provider, :shell)).exec(config) do |line|
         block_given? ? yield(line) : true
       end
       
@@ -414,7 +414,7 @@ class Git < Plugin::Project
   
   #---
     
-  def push!(remote = :edit, options = {})
+  def push(remote = :edit, options = {})
     return super do |config, processed_remote|
       push_branch = config.get(:revision, '')
       
@@ -430,7 +430,7 @@ class Git < Plugin::Project
           :flags => flags,
           :args => [ processed_remote, push_branch ]
         }
-      }, config.get(:provider, :shell)).exec!(config) do |line|
+      }, config.get(:provider, :shell)).exec(config) do |line|
         block_given? ? yield(line) : true
       end
       
