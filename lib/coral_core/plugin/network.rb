@@ -307,30 +307,30 @@ class Network < Base
   
   #---
   
-  def batch(node_references, default_provider = nil, parallel = true)
+  execute_block_on_receiver :batch
+  
+  def batch(node_references, default_provider = nil, parallel = true, &code)
     success = true
     
     if has_nodes? && ! node_references.empty?
-      # Execute action on remote nodes      
+      # Execute action on selected nodes      
       nodes = nodes_by_reference(node_references, default_provider)
       
-      Coral.batch(parallel) do |batch_op, batch|
-        if batch_op == :add
-          # Add batch operations      
-          nodes.each do |node|
-            batch.add(node.name) do
-              yield(node) if block_given?  
-            end
-          end
-        else
-          # Reduce to single status
-          batch.each do |name, process_success|
-            unless process_success
-              success = false
-              break
-            end
-          end
+      if parallel
+        values = []
+        nodes.each do |node|
+          values << Celluloid::Future.new(node, &code)
         end
+        values  = values.map { |future| future.value }
+        success = false if values.include?(false)
+      else
+        nodes.each do |node|
+          proc_success = code.call(node)
+          if proc_success == false
+            success = false
+            break
+          end
+        end  
       end
     end
     success
