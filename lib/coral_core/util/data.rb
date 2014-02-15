@@ -47,13 +47,22 @@ class Data
   #---
   
   def self.exists?(data, keys, check_empty = false)
-    keys = [ keys ] unless keys.is_a?(Array)
-    keys.each do |key|
-      return false unless data.is_a?(Hash) && data.has_key?(key)
-      return false if check_empty && empty?(data[key])
-      data = data[key]
+    if keys.is_a?(String) || keys.is_a?(Symbol)
+      keys = [ keys ]
+    end    
+    key = keys.shift.to_sym
+    
+    if data.has_key?(key)
+      value = data[key]
+      
+      if keys.empty?
+        return false if check_empty && empty?(value)
+        return true
+      else
+        return exists?(data[key], keys)  
+      end
     end
-    return true
+    return false
   end
    
   #-----------------------------------------------------------------------------
