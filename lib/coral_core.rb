@@ -43,8 +43,10 @@ module Kernel
   
   def coral_require(base_dir, name)
     name = name.to_s
+    top_level_file = File.join(base_dir, "#{name}.rb")
     
-    require File.join(base_dir, "#{name}.rb")  
+    require top_level_file if File.exists?(top_level_file) 
+     
     directory = File.join(base_dir, name)
       
     if File.directory?(directory)
@@ -90,7 +92,9 @@ require 'yaml'
 require 'multi_json'
 require 'digest/sha1'
 require 'optparse'
-require 'thread'
+require 'thread' # Eventually depreciated
+require 'celluloid'
+require 'celluloid/autostart'
 require 'tmpdir'
 
 #---
@@ -156,10 +160,11 @@ coral_require(core_dir, :core)
 end
 
 # Include core systems
+coral_require(core_dir, :gems)
+coral_require(core_dir, :manager)
 coral_require(plugin_dir, :base)
 coral_require(core_dir, :plugin)
 coral_require(core_dir, :coral)
-coral_require(core_dir, :types)
 coral_require(core_dir, :facade)
 
 #-------------------------------------------------------------------------------
