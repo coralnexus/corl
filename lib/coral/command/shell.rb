@@ -128,6 +128,8 @@ class Shell < Plugin::Command
   end
   
   #---
+  
+  execute_block_on_receiver :exec
     
   def exec(options = {}, overrides = nil)
     config = Config.ensure(options)
@@ -135,8 +137,8 @@ class Shell < Plugin::Command
     logger.info("Executing command #{command}")
     
     config[:ui] = @ui
-    result = Util::Shell.exec(build(export, overrides), config) do |line|
-      block_given? ? yield(line) : true
+    result = Util::Shell.connection.exec(build(export, overrides), config) do |op, command, data|
+      block_given? ? yield(op, command, data) : true
     end
     
     logger.warn("Command #{command} failed to execute") unless result.status == Coral.code.success    
