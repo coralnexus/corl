@@ -399,8 +399,8 @@ class Git < Plugin::Project
           :flags   => flags,
           :args    => [ processed_remote, config.get(:revision, get(:revision, :master)) ]
         }
-      }, config.get(:provider, :shell)).exec(config) do |line|
-        block_given? ? yield(line) : true
+      }, config.get(:provider, :shell)).exec(config) do |op, command, data|
+        block_given? ? yield(op, command, data) : true
       end
       
       if result.status == Coral.code.success
@@ -430,8 +430,8 @@ class Git < Plugin::Project
           :flags => flags,
           :args => [ processed_remote, push_branch ]
         }
-      }, config.get(:provider, :shell)).exec(config) do |line|
-        block_given? ? yield(line) : true
+      }, config.get(:provider, :shell)).exec(config) do |op, command, data|
+        block_given? ? yield(op, command, data) : true
       end
       
       result.status == Coral.code.success
