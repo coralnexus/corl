@@ -3,6 +3,12 @@ module Coral
 module Util
 class Shell < Core
   
+  include Celluloid
+  
+  #-----------------------------------------------------------------------------
+  
+  @@supervisors = {}
+  
   #-----------------------------------------------------------------------------
   # Execution result interface
   
@@ -39,9 +45,26 @@ class Shell < Core
   end
   
   #-----------------------------------------------------------------------------
-  # Utilities
+  # Shell interface
   
-  def self.exec(command, options = {})
+  def self.connection(name = :core)
+    name = name.to_sym
+    init_shell(name) unless @@supervisors.has_key?(name)
+    @@supervisors[name]
+  end  
+  
+  def self.init_shell(name)
+    name = name.to_sym
+    
+    Shell.supervise_as name
+    @@supervisors[name] = Celluloid::Actor[name]  
+  end
+  
+  #---
+  
+  execute_block_on_receiver :exec
+    
+  def exec(command, options = {}, &code)
     config = Config.ensure(options)
     
     min   = config.get(:min, 1).to_i
@@ -71,20 +94,20 @@ class Shell < Core
           :suffix => info_suffix, 
         }, 'output') do |data|
           system_result.append_output(data)
-          block_given? ? yield(:output, command, data) : true
+          block_given? ? code.call(:output, command, data) : true
         end
-      
+        
         t2, error_new, error_orig, error_reader = pipe_exec_stream($stderr, conditions, { 
           :prefix => error_prefix, 
           :suffix => error_suffix, 
         }, 'error') do |data|
           system_result.append_errors(data)
-          block_given? ? yield(:error, command, data) : true
+          block_given? ? code.call(:error, command, data) : true
         end
       
         system_success       = system(command)
         system_result.status = $?.exitstatus
-      
+        
       ensure
         output_success = close_exec_pipe(t1, $stdout, output_orig, output_new, 'output')
         error_success  = close_exec_pipe(t2, $stderr, error_orig, error_new, 'error')
@@ -94,21 +117,21 @@ class Shell < Core
                   
       min -= 1
       break if success && min <= 0 && conditions.empty?
-    end    
-    return system_result
+    end
+    system_result
   end
   
   #---
   
-  def self.pipe_exec_stream(output, conditions, options, label)
+  def pipe_exec_stream(output, conditions, options, label, &code)
     original     = output.dup
     read, write  = IO.pipe
     
     match_prefix = ( options[:match_prefix] ? options[:match_prefix] : 'EXIT' )
-            
-    thread = process_stream(read, original, options, label) do |line|
-      check_conditions(line, conditions, match_prefix) do
-        block_given? ? yield(line) : true
+    
+    thread = process_stream(read, original, options, label) do |data|
+      check_conditions(data, conditions, match_prefix) do
+        block_given? ? code.call(data) : true
       end
     end
     
@@ -117,10 +140,11 @@ class Shell < Core
     output.reopen(write)    
     return thread, write, original, read
   end
+  protected :pipe_exec_stream
   
   #---
   
-  def self.close_exec_pipe(thread, output, original, write, label)
+  def close_exec_pipe(thread, output, original, write, label)
     output.reopen(original)
      
     write.close
@@ -129,15 +153,16 @@ class Shell < Core
     original.close
     return success
   end
+  protected :close_exec_pipe
   
   #---
   
-  def self.check_conditions(line, conditions, match_prefix = '')
+  def check_conditions(data, conditions, match_prefix = '', &code)
     prefix = ''
     
     unless ! conditions || conditions.empty?
       conditions.each do |key, event|
-        if event.check(line)
+        if event.check(data)
           prefix = match_prefix
           conditions.delete(key)
         end
@@ -146,7 +171,7 @@ class Shell < Core
     
     result = true
     if block_given?
-      result = yield
+      result = code.call
       
       unless prefix.empty?
         case result
@@ -159,10 +184,11 @@ class Shell < Core
     end
     return result
   end
+  protected :check_conditions
   
   #---
   
-  def self.process_stream(input, output, options, label)
+  def process_stream(input, output, options, label, &code)
     return Thread.new do
       success        = true      
       default_prefix = ( options[:prefix] ? options[:prefix] : '' )
@@ -181,7 +207,7 @@ class Shell < Core
               
               unless line.empty?
                 if block_given?
-                  result = yield(line)
+                  result = code.call(line)
                                           
                   if result && result.is_a?(Hash)
                     prefix = result[:prefix]
@@ -207,6 +233,7 @@ class Shell < Core
       success
     end
   end
+  protected :process_stream
 end
 end
 end
