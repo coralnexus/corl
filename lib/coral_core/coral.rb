@@ -21,22 +21,6 @@ module Coral
     return ENV['CORAL_LOG'].downcase.to_sym if ENV['CORAL_LOG']
     :none
   end
-   
-  #-----------------------------------------------------------------------------
-
-  @@config_file = 'coral.json'
-  
-  #---
-    
-  def self.config_file=file_name
-    @@config_file = file_name
-  end
-  
-  #---
-  
-  def self.config_file
-    @@config_file
-  end
   
   #-----------------------------------------------------------------------------
   
@@ -148,7 +132,7 @@ module Coral
     data.each do |options|
       if plugin = plugin(type, options[:provider], options)
         if build_hash
-          group[plugin.name] = plugin
+          group[plugin.plugin_name] = plugin
         else
           group << plugin
         end
@@ -217,34 +201,6 @@ module Coral
     end
   end
   
-  #---
-  
-  @@batch_lock = Mutex.new
-  
-  def self.batch(parallel = true)
-    result = nil
-    
-    @@batch_lock.synchronize do
-      begin
-        logger.debug("Running contained process at #{Time.now}")
-        
-        Util::Batch.new(parallel) do |batch|
-          yield(:add, batch)          
-          result = yield(:reduce, batch.run)
-        end        
-        
-      rescue Exception => error
-        logger.error("Coral batch experienced an error:")
-        logger.error(error.inspect)
-        logger.error(error.message)
-        logger.error(Util::Data.to_yaml(error.backtrace))
-  
-        ui.error(error.message) if error.message
-      end      
-    end    
-    result
-  end
-    
   #-----------------------------------------------------------------------------
   # Utilities
   
