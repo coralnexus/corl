@@ -16,7 +16,7 @@ class Puppetnode < Plugin::Provisioner
     end
     Puppet.initialize_settings
     
-    self.name = :default if name.to_sym == :puppetnode
+    myself.plugin_name = :default if plugin_name.to_sym == :puppetnode
        
     @env      = Puppet::Node::Environment.new
     @compiler = Puppet::Parser::Compiler.new(node)
@@ -216,7 +216,7 @@ class Puppetnode < Plugin::Provisioner
   
   def clear
     init_catalog
-    self
+    myself
   end
   
   #---
@@ -316,7 +316,6 @@ class Puppetnode < Plugin::Provisioner
   
   def import(files, base_dir = nil)
     resource_types.loader.import(file, base_dir + '/')
-    self  
   end
   
   #---
@@ -339,7 +338,7 @@ class Puppetnode < Plugin::Provisioner
       end  
     end
       
-    klasses = compiler.evaluate_classes(class_data, self, false)
+    klasses = compiler.evaluate_classes(class_data, myself, false)
     missing = class_data.keys.find_all do |klass|
       ! klasses.include?(klass)
     end
