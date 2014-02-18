@@ -2,6 +2,8 @@
 module Coral
 module Plugin
 class Node < Base
+  
+  include Celluloid
  
   #-----------------------------------------------------------------------------
   # Node plugin interface
@@ -40,7 +42,7 @@ class Node < Base
   
   def localize
     @local_context     = true
-    self.local_machine = create_machine(:local_machine, :physical)
+    myself.local_machine = create_machine(:local_machine, :physical)
   end
        
   #-----------------------------------------------------------------------------
@@ -64,27 +66,25 @@ class Node < Base
   end
  
   def network=network
-    self.plugin_parent = network
+    myself.plugin_parent = network
   end
   
   #---
   
   def setting(property, default = nil, format = false)
-    return network.node_setting(plugin_provider, name, property, default, format)
+    return network.node_setting(plugin_provider, plugin_name, property, default, format)
   end
   
   def search(property, default = nil, format = false)
-    return network.search_node(plugin_provider, name, property, default, format)
+    return network.search_node(plugin_provider, plugin_name, property, default, format)
   end
   
   def set_setting(property, value = nil)
-    network.set_node_setting(plugin_provider, name, property, value)
-    return self
+    network.set_node_setting(plugin_provider, plugin_name, property, value)
   end
   
   def delete_setting(property)
-    network.delete_node_setting(plugin_provider, name, property)
-    return self
+    network.delete_node_setting(plugin_provider, plugin_name, property)
   end
   
   #---
@@ -128,74 +128,74 @@ class Node < Base
   #---
   
   def id(reset = false)
-    self[:id] = machine.name if reset || self[:id].nil?
-    self[:id]
+    myself[:id] = machine.plugin_name if reset || myself[:id].nil?
+    myself[:id]
   end
  
   #---
   
   def public_ip(reset = false)
-    self[:public_ip] = machine.public_ip if reset || self[:public_ip].nil?
-    self[:public_ip]
+    myself[:public_ip] = machine.public_ip if reset || myself[:public_ip].nil?
+    myself[:public_ip]
   end
   
   def private_ip(reset = false)
-    self[:private_ip] = machine.private_ip if reset || self[:private_ip].nil?
-    self[:private_ip]
+    myself[:private_ip] = machine.private_ip if reset || myself[:private_ip].nil?
+    myself[:private_ip]
   end
   
   #---
   
   def hostname(reset = false)
-    self[:hostname] = machine.hostname if reset || self[:hostname].nil?
-    self[:hostname]
+    myself[:hostname] = machine.hostname if reset || myself[:hostname].nil?
+    myself[:hostname]
   end
   
   #---
   
   def state(reset = false)
-    self[:state] = machine.state if reset || self[:state].nil?
-    self[:state]
+    myself[:state] = machine.state if reset || myself[:state].nil?
+    myself[:state]
   end
   
   #---
   
   def user=user
-    self[:user] = user
+    myself[:user] = user
   end
   
   def user
-    self[:user]
+    myself[:user]
   end
   
   #---
   
   def ssh_port=ssh_port
-    self[:ssh_port] = ssh_port
+    myself[:ssh_port] = ssh_port
   end
   
   def ssh_port
-    self[:ssh_port] = 22 if self[:ssh_port].nil?
-    self[:ssh_port]
+    myself[:ssh_port] = 22 if myself[:ssh_port].nil?
+    myself[:ssh_port]
   end
   
   #---
   
   def home(env_var = 'HOME', reset = false)
-    if reset || self[:user_home].nil?
-      self[:user_home] = cli_capture(:echo, '$' + env_var.to_s.gsub('$', '')) if machine
+    if reset || myself[:user_home].nil?
+      myself[:user_home] = cli_capture(:echo, '$' + env_var.to_s.gsub('$', '')) if machine
     end
-    self[:user_home]
+    myself[:user_home]
   end
   
   #---
   
   def private_key=private_key
-    self[:private_key] = private_key
+    myself[:private_key] = private_key
   end
   
   def private_key
-    config_key = self[:private_key]
+    config_key = myself[:private_key]
     return File.expand_path(config_key) if config_key
     nil
   end
@@ -203,11 +203,11 @@ class Node < Base
   #---
   
   def public_key=public_key
-    self[:public_key] = public_key
+    myself[:public_key] = public_key
   end
   
   def public_key
-    config_key = self[:private_key]
+    config_key = myself[:private_key]
     return File.expand_path(config_key) if config_key
   end
   
@@ -218,18 +218,18 @@ class Node < Base
   end
     
   def machine_type=machine_type
-    self[:machine_type] = machine_type
+    myself[:machine_type] = machine_type
   end
   
   def machine_type(reset = false)
-    self[:machine_type] = machine.machine_type if reset || self[:machine_type].nil?
-    machine_type     = self[:machine_type]
+    myself[:machine_type] = machine.machine_type if reset || myself[:machine_type].nil?
+    machine_type        = myself[:machine_type]
     
     if machine_type.nil? && machine
       if types = machine_types
         unless types.empty?
           machine_type      = machine_type_id(types.first)
-          self.machine_type = machine_type
+          myself.machine_type = machine_type
         end
       end
     end
@@ -279,20 +279,20 @@ class Node < Base
   #---
   
   def image=image
-    self[:image] = image
+    myself[:image] = image
   end
   
   def image(reset = false)
-    self[:image] = machine.image if reset || self[:image].nil?
-    self[:image]
+    myself[:image] = machine.image if reset || myself[:image].nil?
+    myself[:image]
   end
   
   #-----------------------------------------------------------------------------
   # Settings groups
   
   def machine_config
-    name   = self[:id]
-    name   = self[:hostname] if name.nil?
+    name   = myself[:id]
+    name   = myself[:hostname] if name.nil?
     config = Config.new({ :name => name })
     
     yield(config) if block_given?
@@ -303,7 +303,7 @@ class Node < Base
   # Machine operations
   
   def create_machine(name, provider, options = {})
-    Coral.plugin_load(:machine, provider, extended_config(name, options).import({ :meta => { :parent => self }}))
+    Coral.plugin_load(:machine, provider, extended_config(name, options).import({ :meta => { :parent => myself }}))
   end
   
   #---
@@ -315,7 +315,7 @@ class Node < Base
       config = Config.ensure(options)
       
       if extension_check(:create, { :config => config })
-        logger.info("Creating node: #{name}")
+        logger.info("Creating node: #{plugin_name}")
       
         yield(:config, config) if block_given?      
         success = machine.create(config.export)
@@ -330,7 +330,7 @@ class Node < Base
         end
       end
     else
-      logger.warn("Node #{name} does not have an attached machine so cannot be created")
+      logger.warn("Node #{plugin_name} does not have an attached machine so cannot be created")
     end
     success
   end
@@ -345,17 +345,20 @@ class Node < Base
       hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config })
       
       if extension_check(:download, hook_config)
-        logger.info("Downloading from #{name}")
+        logger.info("Downloading from #{plugin_name}")
       
+        render("Starting download of #{remote_path} to #{local_path}") 
         yield(:config, hook_config) if block_given?
         
         active_machine = local? ? local_machine : machine
         
         success = active_machine.download(remote_path, local_path, config.export) do |name, received, total|
+          render("#{name}: Sent #{received} of #{total}")
           yield(:progress, { :name => name, :received => received, :total => total })
         end
         
         if success && block_given?
+          render("Successfully finished download of #{remote_path} to #{local_path}")
           process_success = yield(:process, hook_config)
           success         = process_success if process_success == false        
         end
@@ -365,7 +368,7 @@ class Node < Base
         end
       end
     else
-      logger.warn("Node #{name} does not have an attached machine or is not running so cannot download")
+      logger.warn("Node #{plugin_name} does not have an attached machine or is not running so cannot download")
     end
     success
   end
@@ -380,17 +383,20 @@ class Node < Base
       hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config })
       
       if extension_check(:upload, hook_config)
-        logger.info("Uploading to #{name}")
+        logger.info("Uploading to #{plugin_name}")
       
+        render("Starting upload of #{local_path} to #{remote_path}") 
         yield(:config, hook_config) if block_given?
         
         active_machine = local? ? local_machine : machine
         
         success = active_machine.upload(local_path, remote_path, config.export) do |name, sent, total|
+          render("#{name}: Sent #{sent} of #{total}")
           yield(:progress, { :name => name, :sent => sent, :total => total })  
         end
         
         if success && block_given?
+          render("Successfully finished upload of #{local_path} to #{remote_path}")
           process_success = yield(:process, hook_config)
           success         = process_success if process_success == false        
         end
@@ -400,7 +406,7 @@ class Node < Base
         end
       end
     else
-      logger.warn("Node #{name} does not have an attached machine or is not running so cannot upload")
+      logger.warn("Node #{plugin_name} does not have an attached machine or is not running so cannot upload")
     end
     success
   end
@@ -447,14 +453,20 @@ class Node < Base
       config = Config.ensure(options)
       
       if extension_check(:exec, { :config => config })
-        logger.info("Executing node: #{name}")
-      
+        logger.info("Executing node: #{plugin_name}")
+              
         yield(:config, config) if block_given?
         
         active_machine = local? ? local_machine : machine
         
         if commands = config.get(:commands, nil)
+          render("Starting command execution: #{commands.join('; ')}")
           results = active_machine.exec(commands, config.export) do |type, command, data|
+            if type == :error
+              alert(data)
+            else
+              render(data)
+            end
             yield(:progress, { :type => type, :command => command, :data => data })    
           end
         end
@@ -464,12 +476,13 @@ class Node < Base
           success = false if result.status != Coral.code.success  
         end
         if success
+          render("Successfully finished execution")
           yield(:process, config) if block_given?
           extension(:exec_success, { :config => config, :results => results }) 
         end
       end
     else
-      logger.warn("Node #{name} does not have an attached machine or is not running so cannot execute commands")
+      logger.warn("Node #{plugin_name} does not have an attached machine or is not running so cannot execute commands")
     end
     results 
   end
@@ -519,7 +532,7 @@ class Node < Base
    
   def bootstrap(local_path, options = {})
     config      = Config.ensure(options)
-    self.status = code.unknown_status
+    myself.status = code.unknown_status
     
     bootstrap_name = 'bootstrap'    
     bootstrap_path = config.get(:bootstrap_path, File.join(Gems.core.full_gem_path, bootstrap_name))
@@ -537,18 +550,19 @@ class Node < Base
     
     if File.directory?(local_path)      
       if user_home || user_home = home(config.get(:home_env_var, 'HOME'), config.get(:force, false))
-        self.status = code.success
+        myself.status = code.success
         
         # Transmit authorisation / credential files
         package_files = [ '.fog', '.netrc', '.google-privatekey.p12' ]
         auth_files.each do |file|
           package_files = file.gsub(local_path + '/', '')
         end
-        send_success = send_files(local_path, user_home, package_files, '0600') do |op, results|
-          yield("send_#{op}".to_sym, results) if block_given?
+        send_success = send_files(local_path, user_home, package_files, '0600') do |op, data|
+          yield("send_#{op}".to_sym, data) if block_given?
+          data
         end
         unless send_success
-          self.status = code.auth_upload_failure
+          myself.status = code.auth_upload_failure
         end
     
         # Send bootstrap package
@@ -556,30 +570,32 @@ class Node < Base
           remote_bootstrap_path = File.join(user_home, bootstrap_name)
           
           cli.rm('-Rf', remote_bootstrap_path)
-          send_success = send_files(bootstrap_path, remote_bootstrap_path, nil, '0700') do |op, results|
-            yield("send_#{op}".to_sym, results) if block_given?
+          send_success = send_files(bootstrap_path, remote_bootstrap_path, nil, '0700') do |op, data|
+            yield("send_#{op}".to_sym, data) if block_given?
+            data
           end
           unless send_success
-            self.status = code.bootstrap_upload_failure
+            myself.status = code.bootstrap_upload_failure
           end
           
           # Execute bootstrap process
           if status == code.success
             remote_script = File.join(remote_bootstrap_path, bootstrap_init)                  
-            result = command(remote_script) do |op, results|
-              yield("exec_#{op}".to_sym, results) if block_given?  
+            result = command(remote_script) do |op, data|
+              yield("exec_#{op}".to_sym, data) if block_given?
+              data
             end
             
             if result.status != code.success
-              self.status = code.bootstrap_exec_failure  
+              myself.status = code.bootstrap_exec_failure  
             end
           end
         end
       else
-        self.status = code.home_path_lookup_failure            
+        myself.status = code.home_path_lookup_failure            
       end
     else
-      self.status = code.local_path_not_found
+      myself.status = code.local_path_not_found
     end
     status == code.success
   end
@@ -604,8 +620,8 @@ class Node < Base
     network.save(config.import({ 
       :commit      => true,
       :allow_empty => true,
-      :message     => config.get(:message, "Saving #{plugin_provider} node #{name}"),
-      :remote      => config.get(:remote, :edit)
+      :message     => config.get(:message, "Saving #{plugin_provider} node #{plugin_name}"),
+      :remote      => nil #config.get(:remote, :edit)
     }))    
   end
   
@@ -618,7 +634,7 @@ class Node < Base
       config = Config.ensure(options)
       
       if extension_check(:start, { :config => config })
-        logger.info("Starting node: #{name}")
+        logger.info("Starting node: #{plugin_name}")
       
         yield(:config, config) if block_given?      
         success = machine.start(config.export)
@@ -633,7 +649,7 @@ class Node < Base
         end
       end
     else
-      logger.warn("Node #{name} does not have an attached machine so cannot be started")
+      logger.warn("Node #{plugin_name} does not have an attached machine so cannot be started")
     end
     success
   end
@@ -647,7 +663,7 @@ class Node < Base
       config = Config.ensure(options)
       
       if extension_check(:reload, { :config => config })
-        logger.info("Reloading node: #{name}")
+        logger.info("Reloading node: #{plugin_name}")
       
         yield(:config, config) if block_given?      
         success = machine.reload(config.export)
@@ -662,7 +678,7 @@ class Node < Base
         end
       end
     else
-      logger.warn("Node #{name} does not have an attached machine or is not created so cannot be reloaded")
+      logger.warn("Node #{plugin_name} does not have an attached machine or is not created so cannot be reloaded")
     end
     success
   end
@@ -676,7 +692,7 @@ class Node < Base
       config = Config.ensure(options)
       
       if extension_check(:create_image, { :config => config })
-        logger.info("Executing node: #{name}")
+        logger.info("Executing node: #{plugin_name}")
       
         yield(:config, config) if block_given?      
         success = machine.create_image(config.export)
@@ -691,7 +707,7 @@ class Node < Base
         end
       end
     else
-      logger.warn("Node #{name} does not have an attached machine or is not running so cannot create an image")
+      logger.warn("Node #{plugin_name} does not have an attached machine or is not running so cannot create an image")
     end
     success   
   end
@@ -705,7 +721,7 @@ class Node < Base
       config = Config.ensure(options)
       
       if extension_check(:stop, { :config => config })
-        logger.info("Stopping node: #{name}")
+        logger.info("Stopping node: #{plugin_name}")
       
         yield(:config, config) if block_given?      
         success = machine.stop(config.export)
@@ -720,7 +736,7 @@ class Node < Base
         end
       end
     else
-      logger.warn("Node #{name} does not have an attached machine or is not running so cannot be stopped")
+      logger.warn("Node #{plugin_name} does not have an attached machine or is not running so cannot be stopped")
     end
     success
   end
@@ -740,7 +756,7 @@ class Node < Base
       else
         choice = nil
         begin
-          choice = ui.ask("Are you sure you want to permanently destroy (Y|N): #{name}?")
+          choice = ui.ask("Are you sure you want to permanently destroy (Y|N): #{plugin_name}?")
           run    = choice.upcase == "Y"
           
         rescue Errors::UIExpectsTTY
@@ -750,7 +766,7 @@ class Node < Base
 
       if run
         if extension_check(:destroy, { :config => config })
-          logger.info("Destroying node: #{name}")
+          logger.info("Destroying node: #{plugin_name}")
       
           yield(:config, config) if block_given?      
           success = machine.destroy(config.export)
@@ -765,10 +781,10 @@ class Node < Base
           end
         end
       else
-        logger.warn("Node #{name} does not have an attached machine or is not created so cannot be destroyed")
+        logger.warn("Node #{plugin_name} does not have an attached machine or is not created so cannot be destroyed")
       end
     else
-      logger.info("Node #{name} not destroyed due to user cancellation")  
+      logger.info("Node #{plugin_name} not destroyed due to user cancellation")  
     end
     success    
   end
@@ -828,7 +844,7 @@ class Node < Base
   #---
   
   def translate_reference(reference)
-    self.class.translate_reference(reference)
+    myself.class.translate_reference(reference)
   end
   
   #-----------------------------------------------------------------------------
