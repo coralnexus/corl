@@ -103,49 +103,25 @@ class Data
   #---
   
   def self.parse_json(json_text)
-    output = ''
-    begin
-      output = MultiJson.load(json_text)
-      
-    rescue Exception
-    end
-    return output
+    return MultiJson.load(json_text)
   end
     
   #---
   
   def self.to_json(data, pretty = true)
-    output = ''
-    begin
-      output = MultiJson.dump(data, :pretty => pretty)
-      
-    rescue Exception
-    end
-    return output
+    return MultiJson.dump(data, :pretty => pretty)
   end
   
   #---
   
   def self.parse_yaml(yaml_text)
-    output = ''
-    begin
-      output = YAML.load(yaml_text)
-      
-    rescue Exception
-    end
-    return output  
+    return YAML.load(yaml_text)
   end
   
   #---
   
   def self.to_yaml(data)
-    output = ''
-    begin
-      output = YAML.dump(data)
-      
-    rescue Exception
-    end
-    return output
+    return YAML.dump(data)
   end
   
   #---
@@ -352,6 +328,27 @@ class Data
     end
     #dbg(value, 'interpolate -> result')
     return value  
+  end
+  
+  #---
+  
+  def self.rm_keys(data, keys)
+    keys = [ keys ] unless keys.is_a?(Array)
+    keys.each do |key|
+      data.delete(key)
+    end
+    data
+  end
+  
+  #---
+  
+  def self.subset(data, keys)
+    keys     = [ keys ] unless keys.is_a?(Array)
+    new_data = {} 
+    keys.each do |key|
+      new_data[key] = data[key] if data.has_key?(key)
+    end
+    new_data 
   end
   
   #-----------------------------------------------------------------------------
