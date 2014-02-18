@@ -75,7 +75,7 @@ module ObjectInterface
       
       symbol_map(data).each do |name, options|
         if name != :settings
-          options[:object_container] = self
+          options[:object_container] = myself
           
           logger.debug("Initializing object: #{name}")
           
@@ -98,14 +98,13 @@ module ObjectInterface
       logger.debug("Setting #{_plural}")
     
       data.each do |name, options|
-        options[:object_container] = self
+        options[:object_container] = myself
         
         logger.debug("Setting #{_type} #{name}: #{options.inspect}")
         
         obj = _ensure_proc.call(name, options)
         _set([ _plural, name ], obj)
       end
-      self
     end
 
     #---
@@ -117,7 +116,7 @@ module ObjectInterface
         options = get([ _plural, name ], nil)
          
         unless options.nil?
-          options[:object_container] = self
+          options[:object_container] = myself
           
           logger.debug("Initializing object: #{name}")
           
@@ -137,13 +136,12 @@ module ObjectInterface
       
       set([ _plural, name ], options)
     
-      options[:object_container] = self
+      options[:object_container] = myself
       
       logger.debug("Setting #{_type} #{_name}: #{options.inspect}")
       
       obj = _ensure_proc.call(name, options) 
       _set([ _plural, name ], obj)
-      self
     end
   
     #---
@@ -153,7 +151,6 @@ module ObjectInterface
     define_method "set_#{_type}_setting" do |name, property, value = nil|
       logger.debug("Setting #{name} property #{property} to #{value.inspect}")
       set([ _plural, name, property ], value)
-      self
     end
     
     #---
@@ -169,7 +166,6 @@ module ObjectInterface
       _delete([ _plural, name ])
     
       _delete_proc.call(obj) if _delete_proc && ! obj.nil?
-      self
     end
   
     #---
@@ -180,7 +176,6 @@ module ObjectInterface
       logger.debug("Deleting #{name} property: #{property}")
       
       delete([ _plural, name, property ])
-      self
     end
   
     #---
@@ -193,7 +188,6 @@ module ObjectInterface
         
         send("delete_#{_type}", name)
       end
-      self
     end    
         
     #---------------------------------------------------------------------------
@@ -347,7 +341,6 @@ module ObjectInterface
           clear_objects  
           config.load(options)
         end
-        self  
       end
     end
     
@@ -359,7 +352,6 @@ module ObjectInterface
       define_method :save do |options = {}|
         logger.debug("Saving configuration if possible") 
         config.save(options) if config.respond_to?(:save)
-        self  
       end
     end    
   end
