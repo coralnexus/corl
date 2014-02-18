@@ -44,7 +44,7 @@ class Project < Base
     set_directory(Util::Disk.filename(get(:directory, Dir.pwd)))
     set_url(get(:url)) if get(:url, false)
     
-    self.name = path if self.name == plugin_provider
+    myself.plugin_name = path if myself.plugin_name == plugin_provider
     
     if keys = delete(:keys, nil)
       set(:private_key, keys[:private_key])
@@ -146,7 +146,6 @@ class Project < Base
       set(:url, url)
       set_remote(:origin, url)
     end
-    self
   end
 
   #---
@@ -165,7 +164,6 @@ class Project < Base
       set(:edit, url)
       set_remote(:edit, url)
     end
-    self
   end
  
   #---
@@ -196,11 +194,10 @@ class Project < Base
       logger.info("Setting project #{name} directory to #{current_directory}")
       
       @@projects.delete(get(:directory)) if get(:directory)
-      @@projects[current_directory] = self
+      @@projects[current_directory] = myself
     
       set(:directory, current_directory)
-    end       
-    self  
+    end
   end
   protected :set_directory
   
@@ -211,8 +208,7 @@ class Project < Base
         
     yield if block_given?
     
-    init_project           
-    self
+    init_project
   end
   
   #---
@@ -254,7 +250,6 @@ class Project < Base
         yield(config, value) if block_given?
       end
     end
-    self
   end
   
   #---
@@ -269,7 +264,6 @@ class Project < Base
         yield(config) if block_given?
       end
     end
-    self
   end
   
   #---
@@ -303,7 +297,6 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence can not be authorized")
     end
-    self  
   end
   protected :init_auth
   
@@ -329,7 +322,7 @@ class Project < Base
         if project_directory?(search_dir)
           logger.debug("Directory #{search_dir} is a valid parent for this #{plugin_provider} project")
           
-          project = self.class.open(search_dir, plugin_provider)
+          project = myself.class.open(search_dir, plugin_provider)
           
           extension(:init_parent, { :parent => project })
           
@@ -340,7 +333,6 @@ class Project < Base
         last_dir = search_dir        
       end      
     end
-    self       
   end
   protected :init_parent
 
@@ -366,7 +358,6 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and has no revision")
     end
-    self
   end
   protected :load_revision
   
@@ -392,7 +383,6 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not checkout a revision")
     end
-    self 
   end
   
   #---
@@ -463,7 +453,7 @@ class Project < Base
           if add_project
             logger.debug("Directory #{project_path} is a valid sub project for this #{plugin_provider} project")
             
-            project = self.class.open(project_path, plugin_provider)
+            project = myself.class.open(project_path, plugin_provider)
             
             extension(:load_project, { :project => project })
             subprojects[path] = project
@@ -478,7 +468,6 @@ class Project < Base
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects")    
     end
     set(:subprojects, subprojects)
-    self  
   end
   protected :load_subprojects
   
@@ -566,7 +555,6 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects") 
     end
-    self
   end
   protected :update_subprojects
   
@@ -587,7 +575,6 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have sub projects") 
     end
-    self
   end 
          
   #-----------------------------------------------------------------------------
@@ -609,7 +596,6 @@ class Project < Base
     else
       logger.warn("Project #{name} does not meet the criteria for persistence and can not have remotes")
     end
-    self 
   end
   protected :init_remotes
  
@@ -641,7 +627,6 @@ class Project < Base
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
-    self
   end
   
   #---
@@ -659,7 +644,6 @@ class Project < Base
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
-    self  
   end
   
   #---
@@ -689,7 +673,6 @@ class Project < Base
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
-    self
   end
   
   #---
@@ -705,7 +688,6 @@ class Project < Base
     else
       logger.warn("Project #{self.name} does not meet the criteria for persistence and can not have remotes") 
     end
-    self  
   end
   
   #---
@@ -887,7 +869,7 @@ class Project < Base
   #---
   
   def translate_reference(reference, editable = false)
-    self.class.translate_reference(reference, editable)
+    myself.class.translate_reference(reference, editable)
   end
   
   #---
