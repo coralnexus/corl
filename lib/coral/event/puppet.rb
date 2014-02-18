@@ -11,9 +11,9 @@ class Puppet < Plugin::Event
     
     if get(:string)
       items          = string(delete(:string)).split(':')
-      self.element   = items[0]
-      self.operation = items[1]
-      self.message   = items[2]
+      myself.element   = items[0]
+      myself.operation = items[1]
+      myself.message   = items[2]
     end
   end
     

@@ -10,7 +10,7 @@ class Regex < Plugin::Event
     super
     
     if get(:string)
-      self.pattern = delete(:string)
+      myself.pattern = delete(:string)
     end
   end
       
