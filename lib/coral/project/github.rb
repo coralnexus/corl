@@ -12,11 +12,11 @@ class Github < Git
  
   def normalize    
     if reference = delete(:reference, nil)
-      self.name = reference
+      myself.name = reference
     else
       if url = get(:url, nil)
-        self.name = url
-        set(:url, self.class.expand_url(url, get(:ssh, false)))
+        myself.name = url
+        set(:url, myself.class.expand_url(url, get(:ssh, false)))
       end  
     end    
     super

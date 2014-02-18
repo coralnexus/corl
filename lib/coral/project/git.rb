@@ -31,7 +31,7 @@ class Git < Plugin::Project
         end
       end
     end
-    return self
+    return myself
   end
   protected :ensure_git
        
@@ -124,7 +124,7 @@ class Git < Plugin::Project
     super do
       ensure_git(true)
     end
-    return self
+    return myself
   end
   
   #---
