@@ -21,7 +21,7 @@ class Action < Base
     #---
     
     attr_reader :provider, :name, :type
-    attr_accessor :default, :locale
+    attr_accessor :default, :locale, :validator
     
     #---
     
@@ -86,7 +86,7 @@ class Action < Base
       quiet   = true
       quiet   = method_args[1] if method_args.length > 1
       
-      self.class.exec(method, options, quiet)
+      myself.class.exec(method, options, quiet)
     end
     
     set(:config, Config.new)
@@ -107,12 +107,6 @@ class Action < Base
   #-----------------------------------------------------------------------------
   # Checks
   
-  def quiet?
-    get(:quiet, false)
-  end
-  
-  #---
-  
   def processed?
     get(:processed, false)
   end
@@ -122,6 +116,12 @@ class Action < Base
   
   def config
     get(:config)
+  end
+  
+  #---
+  
+  def config_subset(names)
+    Util::Data.subset(config, names)
   end
   
   #---
@@ -145,6 +145,13 @@ class Action < Base
     
     config[name]   = option
     settings[name] = option.default if settings[name].nil?
+  end
+  
+  #---
+  
+  def remove(names)
+    Util::Data.rm_keys(config, names)
+    Util::Data.rm_keys(settings, names)
   end
   
   #---
@@ -177,7 +184,8 @@ class Action < Base
         usage << "<#{arg}> "  
       end      
     end
-    self.usage = usage
+    myself.usage = usage
+    myself
   end
   
   #---
@@ -235,7 +243,6 @@ class Action < Base
         end
       end
     end
-    self  
   end
   
   #---
@@ -301,6 +308,9 @@ class Action < Base
         end
       end
     end
+    if ignore.include?(:nodes)
+      settings[:nodes] = []
+    end
     success
   end
   
@@ -309,8 +319,8 @@ class Action < Base
   def execute
     logger.info("Executing action #{plugin_provider}")
     
-    self.status = code.success
-    self.result = nil
+    myself.status = code.success
+    myself.result = nil
     
     if processed?      
       node_exec do |node, network|
@@ -318,20 +328,20 @@ class Action < Base
         
         begin
           yield(node, network) if block_given? && extension_check(:exec_init, hook_config)
-          self.status = extension_set(:exec_exit, status, hook_config)
+          myself.status = extension_set(:exec_exit, status, hook_config)
         ensure
           cleanup
         end
       end
     else
       if @parser.options[:help]
-        self.status = code.help_wanted
+        myself.status = code.help_wanted
       else
-        self.status = code.action_unprocessed
+        myself.status = code.action_unprocessed
       end
     end
     
-    self.status = code.unknown_status unless status.is_a?(Integer)
+    myself.status = code.unknown_status unless status.is_a?(Integer)
     
     if processed? && status != code.success
       logger.warn("Execution failed for #{plugin_provider} with status #{status}: #{export.inspect}")
@@ -361,50 +371,8 @@ class Action < Base
   #-----------------------------------------------------------------------------
   # Output
   
-  def render(display, options = {})
-    ui.info(display.strip, options) unless quiet? || display.strip.empty?
-  end
-  
-  #---
-        
-  def info(name, options = {})
-    ui.info(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?
-  end
-  
-  #---
-   
-  def alert(display, options = {})
-    ui.warn(display.strip, options) unless quiet? || display.strip.empty?
-  end
-        
-  #---
-       
-  def warn(name, options = {})
-    ui.warn(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?  
-  end
-        
-  #---
-        
-  def error(name, options = {})
-    ui.error(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?  
-  end
-        
-  #---
-        
-  def success(name, options = {})
-    ui.success(I18n.t(name, Util::Data.merge([ settings.export, options ], true))) unless quiet?  
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Utilities
-  
-  def admin_exec
-    if Coral.admin?
-      yield if block_given?
-    else
-      ui.warn("The #{plugin_provider} action must be run as a machine administrator")
-      self.status = code.access_denied    
-    end
+  def render_options
+    settings
   end
 end
 end
