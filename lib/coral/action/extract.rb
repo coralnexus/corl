@@ -40,7 +40,7 @@ class Extract < Plugin::Action
   def execute
     super do |node, network|
       unless @package.extract(settings[:path])
-        self.status = code.extract_failure
+        myself.status = code.extract_failure
       end
     end
   end
