@@ -4,31 +4,25 @@ module Plugin
 class Base < Core
   
   include Mixin::Lookup
-  include Celluloid
-  
+     
   #---
   
   # All Plugin classes should directly or indirectly extend Base
   
   def initialize(type, provider, options)
     config = Util::Data.clean(Config.ensure(options))
-    name   = Util::Data.ensure_value(config.delete(:name), provider)
+    name   = Util::Data.ensure_value(config.delete(:plugin_name), config.delete(:name, provider))
+    @quiet = config.delete(:quiet, false)
        
     set_meta(config.delete(:meta, Config.new))
     
     # No logging statements aove this line!!
     super(config.import({ :logger => "#{plugin_type}->#{plugin_provider}" }))
-    self.name = name
+    myself.plugin_name = name
     
-    logger.debug("Set #{type} plugin #{name} meta data: #{meta.inspect}")    
-    logger.debug("Normalizing #{type} plugin #{name}")
+    logger.debug("Set #{plugin_type} plugin #{plugin_name} meta data: #{meta.inspect}")    
+    logger.debug("Normalizing #{plugin_type} plugin #{plugin_name}")
     normalize
-  end
-  
-  #---
-  
-  def initialized?(options = {})
-    return true  
   end
   
   #---
@@ -40,20 +34,35 @@ class Base < Core
   #---
   
   def inspect
-    "#<#{self.class}: #{name}>"
+    "#<#{self.class}: #{plugin_name}>"
   end
   
   #-----------------------------------------------------------------------------
-  # Property accessor / modifiers
+  # Checks
   
-  def name
-    return @name
+  def initialized?(options = {})
+    return true  
   end
   
   #---
   
-  def name=name
-    @name = string(name)
+  def quiet?
+    @quiet
+  end
+   
+  #-----------------------------------------------------------------------------
+  # Property accessor / modifiers
+  
+  def myself
+    return current_actor if respond_to?(:current_actor) # Celluloid enhanced plugin
+    self
+  end
+  alias_method :me, :myself
+  
+  #---
+  
+  def quiet=quiet
+    @quiet = quiet
   end
   
   #---
@@ -67,6 +76,18 @@ class Base < Core
   def set_meta(meta)
     @meta = Config.ensure(meta)
   end
+  
+  #---
+  
+  def plugin_name
+    return meta.get(:name)
+  end
+  alias_method :name, :plugin_name
+  
+  def plugin_name=plugin_name
+    meta.set(:name, string(plugin_name))
+  end
+  alias_method :name=, :plugin_name=
   
   #---
   
@@ -103,8 +124,6 @@ class Base < Core
   def plugin_parent=parent
     meta.set(:parent, parent) if parent.is_a?(Coral::Plugin::Base)
   end
-  
-  #---
   
   def plugin_parent
     return meta.get(:parent)
@@ -151,7 +170,7 @@ class Base < Core
     
     logger.debug("Executing plugin hook #{hook} (#{method})")
     
-    return Manager.connection.exec(method, Config.ensure(options).defaults({ :extension_type => :base }).import({ :plugin => self })) do |op, results|
+    return Manager.connection.exec(method, Config.ensure(options).defaults({ :extension_type => :base }).import({ :plugin => myself })) do |op, results|
       results = yield(op, results) if block_given?
       results
     end
@@ -208,7 +227,7 @@ class Base < Core
     
     logger.debug("Setting extension #{plugin_provider} #{hook} value given: #{value.inspect}")
     
-    extension(hook, config.import({ :value => value, :extension_type => :value })) do |op, results|
+    extension(hook, config.import({ :value => value, :extension_type => :set })) do |op, results|
       if op == :process
         value = results unless results.nil?  
       end
@@ -216,6 +235,68 @@ class Base < Core
     
     logger.debug("Extension #{plugin_provider} #{hook} set value to: #{value.inspect}")  
     value
+  end
+  
+  #---
+  
+  def extension_collect(hook, options = {})
+    config = Config.ensure(options)
+    values = []
+    
+    logger.debug("Collecting extension #{plugin_provider} #{hook} values")
+    
+    extension(hook, config.import({ :extension_type => :add })) do |op, results|
+      if op == :process
+        values << results unless results.nil?  
+      end
+    end
+    
+    logger.debug("Extension #{plugin_provider} #{hook} collected values: #{values.inspect}")  
+    values
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Output
+  
+  def render_options
+    export  
+  end
+  protected :render_options
+  
+  #---
+  
+  def render(display, options = {})
+    ui.info(display.strip, options) unless quiet? || display.strip.empty?
+  end
+  
+  #---
+        
+  def info(name, options = {})
+    ui.info(I18n.t(name, Util::Data.merge([ Config.ensure(render_options).export, options ], true))) unless quiet?
+  end
+  
+  #---
+   
+  def alert(display, options = {})
+    ui.warn(display.strip, options) unless quiet? || display.strip.empty?
+  end
+        
+  #---
+       
+  def warn(name, options = {})
+    ui.warn(I18n.t(name, Util::Data.merge([ Config.ensure(render_options).export, options ], true))) unless quiet?  
+  end
+        
+  #---
+        
+  def error(name, options = {})
+    ui.error(I18n.t(name, Util::Data.merge([ Config.ensure(render_options).export, options ], true))) unless quiet?  
+  end
+        
+  #---
+        
+  def success(name, options = {})
+    ui.success(I18n.t(name, Util::Data.merge([ Config.ensure(render_options).export, options ], true))) unless quiet?  
   end
   
   #-----------------------------------------------------------------------------
@@ -260,6 +341,7 @@ class Base < Core
   def self.init_plugin_collection
     logger.debug("Initializing plugin collection interface at #{Time.now}")
     
+    include Celluloid
     include Mixin::Settings
     include Mixin::SubConfig
     
@@ -281,6 +363,17 @@ class Base < Core
       ui.error(e.message, { :prefix => false }) if e.message
     end
     return false
+  end
+  
+  #---
+  
+  def admin_exec
+    if Coral.admin?
+      yield if block_given?
+    else
+      ui.warn("The #{plugin_provider} action must be run as a machine administrator")
+      myself.status = code.access_denied    
+    end
   end
 end
 end
