@@ -128,8 +128,6 @@ class Shell < Plugin::Command
   end
   
   #---
-  
-  execute_block_on_receiver :exec
     
   def exec(options = {}, overrides = nil)
     config = Config.ensure(options)
