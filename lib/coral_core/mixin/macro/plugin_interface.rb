@@ -104,7 +104,7 @@ module PluginInterface
           if _single_instance
             logger.debug("Initializing single instance plugin: #{instance_settings.inspect}")
             
-            plugin = Coral.plugin(_plugin_type, provider, Config.ensure(instance_settings).import({ :meta => { :parent => self } }))
+            plugin = Coral.plugin(_plugin_type, provider, Config.ensure(instance_settings).import({ :meta => { :parent => myself } }))
           
             _set([ _plural, provider ], plugin)
           else
@@ -113,7 +113,7 @@ module PluginInterface
                 logger.debug("Initializing plugin #{_plugin_type} #{name}: #{options.inspect}")
                 
                 options[:name] = name
-                plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
+                plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => myself } }))
                 
                 _set([ _plural, provider, name ], plugin)
               end
@@ -139,7 +139,7 @@ module PluginInterface
         if _single_instance
           logger.debug("Setting single #{_plugin_type} #{provider}: #{instance_settings.inspect}")
           
-          plugin = Coral.plugin(_plugin_type, provider, Config.ensure(instance_settings).import({ :meta => { :parent => self } }))              
+          plugin = Coral.plugin(_plugin_type, provider, Config.ensure(instance_settings).import({ :meta => { :parent => myself } }))              
           
           _set([ _plural, provider ], plugin)  
         else
@@ -147,13 +147,12 @@ module PluginInterface
             logger.debug("Setting #{_plugin_type} #{provider} #{name}: #{options.inspect}")
             
             options[:name] = name
-            plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
+            plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => myself } }))
             
             _set([ _plural, provider, name ], plugin)  
           end
         end
       end
-      self
     end
     
     #---
@@ -172,7 +171,6 @@ module PluginInterface
           end
         end
       end
-      self
     end
 
     #---------------------------------------------------------------------------
@@ -203,7 +201,7 @@ module PluginInterface
           options = get([ _plural, provider ], nil)
          
           unless options.nil?
-            plugin = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
+            plugin = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => myself } }))
         
             logger.debug("Initializing plugin #{_plugin_type} #{provider}: #{options.inspect}")
         
@@ -222,7 +220,7 @@ module PluginInterface
       
         set([ _plural, provider ], options)
     
-        plugin = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
+        plugin = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => myself } }))
         
         logger.debug("Setting single #{_plugin_type} #{provider}: #{options.inspect}")
         
@@ -237,7 +235,6 @@ module PluginInterface
       define_method "set_#{_type}_setting" do |provider, property, value = nil|
         logger.debug("Setting single #{provider} property #{property} to #{value.inspect}")
         set([ _plural, provider, property ], value)
-        self
       end
     
       #---
@@ -253,7 +250,6 @@ module PluginInterface
         _delete([ _plural, provider ])
     
         Coral.remove_plugin(plugin) unless plugin.nil?
-        self
       end
   
       #---
@@ -263,7 +259,6 @@ module PluginInterface
       define_method "delete_#{_type}_setting" do |provider, property|
         logger.debug("Deleting single #{provider} property: #{property}")
         delete([ _plural, provider, property ])
-        self
       end
       
       #---
@@ -306,7 +301,7 @@ module PluginInterface
          
           unless options.nil?
             options[:name] = name
-            plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
+            plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => myself } }))
         
             logger.debug("Initializing plugin #{_plugin_type} #{provider}: #{options.inspect}")
         
@@ -326,7 +321,7 @@ module PluginInterface
         set([ _plural, provider, name ], options)
     
         options[:name] = name
-        plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => self } }))
+        plugin         = Coral.plugin(_plugin_type, provider, Config.ensure(options).import({ :meta => { :parent => myself } }))
         
         logger.debug("Setting #{_plugin_type} #{provider} #{name}: #{options.inspect}")
         
@@ -341,7 +336,6 @@ module PluginInterface
       define_method "set_#{_type}_setting" do |provider, name, property, value = nil|
         logger.debug("Setting #{provider} #{name} property #{property} to #{value.inspect}")
         set([ _plural, provider, name, property ], value)
-        self
       end
     
       #---
@@ -357,7 +351,6 @@ module PluginInterface
         _delete([ _plural, provider, name ])
     
         Coral.remove_plugin(plugin) unless plugin.nil?
-        self
       end
   
       #---
@@ -367,7 +360,6 @@ module PluginInterface
       define_method "delete_#{_type}_setting" do |provider, name, property|
         logger.debug("Deleting #{provider} #{name} property: #{property}")
         delete([ _plural, provider, name, property ])
-        self
       end
       
       #---
