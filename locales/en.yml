@@ -53,7 +53,7 @@ en:
         node:
           options:
             parallel: |-
-              Enable or disable parallelism of node action execution (default %{default_value})
+              Enable parallelism of node action execution (default %{default_value})
             net_provider: |-
               Coral network provider to use for managing cloud nodes (default %{default_value})
             node_provider: |-
@@ -161,15 +161,15 @@ en:
           search: |-
             Optional array of search terms to filter image results
         start: |-
-          Retrieving a list of defined images from %{provider}
+          Retrieving a list of defined images from %{node_provider}
         results: |-
           Total of %{images} images found
       machines:
         options:
-          provider: |-
+          node_provider: |-
             Node provider to retrieve machine types
         start: |-
-          Retrieving a list of available machines from %{provider}
+          Retrieving a list of available machines from %{node_provider}
         results: |-
           Total of %{machines} machine types found
       spawn:
@@ -192,29 +192,31 @@ en:
           Spawning new machines on %{provider}
       bootstrap:
         options:
-          bootstrap: |-
+          bootstrap_path: |-
             Bootstrap script top level local directory (default %{default_value})
-          gateway: |-
+          bootstrap_init: |-
             Gateway bootstrap script within the bootstrap project directory (default %{default_value})
+          bootstrap_glob: |-
+            Path glob to use in searching bootstrap scripts for remote execution (default %{default_value})
           auth_files: |-
             Any additional authorization or state files to pass to the node during bootstrap (relative to local home)
           home_env_var: |-
             Home directory environment variable on remote server (default %{default_value})
           home: |-
             Specified home directory on remote server (default %{default_value})
-          node_name: |-
-            Node name of the machine to bootstrap
+          bootstrap_nodes: |-
+            Node references to bootstrap
         errors:
-          bootstrap: |-
+          bootstrap_path: |-
             Bootstrap path must be an existing directory
           auth_files: |-
             Authorization file %{value} does not exist on the local system
+          bootstrap_nodes: |-
+            Provider %{node_provider} node %{name} is not a valid node to bootstrap (%{value} given)
         start: |-
-          Starting bootstrap of %{provider} machine %{node_name}
-        error: |-
-          Bootstrap returned with status: %{status}
+          Starting bootstrap of machine %{hostname} (%{name})
         success: |-
-          Machine %{node_name} from %{provider} successfully bootstrapped
+          Machine %{hostname} (%{name}) successfully bootstrapped
       exec:
         options:
           command: |-
