@@ -11,9 +11,25 @@ class Manager
   #-----------------------------------------------------------------------------
   # Plugin manager interface
   
+  def self.init_manager(name)
+    name = name.to_sym
+    
+    Manager.supervise_as name
+    @@supervisors[name] = Celluloid::Actor[name]  
+  end
+  
+  #---
+  
   def self.connection(name = :core)
     name = name.to_sym
+    
     init_manager(name) unless @@supervisors.has_key?(name)
+    
+    begin
+      @@supervisors[name].test_connection
+    rescue Celluloid::DeadActorError
+      retry
+    end
     @@supervisors[name]
   end
   
@@ -88,11 +104,8 @@ class Manager
   #-----------------------------------------------------------------------------
   # Operations
   
-  def self.init_manager(name)
-    name = name.to_sym
-    
-    Manager.supervise_as name
-    @@supervisors[name] = Celluloid::Actor[name]  
+  def test_connection
+    true
   end
   
   #---
@@ -260,7 +273,7 @@ class Manager
     
     if @plugins.has_key?(type)
       @plugins[type].each do |instance_name, plugin|
-        if plugin.name.to_s == name.to_s
+        if plugin.plugin_name.to_s == name.to_s
           logger.debug("Plugin #{type} #{name} found")
           return plugin
         end
@@ -274,8 +287,9 @@ class Manager
   
   def remove(plugin)
     if plugin && plugin.respond_to?(:plugin_type) && @plugins.has_key?(plugin.plugin_type)
-      logger.debug("Removing #{plugin.plugin_type} #{plugin.name}")
+      logger.debug("Removing #{plugin.plugin_type} #{plugin.plugin_name}")
       @plugins[plugin.plugin_type].delete(plugin.plugin_instance_name)
+      plugin.terminate if plugin.respond_to?(:terminate)
     else
       logger.warn("Cannot remove plugin: #{plugin.inspect}")    
     end
