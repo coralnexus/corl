@@ -24,10 +24,11 @@ class SSH < Core
   # Instance generators
   
   def self.generate(options = {})
-    config      = Config.ensure(options)
+    config = Config.ensure(options)
     
-    private_key = config.get(:private_key, nil)
-    key_comment = config.get(:comment, '')    
+    private_key  = config.get(:private_key, nil)
+    original_key = nil
+    key_comment  = config.get(:comment, '')    
     
     if private_key.nil?
       key_type    = config.get(:type, "RSA")
@@ -40,21 +41,27 @@ class SSH < Core
         :comment    => key_comment, 
         :passphrase => passphrase
       )
+      is_new = true
+      
     else
       if private_key.include?('PRIVATE KEY')
-        key_data = SSHKey.generate(private_key, :comment => key_comment)
+        original_key = private_key   
       else
-        key_data = SSHKey.generate(Disk.read(private_key), :comment => key_comment)
+        original_key = Disk.read(private_key)
       end
+      
+      key_data = SSHKey.new(original_key, :comment => key_comment) if original_key
+      is_new   = false
     end
     
-    Keypair.new(key_data)
+    return nil unless key_data && ! key_data.ssh_public_key.empty?
+    Keypair.new(key_data, is_new, original_key)
   end
   
   #-----------------------------------------------------------------------------
   # Checks
   
-  def valid?(public_ssh_key)
+  def self.valid?(public_ssh_key)
     SSHKey.valid_ssh_public_key?(public_ssh_key)
   end
   
@@ -64,10 +71,10 @@ class SSH < Core
   class Keypair
     attr_reader :type, :private_key, :encrypted_key, :public_key, :ssh_key
     
-    def initialize(key_data)
+    def initialize(key_data, is_new, original_key)
       @type          = key_data.type
       @private_key   = key_data.private_key
-      @encrypted_key = key_data.encrypted_private_key
+      @encrypted_key = is_new ? key_data.encrypted_private_key : original_key
       @public_key    = key_data.public_key
       @ssh_key       = key_data.ssh_public_key
     end
