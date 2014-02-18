@@ -150,8 +150,6 @@ coral_require(core_dir, :core)
 [ :liquid, 
   :cli, 
   :disk, 
-  :process, 
-  :batch, 
   :package, 
   :shell, 
   :ssh 
