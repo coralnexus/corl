@@ -7,7 +7,7 @@ class Machine < Base
   # Machine plugin interface
   
   def normalize
-    self.name = nil if name.to_s == plugin_provider.to_s      
+    myself.plugin_name = nil if plugin_name.to_s == plugin_provider.to_s      
   end
        
   #-----------------------------------------------------------------------------
@@ -31,7 +31,7 @@ class Machine < Base
   end
  
   def node=node
-    self.plugin_parent = node
+    myself.plugin_parent = node
   end
   
   #---

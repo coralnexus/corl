@@ -27,7 +27,7 @@ class Fog < Plugin::Machine
     
     require 'fog' 
         
-    self.compute = ::Fog::Compute.new(export)
+    myself.compute = ::Fog::Compute.new(export)
   end
   protected :set_connection
   
@@ -52,7 +52,7 @@ class Fog < Plugin::Machine
     end
     
     unless @server.nil?
-      self.name = @server.id
+      myself.name = @server.id
       
       node[:id]         = name
       node[:hostname]   = @server.name
@@ -136,7 +136,7 @@ class Fog < Plugin::Machine
   
   def load
     super do
-      self.server = name if compute && ! name.empty?
+      myself.server = name if compute && ! name.empty?
       server.nil? ? false : true
     end    
   end
@@ -145,8 +145,8 @@ class Fog < Plugin::Machine
   
   def create(options = {})
     super do
-      self.server = compute.servers.bootstrap(Config.ensure(options).export) if compute
-      self.server ? true : false
+      myself.server = compute.servers.bootstrap(Config.ensure(options).export) if compute
+      myself.server ? true : false
     end
   end
   
@@ -227,8 +227,8 @@ class Fog < Plugin::Machine
       
         logger.debug("Setting machine #{server_info.id}")
             
-        self.server = compute.servers.get(server_info.id)
-        self.server ? true : false
+        myself.server = compute.servers.get(server_info.id)
+        myself.server ? true : false
       else
         false
       end      

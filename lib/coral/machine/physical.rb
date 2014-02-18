@@ -8,7 +8,7 @@ class Physical < Plugin::Machine
   
   def normalize
     super
-    self.name = hostname
+    myself.plugin_name = hostname
   end
      
   #-----------------------------------------------------------------------------
