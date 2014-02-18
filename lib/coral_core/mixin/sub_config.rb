@@ -60,7 +60,6 @@ module SubConfig
  
   def _set(keys, value = '')
     modify(@properties, array(keys).flatten, value)
-    return self
   end
   protected :_set
   
@@ -69,7 +68,6 @@ module SubConfig
   def set(keys, value = '')
     init_subconfig
     config.set(keys, value)
-    return self
   end
   
   #---
@@ -86,14 +84,12 @@ module SubConfig
   def delete(keys, default = nil)
     init_subconfig
     config.delete(keys, default)
-    return self
   end
  
   #---
  
   def _clear
     @properties = {}
-    return self
   end
   protected :_clear
   
@@ -102,7 +98,6 @@ module SubConfig
   def clear
     init_subconfig
     config.clear
-    return self
   end
   
   #-----------------------------------------------------------------------------
@@ -118,7 +113,6 @@ module SubConfig
   def import(properties, options = {})
     init_subconfig
     config.import(properties, options)
-    return self
   end
   
   #---
@@ -134,7 +128,6 @@ module SubConfig
   def defaults(defaults, options = {})
     init_subconfig
     config.defaults(defaults, options)
-    return self
   end
   
   #---
