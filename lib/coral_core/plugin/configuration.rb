@@ -15,7 +15,7 @@ class Configuration < Base
     init_subconfig(true)
     
     _init(:autoload, true)
-    _init(:autosave, true)
+    _init(:autosave, false)
   end
    
   #-----------------------------------------------------------------------------
@@ -51,7 +51,6 @@ class Configuration < Base
   def set(keys, value = '', options = {})
     super(keys, value)
     save(options) if autosave
-    self
   end
    
   #---
@@ -59,7 +58,6 @@ class Configuration < Base
   def delete(keys, options = {})
     super(keys)
     save(options) if autosave
-    self
   end
   
   #---
@@ -67,7 +65,6 @@ class Configuration < Base
   def clear(options = {})
     super
     save(options) if autosave
-    self
   end
   
   #-----------------------------------------------------------------------------
@@ -87,7 +84,6 @@ class Configuration < Base
   def import(properties, options = {})
     super(properties, options)
     save(options) if autosave
-    self
   end
       
   #-----------------------------------------------------------------------------
@@ -97,16 +93,16 @@ class Configuration < Base
     method_config = Config.ensure(options)
     success = false
     
-    if can_persist? 
+    if can_persist?
       if extension_check(:load, { :config => method_config })
         logger.info("Loading source configuration")
       
         config.clear if method_config.get(:override, false)
       
-        properties = {}
-        properties = yield(method_config, properties) if block_given?
+        properties = Config.new
+        yield(method_config, properties) if block_given?
           
-        if properties && ! properties.empty?
+        unless properties.export.empty?
           logger.debug("Source configuration parsed properties: #{properties}")
         
           extension(:load_process, { :properties => properties, :config => method_config })               
@@ -115,7 +111,7 @@ class Configuration < Base
         success = true
       end
     else
-      logger.warn("Loading of source configuration from #{location} failed")
+      logger.warn("Loading of source configuration failed")
     end
     success
   end
@@ -161,18 +157,18 @@ class Configuration < Base
   
   #---
   
-  def attach(type, name, file, options = {})
+  def attach(type, name, data, options = {})
     method_config = Config.ensure(options)
     new_location  = nil
     
     if can_persist?
       if extension_check(:attach, { :config => method_config })
-        logger.info("Attaching file to source configuration")
+        logger.info("Attaching data to source configuration")
       
         new_location = yield(method_config) if block_given?
       end
     else
-      logger.warn("Can not attach file to source configuration")
+      logger.warn("Can not attach data to source configuration")
     end
     new_location
   end
