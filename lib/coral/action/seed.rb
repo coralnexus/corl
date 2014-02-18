@@ -88,46 +88,26 @@ class Seed < Plugin::Action
                 if network.load
                   if node = network.local_node
                     render("Updating node network configurations")
-                    self.status = code.node_save_failure unless node.save  
+                    myself.status = code.node_save_failure unless node.save  
                   else
-                    self.status = code.node_load_failure
+                    myself.status = code.node_load_failure
                   end                  
                 else
-                  self.status = code.network_load_failure    
+                  myself.status = code.network_load_failure    
                 end
               else
-                self.status = code.network_init_failure
+                myself.status = code.network_init_failure
               end     
             else
-              self.status = code.project_failure  
+              myself.status = code.project_failure  
             end            
           else
-            self.status = code.key_store_failure
+            myself.status = code.key_store_failure
           end
         end
       else
-        self.status = code.network_load_failure    
+        myself.status = code.network_load_failure    
       end
-    end
-  end
-  
-  #---
-  
-  def execute_remote(node, network, op, data)
-    super do
-      case op
-      when :config # Modify seed execution configurations
-        render("Starting remote execution of seed action")  
-      when :progress # Report progress of seed execution
-        if data[:type] == :error
-          alert(data[:data])
-        else
-          render(data[:data])
-        end  
-      when :process # Process final result
-        render("Successfully finished remote execution of seed package")     
-      end
-      data
     end
   end
 end
