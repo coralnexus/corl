@@ -33,7 +33,7 @@ begin
     Coral::Manager.connection.loaded_plugins(:action).each do |provider, action|
       puts sprintf("   %-10s : %s\n", 
         "<#{provider}>", 
-        Coral.action(provider, { :args => '-h', :quiet => true }).help
+        Coral.action(provider, { :settings => {}, :quiet => true }).help
       )
     end
     
