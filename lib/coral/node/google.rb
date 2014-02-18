@@ -21,11 +21,11 @@ class Google < Node::Fog
   # Property accessors / modifiers
   
   def project_name=project_name
-    self[:project_name] = project_name
+    myself[:project_name] = project_name
   end
   
   def project_name
-    self[:project_name]
+    myself[:project_name]
   end
   
   #---

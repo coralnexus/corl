@@ -8,10 +8,10 @@ class Fog < Plugin::Node
    
   def normalize
     super
-    self.region = region
+    myself.region = region
     
     yield if block_given?    
-    self.machine = create_machine(:machine, :fog, machine_config)
+    myself.machine = create_machine(:machine, :fog, machine_config)
   end
        
   #-----------------------------------------------------------------------------
@@ -21,41 +21,41 @@ class Fog < Plugin::Node
   # Property accessors / modifiers
   
   def api_user=api_user
-    self[:api_user] = api_user
+    myself[:api_user] = api_user
   end
   
   def api_user
-    self[:api_user]
+    myself[:api_user]
   end
   
   #---
   
   def api_key=api_key
-    self[:api_key] = api_key
+    myself[:api_key] = api_key
   end
   
   def api_key
-    self[:api_key]
+    myself[:api_key]
   end
   
   #---
   
   def auth_url=auth_url
-    self[:auth_url] = auth_url
+    myself[:auth_url] = auth_url
   end
   
   def auth_url
-    self[:auth_url]
+    myself[:auth_url]
   end
   
   #---
   
   def connection_options=options
-    self[:connection_options] = options
+    myself[:connection_options] = options
   end
   
   def connection_options
-    self[:connection_options]
+    myself[:connection_options]
   end
   
   #---
@@ -65,15 +65,15 @@ class Fog < Plugin::Node
   end
   
   def region=region
-    self[:region] = region
+    myself[:region] = region
   end
   
   def region
-    if region = self[:region]
+    if region = myself[:region]
       region
     else
       first_region = regions.first
-      self.region  = first_region
+      myself.region  = first_region
       first_region
     end
   end
