@@ -11,9 +11,8 @@ class Network < Base
   def normalize
     super
     
-    logger.info("Initializing sub configuration from source with: #{self._export}")
-    
-    self.config = Coral.configuration(Config.new(self._export).import({ :autocommit => false }))
+    logger.info("Initializing sub configuration from source with: #{myself._export.inspect}")
+    myself.config = Coral.configuration(Config.new(myself._export))
   end
   
   #-----------------------------------------------------------------------------
@@ -122,7 +121,7 @@ class Network < Base
         
     if local_node.nil?
       name       = Util::Data.ensure_value(lookup(:hostname), ip_address)    
-      local_node = Coral.node(name, extended_config(:local_node).import({ :meta => { :parent => self }}), :local) 
+      local_node = Coral.node(name, extended_config(:local_node).import({ :meta => { :parent => myself }}), :local) 
     else
       local_node.localize               
     end    
@@ -142,6 +141,12 @@ class Network < Base
     nodes  
   end
   
+  #---
+  
+  def test_node(provider)
+    Coral.node(:test, { :meta => { :parent => myself } }, provider)
+  end
+  
   #-----------------------------------------------------------------------------
   # Operations
   
@@ -157,13 +162,14 @@ class Network < Base
   
   #---
   
-  def attach(type, name, files, options = {})
+  def attach_files(type, name, files, options = {})
+    attach_config  = Config.ensure(options).import({ :type => :file })
     included_files = []    
     files          = [ files ] unless files.is_a?(Array)
     
     files.each do |file|
       if file
-        attached_file = config.attach(type, name, file, options)
+        attached_file = config.attach(type, name, file, attach_config)
         included_files << attached_file unless attached_file.nil?
       end  
     end    
@@ -172,94 +178,107 @@ class Network < Base
   
   #---
   
-  def add_keys(private_key = nil, public_key = nil)
-    # Get and check a password from the keyboard
-    password = ui.password('SSH')
-    dbg(password, 'password')
-    password
+  def attach_data(type, name, data, options = {})
+    attach_config = Config.ensure(options).import({ :type => :source })
+    attached_data = nil    
+    
+    if data.is_a?(String)
+      attached_data = config.attach(type, name, file, attach_config)
+    end  
+    attached_data
+  end
+  
+  #---
+  
+  def attach_keys(node, keypair)
+    save_config = { :pull => false, :push => false }    
+    private_key = attach_data(:keys, "#{node.public_ip}-id_#{keypair.type}", keypair.encrypted_key)
+    public_key  = attach_data(:keys, "#{node.public_ip}-id_#{keypair.type}.pub", keypair.ssh_key)
+    
+    if private_key && public_key
+      save_config[:files] = [ private_key, public_key ]
+    
+      node[:private_key] = private_key
+      node[:public_key]  = public_key
+    
+      save_config[:message] = "Updating SSH keys for node #{node.plugin_name} (#{node.public_ip})"    
+      node.save(extended_config(:key_save, save_config))
+    else
+      false
+    end
   end
   
   #---
   
   def add_node(provider, name, options = {})
     config = Config.ensure(options)
+    
+    keypair = config.delete(:keypair, nil)
+    return false unless keypair && keypair.is_a?(Util::SSH::Keypair)
         
     remote_name  = config.delete(:remote, :edit)
-    seed_project = config.delete(:seed, nil)
-    seed_branch  = config.delete(:branch, :master)
+    dbg(config, 'node add configuration')
     
     # Set node data
-    node        = set_node(provider, name, config)
-    hook_config = { :node => node, :remote => remote_name, :seed => seed_project, :config => config }
-    success = true
+    #node        = set_node(provider, name, config)
+    #hook_config = { :node => node, :remote => remote_name, :seed => seed_project, :config => config }
+    success     = true
     
-    yield(:preprocess, hook_config) if block_given?
+    #yield(:preprocess, hook_config) if block_given?
     
-    if ! node.local? && extension_check(:add_node, hook_config)
-      # Create new node / machine
-      success = node.create do |op, data|
-        data = yield("create_#{op}".to_sym, data) if block_given?
-        data  
-      end
+    #if ! node.local? && attach_keys(node, keypair) && extension_check(:add_node, hook_config)
+    #  # Create new node / machine
+    #  success = node.create do |op, data|
+    #    data = yield("create_#{op}".to_sym, data) if block_given?
+    #    data  
+    #  end
       
-      if success
-        # Attach SSH keys
-        save_config = { :commit => true, :remote => remote_name, :push => true }
-        ssh_keys    = attach(:keys, node.public_ip, [ config[:private_key], config[:public_key] ])
+    #  if success       
+    #    # Bootstrap new machine
+    #    success = node.bootstrap(home, extended_config(:bootstrap, config)) do |op, data|
+    #      data = yield("bootstrap_#{op}".to_sym, data) if block_given?
+    #      data
+    #    end  
         
-        if ssh_keys.length == 2 && ssh_keys[0] && ssh_keys[1]
-          node[:private_key] = ssh_keys[0]
-          node[:public_key]  = ssh_keys[1]
-                    
-          save_config[:files] = ssh_keys
-        else
-          ssh_keys = []
-        end
-        yield(:keys, ssh_keys) if block_given?
-        
-        # Bootstrap new machine
-        success = node.bootstrap(home, extended_config(:bootstrap, config)) do |op, data|
-          data = yield("bootstrap_#{op}".to_sym, data) if block_given?
-          data
-        end  
-        
-        if success     
-          if seed_project && remote_name
-            # Reset project remote
-            seed_info = Plugin::Project.translate_reference(seed_project)
+    #    if success
+    #      save_config = { :commit => true, :remote => remote_name, :push => true }
+               
+    #      if seed_project && remote_name
+    #        # Reset project remote
+    #        seed_info = Plugin::Project.translate_reference(seed_project)
           
-            if seed_info
-              seed_url    = seed_info[:url]
-              seed_branch = seed_info[:revision] if seed_info[:revision]
-            else
-              seed_url = seed_project                
-            end
-            set_remote(:origin, seed_url) if remote_name.to_sym == :edit
-            set_remote(remote_name, seed_url)
-            save_config[:pull] = false
-          end
+    #        if seed_info
+    #          seed_url    = seed_info[:url]
+    #          seed_branch = seed_info[:revision] if seed_info[:revision]
+    #        else
+    #          seed_url = seed_project                
+    #        end
+    #        set_remote(:origin, seed_url) if remote_name.to_sym == :edit
+    #        set_remote(remote_name, seed_url)
+    #        save_config[:pull] = false
+    #      end
         
-          # Save network changes (preliminary)
-          success = node.save(extended_config(:node_save, save_config))
+    #      # Save network changes (preliminary)
+    #      success = node.save(extended_config(:node_save, save_config))
         
-          if success && seed_project
-            # Seed machine with remote project reference
-            result = node.seed({
-              :net_provider      => plugin_provider,
-              :project_reference => seed_project,
-              :project_branch    => seed_branch
-            }) do |op, data|
-              yield("seed_#{op}".to_sym, data)
-            end
-            success = result.status == code.success
-          end
+    #      if success && seed_project
+    #        # Seed machine with remote project reference
+    #        result = node.seed({
+    #          :net_provider      => plugin_provider,
+    #          :project_reference => seed_project,
+    #          :project_branch    => seed_branch
+    #        }) do |op, data|
+    #          yield("seed_#{op}".to_sym, data)
+    #        end
+    #        success = result.status == code.success
+    #      end
         
-          # Save machine to network project
-          # Update local network project
-        
-        end
-      end
-    end
+    #      if success
+    #        # Update local network project  
+    #      end
+    #    end
+    #  end
+    #end
     
     success 
   end
