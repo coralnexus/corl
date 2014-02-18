@@ -2,47 +2,48 @@
 module Coral
 module Action
 class Machines < Plugin::Action
- 
-  #-----------------------------------------------------------------------------
-  # Machines action interface
-  
-  def normalize
-    super('coral machines <node_provider>')
-    
-    codes :node_load_failure  => 20,
-          :machine_load_failure => 21
-  end
 
   #-----------------------------------------------------------------------------
-  # Action operations
+  # Settings
   
-  def parse(parser)
-    parser.arg_str(:provider, nil, 
-      'coral.core.actions.machines.options.provider'
-    )
+  def configure
+    super do
+      codes :node_load_failure,
+            :machine_load_failure
+    end
   end
   
   #---
-   
+  
+  def ignore
+    node_ignore - [ :node_provider ]
+  end
+  
+  def arguments
+    [ :node_provider ]
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Operations
+  
   def execute
-    super do |node, network, status|
-      info('coral.core.actions.machines.start')
+    super do |local_node, network|
+      info('coral.actions.machines.start')
       
-      if node = Coral.node(:test, {}, settings[:provider])
+      if node = network.test_node(settings[:node_provider])
         if machine_types = node.machine_types
           machine_types.each do |machine_type|
             render(node.render_machine_type(machine_type), { :prefix => false })
           end
           
-          self.result = machine_types
-          success('coral.core.actions.machines.results', { :machines => machine_types.length }) if machine_types.length > 1
+          myself.result = machine_types
+          success('coral.actions.machines.results', { :machines => machine_types.length }) if machine_types.length > 1
         else
-          status = code.machine_load_failure
+          myself.status = code.machine_load_failure
         end
       else
-        status = code.node_load_failure
+        myself.status = code.node_load_failure
       end
-      status
     end
   end
 end

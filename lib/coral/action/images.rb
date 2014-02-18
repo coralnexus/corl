@@ -2,58 +2,52 @@
 module Coral
 module Action
 class Images < Plugin::Action
- 
-  #-----------------------------------------------------------------------------
-  # Images action interface
-  
-  def normalize
-    super('coral images <node_provider> [ <search_term> ... ]')
-    
-    codes :node_load_failure  => 20,
-          :image_load_failure => 21
-  end
 
   #-----------------------------------------------------------------------------
-  # Action operations
+  # Settings
   
-  def parse(parser)
-    parser.option_bool(:match_case, false, 
-      [ '-c', '--match-case' ], 
-      'coral.core.actions.images.options.match_case'
-    )
-    parser.option_bool(:require_all, false, 
-      [ '-r', '--require-all' ], 
-      'coral.core.actions.images.options.require_all'
-    )
-    parser.arg_str(:provider, nil, 
-      'coral.core.actions.images.options.provider'
-    )
-    parser.arg_array(:search, [], 
-      'coral.core.actions.images.options.search'
-    )
+  def configure
+    super do
+      codes :node_load_failure,
+            :image_load_failure
+            
+      register :match_case, :bool, false
+      register :require_all, :bool, false
+      register :search, :array, []
+    end
   end
   
   #---
-   
+  
+  def ignore
+    node_ignore - [ :node_provider ]
+  end
+  
+  def arguments
+    [ :node_provider, :search ]
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Operations
+ 
   def execute
-    super do |node, network, status|
-      info('coral.core.actions.images.start')
+    super do |local_node, network|
+      info('coral.actions.images.start')
       
-      if node = Coral.node(:test, {}, settings[:provider])
+      if node = network.test_node(settings[:node_provider])
         if images = node.images(settings[:search], settings)
           images.each do |image|
             render(node.render_image(image), { :prefix => false })
           end
           
-          self.result = images
-          success('coral.core.actions.images.results', { :images => images.length }) if images.length > 1
+          myself.result = images
+          success('coral.actions.images.results', { :images => images.length }) if images.length > 1
         else
-          status = code.image_load_failure
+          myself.status = code.image_load_failure
         end
       else
-        status = code.node_load_failure
+        myself.status = code.node_load_failure
       end
-      status
     end
   end
 end
