@@ -5,87 +5,69 @@ class Spawn < Plugin::Action
   
   include Mixin::Action::Keypair
  
-  #-----------------------------------------------------------------------------
-  # Spawn action interface
+  #----------------------------------------------------------------------------
+  # Settings
   
-  def normalize
-    super('coral spawn <node_provider> <image_id> <hostname> ...')
-    
-    codes :network_failure     => 20,
-          :node_create_failure => 21
-  end
-
-  #-----------------------------------------------------------------------------
-  # Action operations
-  
-  def parse(parser)
-    parser.option_bool(:parallel, true, 
-      '--[no-]parallel', 
-      'coral.core.actions.spawn.options.parallel'
-    )
-    parser.option_str(:seed, "github:::coraltech/test[master]", 
-      '--seed PROJECT_REFERENCE', 
-      'coral.core.actions.spawn.options.seed'
-    )
-    parser.option_str(:region, nil, 
-      '--region MACHINE_REGION', 
-      'coral.core.actions.spawn.options.region'
-    )
-    parser.option_str(:machine_type, nil, 
-      '--machine MACHINE_TYPE', 
-      'coral.core.actions.spawn.options.machine_type'
-    )
-    parser.arg_str(:provider, nil,
-      'coral.core.actions.spawn.options.provider'
-    )
-    parser.arg_str(:image, nil, 
-      '--image IMAGE_NAME', 
-      'coral.core.actions.spawn.options.image'
-    )    
-    parser.arg_array(:hostnames, nil, 
-      'coral.core.actions.spawn.options.hostnames'
-    )
-    keypair_options(parser)
+  def configure
+    super do
+      codes :network_failure,
+            :key_failure,
+            :node_create_failure
+            
+      register :region, :str, nil
+      register :machine_type, :str, nil
+      register :image, :str, nil      
+      register :hostnames, :array, nil
+        
+      keypair_config
+      
+      bootstrap = Coral.action_config(:bootstrap)
+      config.defaults(bootstrap.config) if bootstrap
+      
+      if seed = Coral.action_config(:seed)
+        seed.config[:project_reference].default = "github:::coraltech/cluster-test[master]"
+        config.defaults(seed.config)
+      end
+    end
   end
   
   #---
-   
+  
+  def ignore
+    node_ignore - [ :parallel, :node_provider ] + [ :bootstrap_nodes ]
+  end
+  
+  def arguments
+    [ :node_provider, :image, :hostnames ]
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Operations
+ 
   def execute
-    super do |node, network, status|
+    super do |node, network|
       info('coral.core.actions.spawn.start')      
       
       if network
-        Coral.batch(settings[:parallel]) do |op, batch|
-          if op == :add
-            # Add batch operations      
-            settings[:hostnames].each do |hostname|
-              batch.add(hostname) do
-                node = network.add_node(settings[:provider], hostname, {
-                  :private_key  => settings[:private_key],
-                  :public_key   => settings[:public_key],
-                  :region       => settings[:region],
-                  :machine_type => settings[:machine_type],
-                  :image        => settings[:image],
-                  :seed         => settings[:seed]
-                })
+        if keypair && keypair_clean
+          results       = []
+          node_provider = settings.delete(:node_provider)
                          
-                code.success                      
-              end                           
-            end
-          else
-            # Reduce to single status
-            batch.each do |name, result|
-              unless result == code.success
-                status = code.batch_error
-                break
-              end
+          settings.delete(:hostnames).each do |hostname|
+            if settings[:parallel]
+              results << network.future.add_node(node_provider, hostname, settings)
+            else
+              results << network.add_node(node_provider, hostname, settings)    
             end
           end
-        end
+          results     = results.map { |future| future.value } if settings[:parallel]                  
+          myself.status = code.batch_error if results.include?(false)
+        else
+          myself.status = code.key_failure  
+        end        
       else
-        status = code.network_failure    
+        myself.status = code.network_failure    
       end
-      status
     end
   end
 end
