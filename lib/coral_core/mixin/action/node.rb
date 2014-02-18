@@ -54,6 +54,7 @@ module Node
   # Operations
   
   def init_network(path = nil)
+    # Get network configuration path
     if Coral.admin?
       network_path = lookup(:coral_network)
       Dir.mkdir(network_path) unless File.directory?(network_path)
@@ -62,10 +63,7 @@ module Node
     end
     
     # Load network if it exists
-    network_config = extended_config(:network, {
-      :directory => network_path,
-      :file_name => Coral.config_file
-    })
+    network_config = extended_config(:network, { :directory => network_path })
     
     network = Coral.network(
       Coral.sha1(network_config), 
@@ -92,11 +90,26 @@ module Node
         exec_config.delete(:node_provider)
               
         result = node.action(plugin_provider, exec_config) do |op, data|
-          execute_remote(node, network, op, data)
+          ui_group(node.name) do
+            case op
+            when :config # Modify seed execution configurations
+              render("Starting remote execution of #{plugin_provider} action")  
+            when :progress # Report progress of seed execution
+              if data[:type] == :error
+                alert(data[:data])
+              else
+                render(data[:data])
+              end  
+            when :process # Process final result
+              render("Successfully finished remote execution of #{plugin_provider} action")     
+            end
+            data = execute_remote(node, network, op, data)
+          end
+          data
         end
         result.status == code.success 
       end
-      self.status = code.batch_error unless success
+      myself.status = code.batch_error unless success
     else
       # Execute statement locally
       node = network.local_node
@@ -105,7 +118,7 @@ module Node
         yield(node, network) if block_given?
       else
         puts "\n" + I18n.t('coral.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
-        self.status = code.validation_failed 
+        myself.status = code.validation_failed 
       end
     end
   end
@@ -113,10 +126,8 @@ module Node
   #---
   
   def execute_remote(node, network, op, data)
-    ui_group(node.name) do
-      data = yield if block_given?
-    end
-    data  
+    # Implement in sub classes if needed
+    data 
   end
 end
 end
