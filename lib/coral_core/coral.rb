@@ -17,9 +17,16 @@ module Coral
   
   #---
   
+  def self.add_log_levels(*levels)
+    Util::Interface.add_log_levels(levels)  
+  end
+  
   def self.log_level
-    return ENV['CORAL_LOG'].downcase.to_sym if ENV['CORAL_LOG']
-    :none
+    Util::Interface.log_level
+  end
+  
+  def self.log_level=log_level
+    Util::Interface.log_level = log_level
   end
   
   #-----------------------------------------------------------------------------
