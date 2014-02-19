@@ -66,7 +66,7 @@ class Bootstrap < Plugin::Action
     super do |local_node, network|     
       if network
         batch_success = network.batch(settings[:bootstrap_nodes], settings[:node_provider], settings[:parallel]) do |node|
-          render_options = { :name => node.plugin_name, :hostname => node.hostname }
+          render_options = { :id => node.id, :hostname => node.hostname }
           
           info('coral.actions.bootstrap.start', render_options)
           node.bootstrap(network.home, extended_config(:bootstrap, settings))
