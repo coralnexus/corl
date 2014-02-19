@@ -47,7 +47,7 @@ class Seed < Plugin::Action
    
   def execute
     super do |node, network|
-      info('coral.core.actions.seed.start')
+      info('coral.actions.seed.start')
       
       if node && network
         admin_exec do
