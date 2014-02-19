@@ -96,18 +96,10 @@ class Interface
     @resource = config.get(:resource, '')
     
     if config.get(:logger, false)
-      if config[:logger].is_a?(String)
-        log_name = config[:logger]
-        @logger  = Log4r::Logger.new(log_name)
-      else
-        log_name = @resource
-        @logger  = config[:logger]
-      end
+      self.logger = config[:logger]
     else
-      log_name = @resource
-      @logger  = Log4r::Logger.new(log_name)
-    end
-    self.class.add_logger(log_name, @logger)  
+      self.logger = Log4r::Logger.new(@resource)
+    end     
     
     @color   = config.get(:color, true)    
     @printer = config.get(:printer, :puts)
@@ -128,7 +120,19 @@ class Interface
   #-----------------------------------------------------------------------------
   # Accessors / Modifiers
   
-  attr_accessor :logger, :resource, :color, :input, :output, :error, :delegate
+  attr_reader :logger
+  attr_accessor :resource, :color, :input, :output, :error, :delegate
+  
+  #---
+  
+  def logger=logger
+    if logger.is_a?(String)
+      @logger = Log4r::Logger.new(logger)
+    else
+      @logger = logger
+    end
+    self.class.add_logger(@resource, @logger)  
+  end
   
   #-----------------------------------------------------------------------------
   # UI functionality
