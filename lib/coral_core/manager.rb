@@ -301,8 +301,9 @@ class Manager
   def exec(method, options = {})
     results = nil
     
-    logger.info("Executing extension method #{method} at #{Time.now}")
-    logger.debug("Options given: #{options.inspect}")
+    if Coral.log_level == :hook # To save processing on rendering
+      logger.hook("Executing extension hook { #{method} } at #{Time.now} with:\n#{PP.pp(options, '')}\n")
+    end
     
     extensions = plugins(:extension)
     
@@ -313,12 +314,10 @@ class Manager
       logger.debug("Checking extension #{provider}")
       
       if plugin.respond_to?(method)
-        results = {} if results.nil?
-        
-        logger.debug("Executing extension method #{method} at #{Time.now}")
-        
+        results = {} if results.nil?       
+                
         result = plugin.send(method, options)
-        logger.debug("Completed at: #{Time.now}")
+        logger.info("Completed hook #{method} at #{Time.now} with: #{result.inspect}")
                     
         if block_given?
           results[provider] = yield(:process, result)
@@ -340,7 +339,7 @@ class Manager
     end        
     results    
   end
- 
+  
   #---
   
   def config(type, options = {})
