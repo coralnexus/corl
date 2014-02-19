@@ -59,12 +59,6 @@ class Config
     end
   end
   
-  #---
-  
-  def inspect
-    "#<#{self.class}: #{@properties.to_s}>"
-  end
-  
   #-----------------------------------------------------------------------------
   # Checks
   
