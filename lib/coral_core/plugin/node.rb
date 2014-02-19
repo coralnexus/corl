@@ -11,15 +11,16 @@ class Node < Base
   def normalize
     super
     
+    ui.resource = hostname
+    ui.logger   = hostname
+    
     @cli_interface = Util::Liquid.new do |method, args, &code|
       result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }) do |op, data|
         code.call(op, data) if code
       end
       result = result.first
       
-      ui_group(hostname) do          
-        ui.alert(result.errors) unless result.errors.empty?
-      end
+      alert(result.errors) unless result.errors.empty?
       result
     end
     
@@ -41,7 +42,7 @@ class Node < Base
   #---
   
   def localize
-    @local_context     = true
+    @local_context       = true
     myself.local_machine = create_machine(:local_machine, :physical)
   end
        
@@ -460,7 +461,7 @@ class Node < Base
         active_machine = local? ? local_machine : machine
         
         if commands = config.get(:commands, nil)
-          render("Starting command execution: #{commands.join('; ')}")
+          logger.info("Starting command execution: #{commands.join('; ')}")
           results = active_machine.exec(commands, config.export) do |type, command, data|
             if type == :error
               alert(data)
