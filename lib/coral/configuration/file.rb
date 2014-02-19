@@ -115,7 +115,7 @@ class File < Plugin::Configuration
             logger.debug("Source configuration file contents: #{raw}")            
             file_properties = parser.parse(raw)
             
-            generate_routes.call(file, file_properties)
+            generate_routes.call(config_name, file_properties)
             properties.import(file_properties)
           end         
         end
@@ -138,7 +138,7 @@ class File < Plugin::Configuration
       properties.each do |name, value|
         keys = [ parents, name ].flatten
         
-        if value.is_a?(Hash)
+        if value.is_a?(Hash) && ! value.empty?
           # Nested configurations
           if local_router.is_a?(Hash) && local_router.has_key?(name)
             # Router and configuration values are nested
@@ -191,24 +191,27 @@ class File < Plugin::Configuration
   def save(options = {})
     super do |method_config|
       config_files = []
+      success      = true
       
-      separate.export do |config_name, router_data|
+      separate.export.each do |config_name, router_data|
         info     = search[config_name]
         provider = info[:provider]
         file     = info[:file]
         
         if renderer = Coral.translator(method_config, provider)
           rendering = renderer.generate(router_data)
-        
-          if success = Util::Disk.write(file, rendering)
-            config_files << file
+          
+          if Util::Disk.write(file, rendering)
+            config_files << config_name
+          else
+            success = false
           end
         else
           success = false
         end
         break unless success        
       end
-      if success
+      if success && ! config_files.empty?
         commit_files = [ config_files, method_config.get_array(:files) ].flatten
           
         logger.debug("Source configuration rendering: #{rendering}")        
@@ -354,6 +357,7 @@ class File < Plugin::Configuration
     config_map = {}
     
     count_config_names = lambda do |data|
+      data = data.export if data.is_a?(Coral::Config)
       data.each do |name, value|
         if value.is_a?(Hash)
           count_config_names.call(value)
