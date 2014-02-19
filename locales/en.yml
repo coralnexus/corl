@@ -216,9 +216,9 @@ en:
           bootstrap_nodes: |-
             Provider %{node_provider} node %{name} is not a valid node to bootstrap (%{value} given)
         start: |-
-          Starting bootstrap of machine %{hostname} (%{name})
+          Starting bootstrap of machine %{hostname} (%{id})
         success: |-
-          Machine %{hostname} (%{name}) successfully bootstrapped
+          Machine %{hostname} (%{id}) successfully bootstrapped
       exec:
         options:
           command: |-
