@@ -6,15 +6,68 @@ class Interface
   #-----------------------------------------------------------------------------
   # Properties
   
-  @@ui_lock = Mutex.new  
-  @@logger  = Log4r::Logger.new('core')
+  @@log_level = nil
+  @@loggers   = {}
+  
+  def self.log_level
+    @@log_level  
+  end
+  
+  def self.log_level=level
+    @@log_level = set_log_level(level)
+  end
+  
+  #---
+  
+  def self.loggers
+    @@loggers
+  end
+  
+  def self.add_log_levels(*levels)
+    levels = levels.flatten.collect do |level| 
+      level.to_s.upcase
+    end
+    Log4r::Configurator.custom_levels(*levels)
+  end
+  
+  def self.add_logger(name, logger)
+    logger.outputters = Log4r::StdoutOutputter.new('console')
+    
+    level = log_level.nil? ? 'off' : log_level
+    set_log_level(level, logger)  
+        
+    @@loggers[name] = logger
+  end
+  
+  def self.set_log_level(level, logger = nil)
+    level_sym   = level.to_s.downcase.to_sym
+    level_id    = level.to_s.upcase
+    
+    if logger.nil?
+      loggers.each do |name, registered_logger|
+        @@loggers[name].level = Log4r.const_get(level_id)
+      end
+    else
+      if logger.levels.include?(level_id)
+        logger.level = Log4r.const_get(level_id)
+      end
+    end
+    level_sym
+  end
+  
+  #---
+  
+  # Initialize log levels
+  
+  add_log_levels :debug, :info, :warn, :error, :hook
     
   if ENV['CORAL_LOG']
-    @@log_level         = ENV['CORAL_LOG'].upcase
-    
-    @@logger.level      = Log4r.const_get(@@log_level)
-    @@logger.outputters = Log4r::StdoutOutputter.new('console')
+    Interface.log_level = ENV['CORAL_LOG']
   end
+    
+  #---
+  
+  @@ui_lock = Mutex.new
   
   #---
 
@@ -44,16 +97,17 @@ class Interface
     
     if config.get(:logger, false)
       if config[:logger].is_a?(String)
-        @logger = Log4r::Logger.new(config[:logger])
+        log_name = config[:logger]
+        @logger  = Log4r::Logger.new(log_name)
       else
-        @logger = config[:logger]
+        log_name = @resource
+        @logger  = config[:logger]
       end
     else
-      @logger = Log4r::Logger.new(@resource)
+      log_name = @resource
+      @logger  = Log4r::Logger.new(log_name)
     end
-    
-    @logger.level      = @@logger.level
-    @logger.outputters = @@logger.outputters    
+    self.class.add_logger(log_name, @logger)  
     
     @color   = config.get(:color, true)    
     @printer = config.get(:printer, :puts)
@@ -76,12 +130,6 @@ class Interface
   
   attr_accessor :logger, :resource, :color, :input, :output, :error, :delegate
   
-  #-----------------------------------------------------------------------------
-  
-  def self.logger
-    return @@logger
-  end
-
   #-----------------------------------------------------------------------------
   # UI functionality
 
