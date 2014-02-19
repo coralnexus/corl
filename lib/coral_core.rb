@@ -81,8 +81,10 @@ $:.unshift(lib_dir) unless $:.include?(lib_dir) || $:.include?(File.expand_path(
   
 require 'rubygems'
 
+require 'pp'
 require 'i18n'
 require 'log4r'
+require 'log4r/configurator'
 require 'base64'
 require 'sshkey'
 require 'deep_merge'
@@ -158,11 +160,11 @@ coral_require(core_dir, :core)
 end
 
 # Include core systems
+coral_require(core_dir, :coral)
 coral_require(core_dir, :gems)
 coral_require(core_dir, :manager)
 coral_require(plugin_dir, :base)
 coral_require(core_dir, :plugin)
-coral_require(core_dir, :coral)
 coral_require(core_dir, :facade)
 
 #-------------------------------------------------------------------------------
