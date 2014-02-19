@@ -90,7 +90,7 @@ module Node
         exec_config.delete(:node_provider)
               
         result = node.action(plugin_provider, exec_config) do |op, data|
-          ui_group(node.name) do
+          ui_group(node.plugin_name) do
             case op
             when :config # Modify seed execution configurations
               render("Starting remote execution of #{plugin_provider} action")  
