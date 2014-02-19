@@ -9,6 +9,8 @@ en:
           options:
             help: |-
               Display help information for this command
+            log_level: |-
+              Set the logging level for this execution run
             encoded: |-
               Optional encoded parameter set that contains default action settings (machine use only)
           parse:
