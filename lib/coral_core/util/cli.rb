@@ -108,6 +108,10 @@ module Coral
           
           self.processed = false
           
+          option_str(:log_level, nil, 
+            '--log_level STR', 
+            'coral.core.util.cli.options.log_level'
+          )
           option_str(:encoded_params, false, 
             '--encoded STR', 
             'coral.core.util.cli.options.encoded'
@@ -118,6 +122,8 @@ module Coral
           end
           
           parser.parse!(args)
+                    
+          Coral.log_level = options[:log_level] if options[:log_level]
           parse_encoded
           
           remaining_args = args.dup
