@@ -621,7 +621,7 @@ class Node < Base
       :commit      => true,
       :allow_empty => true,
       :message     => config.get(:message, "Saving #{plugin_provider} node #{plugin_name}"),
-      :remote      => nil #config.get(:remote, :edit)
+      :remote      => config.get(:remote, :edit)
     }))    
   end
   
