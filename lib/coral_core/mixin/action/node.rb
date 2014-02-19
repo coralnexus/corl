@@ -94,12 +94,6 @@ module Node
             case op
             when :config # Modify seed execution configurations
               render("Starting remote execution of #{plugin_provider} action")  
-            when :progress # Report progress of seed execution
-              if data[:type] == :error
-                alert(data[:data])
-              else
-                render(data[:data])
-              end  
             when :process # Process final result
               render("Successfully finished remote execution of #{plugin_provider} action")     
             end
