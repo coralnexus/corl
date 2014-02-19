@@ -31,12 +31,6 @@ class Base < Core
     return nil  
   end
   
-  #---
-  
-  def inspect
-    "#<#{self.class}: #{plugin_name}>"
-  end
-  
   #-----------------------------------------------------------------------------
   # Checks
   
