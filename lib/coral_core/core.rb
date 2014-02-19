@@ -21,12 +21,6 @@ class Core < Config
     logger.debug("Initialized instance interface")
   end
   
-  #---
-  
-  def inspect
-    "#<#{self.class}>"
-  end
-  
   #-----------------------------------------------------------------------------
   # Accessor / Modifiers
   
@@ -42,12 +36,6 @@ class Core < Config
   
   def self.logger
     return @@ui.logger
-  end
-  
-  #---
- 
-  def self.logger=logger
-    @ui.logger = logger
   end
   
   #--- 
