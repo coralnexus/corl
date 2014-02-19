@@ -96,6 +96,8 @@ class Action < Base
       configure
       set(:processed, true)
       set(:settings, Config.ensure(get(:settings)))
+      
+      Coral.log_level = settings[:log_level] if settings.has_key?(:log_level)
     else
       # External processing
       set(:settings, Config.new)
