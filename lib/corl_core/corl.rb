@@ -222,6 +222,7 @@ module CORL
     end
     
     components.collect! do |value|
+      next value if value.to_s == 'CORL'
       value.to_s.strip.capitalize  
     end
     
