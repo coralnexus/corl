@@ -10,7 +10,7 @@ If no value is found in the defined sources, it returns an empty hash ({})
 ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       raise(Puppet::ParseError, "module_hash(): Define at least the variable name " +
         "given (#{args.size} for 1)") if args.size < 1
 
@@ -22,7 +22,7 @@ If no value is found in the defined sources, it returns an empty hash ({})
       module_var_name  = "#{module_name}::#{var_name}"
       default_var_name = "#{module_name}::default::#{var_name}"
       
-      config = Coral::Config.init(options, [ :param, :module_hash ], module_name, {
+      config = CORL::Config.init(options, [ :param, :module_hash ], module_name, {
         :hiera_scope  => self,
         :puppet_scope => self,
         :search       => 'core::default',
@@ -31,7 +31,7 @@ If no value is found in the defined sources, it returns an empty hash ({})
         :force        => true,
         :merge        => true
       })
-      value = Coral::Config.lookup_hash([ module_var_name, default_var_name ], default, config)
+      value = CORL::Config.lookup_hash([ module_var_name, default_var_name ], default, config)
     end
     return value
   end

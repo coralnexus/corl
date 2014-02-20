@@ -10,7 +10,7 @@ This function interpolates values from one hash to another for configuration inj
 ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       raise(Puppet::ParseError, "interpolate(): Define at least a property name with optional source configurations " +
         "given (#{args.size} for 2)") if args.size < 1
       
@@ -18,8 +18,8 @@ This function interpolates values from one hash to another for configuration inj
       data    = ( args.size > 1 ? args[1] : {} )
       options = ( args.size > 2 ? args[2] : {} )
       
-      config = Coral::Config.init_flat(options, [ :data, :interpolate ])
-      value  = Coral::Util::Data.interpolate(value, data, config.options)
+      config = CORL::Config.init_flat(options, [ :data, :interpolate ])
+      value  = CORL::Util::Data.interpolate(value, data, config.options)
     end
     return value
   end

@@ -11,15 +11,15 @@ This function checks if Hiera is fully configured and ready to query.
 ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       options = ( args[0].is_a?(Hash) ? args[0] : {} )
     
-      config = Coral::Config.init_flat(options, [ :init, :config_initialized ], {
+      config = CORL::Config.init_flat(options, [ :init, :config_initialized ], {
         :hiera_scope  => self,
         :puppet_scope => self,
-        :init_fact    => 'coral_config_ready'
+        :init_fact    => 'corl_config_ready'
       })        
-      value = Coral::Config.initialized?(config)
+      value = CORL::Config.initialized?(config)
     end
     return value
   end

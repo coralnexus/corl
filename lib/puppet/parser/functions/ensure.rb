@@ -10,7 +10,7 @@ This function checks a given test and returns the success value or a failure val
 ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       raise(Puppet::ParseError, "ensure(): Must have at least a test and optional success and failure values specified; " +
         "given (#{args.size} for 1)") if args.size < 1
       
@@ -21,7 +21,7 @@ This function checks a given test and returns the success value or a failure val
       #dbg(test, 'test')
       #dbg(success_value, 'success')
       
-      value = Coral::Util::Data.ensure(test, success_value, failure_value)
+      value = CORL::Util::Data.ensure(test, success_value, failure_value)
       #dbg(value, 'value')
     end
     return value

@@ -1,16 +1,10 @@
-= coral_core
+= CORL (Cluster Orchestration and Research Library)
 
-This library provides core data elements and utilities used in other Coral gems.
-
-The Coral core library contains functionality that is utilized by other
-Coral gems by providing basic utilities like Git, Shell, Disk, and Data
-manipulation libraries, a UI system, and a core data model that supports
-Events, Commands, Repositories, and Memory (version controlled JSON 
-objects).  This library is only used as a starting point for other systems.
+Coming soon!
 
 Note:  This library is still very early in development!
 
-== Contributing to coral_core
+== Contributing to CORL
  
 * Check out the latest {major}.{minor} branch to make sure the feature hasn't 
   been implemented or the bug hasn't been fixed yet.
@@ -29,5 +23,5 @@ Note:  This library is still very early in development!
 
 Licensed under GPLv3.  See LICENSE.txt for further details.
 
-Copyright (c) 2013  Adrian Webb <adrian.webb@coraltech.net>
+Copyright (c) 2013  Adrian Webb <adrian.webb@coralnexus.com>
 Coral Technology Group LLC

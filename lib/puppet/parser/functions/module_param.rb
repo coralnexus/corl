@@ -4,7 +4,7 @@
 # This function performs a lookup for a variable value in various locations
 # following this order
 # - Hiera backend, if present (modulename prefix)
-# - ::coral::default::{modulename}::{varname} (configurable!!)
+# - ::corl::default::{modulename}::{varname} (configurable!!)
 # - ::{modulename}::default::{varname}
 # - {default parameter}
 #
@@ -20,7 +20,7 @@ If no value is found in the defined sources, it returns an empty string ('')
 ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       raise(Puppet::ParseError, "module_param(): Define at least the variable name " +
         "given (#{args.size} for 1)") if args.size < 1
       
@@ -32,7 +32,7 @@ If no value is found in the defined sources, it returns an empty string ('')
       module_var_name  = "#{module_name}::#{var_name}"
       default_var_name = "#{module_name}::default::#{var_name}"
       
-      config = Coral::Config.init(options, [ :param, :module_param ], module_name, {
+      config = CORL::Config.init(options, [ :param, :module_param ], module_name, {
         :hiera_scope  => self,
         :puppet_scope => self,
         :search       => 'core::default',
@@ -41,7 +41,7 @@ If no value is found in the defined sources, it returns an empty string ('')
         :force        => true,
         :merge        => true
       })
-      value = Coral::Config.lookup([ module_var_name, default_var_name ], default, config)
+      value = CORL::Config.lookup([ module_var_name, default_var_name ], default, config)
     end
     return value
   end

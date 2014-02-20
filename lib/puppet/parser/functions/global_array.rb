@@ -12,7 +12,7 @@ If no value is found in the defined sources, it returns an empty array ([])
 ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       raise(Puppet::ParseError, "global_array(): Define at least the variable name " +
         "given (#{args.size} for 1)") if args.size < 1
     
@@ -20,7 +20,7 @@ If no value is found in the defined sources, it returns an empty array ([])
       default  = ( args.size > 1 ? args[1] : [] ) 
       options  = ( args.size > 2 ? args[2] : {} )
     
-      config = Coral::Config.init_flat(options, [ :param, :global_array ], {
+      config = CORL::Config.init_flat(options, [ :param, :global_array ], {
         :hiera_scope  => self,
         :puppet_scope => self,
         :search       => 'core::default',
@@ -28,7 +28,7 @@ If no value is found in the defined sources, it returns an empty array ([])
         :force        => true,
         :merge        => true
       })
-      value = Coral::Config.lookup_array(var_name, default, config)
+      value = CORL::Config.lookup_array(var_name, default, config)
     end
     return value
   end

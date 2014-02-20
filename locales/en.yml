@@ -1,5 +1,5 @@
 en:
-  coral:
+  corl:
     errors:
       batch_error: |-
         An issue was encountered during batch processing
@@ -19,13 +19,13 @@ en:
         batch:
           unexpected_error: |
             There was a problem with batch %{process}: %{message}
-          coral_error: |
+          corl_error: |
             There was a problem with batch %{process}: %{message}
       mixins:
         project:
           options:
             provider: |-
-              Coral plugin provider to use for this project (default %{default_value})
+              CORL plugin provider to use for this project (default %{default_value})
             reference: |-
               Project URL or reference string to set as primary remote (default %{default_value})
             revision: |-
@@ -57,7 +57,7 @@ en:
             parallel: |-
               Enable parallelism of node action execution (default %{default_value})
             net_provider: |-
-              Coral network provider to use for managing cloud nodes (default %{default_value})
+              CORL network provider to use for managing cloud nodes (default %{default_value})
             node_provider: |-
               Default to using a specific node provider but individual node references can override (default %{default_value})
             nodes: |-
@@ -99,7 +99,7 @@ en:
           header: |-
             Available actions
           footer: |-
-            For help on any individual action run `coral <action> -h`
+            For help on any individual action run `corl <action> -h`
         errors:
           missing_argument: |-
             Argument <%{name}> must be specified
@@ -118,17 +118,17 @@ en:
       create:
         options:
           reference: |-
-            Git repository URL of Coral cloud to start project from (default %{default_value})
+            Git repository URL of CORL cloud to start project from (default %{default_value})
           revision: |-
             Revision or branch to initialize the project with (default %{default_value})
           path: |-
             Project path (default %{default_value})
           start: |-
-            Creating a new Coral cloud at %{path} from %{reference}
+            Creating a new CORL cloud at %{path} from %{reference}
       add:
         options:
           sub_reference: |-
-            Repository URL of Coral component (module or library) to include in the project
+            Repository URL of CORL component (module or library) to include in the project
           sub_path: |-
             Subproject path
           editable: |-
@@ -179,7 +179,7 @@ en:
           parallel: |-
             Enable or disable parallelism of node creation (default %{default_value})
           seed: |-
-            Coral project reference with cloud project to seed new machines with (default %{default_value})
+            CORL project reference with cloud project to seed new machines with (default %{default_value})
           region: |-
             Machine provider region in which to create the machines (defaults to first defined in provider)
           machine_type: |-

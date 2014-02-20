@@ -10,11 +10,11 @@ This function returns the internal form of a given value.
 ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       raise(Puppet::ParseError, "value(): Must have a source value specified; " +
         "given (#{args.size} for 1)") if args.size < 1
       
-      value = Coral::Util::Data.value(args[0])
+      value = CORL::Util::Data.value(args[0])
     end
     return value
   end

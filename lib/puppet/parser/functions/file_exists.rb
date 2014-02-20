@@ -8,11 +8,11 @@ EOS
   ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       raise(Puppet::ParseError, "file_exists(): Must have a file or directory name specified; " +
         "given (#{args.size} for 1)") if args.size < 1
       
-      value = Coral::Data::Disk.exists?(args[0])
+      value = CORL::Data::Disk.exists?(args[0])
     end
     return value
   end

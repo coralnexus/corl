@@ -10,7 +10,7 @@ This function returns the string-ified form of a given value.
 ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       raise(Puppet::ParseError, "render(): Must have a template class name and an optional source value specified; " +
         "given (#{args.size} for 2)") if args.size < 1
     
@@ -18,7 +18,7 @@ This function returns the string-ified form of a given value.
       data       = ( args.size > 1 ? args[1] : {} )
       options    = ( args.size > 2 ? args[2] : {} )
     
-      config = Coral::Config.init_flat(options, [ :data, :render ], {
+      config = CORL::Config.init_flat(options, [ :data, :render ], {
         :hiera_scope  => self,
         :puppet_scope => self,
         :search       => 'core::default',
@@ -26,7 +26,7 @@ This function returns the string-ified form of a given value.
         :force        => true,
         :merge        => true
       })
-      value = Coral.template(class_name, config).render(data)
+      value = CORL.template(class_name, config).render(data)
     end
     return value
   end

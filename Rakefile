@@ -8,7 +8,7 @@ require 'rspec/core/rake_task'
 require 'rdoc/task'
 require 'yard'
 
-require './lib/coral_core.rb'
+require './lib/corl.rb'
 
 #-------------------------------------------------------------------------------
 # Dependencies
@@ -26,17 +26,17 @@ end
 
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name                  = "coral_core"
-  gem.homepage              = "http://github.com/coralnexus/ruby-coral_core"
-  gem.rubyforge_project     = 'coral_core'
+  gem.name                  = "corl"
+  gem.homepage              = "http://github.com/coralnexus/corl"
+  gem.rubyforge_project     = 'corl'
   gem.license               = "GPLv3"
-  gem.email                 = "adrian.webb@coraltech.net"
+  gem.email                 = "adrian.webb@coralnexus.com"
   gem.authors               = ["Adrian Webb"]
-  gem.summary               = %Q{Provides core data elements and utilities used in other Coral gems}
+  gem.summary               = %Q{Provides core data elements and utilities used in other CORL gems}
   gem.description           = File.read('README.rdoc')  
   gem.required_ruby_version = '>= 1.8.1'
   gem.has_rdoc              = true
-  gem.rdoc_options << '--title' << 'Coral Core library' <<
+  gem.rdoc_options << '--title' << 'Cluster Orchestration and Research Library' <<
                       '--main' << 'README.rdoc' <<
                       '--line-numbers'
                       
@@ -60,8 +60,8 @@ task :default => :spec
 #-------------------------------------------------------------------------------
 # Documentation
 
-version   = Coral::VERSION
-doc_title = "coral_core #{version}"
+version   = CORL::VERSION
+doc_title = "corl #{version}"
 
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'

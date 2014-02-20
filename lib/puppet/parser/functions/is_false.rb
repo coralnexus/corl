@@ -10,11 +10,11 @@ This function checks whether a given value is false.
 ) do |args|
     
     value = nil
-    Coral.run do
+    CORL.run do
       raise(Puppet::ParseError, "is_false(): Must have a value to check; " +
         "given (#{args.size} for 1)") if args.size < 1
       
-      value = Coral::Util::Data.false?(args[0])
+      value = CORL::Util::Data.false?(args[0])
     end
     return value
   end
