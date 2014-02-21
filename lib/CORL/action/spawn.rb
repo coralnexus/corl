@@ -46,7 +46,7 @@ class Spawn < Plugin::Action
  
   def execute
     super do |node, network|
-      info('corl.core.actions.spawn.start')      
+      info('corl.actions.spawn.start')      
       
       if network
         if keypair && keypair_clean

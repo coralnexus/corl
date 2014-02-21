@@ -4,32 +4,26 @@ module Action
 class Provision < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Provision action interface
+  # Settings
   
-  def normalize
-    super('corl provision [ <project_directory> ]')
+  def configure
+    super do
+      register :provider, :str, :puppetnode
+      register :directory, :str, :default
+    end
+  end
+  
+  def arguments
+    [ :directory ]
   end
 
   #-----------------------------------------------------------------------------
-  # Action operations
+  # Operations
   
-  def parse(parser)
-    parser.option_str(:provider, nil, 
-      '--provider PROVISIONER_PROVIDER', 
-      'corl.core.actions.provision.options.provider'
-    )
-    parser.arg_str(:directory, :default, 
-      'corl.core.actions.provision.options.directory'
-    )
-  end
-  
-  #---
-   
   def execute
-    super do |node, network, status|
-      info('corl.core.actions.provision.start')
+    super do |node, network|
+      info('corl.actions.provision.start')
       
-      status
     end
   end
 end

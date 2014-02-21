@@ -4,25 +4,26 @@ module Action
 class Stop < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Stop action interface
+  # Settings
   
-  def normalize
-    super('corl stop')
+  def configure
+    super do
+      codes :network_failure
+    end
   end
 
   #-----------------------------------------------------------------------------
-  # Action operations
-  
-  def parse(parser)
-  end
-  
-  #---
+  # Operations
    
   def execute
-    super do |node, network, status|
-      info('corl.core.actions.stop.start')
+    super do |node, network|
+      info('corl.actions.stop.start')
       
-      status
+      if network && node
+        
+      else
+        myself.status = code.network_failure
+      end
     end
   end
 end

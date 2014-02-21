@@ -22,7 +22,7 @@ class Bootstrap < Plugin::Action
       end
       register :home_env_var, :str, 'HOME'
       register :home, :str, nil    
-      register :bootstrap_path, :str, File.join(Gems.core.full_gem_path, 'bootstrap') do |value|
+      register :bootstrap_path, :str, File.join(CORL.gem.full_gem_path, 'bootstrap') do |value|
         unless File.directory?(value)
           warn('corl.actions.bootstrap.errors.bootstrap_path', { :value => value })
           next false
@@ -33,11 +33,11 @@ class Bootstrap < Plugin::Action
       register :bootstrap_init, :str, 'bootstrap.sh'
       
       register :bootstrap_nodes, :array, nil do |values|
-        node_plugins = Manager.connection.loaded_plugins(:node)
+        node_plugins = CORL.loaded_plugins(:node)
         success      = true
         
         values.each do |value|
-          if info = Plugin::Node.translate_reference(value)
+          if info = plugin_class(:node).translate_reference(value)
             if ! node_plugins.keys.include?(info[:provider].to_sym) || info[:name].empty?
               warn('corl.actions.bootstrap.errors.bootstrap_nodes', { :value => value, :node_provider => info[:provider],  :name => info[:name] })
               success = false

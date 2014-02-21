@@ -19,9 +19,9 @@ class Seed < Plugin::Action
       register :project_branch, :str, 'master'
       register :project_reference, :str, nil do |value|
         value           = value.to_sym
-        project_plugins = Manager.connection.loaded_plugins(:project)
+        project_plugins = CORL.loaded_plugins(:project)
         
-        if @project_info = Plugin::Project.translate_reference(value, true)
+        if @project_info = plugin_class(:project).translate_reference(value, true)
           provider = @project_info[:provider]
         else
           provider = value

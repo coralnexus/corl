@@ -4,32 +4,26 @@ module Action
 class Start < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Start action interface
+  # Settings
   
-  def normalize
-    super('corl start <node_reference>')
+  def configure
+    super do
+      codes :network_failure
+    end
   end
 
   #-----------------------------------------------------------------------------
-  # Action operations
-  
-  def parse(parser)
-    parser.option_str(:provider, :rackspace,
-      '--provider DEFAULT_NODE_PROVIDER', 
-      'corl.core.actions.start.options.provider'
-    )
-    parser.arg_str(:node_reference, nil, 
-      'corl.core.actions.start.options.node_reference'
-    )
-  end
-  
-  #---
+  # Operations
    
   def execute
-    super do |node, network, status|
-      info('corl.core.actions.start.start')
+    super do |node, network|
+      info('corl.actions.start.start')
       
-      status
+      if network && node
+        
+      else
+        myself.status = code.network_failure
+      end
     end
   end
 end

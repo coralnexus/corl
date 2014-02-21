@@ -4,30 +4,29 @@ module Action
 class Lookup < Plugin::Action
  
   #-----------------------------------------------------------------------------
-  # Lookup action interface
+  # Settings
   
-  def normalize
-    super('corl lookup <property>') 
-  end
-
-  #-----------------------------------------------------------------------------
-  # Action operations
-  
-  def parse(parser)
-    parser.arg_str(:property, nil, 
-      'corl.core.actions.create.options.property'
-    )
+  def configure
+    super do
+      register :property, :str, nil
+    end
   end
   
   #---
+  
+  def arguments
+    [ :property ]
+  end
+
+  #-----------------------------------------------------------------------------
+  # Operations
    
   def execute
-    super do |node, network, status|
+    super do |node, network|
       property = settings[:property]
       value    = lookup(property)
       
-      ui.success(sprintf("#{property} = %s", value.inspect))                
-      status
+      render(sprintf("#{property} = %s", value.inspect))
     end
   end
 end
