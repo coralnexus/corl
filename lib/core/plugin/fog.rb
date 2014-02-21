@@ -1,5 +1,5 @@
 
-corl_require(File.dirname(__FILE__), :node)
+nucleon_require(File.dirname(__FILE__), :node)
 
 #---
 
