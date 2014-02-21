@@ -1,7 +1,7 @@
 
 module CORL
 module Provisioner
-class Puppetnode < Plugin::Provisioner
+class Puppetnode < plugin_class(:provisioner)
   
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
@@ -23,19 +23,6 @@ class Puppetnode < Plugin::Provisioner
     
     init_scope
     register
-  end
-  
-  #---
-  
-  def register
-    # Register Puppet CORL extensions
-    env.modules.each do |mod|
-      lib_dir = File.join(mod.path, 'lib', 'corl')
-      if File.directory?(lib_dir)
-        logger.debug("Registering Puppet module at #{lib_dir}")
-        Manager.connection.register(lib_dir)
-      end
-    end
   end
   
   #-----------------------------------------------------------------------------

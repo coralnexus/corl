@@ -1,7 +1,7 @@
 
 module CORL
 module Extension
-class Puppetloader < Plugin::Extension
+class Puppetloader < plugin_class(:extension)
 
   def register_plugins(config)
     connection  = Manager.connection

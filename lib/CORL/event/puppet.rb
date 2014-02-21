@@ -1,7 +1,7 @@
 
 module CORL
 module Event
-class Puppet < Plugin::Event
+class Puppet < plugin_class(:event)
   
   #-----------------------------------------------------------------------------
   # Puppet event interface

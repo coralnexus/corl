@@ -1,8 +1,4 @@
 
-corl_require(File.dirname(__FILE__), :fog)
-
-#---
-
 module CORL
 module Node
 class Aws < Node::Fog

@@ -1,7 +1,7 @@
 
 module CORL
 module Node
-class Local < Plugin::Node
+class Local < plugin_class(:node)
  
   #-----------------------------------------------------------------------------
   # Node plugin interface

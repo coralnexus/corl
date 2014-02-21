@@ -1,7 +1,7 @@
 
 module CORL
 module Machine
-class Physical < Plugin::Machine
+class Physical < plugin_class(:machine)
   
   #-----------------------------------------------------------------------------
   # Machine plugin interface
@@ -104,7 +104,7 @@ class Physical < Plugin::Machine
       logger.debug("Executing shell commands ( #{commands.inspect} ) on machine #{name}")
       
       commands.each do |command|
-        result = Util::Shell.connection.exec(command, config) do |op, command_str, data|
+        result = CORL.cli_run(command, config) do |op, command_str, data|
           block_given? ? yield(op, command_str, data) : true
         end        
         results << result
