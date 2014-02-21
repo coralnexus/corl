@@ -21,7 +21,7 @@ class Seed < Plugin::Action
         value           = value.to_sym
         project_plugins = CORL.loaded_plugins(:project)
         
-        if @project_info = plugin_class(:project).translate_reference(value, true)
+        if @project_info = CORL.plugin_class(:project).translate_reference(value, true)
           provider = @project_info[:provider]
         else
           provider = value

@@ -1,7 +1,7 @@
 
 module CORL
 module Plugin
-class Action < plugin_class(:action)
+class Action < CORL.plugin_class(:action)
   
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
@@ -42,7 +42,7 @@ class Action < plugin_class(:action)
     register :nodes, :array, [], 'corl.core.action.options.nodes' do |values|
       success = true
       values.each do |value|
-        if info = plugin_class(:node).translate_reference(value)
+        if info = CORL.plugin_class(:node).translate_reference(value)
           if ! node_plugins.keys.include?(info[:provider].to_sym) || info[:name].empty?
             warn('corl.core.action.errors.nodes', { :value => value, :provider => info[:provider],  :name => info[:name] })
             success = false

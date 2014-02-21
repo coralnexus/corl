@@ -1,7 +1,7 @@
 
 module Nucleon
 module Plugin
-class Provisioner < plugin_class(:base)
+class Provisioner < CORL.plugin_class(:base)
 
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface

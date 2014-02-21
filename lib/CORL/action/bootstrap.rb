@@ -37,7 +37,7 @@ class Bootstrap < Plugin::Action
         success      = true
         
         values.each do |value|
-          if info = plugin_class(:node).translate_reference(value)
+          if info = CORL.plugin_class(:node).translate_reference(value)
             if ! node_plugins.keys.include?(info[:provider].to_sym) || info[:name].empty?
               warn('corl.actions.bootstrap.errors.bootstrap_nodes', { :value => value, :node_provider => info[:provider],  :name => info[:name] })
               success = false

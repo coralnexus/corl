@@ -1,7 +1,7 @@
 
 module CORL
 module Template
-class Environment < plugin_class(:template)
+class Environment < CORL.plugin_class(:template)
   
   #-----------------------------------------------------------------------------
   # Renderers  

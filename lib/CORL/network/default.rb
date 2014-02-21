@@ -1,7 +1,7 @@
 
 module CORL
 module Network
-class Default < plugin_class(:network)
+class Default < CORL.plugin_class(:network)
  
   #-----------------------------------------------------------------------------
   # Cloud plugin interface

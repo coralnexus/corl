@@ -70,9 +70,8 @@ end
   nucleon_require(util_dir, name)
 end
 
-# Include core systems
+# Include facade
 nucleon_require(core_dir, :facade)
-nucleon_require(core_dir, :plugin)
 
 #-------------------------------------------------------------------------------
 # CORL interface
@@ -83,6 +82,7 @@ module CORL
   
   #-----------------------------------------------------------------------------
   
+  extend Nucleon::Facade
   extend Facade
   
   #-----------------------------------------------------------------------------
@@ -100,13 +100,17 @@ module CORL
     if op == :define    
       manager.define_namespace :CORL
     
-      manager.define_type :configuration => :file,       # Core
-                          :network       => :default,    # Cluster
-                          :node          => :local,      # Cluster
-                          :machine       => :physical,   # Cluster
-                          :provisioner   => :puppetnode, # Cluster
+      manager.define_type :configuration => :file,      # Core
+                          :network       => :default,   # Cluster
+                          :node          => :local,     # Cluster
+                          :machine       => :physical,  # Cluster
+                          :provisioner   => :puppetnode # Cluster
     elsif op == :load
       @@gem = Nucleon::Gems.registered[:corl][:spec]
     end
   end
 end
+
+# Include CORL core plugins
+nucleon_require(core_dir, :plugin)
+

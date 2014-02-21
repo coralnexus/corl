@@ -1,7 +1,7 @@
 
 module CORL
 module Configuration
-class File < plugin_class(:configuration)
+class File < CORL.plugin_class(:configuration)
 
   #-----------------------------------------------------------------------------
   # Configuration plugin interface

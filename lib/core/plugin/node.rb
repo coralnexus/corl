@@ -1,7 +1,7 @@
 
 module Nucleon
 module Plugin
-class Node < plugin_class(:base)
+class Node < CORL.plugin_class(:base)
   
   include Celluloid
  

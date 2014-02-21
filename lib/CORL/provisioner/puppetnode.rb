@@ -1,7 +1,7 @@
 
 module CORL
 module Provisioner
-class Puppetnode < plugin_class(:provisioner)
+class Puppetnode < CORL.plugin_class(:provisioner)
   
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface

@@ -1,7 +1,7 @@
 
 module CORL
 module Machine
-class Fog < plugin_class(:machine)
+class Fog < CORL.plugin_class(:machine)
  
   #-----------------------------------------------------------------------------
   # Checks

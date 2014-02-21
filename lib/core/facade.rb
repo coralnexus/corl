@@ -1,12 +1,6 @@
 
 module CORL
 module Facade
-  
-  extend Nucleon::Facade
-  
-  def self.included(klass)
-    klass.send(:extend, Nucleon::Facade)
-  end
     
   #-----------------------------------------------------------------------------
   # Core plugin type facade
