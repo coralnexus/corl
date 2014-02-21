@@ -1,7 +1,7 @@
 
-module CORL
+module Nucleon
 module Plugin
-class Network < Base
+class Network < plugin_class(:base)
   
   init_plugin_collection 
   
