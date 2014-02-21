@@ -17,7 +17,6 @@ lib_dir          = File.dirname(__FILE__)
 core_dir         = File.join(lib_dir, 'core')
 mixin_dir        = File.join(core_dir, 'mixin')
 mixin_action_dir = File.join(mixin_dir, 'action')
-macro_dir        = File.join(mixin_dir, 'macro')
 util_dir         = File.join(core_dir, 'util')
 mod_dir          = File.join(core_dir, 'mod')
 plugin_dir       = File.join(core_dir, 'plugin')
@@ -62,9 +61,6 @@ end
 Dir.glob(File.join(mixin_action_dir, '*.rb')).each do |file|
   require file
 end
-Dir.glob(File.join(macro_dir, '*.rb')).each do |file|
-  require file
-end
 
 #---
 
@@ -79,7 +75,38 @@ nucleon_require(core_dir, :facade)
 nucleon_require(core_dir, :plugin)
 
 #-------------------------------------------------------------------------------
-# CORL initialization
+# CORL interface
 
-Nucleon.define_namespace :CORL
-Nucleon.reload
+module CORL
+ 
+  VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
+  
+  #-----------------------------------------------------------------------------
+  
+  extend Facade
+  
+  #-----------------------------------------------------------------------------
+  # CORL initialization
+  
+  @@gem = nil
+  
+  def self.gem
+    @@gem
+  end
+  
+  #---  
+
+  reload do |op, manager|
+    if op == :define    
+      manager.define_namespace :CORL
+    
+      manager.define_type :configuration => :file,       # Core
+                          :network       => :default,    # Cluster
+                          :node          => :local,      # Cluster
+                          :machine       => :physical,   # Cluster
+                          :provisioner   => :puppetnode, # Cluster
+    elsif op == :load
+      @@gem = Nucleon::Gems.registered[:corl][:spec]
+    end
+  end
+end
