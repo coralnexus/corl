@@ -1,7 +1,11 @@
 
+corl_require(File.dirname(__FILE__), :node)
+
+#---
+
 module CORL
 module Node
-class Fog < Plugin::Node
+class Fog < plugin_class(:node)
  
   #-----------------------------------------------------------------------------
   # Node plugin interface
