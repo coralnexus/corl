@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Stop < Plugin::Action
+class Stop < Plugin::CloudAction
  
   #-----------------------------------------------------------------------------
   # Settings

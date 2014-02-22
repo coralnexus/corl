@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Start < Plugin::Action
+class Start < Plugin::CloudAction
  
   #-----------------------------------------------------------------------------
   # Settings

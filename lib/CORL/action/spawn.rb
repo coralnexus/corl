@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Spawn < Plugin::Action
+class Spawn < Plugin::CloudAction
   
   include Mixin::Action::Keypair
  

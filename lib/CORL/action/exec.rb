@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Exec < Plugin::Action
+class Exec < Plugin::CloudAction
  
   #----------------------------------------------------------------------------
   # Settings

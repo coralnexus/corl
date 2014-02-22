@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Lookup < Plugin::Action
+class Lookup < Plugin::CloudAction
  
   #-----------------------------------------------------------------------------
   # Settings

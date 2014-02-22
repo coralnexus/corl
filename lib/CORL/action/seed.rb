@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Seed < Plugin::Action
+class Seed < Plugin::CloudAction
  
   #-----------------------------------------------------------------------------
   # Settings

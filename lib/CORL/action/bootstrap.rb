@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Bootstrap < Plugin::Action
+class Bootstrap < Plugin::CloudAction
 
   #-----------------------------------------------------------------------------
   # Settings

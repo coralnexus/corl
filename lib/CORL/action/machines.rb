@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Machines < Plugin::Action
+class Machines < Plugin::CloudAction
 
   #-----------------------------------------------------------------------------
   # Settings

@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Images < Plugin::Action
+class Images < Plugin::CloudAction
 
   #-----------------------------------------------------------------------------
   # Settings

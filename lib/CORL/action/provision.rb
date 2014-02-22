@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class Provision < Plugin::Action
+class Provision < Plugin::CloudAction
  
   #-----------------------------------------------------------------------------
   # Settings
