@@ -1,7 +1,7 @@
 
 module CORL
 module Plugin
-class Action < CORL.plugin_class(:action)
+class CloudAction < CORL.plugin_class(:action)
   
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
