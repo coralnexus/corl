@@ -8,41 +8,41 @@ module Keypair
   # Options
         
   def keypair_config
-    register :private_key, :str, nil, 'corl.core.mixins.keypair.options.private_key' do |value|
+    register :private_key, :str, nil, 'corl.core.mixin.action.keypair.options.private_key' do |value|
       success = true
       if value
         file = File.expand_path(value)
         if File.exists?(file)
           unless Util::SSH.generate({ :private_key => file })
-            warn('corl.core.mixins.keypair.errors.private_key_parse_error', { :value => file })
+            warn('corl.core.mixin.action.keypair.errors.private_key_parse_error', { :value => file })
             success = false
           end
         else
-          warn('corl.core.mixins.keypair.errors.private_key_not_found', { :value => file })
+          warn('corl.core.mixin.action.keypair.errors.private_key_not_found', { :value => file })
           success = false  
         end
       end
       success  
     end
     
-    register :require_password, :bool, false, 'corl.core.mixins.keypair.options.require_password'
+    register :require_password, :bool, false, 'corl.core.mixin.action.keypair.options.require_password'
     
-    register :key_type, :str, 'RSA', 'corl.core.mixins.keypair.options.key_type' do |value|
+    register :key_type, :str, 'RSA', 'corl.core.mixin.action.keypair.options.key_type' do |value|
       key_type_choices = [ 'RSA', 'DSA' ]
       unless key_type_choices.include?(value.to_s.upcase)
-        warn('corl.core.mixins.keypair.errors.key_type', { :value => value, :choices => key_type_choices })
+        warn('corl.core.mixin.action.keypair.errors.key_type', { :value => value, :choices => key_type_choices })
         next false    
       end
       true
     end
-    register :key_bits, :int, 2048, 'corl.core.mixins.keypair.options.key_bits' do |value|
+    register :key_bits, :int, 2048, 'corl.core.mixin.action.keypair.options.key_bits' do |value|
       unless value >= 2048
-        warn('corl.core.mixins.keypair.errors.key_bits', { :value => value, :required => 2048 })
+        warn('corl.core.mixin.action.keypair.errors.key_bits', { :value => value, :required => 2048 })
         next false 
       end
       true     
     end
-    register :key_comment, :str, '', 'corl.core.mixins.keypair.options.key_comment'
+    register :key_comment, :str, '', 'corl.core.mixin.action.keypair.options.key_comment'
     
     config_subset(keypair_ignore)
   end
@@ -89,7 +89,7 @@ module Keypair
           if password
             key_options[:passphrase] = password
           else
-            warn('corl.core.mixins.keypair.errors.no_password')
+            warn('corl.core.mixin.action.keypair.errors.no_password')
             return nil
           end
         end
