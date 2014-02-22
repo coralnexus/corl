@@ -7,7 +7,7 @@ class Action < CORL.plugin_class(:action)
   # Property accessor / modifiers
     
   def configure
-    super(:corl) do
+    super do
       node_config
       yield if block_given?
     end
