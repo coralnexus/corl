@@ -19,7 +19,6 @@ mixin_dir        = File.join(core_dir, 'mixin')
 mixin_action_dir = File.join(mixin_dir, 'action')
 util_dir         = File.join(core_dir, 'util')
 mod_dir          = File.join(core_dir, 'mod')
-plugin_dir       = File.join(core_dir, 'plugin')
  
 #-------------------------------------------------------------------------------
 # CORL requirements
@@ -30,7 +29,8 @@ $:.unshift(lib_dir) unless $:.include?(lib_dir) || $:.include?(File.expand_path(
   
 require 'rubygems'
 
-require 'nucleon'
+require 'nucleon_base'
+CORL = Nucleon
 
 require 'tmpdir'
 require 'sshkey'
@@ -73,17 +73,17 @@ end
 # Include facade
 nucleon_require(core_dir, :facade)
 
+# Include CORL core plugins
+nucleon_require(core_dir, :plugin)
+
 #-------------------------------------------------------------------------------
 # CORL interface
 
 module CORL
  
-  VERSION = File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
-  
-  #-----------------------------------------------------------------------------
-  
-  extend Nucleon::Facade
-  extend Facade
+  def self.VERSION
+    File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))  
+  end
   
   #-----------------------------------------------------------------------------
   # CORL initialization
@@ -96,8 +96,8 @@ module CORL
   
   #---  
 
-  reload do |op, manager|
-    if op == :define    
+  reload(true) do |op, manager|
+    if op == :define
       manager.define_namespace :CORL
     
       manager.define_type :configuration => :file,      # Core
@@ -110,7 +110,3 @@ module CORL
     end
   end
 end
-
-# Include CORL core plugins
-nucleon_require(core_dir, :plugin)
-
