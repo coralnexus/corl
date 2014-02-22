@@ -5,6 +5,12 @@ class CloudAction < CORL.plugin_class(:action)
   
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
+  
+  def namespace
+    :corl
+  end
+  
+  #---
     
   def configure
     super do
