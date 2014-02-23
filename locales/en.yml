@@ -21,6 +21,10 @@ en:
             Node plugin provider %{value} is not loaded >> Pick from the following: %{choices}
           nodes: |-
             Node reference %{value} failed to parse or provider %{provider} isn't loaded (%{name})
+      node:
+        bootstrap:
+          status: |-
+            Bootstrap script %{script} failed with status %{status}
       mixin:
         action:
           keypair:
@@ -114,6 +118,8 @@ en:
           Starting bootstrap of machine %{hostname} (%{id})
         success: |-
           Machine %{hostname} (%{id}) successfully bootstrapped
+        failure: |-
+          Machine %{hostname} (%{id}) bootstrap failed with status %{status}
       exec:
         options:
           command: |-
