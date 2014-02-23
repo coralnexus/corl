@@ -133,6 +133,8 @@ en:
         errors:
           project_reference: |-
             Project reference %{value} failed to parse or provider %{provider} isn't loaded >> Possible providers: %{choices}
+        start: |-
+          Now seeding CORL node
       provision:
         options:
           provider: |-
