@@ -32,8 +32,8 @@ Jeweler::Tasks.new do |gem|
   gem.license               = "GPLv3"
   gem.email                 = "adrian.webb@coralnexus.com"
   gem.authors               = ["Adrian Webb"]
-  gem.summary               = %Q{Provides core data elements and utilities used in other CORL gems}
-  gem.description           = File.read('README.rdoc')  
+  gem.summary               = %Q{Cluster Orchestration and Research Library}
+  gem.description           = %Q{Framework that provides a simple foundation for growing organically in the cloud} 
   gem.required_ruby_version = '>= 1.8.1'
   gem.has_rdoc              = true
   gem.rdoc_options << '--title' << 'Cluster Orchestration and Research Library' <<
@@ -60,7 +60,7 @@ task :default => :spec
 #-------------------------------------------------------------------------------
 # Documentation
 
-version   = CORL::VERSION
+version   = CORL.VERSION
 doc_title = "corl #{version}"
 
 Rake::RDocTask.new do |rdoc|
