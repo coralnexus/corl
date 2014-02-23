@@ -11,11 +11,12 @@ class Fog < CORL.plugin_class(:node)
   # Node plugin interface
    
   def normalize
-    super
-    myself.region = region
-    
-    yield if block_given?    
-    myself.machine = create_machine(:machine, :fog, machine_config)
+    super do
+      myself.region  = region             
+      myself.machine = create_machine(:machine, :fog, machine_config)
+      
+      yield if block_given? 
+    end
   end
        
   #-----------------------------------------------------------------------------
