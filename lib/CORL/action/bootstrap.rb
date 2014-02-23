@@ -63,14 +63,20 @@ class Bootstrap < Plugin::CloudAction
   # Operations
     
   def execute
-    super do |local_node, network|     
+    super do |local_node, network|
       if network
         batch_success = network.batch(settings[:bootstrap_nodes], settings[:node_provider], settings[:parallel]) do |node|
           render_options = { :id => node.id, :hostname => node.hostname }
           
           info('corl.actions.bootstrap.start', render_options)
-          node.bootstrap(network.home, extended_config(:bootstrap, settings))
-          info('corl.actions.bootstrap.success', render_options)
+          success = node.bootstrap(network.home, extended_config(:bootstrap, settings))
+          if success
+            info('corl.actions.bootstrap.success', render_options)
+          else
+            render_options[:status] = node.status
+            error('corl.actions.bootstrap.failure', render_options)
+          end
+          success
         end
         myself.status = code.batch_error unless batch_success
       else
