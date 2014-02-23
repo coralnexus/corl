@@ -48,7 +48,7 @@ class Network < CORL.plugin_class(:base)
   def node_groups
     groups = {}
     
-    each_node_config! do |provider, name, info|
+    each_node_config do |provider, name, info|
       search_node(provider, name, :groups, [], :array).each do |group|
         group = group.to_sym
         groups[group] = [] unless groups.has_key?(group)
@@ -107,7 +107,7 @@ class Network < CORL.plugin_class(:base)
   #---
   
   def node_by_ip(public_ip)
-    each_node_config! do |provider, name, info|
+    each_node_config do |provider, name, info|
       return node(provider, name) if info[:public_ip] == public_ip  
     end
     nil
