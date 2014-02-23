@@ -54,7 +54,7 @@ class Fog < CORL.plugin_class(:machine)
     unless @server.nil?
       myself.name = @server.id
       
-      node[:id]         = name
+      node[:id]         = plugin_name
       node[:hostname]   = @server.name
       node[:public_ip]  = @server.public_ip_address
       node[:private_ip] = @server.private_ip_address
@@ -136,7 +136,7 @@ class Fog < CORL.plugin_class(:machine)
   
   def load
     super do
-      myself.server = name if compute && ! name.empty?
+      myself.server = plugin_name if compute && ! plugin_name.empty?
       server.nil? ? false : true
     end    
   end
