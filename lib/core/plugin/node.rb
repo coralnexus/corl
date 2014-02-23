@@ -12,7 +12,7 @@ class Node < CORL.plugin_class(:base)
     super
     
     ui.resource = hostname
-    ui.logger   = hostname
+    logger      = hostname
     
     @cli_interface = Util::Liquid.new do |method, args, &code|
       result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }) do |op, data|
@@ -28,7 +28,7 @@ class Node < CORL.plugin_class(:base)
       action(method, *args) do |op, data|
         code.call(op, data) if code
       end
-    end
+    end    
   end
   
   #---
@@ -304,7 +304,7 @@ class Node < CORL.plugin_class(:base)
   # Machine operations
   
   def create_machine(name, provider, options = {})
-    CORL.plugin_load(:machine, provider, extended_config(name, options).import({ :meta => { :parent => myself }}))
+    CORL.create_plugin(:machine, provider, extended_config(name, options).import({ :meta => { :parent => myself }}))
   end
   
   #---
@@ -461,7 +461,7 @@ class Node < CORL.plugin_class(:base)
         active_machine = local? ? local_machine : machine
         
         if commands = config.get(:commands, nil)
-          logger.info("Starting command execution: #{commands.join('; ')}")
+          render("Starting command execution: #{commands.join('; ')}")
           results = active_machine.exec(commands, config.export) do |type, command, data|
             if type == :error
               alert(data)
@@ -498,7 +498,7 @@ class Node < CORL.plugin_class(:base)
   
   def command(command, options = {})
     unless command.is_a?(CORL::Plugin::Command)
-      command = CORL.command(Config.new({ :command => command }).import(options), :shell)
+      command = CORL.command(Config.new({ :command => command }).import(options), :bash)
     end
     results = exec({ :commands => [ command.to_s ] }) do |op, data|
       yield(op, data) if block_given?  
@@ -581,13 +581,15 @@ class Node < CORL.plugin_class(:base)
           
           # Execute bootstrap process
           if status == code.success
-            remote_script = File.join(remote_bootstrap_path, bootstrap_init)                  
+            remote_script = File.join(remote_bootstrap_path, bootstrap_init) 
+            
             result = command(remote_script) do |op, data|
               yield("exec_#{op}".to_sym, data) if block_given?
               data
             end
             
             if result.status != code.success
+              warn('corl.core.node.bootstrap.status', { :script => remote_script, :status => result.status })
               myself.status = code.bootstrap_exec_failure  
             end
           end
