@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
     "bootstrap/os/ubuntu/05_ruby.sh",
     "bootstrap/os/ubuntu/06_puppet.sh",
     "bootstrap/os/ubuntu/10_corl.sh",
+    "corl.gemspec",
     "lib/CORL/action/bootstrap.rb",
     "lib/CORL/action/exec.rb",
     "lib/CORL/action/image.rb",
