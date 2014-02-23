@@ -22,7 +22,7 @@ class Bootstrap < Plugin::CloudAction
       end
       register :home_env_var, :str, 'HOME'
       register :home, :str, nil    
-      register :bootstrap_path, :str, File.join(CORL.gem.full_gem_path, 'bootstrap') do |value|
+      register :bootstrap_path, :str, File.join(CORL.lib_path, '..', 'bootstrap') do |value|
         unless File.directory?(value)
           warn('corl.actions.bootstrap.errors.bootstrap_path', { :value => value })
           next false

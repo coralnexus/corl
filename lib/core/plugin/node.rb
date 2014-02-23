@@ -536,7 +536,7 @@ class Node < CORL.plugin_class(:base)
     myself.status = code.unknown_status
     
     bootstrap_name = 'bootstrap'    
-    bootstrap_path = config.get(:bootstrap_path, File.join(CORL.gem.full_gem_path, bootstrap_name))
+    bootstrap_path = config.get(:bootstrap_path, File.join(CORL.lib_path, '..', bootstrap_name))
     bootstrap_glob = config.get(:bootstrap_glob, '**/*.sh')
     bootstrap_init = config.get(:bootstrap_init, 'bootstrap.sh')
     

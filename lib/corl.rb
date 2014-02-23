@@ -94,10 +94,8 @@ module CORL
   #-----------------------------------------------------------------------------
   # CORL initialization
   
-  @@gem = nil
-  
-  def self.gem
-    @@gem
+  def self.lib_path
+    File.dirname(__FILE__)
   end
   
   #---  
@@ -111,8 +109,6 @@ module CORL
                           :node          => :local,     # Cluster
                           :machine       => :physical,  # Cluster
                           :provisioner   => :puppetnode # Cluster
-    elsif op == :load
-      @@gem = Nucleon::Gems.registered[:corl][:spec]
     end
   end
 end
