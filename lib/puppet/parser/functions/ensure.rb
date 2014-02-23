@@ -18,11 +18,7 @@ This function checks a given test and returns the success value or a failure val
       success_value = (args.size > 1 ? args[1] : test)
       failure_value = (args.size > 2 ? args[2] : :undef)
       
-      #dbg(test, 'test')
-      #dbg(success_value, 'success')
-      
       value = CORL::Util::Data.ensure(test, success_value, failure_value)
-      #dbg(value, 'value')
     end
     return value
   end
