@@ -11,6 +11,8 @@ class Node < CORL.plugin_class(:base)
   def normalize
     super
     
+    yield if block_given? # Chance to create a machine to feed hostname
+    
     ui.resource = hostname
     logger      = hostname
     
@@ -129,33 +131,33 @@ class Node < CORL.plugin_class(:base)
   #---
   
   def id(reset = false)
-    myself[:id] = machine.plugin_name if reset || myself[:id].nil?
+    myself[:id] = machine.plugin_name if machine && ( reset || myself[:id].nil? )
     myself[:id]
   end
  
   #---
   
   def public_ip(reset = false)
-    myself[:public_ip] = machine.public_ip if reset || myself[:public_ip].nil?
+    myself[:public_ip] = machine.public_ip if machine && ( reset || myself[:public_ip].nil? )
     myself[:public_ip]
   end
   
   def private_ip(reset = false)
-    myself[:private_ip] = machine.private_ip if reset || myself[:private_ip].nil?
+    myself[:private_ip] = machine.private_ip if machine && ( reset || myself[:private_ip].nil? )
     myself[:private_ip]
   end
   
   #---
   
   def hostname(reset = false)
-    myself[:hostname] = machine.hostname if reset || myself[:hostname].nil?
+    myself[:hostname] = machine.hostname if machine && ( reset || myself[:hostname].nil? )
     myself[:hostname]
   end
   
   #---
   
   def state(reset = false)
-    myself[:state] = machine.state if reset || myself[:state].nil?
+    myself[:state] = machine.state if machine && ( reset || myself[:state].nil? )
     myself[:state]
   end
   
@@ -284,7 +286,7 @@ class Node < CORL.plugin_class(:base)
   end
   
   def image(reset = false)
-    myself[:image] = machine.image if reset || myself[:image].nil?
+    myself[:image] = machine.image if machine && ( reset || myself[:image].nil? )
     myself[:image]
   end
   
