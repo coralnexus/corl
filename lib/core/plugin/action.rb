@@ -102,16 +102,7 @@ class CloudAction < CORL.plugin_class(:action)
         exec_config.delete(:node_provider)
               
         result = node.action(plugin_provider, exec_config) do |op, data|
-          ui_group(node.plugin_name) do
-            case op
-            when :config # Modify seed execution configurations
-              render("Starting remote execution of #{plugin_provider} action")  
-            when :process # Process final result
-              render("Successfully finished remote execution of #{plugin_provider} action")     
-            end
-            data = execute_remote(node, network, op, data)
-          end
-          data
+          execute_remote(node, network, op, data)
         end
         result.status == code.success 
       end
