@@ -52,9 +52,9 @@ class Network < CORL.plugin_class(:base)
       search_node(provider, name, :groups, [], :array).each do |group|
         group = group.to_sym
         groups[group] = [] unless groups.has_key?(group)
-        groups[group] << { :provider => provider, :name => node_name }
+        groups[group] << { :provider => provider, :name => name }
       end
-    end    
+    end
     groups
   end
   
