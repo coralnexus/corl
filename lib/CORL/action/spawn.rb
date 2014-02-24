@@ -21,12 +21,12 @@ class Spawn < Plugin::CloudAction
         
       keypair_config
       
-      bootstrap = CORL.action_config(:bootstrap)
-      config.defaults(bootstrap.config) if bootstrap
+      bootstrap_config = CORL.action_config(:bootstrap)
+      config.defaults(bootstrap_config) if bootstrap_config
       
-      if seed = CORL.action_config(:seed)
-        seed.config[:project_reference].default = "github:::coraltech/cluster-test[master]"
-        config.defaults(seed.config)
+      if seed_config = CORL.action_config(:seed)
+        seed_config[:project_reference].default = "github:::coraltech/cluster-test[master]"
+        config.defaults(seed_config)
       end
     end
   end
@@ -52,7 +52,7 @@ class Spawn < Plugin::CloudAction
         if keypair && keypair_clean
           results       = []
           node_provider = settings.delete(:node_provider)
-                         
+          
           settings.delete(:hostnames).each do |hostname|
             if settings[:parallel]
               results << network.future.add_node(node_provider, hostname, settings)
