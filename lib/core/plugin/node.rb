@@ -460,17 +460,26 @@ class Node < CORL.plugin_class(:base)
               
         yield(:config, config) if block_given?
         
-        active_machine = local? ? local_machine : machine
+        if local?
+          active_machine = local_machine
+          
+          config[:info_prefix]  = "[#{hostname}] "
+          config[:error_prefix] = "[#{hostname}] "
+        else
+          active_machine = machine
+        end
         
         if commands = config.get(:commands, nil)
           render("Starting command execution: #{commands.join('; ')}")
           results = active_machine.exec(commands, config.export) do |type, command, data|
-            if type == :error
-              alert(data)
-            else
-              render(data)
+            unless local?
+              if type == :error
+                alert(data)
+              else
+                render(data)
+              end
             end
-            yield(:progress, { :type => type, :command => command, :data => data })    
+            yield(:progress, { :type => type, :command => command, :data => data }) if block_given?   
           end
         end
         
