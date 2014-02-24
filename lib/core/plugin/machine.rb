@@ -88,10 +88,10 @@ class Machine < CORL.plugin_class(:base)
   def load
     success = true
     
-    logger.debug("Loading #{plugin_provider} machine: #{name}")
+    logger.debug("Loading #{plugin_provider} machine: #{plugin_name}")
     success = yield if block_given?  
         
-    logger.warn("There was an error loading the machine #{name}") unless success
+    logger.warn("There was an error loading the machine #{plugin_name}") unless success
     success
   end
   
@@ -101,14 +101,14 @@ class Machine < CORL.plugin_class(:base)
     success = true
     
     if created?
-      logger.debug("Machine #{name} already exists")
+      logger.debug("Machine #{plugin_name} already exists")
     else
       logger.debug("Creating #{plugin_provider} machine with: #{options.inspect}")
       config  = Config.ensure(options)
       success = yield(config) if block_given?  
     end
     
-    logger.warn("There was an error creating the machine #{name}") unless success
+    logger.warn("There was an error creating the machine #{plugin_name}") unless success
     success
   end
   
@@ -122,10 +122,10 @@ class Machine < CORL.plugin_class(:base)
       config  = Config.ensure(options)      
       success = yield(config, success) if block_given?
     else
-      logger.debug("Machine #{name} is not running")  
+      logger.debug("Machine #{plugin_name} is not running")  
     end
     
-    logger.warn("There was an error downloading from the machine #{name}") unless success
+    logger.warn("There was an error downloading from the machine #{plugin_name}") unless success
     success
   end
   
@@ -139,10 +139,10 @@ class Machine < CORL.plugin_class(:base)
       config  = Config.ensure(options)      
       success = yield(config, success) if block_given?
     else
-      logger.debug("Machine #{name} is not running")  
+      logger.debug("Machine #{plugin_name} is not running")  
     end
     
-    logger.warn("There was an error uploading to the machine #{name}") unless success
+    logger.warn("There was an error uploading to the machine #{plugin_name}") unless success
     success
   end
   
@@ -156,10 +156,10 @@ class Machine < CORL.plugin_class(:base)
       config  = Config.ensure(options)      
       results = yield(config, results) if block_given?
     else
-      logger.debug("Machine #{name} is not running")  
+      logger.debug("Machine #{plugin_name} is not running")  
     end
     
-    logger.warn("There was an error executing command on the machine #{name}") unless results
+    logger.warn("There was an error executing command on the machine #{plugin_name}") unless results
     results
   end
   
@@ -169,7 +169,7 @@ class Machine < CORL.plugin_class(:base)
     success = true
     
     if running?
-      logger.debug("Machine #{name} is already running")  
+      logger.debug("Machine #{plugin_name} is already running")  
     else
       logger.debug("Starting #{plugin_provider} machine with: #{options.inspect}")
       
@@ -177,12 +177,12 @@ class Machine < CORL.plugin_class(:base)
         config  = Config.ensure(options)
         success = yield(config) if block_given?    
       else
-        logger.debug("Machine #{name} does not yet exist")
+        logger.debug("Machine #{plugin_name} does not yet exist")
         success = create(options)
       end      
     end
     
-    logger.warn("There was an error starting the machine #{name}") unless success
+    logger.warn("There was an error starting the machine #{plugin_name}") unless success
     success
   end
   
@@ -196,10 +196,10 @@ class Machine < CORL.plugin_class(:base)
       config  = Config.ensure(options)
       success = yield(config) if block_given?
     else
-      logger.debug("Machine #{name} does not yet exist")
+      logger.debug("Machine #{plugin_name} does not yet exist")
     end
     
-    logger.warn("There was an error reloading the machine #{name}") unless success
+    logger.warn("There was an error reloading the machine #{plugin_name}") unless success
     success
   end
 
@@ -213,10 +213,10 @@ class Machine < CORL.plugin_class(:base)
       config  = Config.ensure(options)      
       success = yield(config) if block_given?
     else
-      logger.debug("Machine #{name} is not running")  
+      logger.debug("Machine #{plugin_name} is not running")  
     end
     
-    logger.warn("There was an error creating an image of the machine #{name}") unless success
+    logger.warn("There was an error creating an image of the machine #{plugin_name}") unless success
     success
   end
 
@@ -230,10 +230,10 @@ class Machine < CORL.plugin_class(:base)
       config  = Config.ensure(options)      
       success = yield(config) if block_given?
     else
-      logger.debug("Machine #{name} is not running")  
+      logger.debug("Machine #{plugin_name} is not running")  
     end
     
-    logger.warn("There was an error stopping the machine #{name}") unless success
+    logger.warn("There was an error stopping the machine #{plugin_name}") unless success
     success
   end
   
@@ -247,10 +247,10 @@ class Machine < CORL.plugin_class(:base)
       config  = Config.ensure(options)
       success = yield(config) if block_given?
     else
-      logger.debug("Machine #{name} does not yet exist")
+      logger.debug("Machine #{plugin_name} does not yet exist")
     end
     
-    logger.warn("There was an error destroying the machine #{name}") unless success
+    logger.warn("There was an error destroying the machine #{plugin_name}") unless success
     success
   end
   
