@@ -62,7 +62,7 @@ class Fog < CORL.plugin_class(:machine)
       node.machine_type = @server.flavor.id
       node.image        = @server.image.id      
     
-      node.user                = @server.username unless node.user
+      node.user         = @server.username unless node.user
       
       @server.private_key_path = node.private_key if node.private_key
       @server.public_key_path  = node.public_key if node.public_key
@@ -137,7 +137,7 @@ class Fog < CORL.plugin_class(:machine)
   def load
     super do
       myself.server = plugin_name if compute && ! plugin_name.empty?
-      server.nil? ? false : true
+      ! plugin_name.empty? && @server.nil? ? false : true
     end    
   end
   
