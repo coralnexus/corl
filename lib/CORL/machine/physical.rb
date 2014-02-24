@@ -99,13 +99,13 @@ class Physical < CORL.plugin_class(:machine)
   
   #---
   
-  def exec(commands, options = {})
+  def exec(commands, options = {}, &code)
     super do |config, results|
-      logger.debug("Executing shell commands ( #{commands.inspect} ) on machine #{name}")
+      logger.debug("Executing shell commands ( #{commands.inspect} ) on machine #{plugin_name}")
       
       commands.each do |command|
         result = CORL.cli_run(command, config) do |op, command_str, data|
-          block_given? ? yield(op, command_str, data) : true
+          code ? code.call(op, command_str, data) : true
         end        
         results << result
       end
