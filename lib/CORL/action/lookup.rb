@@ -24,9 +24,9 @@ class Lookup < Plugin::CloudAction
   def execute
     super do |node, network|
       property = settings[:property]
-      value    = lookup(property)
+      value    = node.lookup(property)
       
-      render(sprintf("#{property} = %s", value.inspect))
+      node.render(sprintf("#{property} = %s", value.inspect))
     end
   end
 end
