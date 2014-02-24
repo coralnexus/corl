@@ -74,7 +74,6 @@ GEM
       multi_json (~> 1.7)
       netrc (~> 0.7)
       octokit (~> 2.7)
-      rgen (~> 0.6)
     oauth2 (0.9.3)
       faraday (>= 0.8, < 0.10)
       jwt (~> 0.1.8)
