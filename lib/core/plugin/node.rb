@@ -449,6 +449,8 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
+  execute_block_on_receiver :exec
+  
   def exec(options = {})
     results = nil
     
@@ -460,7 +462,7 @@ class Node < CORL.plugin_class(:base)
               
         yield(:config, config) if block_given?
         
-        if local?
+        if local? && local_machine
           active_machine = local_machine
           
           config[:info_prefix]  = "[#{hostname}] "
@@ -470,13 +472,12 @@ class Node < CORL.plugin_class(:base)
         end
         
         if commands = config.get(:commands, nil)
-          render("Starting command execution: #{commands.join('; ')}")
           results = active_machine.exec(commands, config.export) do |type, command, data|
             unless local?
               if type == :error
-                alert(data)
+                alert(data.gsub(/^\[[^\]]+\]\s*/, ''))
               else
-                render(data)
+                render(data.gsub(/^\[[^\]]+\]\s*/, ''))
               end
             end
             yield(:progress, { :type => type, :command => command, :data => data }) if block_given?   
@@ -485,10 +486,9 @@ class Node < CORL.plugin_class(:base)
         
         success  = true
         results.each do |result|
-          success = false if result.status != CORL.code.success  
+          success = false if result.status != code.success  
         end
         if success
-          render("Successfully finished execution")
           yield(:process, config) if block_given?
           extension(:exec_success, { :config => config, :results => results }) 
         end
@@ -507,6 +507,8 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
+  execute_block_on_receiver :command
+  
   def command(command, options = {})
     unless command.is_a?(CORL::Plugin::Command)
       command = CORL.command(Config.new({ :command => command }).import(options), :bash)
@@ -519,19 +521,22 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
+  execute_block_on_receiver :action
+  
   def action(provider, options = {})
-    config         = Config.ensure(options).defaults({ :net_provider => network.plugin_provider })
-    encoded_config = Util::CLI.encode(config.export)
+    config = Config.ensure(options).defaults({ :net_provider => network.plugin_provider })
     
     logger.info("Executing remote action #{provider} with encoded arguments: #{config.export.inspect}")
     
-    action_config = extended_config(:action, {
+    encoded_config = Util::CLI.encode(Util::Data.clean(config.export))
+    action_config  = extended_config(:action, {
       :command => provider, 
       :data    => { :encoded => encoded_config }
     })
+    
     command(:corl, { :subcommand => action_config }) do |op, data|
       yield(op, data) if block_given?  
-    end  
+    end 
   end
   
   #---
