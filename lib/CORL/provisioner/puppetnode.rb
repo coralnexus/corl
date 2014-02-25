@@ -6,20 +6,22 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
    
-  def normalize
+  def normalize(reload)
     super
     
-    require 'puppet'
+    unless reload
+      require 'puppet'
     
-    if CORL.log_level == :debug
-      Puppet.debug = true
-    end
-    Puppet.initialize_settings
+      if CORL.log_level == :debug
+        Puppet.debug = true
+      end
+      Puppet.initialize_settings
     
-    myself.plugin_name = :default if plugin_name.to_sym == :puppetnode
+      myself.plugin_name = :default if plugin_name.to_sym == :puppetnode
        
-    @env      = Puppet::Node::Environment.new
-    @compiler = Puppet::Parser::Compiler.new(node)
+      @env      = Puppet::Node::Environment.new
+      @compiler = Puppet::Parser::Compiler.new(node)
+    end
     
     init_scope
     register

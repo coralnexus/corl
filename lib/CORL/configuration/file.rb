@@ -6,7 +6,7 @@ class File < CORL.plugin_class(:configuration)
   #-----------------------------------------------------------------------------
   # Configuration plugin interface
   
-  def normalize
+  def normalize(reload)
     super
     
     logger.info("Setting source configuration project")

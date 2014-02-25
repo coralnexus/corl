@@ -6,7 +6,7 @@ class Provisioner < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
   
-  def normalize
+  def normalize(reload)
     super
   end
   

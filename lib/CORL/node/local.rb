@@ -6,7 +6,7 @@ class Local < CORL.plugin_class(:node)
   #-----------------------------------------------------------------------------
   # Node plugin interface
    
-  def normalize
+  def normalize(reload)
     super do
       myself.machine = create_machine(:machine, :physical, machine_config)
     end

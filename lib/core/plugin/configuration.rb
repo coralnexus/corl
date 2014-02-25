@@ -8,11 +8,11 @@ class Configuration < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Configuration plugin interface
   
-  def normalize
+  def normalize(reload)
     super
     
     logger.debug("Initializing source sub configuration")
-    init_subconfig(true)
+    init_subconfig(true) unless reload
     
     _init(:autoload, true)
     _init(:autosave, false)

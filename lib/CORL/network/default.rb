@@ -6,7 +6,7 @@ class Default < CORL.plugin_class(:network)
   #-----------------------------------------------------------------------------
   # Cloud plugin interface
    
-  def normalize
+  def normalize(reload)
     super
   end
        

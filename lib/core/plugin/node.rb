@@ -8,7 +8,7 @@ class Node < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Node plugin interface
    
-  def normalize
+  def normalize(reload)
     super
     
     yield if block_given? # Chance to create a machine to feed hostname
@@ -16,21 +16,23 @@ class Node < CORL.plugin_class(:base)
     ui.resource = hostname
     logger      = hostname
     
-    @cli_interface = Util::Liquid.new do |method, args, &code|
-      result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }) do |op, data|
-        code.call(op, data) if code
-      end
-      result = result.first
+    unless reload
+      @cli_interface = Util::Liquid.new do |method, args, &code|
+        result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }) do |op, data|
+          code.call(op, data) if code
+        end
+        result = result.first
       
-      alert(result.errors) unless result.errors.empty?
-      result
-    end
-    
-    @action_interface = Util::Liquid.new do |method, args, &code|
-      action(method, *args) do |op, data|
-        code.call(op, data) if code
+        alert(result.errors) unless result.errors.empty?
+        result
       end
-    end    
+    
+      @action_interface = Util::Liquid.new do |method, args, &code|
+        action(method, *args) do |op, data|
+          code.call(op, data) if code
+        end
+      end
+    end
   end
   
   #---

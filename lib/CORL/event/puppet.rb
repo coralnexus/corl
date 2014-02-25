@@ -6,7 +6,7 @@ class Puppet < CORL.plugin_class(:event)
   #-----------------------------------------------------------------------------
   # Puppet event interface
   
-  def normalize
+  def normalize(reload)
     super
     
     if get(:string)

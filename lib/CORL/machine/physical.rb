@@ -6,7 +6,7 @@ class Physical < CORL.plugin_class(:machine)
   #-----------------------------------------------------------------------------
   # Machine plugin interface
   
-  def normalize
+  def normalize(reload)
     super
     myself.plugin_name = hostname
   end

@@ -8,11 +8,11 @@ class Network < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Cloud plugin interface
   
-  def normalize
+  def normalize(reload)
     super
     
     logger.info("Initializing sub configuration from source with: #{myself._export.inspect}")
-    myself.config = CORL.configuration(Config.new(myself._export))
+    myself.config = CORL.configuration(Config.new(myself._export)) unless reload
   end
   
   #-----------------------------------------------------------------------------
