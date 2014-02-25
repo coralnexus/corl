@@ -21,13 +21,10 @@ class Spawn < Plugin::CloudAction
         
       keypair_config
       
-      bootstrap_config = CORL.action_config(:bootstrap)
-      config.defaults(bootstrap_config) if bootstrap_config
+      config.defaults(CORL.action_config(:bootstrap))
+      config.defaults(CORL.action_config(:seed))
       
-      if seed_config = CORL.action_config(:seed)
-        seed_config[:project_reference].default = "github:::coraltech/cluster-test[master]"
-        config.defaults(seed_config)
-      end
+      config[:project_reference].default = "github:::coraltech/cluster-test[master]"
     end
   end
   
