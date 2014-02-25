@@ -90,7 +90,7 @@ en:
           hostnames: |-
             Hostnames of machines to create on provider infrastructure
         start: |-
-          Spawning new machines on %{provider}
+          Spawning new machines on %{node_provider}
       bootstrap:
         options:
           bootstrap_path: |-
