@@ -33,6 +33,11 @@ class Bootstrap < Plugin::CloudAction
       register :bootstrap_init, :str, 'bootstrap.sh'
       
       register :bootstrap_nodes, :array, nil do |values|
+        if values.nil?
+          warn('corl.actions.bootstrap.errors.bootstrap_nodes_empty')
+          next false 
+        end
+        
         node_plugins = CORL.loaded_plugins(:node)
         success      = true
         
