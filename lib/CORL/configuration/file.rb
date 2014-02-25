@@ -254,8 +254,8 @@ class File < CORL.plugin_class(:configuration)
       if success
         case method_config.get(:type, :source)
         when :source
-          new_file = project.local_path(Util::Disk.filename([ attach_path, name ])) 
-        
+          new_file = project.local_path(Util::Disk.filename([ attach_path, name ]))
+          
           logger.debug("Attaching source data (length: #{data.length}) to configuration at #{attach_path}")        
           success = Util::Disk.write(new_file, data)
           
@@ -276,7 +276,7 @@ class File < CORL.plugin_class(:configuration)
           end  
         end
       end
-      if success
+      if success && autosave
         logger.debug("Attaching data to project as #{new_file}")
         success = update_project(new_file, method_config)
       end
