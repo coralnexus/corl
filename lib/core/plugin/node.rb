@@ -526,7 +526,10 @@ class Node < CORL.plugin_class(:base)
   execute_block_on_receiver :action
   
   def action(provider, options = {})
-    config = Config.ensure(options).defaults({ :net_provider => network.plugin_provider })
+    config = Config.ensure(options).defaults({
+      :log_level    => Nucleon.log_level, 
+      :net_provider => network.plugin_provider 
+    })
     
     logger.info("Executing remote action #{provider} with encoded arguments: #{config.export.inspect}")
     
