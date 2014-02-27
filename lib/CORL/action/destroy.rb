@@ -10,8 +10,6 @@ class Destroy < Plugin::CloudAction
     super do
       codes :network_failure,
             :destroy_failure
-      
-      register :force, :bool, false
     end
   end
   
