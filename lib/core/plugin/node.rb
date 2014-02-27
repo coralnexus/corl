@@ -11,6 +11,10 @@ class Node < CORL.plugin_class(:base)
   def normalize(reload)
     super
     
+    export.each do |name, value|
+      myself[name] = value
+    end
+    
     yield if block_given? # Chance to create a machine to feed hostname
     
     ui.resource = hostname
@@ -21,9 +25,10 @@ class Node < CORL.plugin_class(:base)
         result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }) do |op, data|
           code.call(op, data) if code
         end
-        result = result.first
-      
-        alert(result.errors) unless result.errors.empty?
+        if result
+          result = result.first
+          alert(result.errors) unless result.errors.empty?
+        end
         result
       end
     
@@ -212,7 +217,7 @@ class Node < CORL.plugin_class(:base)
   end
   
   def public_key
-    config_key = myself[:private_key]
+    config_key = myself[:public_key]
     return File.expand_path(config_key) if config_key
   end
   
@@ -604,7 +609,7 @@ class Node < CORL.plugin_class(:base)
           if status == code.success
             remote_script = File.join(remote_bootstrap_path, bootstrap_init) 
             
-            result = command(remote_script) do |op, data|
+            result = command("HOSTNAME='#{hostname}' #{remote_script}") do |op, data|
               yield("exec_#{op}".to_sym, data) if block_given?
               data
             end
