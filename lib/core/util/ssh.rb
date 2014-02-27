@@ -281,6 +281,74 @@ class SSH < Nucleon::Core
       end
     end
   end
+  
+  #---
+  
+  #
+  # Inspired by vagrant ssh implementation
+  #
+  # See: https://github.com/mitchellh/vagrant/blob/master/lib/vagrant/util/ssh.rb
+  #
+  
+  def self.terminal(hostname, user, options = {})
+    config   = Config.ensure(options)
+    ssh_path = nucleon_locate("ssh")
+    
+    raise Errors::SSHUnavailable unless ssh_path
+    
+    port         = config.get(:port, 22)
+    private_keys = config.get(:private_keys, File.join(ENV['HOME'], '.ssh', 'id_rsa'))
+    
+    if Platform.windows?
+      test = Subprocess.execute(ssh_path)
+      if test.stdout.include?("PuTTY Link")
+        raise Errors::SSHIsPuttyLink,
+          :host     => hostname,
+          :username => user,
+          :port     => port,
+          :key_path => Util::Data.array(private_key_paths).join(', ')
+      end
+    end
+
+    command_options = [
+      "#{user}@#{hostname}",
+      "-p", port.to_s,
+      "-o", "Compression=yes",
+      "-o", "DSAAuthentication=yes",
+      "-o", "LogLevel=FATAL",
+      "-o", "StrictHostKeyChecking=no",
+      "-o", "UserKnownHostsFile=/dev/null"
+    ]
+
+    unless Platform.solaris?
+      command_options += [ "-o", "IdentitiesOnly=yes" ]
+    end
+    Util::Data.array(private_keys).each do |path|
+      command_options += [ "-i", File.expand_path(path.to_s) ]
+    end
+    
+    if config.get(:forward_x11, false)
+      command_options += [
+        "-o", "ForwardX11=yes",
+        "-o", "ForwardX11Trusted=yes"
+      ]
+    end
+
+    command_options += [ "-o", "ProxyCommand=#{config[:proxy_command]}" ] if config.get(:proxy_command, false)
+    command_options += [ "-o", "ForwardAgent=yes" ] if config.get(:forward_agent, false)
+    
+    command_options.concat(Util::Data.array(config[:extra_args])) if config.get(:extra_args, false)
+
+    #---
+
+    logger.info("Executing SSH in subprocess: #{command_options.inspect}")    
+    process = ChildProcess.build('ssh', *command_options)
+    process.io.inherit!
+    
+    process.start
+    process.wait
+    process.exit_code
+  end
 end
 end
 end
