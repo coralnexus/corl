@@ -1,4 +1,8 @@
 
+nucleon_require(File.dirname(__FILE__), :machine)
+
+#---
+
 module CORL
 module Machine
 class Fog < CORL.plugin_class(:machine)
@@ -248,11 +252,10 @@ class Fog < CORL.plugin_class(:machine)
   def reload(options = {})
     super do
       if server
-        logger.debug("Rebooting machine #{name}")
-        server.reboot(options)
+        block_given? ? yield : true
       else
         false
-      end  
+      end
     end
   end
 
