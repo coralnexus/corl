@@ -32,6 +32,8 @@ require 'rubygems'
 require 'nucleon_base'
 CORL = Nucleon
 
+require 'childprocess'
+
 require 'tmpdir'
 require 'sshkey'
 
@@ -69,6 +71,9 @@ end
 ].each do |name| 
   nucleon_require(util_dir, name)
 end
+
+# Special errors
+nucleon_require(core_dir, :errors)
 
 # Include facade
 nucleon_require(core_dir, :facade)
