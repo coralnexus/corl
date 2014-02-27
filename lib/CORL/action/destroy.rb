@@ -12,8 +12,6 @@ class Destroy < Plugin::CloudAction
             :destroy_failure
       
       register :force, :bool, false
-      
-      config[:nodes].default = nil
     end
   end
   
