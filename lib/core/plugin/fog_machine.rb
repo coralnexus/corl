@@ -303,7 +303,9 @@ class Fog < CORL.plugin_class(:machine)
     super do
       if server
         logger.debug("Destroying machine #{name}")
-        server.destroy(options)
+        dbg('destroying server')
+        #server.destroy
+        true
       else
         false  
       end  
