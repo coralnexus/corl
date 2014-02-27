@@ -12,7 +12,7 @@ class Network < CORL.plugin_class(:base)
     super
     
     logger.info("Initializing sub configuration from source with: #{myself._export.inspect}")
-    myself.config = CORL.configuration(Config.new(myself._export)) unless reload
+    myself.config = CORL.configuration(Config.new(myself._export).import({ :autosave => false })) unless reload
   end
   
   #-----------------------------------------------------------------------------
@@ -183,7 +183,7 @@ class Network < CORL.plugin_class(:base)
     attached_data = nil    
     
     if data.is_a?(String)
-      attached_data = config.attach(type, name, file, attach_config)
+      attached_data = config.attach(type, name, data, attach_config)
     end  
     attached_data
   end
@@ -191,9 +191,11 @@ class Network < CORL.plugin_class(:base)
   #---
   
   def attach_keys(node, keypair)
-    save_config = { :pull => false, :push => false }    
-    private_key = attach_data(:keys, "#{node.public_ip}-id_#{keypair.type}", keypair.encrypted_key)
-    public_key  = attach_data(:keys, "#{node.public_ip}-id_#{keypair.type}.pub", keypair.ssh_key)
+    base_name   = "#{node.plugin_provider}-#{node.plugin_name}"
+    save_config = { :pull => false, :push => false }
+        
+    private_key = attach_data(:keys, "#{base_name}-id_#{keypair.type}", keypair.encrypted_key)
+    public_key  = attach_data(:keys, "#{base_name}-id_#{keypair.type}.pub", keypair.ssh_key)
     
     if private_key && public_key
       save_config[:files] = [ private_key, public_key ]
@@ -201,7 +203,7 @@ class Network < CORL.plugin_class(:base)
       node[:private_key] = private_key
       node[:public_key]  = public_key
     
-      save_config[:message] = "Updating SSH keys for node #{node.plugin_name} (#{node.public_ip})"    
+      save_config[:message] = "Updating SSH keys for node #{node.plugin_provider} (#{node.plugin_name})"    
       node.save(extended_config(:key_save, save_config))
     else
       false
@@ -210,37 +212,41 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
+  execute_block_on_receiver :add_node
+  
   def add_node(provider, name, options = {})
     config = Config.ensure(options)
     
     keypair = config.delete(:keypair, nil)
     return false unless keypair && keypair.is_a?(Util::SSH::Keypair)
         
-    remote_name  = config.delete(:remote, :edit)
-    dbg(config, 'node add configuration')
+    remote_name = config.delete(:remote, :edit)
     
     # Set node data
-    #node        = set_node(provider, name, config)
-    #hook_config = { :node => node, :remote => remote_name, :seed => seed_project, :config => config }
+    node        = set_node(provider, name, {})
+    hook_config = { :node => node, :remote => remote_name, :config => config }
     success     = true
     
-    #yield(:preprocess, hook_config) if block_given?
+    yield(:preprocess, hook_config) if block_given?
     
-    #if ! node.local? && attach_keys(node, keypair) && extension_check(:add_node, hook_config)
-    #  # Create new node / machine
-    #  success = node.create do |op, data|
-    #    data = yield("create_#{op}".to_sym, data) if block_given?
-    #    data  
-    #  end
+    if ! node.local? && attach_keys(node, keypair) && extension_check(:add_node, hook_config)
+      node[:hostname] = name
+      node[:image]    = config[:image]
+          
+      # Create new node / machine
+      success = node.create do |op, data|
+        block_given? ? yield("create_#{op}".to_sym, data) : data
+      end
       
-    #  if success       
-    #    # Bootstrap new machine
-    #    success = node.bootstrap(home, extended_config(:bootstrap, config)) do |op, data|
-    #      data = yield("bootstrap_#{op}".to_sym, data) if block_given?
-    #      data
-    #    end  
+      if success && node.save({ :remote => remote_name, :message => "Created machine #{name} on #{provider}" })
+        # Bootstrap new machine
+        success = node.bootstrap(home, extended_config(:bootstrap, config)) do |op, data|
+          block_given? ? yield("bootstrap_#{op}".to_sym, data) : data
+        end  
         
-    #    if success
+        if success
+          dbg(export, 'network config')
+          
     #      save_config = { :commit => true, :remote => remote_name, :push => true }
                
     #      if seed_project && remote_name
@@ -276,9 +282,9 @@ class Network < CORL.plugin_class(:base)
     #      if success
     #        # Update local network project  
     #      end
-    #    end
-    #  end
-    #end
+        end
+      end
+    end
     
     success 
   end
