@@ -52,6 +52,7 @@ Gem::Specification.new do |s|
     "lib/CORL/action/provision.rb",
     "lib/CORL/action/seed.rb",
     "lib/CORL/action/spawn.rb",
+    "lib/CORL/action/ssh.rb",
     "lib/CORL/action/start.rb",
     "lib/CORL/action/stop.rb",
     "lib/CORL/configuration/file.rb",
@@ -68,6 +69,7 @@ Gem::Specification.new do |s|
     "lib/CORL/provisioner/puppetnode/resource.rb",
     "lib/CORL/provisioner/puppetnode/resource_group.rb",
     "lib/CORL/template/environment.rb",
+    "lib/core/errors.rb",
     "lib/core/facade.rb",
     "lib/core/mixin/action/keypair.rb",
     "lib/core/mixin/lookup.rb",
@@ -126,6 +128,7 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<nucleon>, ["~> 0.1"])
+      s.add_runtime_dependency(%q<childprocess>, ["~> 0.5.0"])
       s.add_runtime_dependency(%q<sshkey>, ["~> 1.6"])
       s.add_runtime_dependency(%q<fog>, ["~> 1.20"])
       s.add_runtime_dependency(%q<facter>, ["~> 1.7"])
@@ -138,6 +141,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<yard>, ["~> 0.8"])
     else
       s.add_dependency(%q<nucleon>, ["~> 0.1"])
+      s.add_dependency(%q<childprocess>, ["~> 0.5.0"])
       s.add_dependency(%q<sshkey>, ["~> 1.6"])
       s.add_dependency(%q<fog>, ["~> 1.20"])
       s.add_dependency(%q<facter>, ["~> 1.7"])
@@ -151,6 +155,7 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<nucleon>, ["~> 0.1"])
+    s.add_dependency(%q<childprocess>, ["~> 0.5.0"])
     s.add_dependency(%q<sshkey>, ["~> 1.6"])
     s.add_dependency(%q<fog>, ["~> 1.20"])
     s.add_dependency(%q<facter>, ["~> 1.7"])
