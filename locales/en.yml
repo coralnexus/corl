@@ -91,6 +91,19 @@ en:
             Hostnames of machines to create on provider infrastructure
         start: |-
           Spawning new machines on %{node_provider}
+      ssh:
+        options:
+        errors:
+          ssh_nodes_empty: |-
+            Nodes must be specified in order to launch a SSH terminal
+          ssh_nodes: |-
+            Provider %{node_provider} node %{name} is not a valid node to launch terminal (%{value} given)
+        start: |-
+          Launching terminal for machine %{hostname} (%{id})
+        success: |-
+          Machine %{hostname} (%{id}) successfully ended terminal session
+        failure: |-
+          Machine %{hostname} (%{id}) terminal session failed with status %{status}
       bootstrap:
         options:
           bootstrap_path: |-
@@ -112,6 +125,8 @@ en:
             Bootstrap path must be an existing directory
           auth_files: |-
             Authorization file %{value} does not exist on the local system
+          bootstrap_nodes_empty: |-
+            Nodes must be specified in order to run the bootstrap action
           bootstrap_nodes: |-
             Provider %{node_provider} node %{name} is not a valid node to bootstrap (%{value} given)
         start: |-
