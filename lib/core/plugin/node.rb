@@ -158,7 +158,14 @@ class Node < CORL.plugin_class(:base)
   
   def hostname(reset = false)
     myself[:hostname] = machine.hostname if machine && ( reset || myself[:hostname].nil? )
-    myself[:hostname]
+    
+    hostname = myself[:hostname]
+    
+    if hostname.to_s != ui.resource.to_s 
+      ui.resource = hostname
+      logger      = hostname
+    end
+    hostname
   end
   
   #---
@@ -607,7 +614,8 @@ class Node < CORL.plugin_class(:base)
           :home_path_lookup_failure,
           :auth_upload_failure,
           :bootstrap_upload_failure,
-          :bootstrap_exec_failure
+          :bootstrap_exec_failure,
+          :reload_failure
     
     if File.directory?(local_path)      
       if user_home || user_home = home(config.get(:home_env_var, 'HOME'), config.get(:force, false))
@@ -648,9 +656,15 @@ class Node < CORL.plugin_class(:base)
               data
             end
             
-            if result.status != code.success
+            if result.status == code.success
+              # Reboot the machine
+              unless reload
+                warn('corl.core.node.bootstrap.reload')
+                myself.status = code.reload_failure 
+              end
+            else
               warn('corl.core.node.bootstrap.status', { :script => remote_script, :status => result.status })
-              myself.status = code.bootstrap_exec_failure  
+              myself.status = code.bootstrap_exec_failure
             end
           end
         end
