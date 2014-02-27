@@ -48,9 +48,9 @@ class Rackspace < Node::Fog
     super do |op, config|
       if op == :config
         config.defaults({
-          :name      => hostname,
-          :flavor_id => machine_type,
-          :image_id  => image
+          :name             => hostname,
+          :flavor_id        => machine_type,
+          :image_id         => image
         })
       end
     end
