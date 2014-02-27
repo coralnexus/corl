@@ -833,8 +833,23 @@ class Node < CORL.plugin_class(:base)
       if extension_check(:destroy, { :config => config })
         logger.info("Destroying node: #{plugin_name}")
       
-        yield(:config, config) if block_given?      
+        yield(:config, config) if block_given?
+        
+        # Shut down machine      
         success = machine.destroy(config.export)
+        
+        # Remove SSH keys
+        if success
+          if private_key
+            Util::Disk.delete(File.expand_path(private_key))
+          end
+          if public_key
+            Util::Disk.delete(File.expand_path(public_key))
+          end
+          
+          # Remove node information
+          network.delete_node(plugin_provider, plugin_name)
+        end      
         
         if success && block_given?
           process_success = yield(:process, config)
