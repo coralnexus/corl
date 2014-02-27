@@ -43,6 +43,7 @@ Gem::Specification.new do |s|
     "bootstrap/os/ubuntu/09_nucleon.sh",
     "bootstrap/os/ubuntu/10_corl.sh",
     "corl.gemspec",
+    "lib/CORL/action/authorize.rb",
     "lib/CORL/action/bootstrap.rb",
     "lib/CORL/action/destroy.rb",
     "lib/CORL/action/exec.rb",
