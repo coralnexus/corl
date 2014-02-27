@@ -849,6 +849,12 @@ class Node < CORL.plugin_class(:base)
           
           # Remove node information
           network.delete_node(plugin_provider, plugin_name)
+          network.save({
+            :files  => [ private_key, public_key ], 
+            :commit => true, 
+            :remote => config.get(:remote, :edit), 
+            :push   => true 
+          })
         end      
         
         if success && block_given?
