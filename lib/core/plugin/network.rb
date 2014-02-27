@@ -198,6 +198,9 @@ class Network < CORL.plugin_class(:base)
     public_key  = attach_data(:keys, "#{base_name}-id_#{keypair.type}.pub", keypair.ssh_key)
     
     if private_key && public_key
+      FileUtils.chmod(0600, private_key)
+      FileUtils.chmod(0644, public_key)
+      
       save_config[:files] = [ private_key, public_key ]
     
       node[:private_key] = private_key
@@ -245,47 +248,44 @@ class Network < CORL.plugin_class(:base)
         end  
         
         if success
-          dbg(export, 'network config')
-          
-    #      save_config = { :commit => true, :remote => remote_name, :push => true }
+          seed_project = config.get(:project_reference, nil)
+          save_config  = { :commit => true, :remote => remote_name, :push => true }
                
-    #      if seed_project && remote_name
-    #        # Reset project remote
-    #        seed_info = Plugin::Project.translate_reference(seed_project)
+          if seed_project && remote_name
+            # Reset project remote
+            seed_info = Plugin::Project.translate_reference(seed_project)
           
-    #        if seed_info
-    #          seed_url    = seed_info[:url]
-    #          seed_branch = seed_info[:revision] if seed_info[:revision]
-    #        else
-    #          seed_url = seed_project                
-    #        end
-    #        set_remote(:origin, seed_url) if remote_name.to_sym == :edit
-    #        set_remote(remote_name, seed_url)
-    #        save_config[:pull] = false
-    #      end
+            if seed_info
+              seed_url    = seed_info[:url]
+              seed_branch = seed_info[:revision] if seed_info[:revision]
+            else
+              seed_url = seed_project                
+            end
+            set_remote(:origin, seed_url) if remote_name.to_sym == :edit
+            set_remote(remote_name, seed_url)
+            save_config[:pull] = false
+          end
+          
+          # Save network changes (preliminary)
+          success = node.save(extended_config(:node_save, save_config))
         
-    #      # Save network changes (preliminary)
-    #      success = node.save(extended_config(:node_save, save_config))
+          if success && seed_project
+            # Seed machine with remote project reference
+            result = node.seed({
+              :net_provider      => plugin_provider,
+              :project_reference => seed_project,
+              :project_branch    => seed_branch
+            }) do |op, data|
+              yield("seed_#{op}".to_sym, data)
+            end
+            success = result.status == code.success
+          end
         
-    #      if success && seed_project
-    #        # Seed machine with remote project reference
-    #        result = node.seed({
-    #          :net_provider      => plugin_provider,
-    #          :project_reference => seed_project,
-    #          :project_branch    => seed_branch
-    #        }) do |op, data|
-    #          yield("seed_#{op}".to_sym, data)
-    #        end
-    #        success = result.status == code.success
-    #      end
-        
-    #      if success
-    #        # Update local network project  
-    #      end
+          # Update local network project
+          success = load({ :remote => remote_name, :pull => true }) if success
         end
       end
-    end
-    
+    end    
     success 
   end
   
