@@ -20,6 +20,10 @@ class Node < CORL.plugin_class(:base)
     ui.resource = hostname
     logger      = hostname
     
+    unless groups.include?("all")
+      myself[:groups] = [ "all", groups ].flatten
+    end
+    
     unless reload
       @cli_interface = Util::Liquid.new do |method, args, &code|
         result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }) do |op, data|
