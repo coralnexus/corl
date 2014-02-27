@@ -299,17 +299,6 @@ class SSH < Nucleon::Core
     port         = config.get(:port, 22)
     private_keys = config.get(:private_keys, File.join(ENV['HOME'], '.ssh', 'id_rsa'))
     
-    if Platform.windows?
-      test = Subprocess.execute(ssh_path)
-      if test.stdout.include?("PuTTY Link")
-        raise Errors::SSHIsPuttyLink,
-          :host     => hostname,
-          :username => user,
-          :port     => port,
-          :key_path => Util::Data.array(private_key_paths).join(', ')
-      end
-    end
-
     command_options = [
       "#{user}@#{hostname}",
       "-p", port.to_s,
@@ -317,14 +306,12 @@ class SSH < Nucleon::Core
       "-o", "DSAAuthentication=yes",
       "-o", "LogLevel=FATAL",
       "-o", "StrictHostKeyChecking=no",
-      "-o", "UserKnownHostsFile=/dev/null"
+      "-o", "UserKnownHostsFile=/dev/null",
+      "-o", "IdentitiesOnly=yes"
     ]
 
-    unless Platform.solaris?
-      command_options += [ "-o", "IdentitiesOnly=yes" ]
-    end
     Util::Data.array(private_keys).each do |path|
-      command_options += [ "-i", File.expand_path(path.to_s) ]
+      command_options += [ "-i", File.expand_path(path) ]
     end
     
     if config.get(:forward_x11, false)
@@ -341,7 +328,8 @@ class SSH < Nucleon::Core
 
     #---
 
-    logger.info("Executing SSH in subprocess: #{command_options.inspect}")    
+    logger.info("Executing SSH in subprocess: #{command_options.inspect}")
+    
     process = ChildProcess.build('ssh', *command_options)
     process.io.inherit!
     
