@@ -190,27 +190,8 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
-  def attach_keys(node, keypair)
-    base_name   = "#{node.plugin_provider}-#{node.plugin_name}"
-    save_config = { :pull => false, :push => false }
-        
-    private_key = attach_data(:keys, "#{base_name}-id_#{keypair.type}", keypair.encrypted_key)
-    public_key  = attach_data(:keys, "#{base_name}-id_#{keypair.type}.pub", keypair.ssh_key)
-    
-    if private_key && public_key
-      FileUtils.chmod(0600, private_key)
-      FileUtils.chmod(0644, public_key)
-      
-      save_config[:files] = [ private_key, public_key ]
-    
-      node[:private_key] = private_key
-      node[:public_key]  = public_key
-    
-      save_config[:message] = "Updating SSH keys for node #{node.plugin_provider} (#{node.plugin_name})"    
-      node.save(extended_config(:key_save, save_config))
-    else
-      false
-    end
+  def delete_attachments(ids, options = {})
+    config.delete_attachments(ids, options)    
   end
   
   #---
@@ -232,9 +213,11 @@ class Network < CORL.plugin_class(:base)
     
     yield(:preprocess, hook_config) if block_given?
     
-    if ! node.local? && attach_keys(node, keypair) && extension_check(:add_node, hook_config)
+    if ! node.local? && node.attach_keys(keypair) && extension_check(:add_node, hook_config)
       node[:hostname] = name
-      node[:image]    = config[:image]
+      node.hostname # Reset logger and ui prefix (TODO: look into a better way to do this?)
+      
+      node[:image] = config[:image]
           
       # Create new node / machine
       success = node.create do |op, data|
@@ -272,7 +255,6 @@ class Network < CORL.plugin_class(:base)
           if success && seed_project
             # Seed machine with remote project reference
             result = node.seed({
-              :net_provider      => plugin_provider,
               :project_reference => seed_project,
               :project_branch    => seed_branch
             }) do |op, data|
