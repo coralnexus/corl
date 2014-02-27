@@ -215,6 +215,18 @@ class Fog < CORL.plugin_class(:machine)
   
   #---
   
+  def terminal(user, options = {})
+    super do |config|
+      dbg(public_ip, 'public ip')
+      dbg(user, 'ssh user')
+      dbg(config.export, 'ssh config')
+      #Util::SSH.terminal(public_ip, user, config.export)
+      0     
+    end
+  end
+  
+  #---
+  
   def start(options = {})
     super do
       if compute

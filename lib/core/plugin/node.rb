@@ -556,6 +556,38 @@ class Node < CORL.plugin_class(:base)
   end
   
   #---
+  
+  def terminal(options = {})
+    myself.status = code.unknown_status
+    
+    if machine && machine.running?
+      config = Config.ensure(options)
+      
+      if extension_check(:terminal, { :config => config })
+        logger.info("Launching terminal for node: #{plugin_name}")
+        
+        if local? && local_machine
+          active_machine = local_machine
+          
+          config[:info_prefix]  = "[#{hostname}] "
+          config[:error_prefix] = "[#{hostname}] "
+        else
+          active_machine = machine
+        end
+        
+        myself.status = active_machine.terminal(user, config.export)
+        
+        if status == code.success
+          extension(:exec_success, { :config => config }) 
+        end
+      end
+    else
+      logger.warn("Node #{plugin_name} does not have an attached machine or is not running so cannot launch terminal")
+    end
+    status == code.success
+  end
+  
+  #---
    
   def bootstrap(local_path, options = {})
     config      = Config.ensure(options)

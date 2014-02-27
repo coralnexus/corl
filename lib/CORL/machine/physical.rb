@@ -115,6 +115,15 @@ class Physical < CORL.plugin_class(:machine)
  
   #---
   
+  def terminal(user, options = {})
+    super do |config|
+      logger.debug("Launching terminals on the local machine is not currently supported")
+      1
+    end
+  end
+  
+  #---
+  
   def start(options = {})
     super do
       logger.warn("This machine is already running so can not be started")
