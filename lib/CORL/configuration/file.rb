@@ -284,6 +284,31 @@ class File < CORL.plugin_class(:configuration)
     end
   end
   
+  #---
+  
+  def delete_attachments(ids, options = {})
+    super do |method_config|
+      success = true
+      files   = []
+      
+      array(ids).each do |id|
+        file = File.join(project.directory, id.to_s)
+        
+        if Util::Disk.delete(file)
+          files << file
+        else
+          success = false
+        end
+      end
+      
+      if success && autosave
+        logger.debug("Removing attached data from project as #{files.join(', ')}")
+        success = update_project(files, method_config)
+      end
+      success ? files : nil
+    end
+  end
+  
   #-----------------------------------------------------------------------------
   # Utilities
    

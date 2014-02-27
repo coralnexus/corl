@@ -172,6 +172,24 @@ class Configuration < CORL.plugin_class(:base)
     end
     new_location
   end
+  
+  #---
+  
+  def delete_attachments(type, ids, options = {})
+    method_config = Config.ensure(options)
+    locations     = []
+    
+    if can_persist?
+      if extension_check(:remove_attachments, { :config => method_config })
+        logger.info("Removing attached data from source configuration")
+      
+        locations = yield(method_config) if block_given?
+      end
+    else
+      logger.warn("Can not remove attached data from source configuration")
+    end
+    locations  
+  end
 end
 end
 end
