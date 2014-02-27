@@ -1,7 +1,7 @@
 
 module CORL
 module Action
-class SSH < Plugin::CloudAction
+class Ssh < Plugin::CloudAction
 
   #-----------------------------------------------------------------------------
   # Settings
@@ -29,6 +29,8 @@ class SSH < Plugin::CloudAction
         end
         success
       end
+      
+      config[:node_provider].default = :rackspace
     end
   end
   
@@ -52,7 +54,7 @@ class SSH < Plugin::CloudAction
           render_options = { :id => node.id, :hostname => node.hostname }
           
           info('corl.actions.ssh.start', render_options)
-          success = node.terminal(extended_config(:ssh, settings))
+          success = node.terminal(extended_config(:ssh, {}))
           if success
             info('corl.actions.ssh.success', render_options)
           else
