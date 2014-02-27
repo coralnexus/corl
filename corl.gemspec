@@ -44,6 +44,7 @@ Gem::Specification.new do |s|
     "bootstrap/os/ubuntu/10_corl.sh",
     "corl.gemspec",
     "lib/CORL/action/bootstrap.rb",
+    "lib/CORL/action/destroy.rb",
     "lib/CORL/action/exec.rb",
     "lib/CORL/action/image.rb",
     "lib/CORL/action/images.rb",
