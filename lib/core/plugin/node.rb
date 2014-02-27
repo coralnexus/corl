@@ -211,6 +211,13 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
+  def ssh_path(home_env_var = 'HOME', reset = false)
+    home = home(home_env_var, reset)
+    home ? File.join(home, '.ssh') : nil
+  end
+  
+  #---
+  
   def private_key=private_key
     myself[:private_key] = private_key
   end
@@ -322,6 +329,67 @@ class Node < CORL.plugin_class(:base)
     
   #-----------------------------------------------------------------------------
   # Machine operations
+  
+  def attach_keys(keypair)
+    base_name   = "#{plugin_provider}-#{plugin_name}"
+    save_config = { 
+      :pull    => false, 
+      :push    => false,
+      :message => "Updating SSH keys for node #{plugin_provider} (#{plugin_name})" 
+    }
+    
+    active  = machine && machine.running?
+    result  = run.authorize({ :public_key => keypair.ssh_key }) if active
+    success = false
+    
+    if ! active || result.status == code.success        
+      private_key = network.attach_data(:keys, "#{base_name}-id_#{keypair.type}", keypair.encrypted_key)
+      public_key  = network.attach_data(:keys, "#{base_name}-id_#{keypair.type}.pub", keypair.ssh_key)
+    
+      if private_key && public_key
+        FileUtils.chmod(0600, private_key)
+        FileUtils.chmod(0644, public_key)
+      
+        save_config[:files] = [ private_key, public_key ]
+    
+        myself.private_key = private_key
+        myself.public_key  = public_key
+    
+        success = save(extended_config(:key_save, save_config))
+      end
+    end
+    success
+  end
+  
+  #---
+  
+  def delete_keys
+    keys = []
+    keys << private_key if private_key
+    keys << public_key if public_key
+    
+    success = true
+    
+    unless keys.empty?
+      files = network.delete_attachments(keys)
+    
+      if files && ! files.empty?
+        delete_setting(:private_key)
+        delete_setting(:public_key)
+        
+        success = save(extended_config(:key_delete, { 
+          :pull    => false, 
+          :push    => false,
+          :message => "Removing SSH keys for node #{plugin_provider} (#{plugin_name})"  
+        }))
+      else
+        success = false
+      end
+    end
+    success
+  end
+  
+  #---
   
   def create_machine(name, provider, options = {})
     CORL.create_plugin(:machine, provider, extended_config(name, options).import({ :meta => { :parent => myself }}))
@@ -839,14 +907,7 @@ class Node < CORL.plugin_class(:base)
         success = machine.destroy(config.export)
         
         # Remove SSH keys
-        if success
-          if private_key
-            Util::Disk.delete(File.expand_path(private_key))
-          end
-          if public_key
-            Util::Disk.delete(File.expand_path(public_key))
-          end
-          
+        if success && delete_keys
           # Remove node information
           network.delete_node(plugin_provider, plugin_name)
           network.save({
