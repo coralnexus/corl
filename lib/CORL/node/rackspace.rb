@@ -1,10 +1,16 @@
 
 module CORL
 module Node
-class Rackspace < Node::Fog
+class Rackspace < Fog
  
   #-----------------------------------------------------------------------------
   # Node plugin interface
+  
+  def normalize(reload)
+    super do
+      :rackspace
+    end
+  end
       
   #-----------------------------------------------------------------------------
   # Checks
