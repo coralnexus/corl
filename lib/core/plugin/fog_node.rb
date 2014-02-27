@@ -12,10 +12,14 @@ class Fog < CORL.plugin_class(:node)
    
   def normalize(reload)
     super do
-      myself.region  = region             
-      myself.machine = create_machine(:machine, :fog, machine_config) unless reload
+      myself.region  = region 
       
-      yield if block_given? 
+      unless reload
+        machine_provider = :fog
+        machine_provider = yield if block_given?
+                        
+        myself.machine = create_machine(:machine, machine_provider, machine_config)
+      end
     end
   end
        
