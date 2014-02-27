@@ -830,42 +830,23 @@ class Node < CORL.plugin_class(:base)
     if machine && machine.created?
       config = Config.ensure(options)
       
-      run = false
-
-      if config[:force]
-        run = true
-      else
-        choice = nil
-        begin
-          choice = ui.ask("Are you sure you want to permanently destroy (Y|N): #{plugin_name}?")
-          run    = choice.upcase == "Y"
-          
-        rescue Errors::UIExpectsTTY
-          run = false
-        end        
-      end
-
-      if run
-        if extension_check(:destroy, { :config => config })
-          logger.info("Destroying node: #{plugin_name}")
+      if extension_check(:destroy, { :config => config })
+        logger.info("Destroying node: #{plugin_name}")
       
-          yield(:config, config) if block_given?      
-          success = machine.destroy(config.export)
+        yield(:config, config) if block_given?      
+        success = machine.destroy(config.export)
         
-          if success && block_given?
-            process_success = yield(:process, config)
-            success         = process_success if process_success == false        
-          end
-        
-          if success
-            extension(:destroy_success, { :config => config })
-          end
+        if success && block_given?
+          process_success = yield(:process, config)
+          success         = process_success if process_success == false        
         end
-      else
-        logger.warn("Node #{plugin_name} does not have an attached machine or is not created so cannot be destroyed")
+        
+        if success
+          extension(:destroy_success, { :config => config })
+        end
       end
     else
-      logger.info("Node #{plugin_name} not destroyed due to user cancellation")  
+      logger.warn("Node #{plugin_name} does not have an attached machine or is not created so cannot be destroyed")
     end
     success    
   end
