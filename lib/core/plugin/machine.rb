@@ -166,6 +166,8 @@ class Machine < CORL.plugin_class(:base)
   #---
   
   def terminal(user, options = {})
+    status = code.unknown_status
+    
     if running?
       logger.debug("Launching #{user} terminal on #{plugin_provider} machine with: #{options.inspect}")
       config = Config.ensure(options)      
@@ -174,6 +176,7 @@ class Machine < CORL.plugin_class(:base)
       logger.debug("Machine #{plugin_name} is not running")  
     end    
     logger.warn("There was an error launching a #{user} terminal on the machine #{plugin_name}") unless status == code.success
+    status
   end
   
   #---
