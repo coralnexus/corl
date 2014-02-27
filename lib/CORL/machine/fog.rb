@@ -217,7 +217,7 @@ class Fog < CORL.plugin_class(:machine)
   
   def terminal(user, options = {})
     super do |config|
-      Util::SSH.terminal(public_ip, user, config.export)
+      Util::SSH.terminal(node.public_ip, user, config.export)
     end
   end
   
