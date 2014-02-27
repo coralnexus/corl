@@ -52,7 +52,7 @@ class Fog < CORL.plugin_class(:machine)
     end
     
     unless @server.nil?
-      myself.name = @server.id
+      myself.plugin_name = @server.id
       
       node[:id]         = plugin_name
       node[:hostname]   = @server.name
