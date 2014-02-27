@@ -95,6 +95,12 @@ class Fog < CORL.plugin_class(:node)
   
   #---
   
+  def key_config
+    { :private_key_path => private_key, :public_key_path  => public_key }
+  end
+  
+  #---
+  
   def exec_options(name, options = {})
     extended_config(name, options).export
   end
@@ -106,8 +112,9 @@ class Fog < CORL.plugin_class(:node)
     super do |op, config|
       if op == :config
         config.import(exec_options(:create))
+        config.defaults(key_config)
       end
-      yield(op, config) if block_given?
+      yield(op, config) if block_given?      
     end
   end
   
