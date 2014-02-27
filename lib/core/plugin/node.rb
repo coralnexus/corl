@@ -575,6 +575,8 @@ class Node < CORL.plugin_class(:base)
           active_machine = machine
         end
         
+        config[:private_keys] = private_key
+        
         myself.status = active_machine.terminal(user, config.export)
         
         if status == code.success
