@@ -151,6 +151,7 @@ class File < CORL.plugin_class(:configuration)
             else
               # Never encountered before
               config_name = nil
+              
               config_name = select_largest(router.get(parents)) unless parents.empty?
               split_config.call(value, config_name, keys)  
             end  
@@ -165,12 +166,12 @@ class File < CORL.plugin_class(:configuration)
             file_data.set([ config_name, keys ].flatten, value)  
           else
             # Router is non existent
-            if config_name = select_largest(router)
+            if config_name = select_largest(router.export)
               # Pick largest router from top level
               file_data.set([ config_name, keys ].flatten, value)
             else
               # Resort to sane defaults
-              default_provider = Manager.connection.type_default(:translator)
+              default_provider = CORL.type_default(:translator)
               config_name      = "corl.#{default_provider}"
               file_data.set([ config_name, keys ].flatten, value)
             end      
@@ -180,7 +181,6 @@ class File < CORL.plugin_class(:configuration)
     end
     
     # Whew!  Glad that's over...
-    
     split_config.call(config.export, router.export)
     file_data     
   end
@@ -379,6 +379,8 @@ class File < CORL.plugin_class(:configuration)
   #---
   
   def select_largest(router)
+    return router unless router.is_a?(Hash)
+    
     config_map = {}
     
     count_config_names = lambda do |data|
