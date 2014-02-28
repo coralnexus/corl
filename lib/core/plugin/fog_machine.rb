@@ -251,11 +251,12 @@ class Fog < CORL.plugin_class(:machine)
   
   def reload(options = {})
     super do
+      success = false
       if server
-        block_given? ? yield : true
-      else
-        false
+        success = block_given? ? yield : true
       end
+      init_ssh_session(true) if success
+      success
     end
   end
 
@@ -263,19 +264,17 @@ class Fog < CORL.plugin_class(:machine)
  
   def create_image(name, options = {})
     super do
+      success = false
       if server
         logger.debug("Imaging machine #{self.name}")
         image = server.create_image(name, options)
       
         if image
           node.image = image.id
-          true
-        else
-          false
+          success    = true
         end
-      else
-        false
       end
+      success
     end
   end
   
@@ -293,6 +292,7 @@ class Fog < CORL.plugin_class(:machine)
         logger.debug("Detroying machine #{name}")
         success = server.destroy        
       end
+      close_ssh_session if success
       success
     end
   end
@@ -301,20 +301,27 @@ class Fog < CORL.plugin_class(:machine)
 
   def destroy(options = {})
     super do
+      success = false
       if server
         logger.debug("Destroying machine #{name}")
-        server.destroy
-      else
-        false  
-      end  
+        success = server.destroy
+      end
+      close_ssh_session if success
+      success
     end
   end
   
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def init_ssh_session
-    Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key)
+  def init_ssh_session(reset = false)
+    Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key, reset)
+  end
+  
+  #---
+  
+  def close_ssh_session
+    Util::SSH.close_session(node.public_ip, node.user)
   end
 end
 end
