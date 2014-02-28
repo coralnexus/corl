@@ -32,8 +32,6 @@ require 'rubygems'
 require 'nucleon_base'
 CORL = Nucleon
 
-require 'childprocess'
-
 require 'hiera'
 require 'facter'
 
