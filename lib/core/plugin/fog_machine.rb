@@ -267,14 +267,13 @@ class Fog < CORL.plugin_class(:machine)
       success = false
       if server
         logger.debug("Imaging machine #{plugin_name}")
-        dbg(node.plugin_name, 'node plugin name')
-        #image = server.create_image(node.plugin_name)        
-        #image.wait_for { ready? }
+        image = server.create_image(node.plugin_name)        
+        image.wait_for { ready? }
       
-        #if image
-        #  node.image = image.id
-        #  success    = true
-        #end
+        if image
+          node.image = image.id
+          success    = true
+        end
       end
       success
     end
