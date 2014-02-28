@@ -70,6 +70,7 @@ GEM
       mini_portile (~> 0.5.0)
     nucleon (0.1.4)
       celluloid (~> 0.15)
+      childprocess (~> 0.5.0)
       deep_merge (~> 1.0)
       grit (~> 2.5)
       i18n (~> 0.6)
@@ -116,7 +117,6 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.2)
-  childprocess (~> 0.5.0)
   facter (~> 1.7)
   fog (~> 1.20)
   hiera (~> 1.3)
