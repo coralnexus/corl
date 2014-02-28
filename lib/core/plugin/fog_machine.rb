@@ -250,12 +250,12 @@ class Fog < CORL.plugin_class(:machine)
   #---
   
   def reload(options = {})
-    super do
+    super do |method_config|
       success = false
       if server
-        success = block_given? ? yield : true
+        success = block_given? ? yield : true            
+        success = init_ssh_session(true, method_config.get(:tries, 5), method_config.get(:sleep_time, 5)) if success
       end
-      init_ssh_session(true) if success
       success
     end
   end
@@ -314,8 +314,26 @@ class Fog < CORL.plugin_class(:machine)
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def init_ssh_session(reset = false)
-    Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key, reset)
+  def init_ssh_session(reset = false, tries = 5, sleep_secs = 5)
+    server.wait_for { ready? }
+    
+    success = true
+        
+    begin
+      Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key, reset)
+            
+    rescue Exception => error
+      if tries > 1
+        sleep(sleep_secs)
+        
+        tries -= 1
+        reset  = true
+        retry
+      else
+        success = false
+      end
+    end
+    success
   end
   
   #---
