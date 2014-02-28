@@ -304,7 +304,7 @@ class Fog < CORL.plugin_class(:machine)
       success = false
       if server
         logger.debug("Destroying machine #{name}")
-        #success = server.destroy
+        success = server.destroy
       end
       close_ssh_session if success
       success
