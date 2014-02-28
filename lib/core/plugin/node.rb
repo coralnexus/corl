@@ -364,6 +364,9 @@ class Node < CORL.plugin_class(:base)
   #---
   
   def delete_keys
+    private_key = myself[:private_key]
+    public_key  = myself[:public_key]
+    
     keys = []
     keys << private_key if private_key
     keys << public_key if public_key
@@ -372,12 +375,13 @@ class Node < CORL.plugin_class(:base)
     
     unless keys.empty?
       files = network.delete_attachments(keys)
-    
+      
       if files && ! files.empty?
         delete_setting(:private_key)
         delete_setting(:public_key)
         
-        success = save(extended_config(:key_delete, { 
+        success = save(extended_config(:key_delete, {
+          :files   => [ private_key, public_key ], 
           :pull    => false, 
           :push    => false,
           :message => "Removing SSH keys for node #{plugin_provider} (#{plugin_name})"  
@@ -909,16 +913,13 @@ class Node < CORL.plugin_class(:base)
         # Remove SSH keys
         if success && delete_keys
           # Remove node information
-          dbg(plugin_provider, plugin_name)
-          dbg(private_key, 'private key')
-          dbg(public_key, 'public key')
-          #network.delete_node(plugin_provider, plugin_name)
-          #network.save({
-          #  :files  => [ private_key, public_key ], 
-          #  :commit => true, 
-          #  :remote => config.get(:remote, :edit), 
-          #  :push   => true 
-          #})
+          network.delete_node(plugin_provider, plugin_name, false)
+          
+          network.save({
+            :commit => true, 
+            :remote => config.get(:remote, :edit), 
+            :push   => true 
+          })
         end      
         
         if success && block_given?
