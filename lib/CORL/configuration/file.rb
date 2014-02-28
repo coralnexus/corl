@@ -292,7 +292,7 @@ class File < CORL.plugin_class(:configuration)
       files   = []
       
       array(ids).each do |id|
-        file = File.join(project.directory, id.to_s)
+        file = ::File.join(project.directory, id.to_s)
         
         if Util::Disk.delete(file)
           files << file
