@@ -262,17 +262,19 @@ class Fog < CORL.plugin_class(:machine)
 
   #---
  
-  def create_image(name, options = {})
+  def create_image(options = {})
     super do
       success = false
       if server
-        logger.debug("Imaging machine #{self.name}")
-        image = server.create_image(name, options)
+        logger.debug("Imaging machine #{plugin_name}")
+        dbg(node.plugin_name, 'node plugin name')
+        #image = server.create_image(node.plugin_name)        
+        #image.wait_for { ready? }
       
-        if image
-          node.image = image.id
-          success    = true
-        end
+        #if image
+        #  node.image = image.id
+        #  success    = true
+        #end
       end
       success
     end
@@ -283,14 +285,11 @@ class Fog < CORL.plugin_class(:machine)
   def stop(options = {})
     super do
       success = true
-      if image_id = create_image(name)      
-        logger.info("Waiting for #{plugin_provider} machine to finish creating image: #{image_id}")
-        ::Fog.wait_for do
-          compute.images.get(image_id).ready? ? true : false
-        end
-              
-        logger.debug("Detroying machine #{name}")
-        success = server.destroy        
+      if server && create_image(options)      
+        logger.debug("Detroying machine #{plugin_name}")
+        success = server.destroy
+      else
+        success = false            
       end
       close_ssh_session if success
       success
@@ -303,7 +302,7 @@ class Fog < CORL.plugin_class(:machine)
     super do
       success = false
       if server
-        logger.debug("Destroying machine #{name}")
+        logger.debug("Destroying machine #{plugin_name}")
         success = server.destroy
       end
       close_ssh_session if success
