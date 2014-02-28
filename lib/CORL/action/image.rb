@@ -8,8 +8,15 @@ class Image < Plugin::CloudAction
   
   def configure
     super do
-      codes :network_failure  
+      codes :network_failure,
+            :image_create_failure  
     end
+  end
+  
+  #---
+  
+  def arguments
+    [ :nodes ]
   end
  
   #-----------------------------------------------------------------------------
@@ -20,7 +27,9 @@ class Image < Plugin::CloudAction
       info('corl.actions.image.start')
       
       if network && node
-        
+        unless node.create_image
+          myself.status = code.image_create_failure
+        end  
       else
         myself.status = code.network_failure
       end    
