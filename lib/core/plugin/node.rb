@@ -909,13 +909,16 @@ class Node < CORL.plugin_class(:base)
         # Remove SSH keys
         if success && delete_keys
           # Remove node information
-          network.delete_node(plugin_provider, plugin_name)
-          network.save({
-            :files  => [ private_key, public_key ], 
-            :commit => true, 
-            :remote => config.get(:remote, :edit), 
-            :push   => true 
-          })
+          dbg(plugin_provider, plugin_name)
+          dbg(private_key, 'private key')
+          dbg(public_key, 'public key')
+          #network.delete_node(plugin_provider, plugin_name)
+          #network.save({
+          #  :files  => [ private_key, public_key ], 
+          #  :commit => true, 
+          #  :remote => config.get(:remote, :edit), 
+          #  :push   => true 
+          #})
         end      
         
         if success && block_given?
