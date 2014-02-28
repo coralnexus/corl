@@ -3,7 +3,6 @@ source "http://rubygems.org"
 gem "nucleon", "~> 0.1"
 gem "childprocess", "~> 0.5.0"
 
-gem "sshkey", "~> 1.6"
 gem "fog", "~> 1.20"
 
 gem "facter", "~> 1.7"

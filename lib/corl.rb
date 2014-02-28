@@ -34,9 +34,6 @@ CORL = Nucleon
 
 require 'childprocess'
 
-require 'tmpdir'
-require 'sshkey'
-
 require 'hiera'
 require 'facter'
 
@@ -67,10 +64,9 @@ end
 #---
 
 # Include CORL utilities
-[ :ssh 
-].each do |name| 
-  nucleon_require(util_dir, name)
-end
+#[].each do |name| 
+#  nucleon_require(util_dir, name)
+#end
 
 # Special errors
 nucleon_require(core_dir, :errors)
