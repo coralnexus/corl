@@ -888,6 +888,7 @@ class Node < CORL.plugin_class(:base)
       
         yield(:config, config) if block_given?      
         success = machine.stop(config.export)
+        success = save(config) if success
         
         if success && block_given?
           process_success = yield(:process, config)
