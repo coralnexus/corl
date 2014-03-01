@@ -272,34 +272,6 @@ class Network < CORL.plugin_class(:base)
     success 
   end
   
-  #---
-  
-  def remove_node(provider, name = nil)
-    status = CORL.code.success
-    
-    if name.nil?
-      nodes(provider).each do |node_name, node|
-        sub_status = remove_node(provider, node_name)
-        status     = sub_status unless status == sub_status 
-      end  
-    else
-      node = node(provider, name)
-      
-      unless node.local?  
-        # Stop node
-        status = node.run(:stop)
-      end
-      
-      if status == CORL.code.success
-        delete_node(provider, name)
-      else
-        ui.warn("Stopping #{provider} node #{name} failed")
-      end       
-    end  
-        
-    status
-  end
-  
   #-----------------------------------------------------------------------------
   # Utilities
 
