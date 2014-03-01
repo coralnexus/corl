@@ -614,8 +614,11 @@ class Node < CORL.plugin_class(:base)
   execute_block_on_receiver :action
   
   def action(provider, options = {})
+    codes :network_load_error
+    
     config = Config.ensure(options).defaults({
-      :log_level    => Nucleon.log_level, 
+      :log_level    => Nucleon.log_level,
+      :net_remote   => :edit, 
       :net_provider => network.plugin_provider 
     })
     
@@ -627,9 +630,15 @@ class Node < CORL.plugin_class(:base)
       :data    => { :encoded => encoded_config }
     })
     
-    command(:corl, { :subcommand => action_config }) do |op, data|
+    result = command(:corl, { :subcommand => action_config }) do |op, data|
       yield(op, data) if block_given?  
-    end 
+    end
+    
+    # Update local network configuration so we capture any updates
+    if result.status == code.success && ! network.load({ :remote => config[:net_remote], :pull => true })
+      result.status = code.network_load_error
+    end
+    result
   end
   
   #---

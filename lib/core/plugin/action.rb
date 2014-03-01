@@ -26,6 +26,7 @@ class CloudAction < CORL.plugin_class(:action)
     node_plugins = CORL.loaded_plugins(:node)
     
     register :parallel, :bool, true, 'corl.core.action.options.parallel'
+    register :net_remote, :str, :edit, 'corl.core.action.options.net_remote'
     register :net_provider, :str, :default, 'corl.core.action.options.net_provider' do |value|
       value           = value.to_sym
       network_plugins = CORL.loaded_plugins(:network)
@@ -62,7 +63,7 @@ class CloudAction < CORL.plugin_class(:action)
   #---
          
   def node_ignore
-    [ :parallel, :net_provider, :node_provider, :nodes ]
+    [ :parallel, :net_remote, :net_provider, :node_provider, :nodes ]
   end
   
   #-----------------------------------------------------------------------------
