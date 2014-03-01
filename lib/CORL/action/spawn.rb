@@ -13,7 +13,8 @@ class Spawn < Plugin::CloudAction
       codes :network_failure,
             :key_failure,
             :node_create_failure
-            
+      
+      register :groups, :array, []      
       register :region, :str, nil
       register :machine_type, :str, nil
       register :image, :str, nil      

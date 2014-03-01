@@ -206,9 +206,10 @@ class Network < CORL.plugin_class(:base)
     return false unless keypair && keypair.is_a?(Util::SSH::Keypair)
         
     remote_name = config.delete(:remote, :edit)
+    node_groups = array(config.delete(:groups, []))
     
     # Set node data
-    node        = set_node(provider, name, {})
+    node        = set_node(provider, name, { :groups => node_groups })
     hook_config = { :node => node, :remote => remote_name, :config => config }
     success     = true
     
