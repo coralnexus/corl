@@ -895,6 +895,13 @@ class Node < CORL.plugin_class(:base)
       
         yield(:config, config) if block_given?      
         success = machine.stop(config.export)
+        
+        delete_setting(:id)
+        delete_setting(:public_ip)
+        delete_setting(:private_ip)
+        
+        myself[:state] = :stopped
+        
         success = save(config) if success
         
         if success && block_given?
