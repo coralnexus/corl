@@ -20,6 +20,13 @@ class Node < CORL.plugin_class(:base)
     ui.resource = hostname
     logger      = hostname
     
+    # TODO: A better way to do this
+    unless groups.include?(plugin_name)
+      myself[:groups] = [ plugin_name, groups ].flatten
+    end
+    unless groups.include?(plugin_provider)
+      myself[:groups] = [ plugin_provider, groups ].flatten
+    end
     unless groups.include?("all")
       myself[:groups] = [ "all", groups ].flatten
     end
@@ -116,7 +123,7 @@ class Node < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   
   def groups
-    array(self[:groups])
+    array(myself[:groups])
   end
   
   #-----------------------------------------------------------------------------
