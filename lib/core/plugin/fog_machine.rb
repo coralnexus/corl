@@ -263,11 +263,11 @@ class Fog < CORL.plugin_class(:machine)
   #---
  
   def create_image(options = {})
-    super do
+    super do |method_config|
       success = false
       if server
         logger.debug("Imaging machine #{plugin_name}")
-        image = server.create_image(node.plugin_name)        
+        image = server.create_image(sprintf(method_config.get(:image_name_format, "%s (%s)"), node.plugin_name, Time.now.to_s))        
         image.wait_for { ready? }
       
         if image
