@@ -8,10 +8,17 @@ class Stop < Plugin::CloudAction
   
   def configure
     super do
-      codes :network_failure
+      codes :network_failure,
+            :stop_failure
     end
   end
 
+  #---
+  
+  def arguments
+    [ :nodes ]
+  end
+ 
   #-----------------------------------------------------------------------------
   # Operations
    
@@ -20,7 +27,9 @@ class Stop < Plugin::CloudAction
       info('corl.actions.stop.start')
       
       if network && node
-        
+        unless node.stop
+          myself.status = code.stop_failure
+        end   
       else
         myself.status = code.network_failure
       end
