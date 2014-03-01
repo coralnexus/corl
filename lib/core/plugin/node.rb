@@ -20,16 +20,7 @@ class Node < CORL.plugin_class(:base)
     ui.resource = hostname
     logger      = hostname
     
-    # TODO: A better way to do this
-    unless groups.include?(plugin_name)
-      myself[:groups] = [ plugin_name, groups ].flatten
-    end
-    unless groups.include?(plugin_provider)
-      myself[:groups] = [ plugin_provider, groups ].flatten
-    end
-    unless groups.include?("all")
-      myself[:groups] = [ "all", groups ].flatten
-    end
+    myself[:groups] = groups.ary([ "all", plugin_provider, plugin_name ])
     
     unless reload
       @cli_interface = Util::Liquid.new do |method, args, &code|
