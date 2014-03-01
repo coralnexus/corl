@@ -124,6 +124,7 @@ class Network < CORL.plugin_class(:base)
       local_node = CORL.node(name, extended_config(:local_node).import({ :meta => { :parent => myself }}), :local) 
     else
       local_node.network = myself
+      local_node.normalize(true)
       local_node.localize               
     end    
     local_node
