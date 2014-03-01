@@ -765,7 +765,7 @@ class Node < CORL.plugin_class(:base)
     hostname(true)
     state(true)
     machine_type(true)
-    image(true)
+    image(false)
     
     # Provider or external configuration preparation
     yield(config) if block_given?
