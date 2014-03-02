@@ -248,8 +248,8 @@ class Node < CORL.plugin_class(:base)
   end
   
   def machine_type(reset = false)
-    myself[:machine_type] = machine.machine_type if reset || myself[:machine_type].nil?
-    machine_type        = myself[:machine_type]
+    myself[:machine_type] = machine.machine_type if machine && ( reset || myself[:machine_type].nil? )
+    machine_type          = myself[:machine_type]
     
     if machine_type.nil? && machine
       if types = machine_types
