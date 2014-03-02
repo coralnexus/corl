@@ -149,10 +149,8 @@ class Fog < CORL.plugin_class(:machine)
   
   def create(options = {})
     super do
-      dbg(options, 'create options')
-      #myself.server = compute.servers.bootstrap(Config.ensure(options).export) if compute
-      #myself.server ? true : false
-      false
+      myself.server = compute.servers.bootstrap(Config.ensure(options).export) if compute
+      myself.server ? true : false
     end
   end
   
