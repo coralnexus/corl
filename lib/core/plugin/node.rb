@@ -798,6 +798,7 @@ class Node < CORL.plugin_class(:base)
       
         yield(:config, config) if block_given?      
         success = machine.start(config.export)
+        success = save(config) if success
         
         if success && block_given?
           process_success = yield(:process, config)
@@ -892,6 +893,9 @@ class Node < CORL.plugin_class(:base)
         delete_setting(:id)
         delete_setting(:public_ip)
         delete_setting(:private_ip)
+        delete_setting(:user)
+        delete_setting(:user_home)
+        delete_setting(:ssh_port)
         
         myself[:state] = :stopped
         
