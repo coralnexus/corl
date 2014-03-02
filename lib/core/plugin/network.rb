@@ -207,21 +207,21 @@ class Network < CORL.plugin_class(:base)
     return false unless keypair && keypair.is_a?(Util::SSH::Keypair)
         
     remote_name = config.delete(:remote, :edit)
-    node_groups = array(config.delete(:groups, []))
     
     # Set node data
-    node        = set_node(provider, name, { :groups => node_groups })
+    node = set_node(provider, name, { 
+      :groups       => array(config.delete(:groups, [])), 
+      :region       => config.delete(:region, nil),
+      :machine_type => config.delete(:machine_type, nil),
+      :image        => config.delete(:image, nil),
+      :hostname     => name
+    })
     hook_config = { :node => node, :remote => remote_name, :config => config }
     success     = true
     
     yield(:preprocess, hook_config) if block_given?
     
     if ! node.local? && node.attach_keys(keypair) && extension_check(:add_node, hook_config)
-      node[:hostname] = name
-      node.hostname # Reset logger and ui prefix (TODO: look into a better way to do this?)
-      
-      node[:image] = config[:image]
-          
       # Create new node / machine
       success = node.create do |op, data|
         block_given? ? yield("create_#{op}".to_sym, data) : data
