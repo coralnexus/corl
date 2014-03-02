@@ -26,11 +26,13 @@ class Exec < Plugin::CloudAction
   def execute
     super do |node, network|
       if network && node
-        settings[:command].collect! do |value|
-          if value.strip.match(/\s+/)
-            value = "\"#{value}\""
+        if settings[:command].length > 1
+          settings[:command].collect! do |value|
+            if value.strip.match(/\s+/)
+              value = "\"#{value}\""
+            end
+            value
           end
-          value
         end
         
         command_str   = settings[:command].join(' ')
