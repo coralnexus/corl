@@ -887,6 +887,8 @@ class Node < CORL.plugin_class(:base)
         yield(:config, config) if block_given?      
         success = machine.stop(config.export)
         
+        myself.machine = nil
+        
         delete_setting(:id)
         delete_setting(:public_ip)
         delete_setting(:private_ip)
@@ -925,6 +927,8 @@ class Node < CORL.plugin_class(:base)
         
         # Shut down machine      
         success = machine.destroy(config.export)
+        
+        myself.machine = nil
         
         # Remove SSH keys
         if success && delete_keys
