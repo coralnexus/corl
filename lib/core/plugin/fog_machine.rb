@@ -49,9 +49,11 @@ class Fog < CORL.plugin_class(:machine)
   #---
   
   def server=id
+    @server = nil
+    
     if id.is_a?(String)
-      @server = compute.servers.get(id)
-    else
+      @server = compute.servers.get(id) unless id.empty?
+    elsif ! id.nil?
       @server = id
     end
     
@@ -140,8 +142,8 @@ class Fog < CORL.plugin_class(:machine)
   
   def load
     super do
-      myself.server = plugin_name if compute && ! plugin_name.empty?
-      ! plugin_name.empty? && @server.nil? ? false : true
+      myself.server = plugin_name if compute && plugin_name
+      ! plugin_name && @server.nil? ? false : true
     end    
   end
   
