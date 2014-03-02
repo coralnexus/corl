@@ -24,13 +24,13 @@ class Aws < Node::Fog
   
   def regions
     [
-      'ap-northeast-1', 
-      'ap-southeast-1', 
-      'ap-southeast-2', 
-      'eu-west-1', 
       'us-east-1', 
       'us-west-1', 
-      'us-west-2', 
+      'us-west-2',
+      'eu-west-1',
+      'ap-northeast-1', 
+      'ap-southeast-1', 
+      'ap-southeast-2',       
       'sa-east-1'
     ]
   end
@@ -41,7 +41,8 @@ class Aws < Node::Fog
   def machine_config
     super do |config|
       config.import({ 
-        :provider => 'AWS'
+        :provider => 'AWS',
+        :region   => region
       })
     
       config[:aws_access_key_id]     = api_user if api_user
@@ -55,9 +56,6 @@ class Aws < Node::Fog
   def create(options = {})
     super do |op, config|
       if op == :config
-        config[:private_key] = private_key if private_key
-        config[:public_key]  = public_key if public_key
-        
         config.defaults({
           :name      => hostname,
           :flavor_id => machine_type,
