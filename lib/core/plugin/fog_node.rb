@@ -161,6 +161,7 @@ class Fog < CORL.plugin_class(:node)
     super do |op, config|
       if op == :config
         config.import(exec_options(:start))
+        config.defaults(key_config)
       end
       yield(op, config) if block_given?
     end
