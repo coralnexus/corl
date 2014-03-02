@@ -769,9 +769,10 @@ class Node < CORL.plugin_class(:base)
     id(true)
     public_ip(true)
     private_ip(true)
-    hostname(true)
     state(true)
-    machine_type(true)
+    
+    hostname(false)
+    machine_type(false)
     image(false)
     
     # Provider or external configuration preparation
