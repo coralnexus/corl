@@ -7,7 +7,7 @@ class Machine < CORL.plugin_class(:base)
   # Machine plugin interface
   
   def normalize(reload)
-    myself.plugin_name = nil if plugin_name.to_s == plugin_provider.to_s      
+    myself.plugin_name = nil   
   end
        
   #-----------------------------------------------------------------------------
