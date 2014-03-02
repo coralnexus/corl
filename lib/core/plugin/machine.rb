@@ -190,8 +190,7 @@ class Machine < CORL.plugin_class(:base)
       logger.debug("Starting #{plugin_provider} machine with: #{options.inspect}")
       
       if created?
-        config  = Config.ensure(options)
-        success = yield(config) if block_given?    
+        logger.debug("Machine #{plugin_name} has already been created") 
       else
         logger.debug("Machine #{plugin_name} does not yet exist")
         success = create(options)

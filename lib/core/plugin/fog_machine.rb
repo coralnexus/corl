@@ -149,8 +149,10 @@ class Fog < CORL.plugin_class(:machine)
   
   def create(options = {})
     super do
-      myself.server = compute.servers.bootstrap(Config.ensure(options).export) if compute
-      myself.server ? true : false
+      dbg(options, 'create options')
+      #myself.server = compute.servers.bootstrap(Config.ensure(options).export) if compute
+      #myself.server ? true : false
+      false
     end
   end
   
@@ -227,28 +229,6 @@ class Fog < CORL.plugin_class(:machine)
   
   #---
   
-  def start(options = {})
-    super do
-      if compute
-        server_info = compute.servers.create(options)
-      
-        logger.info("Waiting for #{plugin_provider} machine to start")
-        ::Fog.wait_for do
-          compute.servers.get(server_info.id).ready? ? true : false
-        end
-      
-        logger.debug("Setting machine #{server_info.id}")
-            
-        myself.server = compute.servers.get(server_info.id)
-        myself.server ? true : false
-      else
-        false
-      end      
-    end
-  end
-  
-  #---
-  
   def reload(options = {})
     super do |method_config|
       success = false
@@ -285,7 +265,7 @@ class Fog < CORL.plugin_class(:machine)
     super do
       success = true
       if server && create_image(options)      
-        logger.debug("Detroying machine #{plugin_name}")
+        logger.debug("Stopping machine #{plugin_name}")
         success = server.destroy
       else
         success = false            
