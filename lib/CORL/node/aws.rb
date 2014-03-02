@@ -5,7 +5,13 @@ class Aws < Node::Fog
  
   #-----------------------------------------------------------------------------
   # Node plugin interface
-      
+  
+  def normalize(reload)
+    super do
+      :aws
+    end
+  end
+       
   #-----------------------------------------------------------------------------
   # Checks
   
@@ -18,9 +24,14 @@ class Aws < Node::Fog
   
   def regions
     [
-      'us-west-2a',
-      'us-west-2b',
-      'us-west-2c'
+      'ap-northeast-1', 
+      'ap-southeast-1', 
+      'ap-southeast-2', 
+      'eu-west-1', 
+      'us-east-1', 
+      'us-west-1', 
+      'us-west-2', 
+      'sa-east-1'
     ]
   end
   
