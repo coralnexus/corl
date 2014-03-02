@@ -47,21 +47,33 @@ class Rackspace < Fog
     end
   end
   
+  #---
+  
+  def create_config
+    { :name => hostname, :flavor_id => machine_type, :image_id => image }  
+  end
+  
   #-----------------------------------------------------------------------------
   # Node operations
   
   def create(options = {})
     super do |op, config|
       if op == :config
-        config.defaults({
-          :name             => hostname,
-          :flavor_id        => machine_type,
-          :image_id         => image
-        })
+        config.defaults(create_config)
       end
     end
   end
- 
+  
+  #---
+  
+  def start(options = {})
+    super do |op, config|
+      if op == :config
+        config.defaults(create_config)
+      end
+    end
+  end
+  
   #-----------------------------------------------------------------------------
   # Utilities
   
