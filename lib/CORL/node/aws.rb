@@ -63,6 +63,7 @@ class Aws < Fog
     super do |op, config|
       if op == :config
         config.defaults(create_config)
+        config.defaults({ :username => user })
       end
     end
   end
@@ -84,13 +85,16 @@ class Aws < Fog
   #---
   
   def render_image(image)
-    sprintf("[  %20s  ][ %10s ] %10s - %s", image_id(image), image.state, image.architecture, image.name)
+    location = image.location.split('/').first
+    sprintf("[  %20s  ][ %10s ] %10s - %s (%s)", image_id(image), image.state, image.architecture, image.name, location)
   end
   
   #---
   
   def image_search_text(image)
-    sprintf("%s %s %s %s %s", image_id(image), image.name, image.description, image.state, image.architecture)
+    location = image.location.split('/').first
+    location = location.match(/^\d+$/) ? '' : location
+    sprintf("%s %s %s %s %s %s %s", image_id(image), image.name, image.description, image.state, image.architecture, image.owner_id, location)
   end
 end
 end
