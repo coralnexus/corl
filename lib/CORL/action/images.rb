@@ -10,9 +10,10 @@ class Images < Plugin::CloudAction
     super do
       codes :node_load_failure,
             :image_load_failure
-            
+      
+      register :region, :str, nil      
       register :match_case, :bool, false
-      register :require_all, :bool, false
+      register :require_all, :bool, true
       register :search, :array, []
     end
   end
@@ -34,7 +35,7 @@ class Images < Plugin::CloudAction
     super do |local_node, network|
       info('corl.actions.images.start')
       
-      if node = network.test_node(settings[:node_provider])
+      if node = network.test_node(settings[:node_provider], { :region => settings[:region] })
         if images = node.images(settings[:search], settings)
           images.each do |image|
             render(node.render_image(image), { :prefix => false })
