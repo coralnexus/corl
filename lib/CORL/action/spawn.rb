@@ -17,7 +17,8 @@ class Spawn < Plugin::CloudAction
       register :groups, :array, []      
       register :region, :str, nil
       register :machine_type, :str, nil
-      register :image, :str, nil      
+      register :image, :str, nil
+      register :user, :str, :root     
       register :hostnames, :array, nil
         
       keypair_config
