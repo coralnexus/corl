@@ -145,8 +145,9 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
-  def test_node(provider)
-    CORL.node(:test, { :meta => { :parent => myself } }, provider)
+  def test_node(provider, options = {})
+    config = Config.ensure(options).import({ :meta => { :parent => myself } })
+    CORL.node(:test, config.export, provider)
   end
   
   #-----------------------------------------------------------------------------
@@ -214,6 +215,7 @@ class Network < CORL.plugin_class(:base)
       :region       => config.delete(:region, nil),
       :machine_type => config.delete(:machine_type, nil),
       :image        => config.delete(:image, nil),
+      :user         => config.delete(:user, :root),
       :hostname     => name
     })
     hook_config = { :node => node, :remote => remote_name, :config => config }
