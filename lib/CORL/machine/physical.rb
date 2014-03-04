@@ -40,7 +40,7 @@ class Physical < CORL.plugin_class(:machine)
   #---
   
   def public_ip
-    fact(:ipaddress)
+    CORL.ip_address
   end
   
   #---

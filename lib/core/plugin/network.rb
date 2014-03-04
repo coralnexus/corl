@@ -116,7 +116,7 @@ class Network < CORL.plugin_class(:base)
   #---
   
   def local_node
-    ip_address = lookup(:ipaddress)
+    ip_address = CORL.ip_address
     local_node = node_by_ip(ip_address)
         
     if local_node.nil?
