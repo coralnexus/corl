@@ -106,18 +106,18 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
-  def node_by_ip(public_ip)
+  def node_by_ip(public_ip, require_new = false)
     each_node_config do |provider, name, info|
-      return node(provider, name) if info[:public_ip] == public_ip  
+      return node(provider, name, require_new) if info[:public_ip] == public_ip  
     end
     nil
   end
   
   #---
   
-  def local_node
+  def local_node(require_new = false)
     ip_address = CORL.ip_address
-    local_node = node_by_ip(ip_address)
+    local_node = node_by_ip(ip_address, require_new)
         
     if local_node.nil?
       name       = Util::Data.ensure_value(lookup(:hostname), ip_address)    
@@ -132,12 +132,12 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
-  def nodes_by_reference(references, default_provider = nil)
+  def nodes_by_reference(references, default_provider = nil, require_new = false)
     nodes = []
     
     node_info(references, default_provider).each do |provider, names|
       names.each do |name|
-        nodes << node(provider, name)
+        nodes << node(provider, name, require_new)
       end
     end
     nodes  
