@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-03-02"
+  s.date = "2014-03-04"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -52,6 +52,7 @@ Gem::Specification.new do |s|
     "lib/CORL/action/lookup.rb",
     "lib/CORL/action/machines.rb",
     "lib/CORL/action/provision.rb",
+    "lib/CORL/action/regions.rb",
     "lib/CORL/action/seed.rb",
     "lib/CORL/action/spawn.rb",
     "lib/CORL/action/ssh.rb",
@@ -60,6 +61,7 @@ Gem::Specification.new do |s|
     "lib/CORL/configuration/file.rb",
     "lib/CORL/event/puppet.rb",
     "lib/CORL/extension/puppetloader.rb",
+    "lib/CORL/machine/aws.rb",
     "lib/CORL/machine/physical.rb",
     "lib/CORL/machine/rackspace.rb",
     "lib/CORL/network/default.rb",
@@ -75,6 +77,7 @@ Gem::Specification.new do |s|
     "lib/core/facade.rb",
     "lib/core/mixin/action/keypair.rb",
     "lib/core/mixin/lookup.rb",
+    "lib/core/mod/fog_aws_server.rb",
     "lib/core/mod/hiera_backend.rb",
     "lib/core/plugin/action.rb",
     "lib/core/plugin/configuration.rb",
