@@ -3,6 +3,7 @@ source "http://rubygems.org"
 gem "nucleon", "~> 0.1"
 
 gem "fog", "~> 1.20"
+gem "unf", "~> 0.1"
 
 gem "facter", "~> 1.7"
 gem "hiera", "~> 1.3"

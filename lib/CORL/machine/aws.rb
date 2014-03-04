@@ -10,6 +10,7 @@ class Aws < Fog
   # Property accessors / modifiers
   
   def set_connection
+    require 'unf'
     super
     Kernel.load File.join(File.dirname(__FILE__), '..', '..', 'core', 'mod', 'fog_aws_server.rb')
   end
