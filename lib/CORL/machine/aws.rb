@@ -50,7 +50,7 @@ class Aws < Fog
       method_config[:key_name] = keypair_name
       
       # Security group initialization
-      ssh_port = 55 #node.ssh_port
+      ssh_port = node.ssh_port
       
       if ssh_port != 22
         group_name = "CORL_SSH_#{ssh_port}"
