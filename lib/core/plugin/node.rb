@@ -143,7 +143,7 @@ class Node < CORL.plugin_class(:base)
     myself[:id] = machine.plugin_name if machine && ( reset || myself[:id].nil? )
     myself[:id]
   end
- 
+  
   #---
   
   def public_ip(reset = false)
@@ -158,9 +158,7 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
-  def hostname(reset = false)
-    myself[:hostname] = machine.hostname if machine && ( reset || myself[:hostname].nil? )
-    
+  def hostname
     hostname = myself[:hostname]
     
     if hostname.to_s != ui.resource.to_s 
@@ -242,10 +240,6 @@ class Node < CORL.plugin_class(:base)
   def machine_types # Must be set at machine level (queried)
     machine.machine_types if machine
   end
-    
-  def machine_type=machine_type
-    myself[:machine_type] = machine_type
-  end
   
   def machine_type(reset = false)
     myself[:machine_type] = machine.machine_type if machine && ( reset || myself[:machine_type].nil? )
@@ -254,8 +248,8 @@ class Node < CORL.plugin_class(:base)
     if machine_type.nil? && machine
       if types = machine_types
         unless types.empty?
-          machine_type      = machine_type_id(types.first)
-          myself.machine_type = machine_type
+          machine_type          = machine_type_id(types.first)
+          myself[:machine_type] = machine_type
         end
       end
     end
@@ -598,10 +592,20 @@ class Node < CORL.plugin_class(:base)
   execute_block_on_receiver :command
   
   def command(command, options = {})
+    config   = Config.ensure(options)
+    as_admin = config.delete(:as_admin, false)
+    
     unless command.is_a?(CORL::Plugin::Command)
-      command = CORL.command(Config.new({ :command => command }).import(options), :bash)
+      command = CORL.command(Config.new({ :command => command }).import(config), :bash)
     end
-    results = exec({ :commands => [ command.to_s ] }) do |op, data|
+    
+    admin_command = ''
+    if as_admin
+      admin_command = 'sudo' if user.to_s == 'ubuntu'
+      admin_command = extension_set(:admin_command, admin_command, config)
+    end
+    
+    results = exec({ :commands => [ "#{admin_command} #{command.to_s}".strip ] }) do |op, data|
       yield(op, data) if block_given?  
     end
     results.first
@@ -628,7 +632,7 @@ class Node < CORL.plugin_class(:base)
       :data    => { :encoded => encoded_config }
     })
     
-    result = command(:corl, { :subcommand => action_config }) do |op, data|
+    result = command(:corl, { :subcommand => action_config, :as_admin => true }) do |op, data|
       yield(op, data) if block_given?  
     end
     
@@ -734,7 +738,7 @@ class Node < CORL.plugin_class(:base)
           if status == code.success
             remote_script = File.join(remote_bootstrap_path, bootstrap_init) 
             
-            result = command("HOSTNAME='#{hostname}' #{remote_script}") do |op, data|
+            result = command("HOSTNAME='#{hostname}' #{remote_script}", { :as_admin => true }) do |op, data|
               yield("exec_#{op}".to_sym, data) if block_given?
               data
             end
@@ -771,7 +775,6 @@ class Node < CORL.plugin_class(:base)
     private_ip(true)
     state(true)
     
-    hostname(false)
     machine_type(false)
     image(false)
     
