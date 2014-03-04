@@ -44,13 +44,6 @@ I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir
 
 #---
 
-# Object modifications (100% pure monkey patches)
-Dir.glob(File.join(mod_dir, '*.rb')).each do |file|
-  require file
-end
-
-#---
-
 # Mixins for classes
 Dir.glob(File.join(mixin_dir, '*.rb')).each do |file|
   require file
