@@ -29,8 +29,8 @@ class Fog < CORL.plugin_class(:machine)
     
     ENV['DEBUG'] = 'true' if CORL.log_level == :debug
     
-    require 'fog' 
-        
+    require 'fog'
+            
     myself.compute = ::Fog::Compute.new(export)
   end
   protected :set_connection
@@ -55,24 +55,8 @@ class Fog < CORL.plugin_class(:machine)
       @server = compute.servers.get(id) unless id.empty?
     elsif ! id.nil?
       @server = id
-    end
-    
-    unless @server.nil?
-      myself.plugin_name = @server.id
-      
-      node[:id]         = plugin_name
-      node[:hostname]   = @server.name
-      node[:public_ip]  = @server.public_ip_address
-      node[:private_ip] = @server.private_ip_address
-    
-      node.machine_type = @server.flavor.id
-      node.image        = @server.image.id      
-    
-      node.user         = @server.username unless node.user
-      
-      @server.private_key_path = node.private_key if node.private_key
-      @server.public_key_path  = node.public_key if node.public_key
-    end
+    end    
+    init_server
   end
   
   def server
@@ -87,14 +71,7 @@ class Fog < CORL.plugin_class(:machine)
     return translate_state(server.state) if server
     nil
   end
-  
-  #---
-  
-  def hostname
-    return server.name if server
-    nil
-  end
-  
+   
   #---
   
   def public_ip
@@ -140,6 +117,15 @@ class Fog < CORL.plugin_class(:machine)
   #-----------------------------------------------------------------------------
   # Management
   
+  def init_server
+    unless @server.nil?
+      yield # Implement in fog machine providers
+    end  
+  end
+  protected :init_server
+  
+  #---
+  
   def load
     super do
       myself.server = plugin_name if compute && plugin_name
@@ -150,8 +136,11 @@ class Fog < CORL.plugin_class(:machine)
   #---
   
   def create(options = {})
-    super do
-      myself.server = compute.servers.bootstrap(Config.ensure(options).export) if compute
+    super do |method_config|
+      if compute
+        yield(method_config) if block_given?
+        myself.server = compute.servers.bootstrap(method_config.export)
+      end
       myself.server ? true : false
     end
   end
@@ -163,7 +152,7 @@ class Fog < CORL.plugin_class(:machine)
       logger.debug("Executing SCP download to #{local_path} from #{remote_path} on machine #{name}") 
       
       begin
-        if init_ssh_session
+        if init_ssh_session(server)
           Util::SSH.download(node.public_ip, node.user, remote_path, local_path, config.export) do |name, received, total|
             yield(name, received, total) if block_given?
           end
@@ -182,10 +171,10 @@ class Fog < CORL.plugin_class(:machine)
   
   def upload(local_path, remote_path, options = {})
     super do |config, success|
-      logger.debug("Executing SCP upload from #{local_path} to #{remote_path} on machine #{name}") 
+      logger.debug("Executing SCP upload from #{local_path} to #{remote_path} on machine #{plugin_name}") 
       
       begin
-        if init_ssh_session
+        if init_ssh_session(server)
           Util::SSH.upload(node.public_ip, node.user, local_path, remote_path, config.export) do |name, sent, total|
             yield(name, sent, total) if block_given?
           end
@@ -205,9 +194,9 @@ class Fog < CORL.plugin_class(:machine)
   def exec(commands, options = {})
     super do |config, results|
       if commands
-        logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{name}")
+        logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{plugin_name}")
         
-        if init_ssh_session
+        if init_ssh_session(server)
           results = Util::SSH.exec(node.public_ip, node.user, commands) do |type, command, data|
             yield(type, command, data) if block_given?  
           end
@@ -233,8 +222,8 @@ class Fog < CORL.plugin_class(:machine)
     super do |method_config|
       success = false
       if server
-        success = block_given? ? yield : true            
-        success = init_ssh_session(true, method_config.get(:tries, 5), method_config.get(:sleep_time, 5)) if success
+        success = block_given? ? yield(method_config) : true            
+        success = init_ssh_session(server, true, method_config.get(:tries, 5), method_config.get(:sleep_time, 5)) if success
       end
       success
     end
@@ -251,8 +240,8 @@ class Fog < CORL.plugin_class(:machine)
         image.wait_for { ready? }
       
         if image
-          node.image = image.id
-          success    = true
+          node[:image] = image.id
+          success      = true
         end
       end
       success
@@ -292,7 +281,7 @@ class Fog < CORL.plugin_class(:machine)
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def init_ssh_session(reset = false, tries = 5, sleep_secs = 5)
+  def init_ssh_session(server, reset = false, tries = 5, sleep_secs = 5)
     server.wait_for { ready? }
     
     success = true
