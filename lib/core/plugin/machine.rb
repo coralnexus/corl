@@ -7,7 +7,7 @@ class Machine < CORL.plugin_class(:base)
   # Machine plugin interface
   
   def normalize(reload)
-    myself.plugin_name = nil   
+    myself.plugin_name = node[:id]
   end
        
   #-----------------------------------------------------------------------------
