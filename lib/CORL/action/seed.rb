@@ -86,7 +86,7 @@ class Seed < Plugin::CloudAction
               render("Reinitializing network")
               if network = init_network
                 if network.load
-                  if node = network.local_node
+                  if node = network.local_node(true)
                     render("Updating node network configurations")
                     myself.status = code.node_save_failure unless node.save  
                   else
