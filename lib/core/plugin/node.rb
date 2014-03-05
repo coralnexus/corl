@@ -813,7 +813,7 @@ class Node < CORL.plugin_class(:base)
               yield("bootstrap_#{op}".to_sym, data) if block_given?
               data
             end
-            success = false unless result.status == code.success
+            success = false unless result.status == code.success && reload
           end
         end
         
