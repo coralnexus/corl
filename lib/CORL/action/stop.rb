@@ -47,10 +47,9 @@ class Stop < Plugin::CloudAction
    
   def execute
     super do |local_node, network|
-      info('corl.actions.stop.start')
-      
       if network
         batch_success = network.batch(settings[:stop_nodes], settings[:node_provider], settings[:parallel]) do |node|
+          info('corl.actions.stop.start', { :provider => node.plugin_provider, :name => node.plugin_name })
           node.stop  
         end
         myself.status = code.batch_error unless batch_success

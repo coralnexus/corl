@@ -47,10 +47,9 @@ class Start < Plugin::CloudAction
    
   def execute
     super do |local_node, network|
-      info('corl.actions.start.start')
-      
       if network
         batch_success = network.batch(settings[:start_nodes], settings[:node_provider], settings[:parallel]) do |node|
+          info('corl.actions.start.start', { :provider => node.plugin_provider, :name => node.plugin_name })
           node.start 
         end
         myself.status = code.batch_error unless batch_success
