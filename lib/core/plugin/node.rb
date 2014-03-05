@@ -898,7 +898,6 @@ class Node < CORL.plugin_class(:base)
         delete_setting(:id)
         delete_setting(:public_ip)
         delete_setting(:private_ip)
-        delete_setting(:user_home)
         delete_setting(:ssh_port)
         
         myself[:state] = :stopped
