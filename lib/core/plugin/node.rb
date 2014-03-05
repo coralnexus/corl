@@ -189,6 +189,7 @@ class Node < CORL.plugin_class(:base)
   
   def ssh_port=ssh_port
     myself[:ssh_port] = ssh_port
+    machine.init_ssh(ssh_port) if machine
   end
   
   def ssh_port

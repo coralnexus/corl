@@ -83,7 +83,13 @@ class Machine < CORL.plugin_class(:base)
   end
             
   #-----------------------------------------------------------------------------
-  # Management 
+  # Management
+  
+  def init_ssh(ssh_port)
+    # Implement in sub classes if needed
+  end
+  
+  #--- 
 
   def load
     success = true
@@ -181,28 +187,6 @@ class Machine < CORL.plugin_class(:base)
   
   #---
   
-  def start(options = {})
-    success = true
-    
-    if running?
-      logger.debug("Machine #{plugin_name} is already running")  
-    else
-      logger.debug("Starting #{plugin_provider} machine with: #{options.inspect}")
-      
-      if created?
-        logger.debug("Machine #{plugin_name} has already been created") 
-      else
-        logger.debug("Machine #{plugin_name} does not yet exist")
-        success = create(options)
-      end      
-    end
-    
-    logger.warn("There was an error starting the machine #{plugin_name}") unless success
-    success
-  end
-  
-  #---
-  
   def reload(options = {})
     success = true
     
@@ -249,6 +233,28 @@ class Machine < CORL.plugin_class(:base)
     end
     
     logger.warn("There was an error stopping the machine #{plugin_name}") unless success
+    success
+  end
+  
+  #---
+  
+  def start(options = {})
+    success = true
+    
+    if running?
+      logger.debug("Machine #{plugin_name} is already running")  
+    else
+      logger.debug("Starting #{plugin_provider} machine with: #{options.inspect}")
+      
+      if created?
+        logger.debug("Machine #{plugin_name} has already been created") 
+      else
+        logger.debug("Machine #{plugin_name} does not yet exist")
+        success = create(options)
+      end      
+    end
+    
+    logger.warn("There was an error starting the machine #{plugin_name}") unless success
     success
   end
   
