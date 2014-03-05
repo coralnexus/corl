@@ -737,7 +737,9 @@ class Node < CORL.plugin_class(:base)
           
           # Execute bootstrap process
           if status == code.success
-            remote_script = File.join(remote_bootstrap_path, bootstrap_init) 
+            remote_script = File.join(remote_bootstrap_path, bootstrap_init)
+            
+            myself[:bootstrap] = remote_script
             
             result = command("HOSTNAME='#{hostname}' #{remote_script}", { :as_admin => true }) do |op, data|
               yield("exec_#{op}".to_sym, data) if block_given?
@@ -804,6 +806,16 @@ class Node < CORL.plugin_class(:base)
         yield(:config, config) if block_given?      
         success = machine.start(config.export)
         success = save(config) if success
+        
+        if success
+          if bootstrap_script = myself[:bootstrap]
+            result = command("HOSTNAME='#{hostname}' #{bootstrap_script}", { :as_admin => true }) do |op, data|
+              yield("bootstrap_#{op}".to_sym, data) if block_given?
+              data
+            end
+            success = false unless result.status == code.success
+          end
+        end
         
         if success && block_given?
           process_success = yield(:process, config)
