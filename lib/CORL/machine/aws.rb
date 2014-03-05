@@ -81,7 +81,7 @@ class Aws < Fog
       data              = compute.create_image(server.identity, image_name, image_description)
       image_id          = data.body['imageId']
       
-      Fog.wait_for do
+      ::Fog.wait_for do
         compute.describe_images('ImageId' => image_id).body['ImagesSet'].first['ImageState'] == 'available'
       end
       
