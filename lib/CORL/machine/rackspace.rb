@@ -31,8 +31,7 @@ class Rackspace < Fog
   #---
   
   def reload(options = {})
-    super do
-      config  = Config.ensure(options)
+    super do |config|
       success = server.reboot(config.get(:type, 'SOFT'))
       
       server.wait_for { ready? } if success
@@ -43,7 +42,7 @@ class Rackspace < Fog
   #---
  
   def create_image(options = {})
-    super do |image_name, method_config, success|
+    super do |image_name, config, success|
       image = server.create_image(image_name)        
       image.wait_for { ready? }
       

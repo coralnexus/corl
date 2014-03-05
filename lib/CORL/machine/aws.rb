@@ -46,10 +46,8 @@ class Aws < Fog
   #--- 
 
   def create(options = {})
-    super do |method_config|
+    super do |config|
       # Keypair initialization
-      keypair_name = "CORL_#{node.plugin_name}"
-      
       if key_pair = compute.key_pairs.get(keypair_name)
         key_pair.destroy
       end
@@ -57,14 +55,14 @@ class Aws < Fog
         :name       => keypair_name,
         :public_key => Util::Disk.read(node.public_key)
       )      
-      method_config[:key_name] = keypair_name
+      config[:key_name] = keypair_name
     end
   end
   
   #---
   
   def reload(options = {})
-    super do
+    super do |config|
       success = server.reboot
       
       server.wait_for { ready? } if success
@@ -75,12 +73,12 @@ class Aws < Fog
   #---
  
   def create_image(options = {})
-    super do |image_name, method_config, success|
+    super do |image_name, config, success|
       image_name        = image_name.gsub(/[^A-Za-z0-9\(\)\.\-\_\/]+/, '_')
-      image_description = method_config.get(:description, "CORL backup image")
+      image_description = config.get(:description, "CORL backup image")
       
-      data              = compute.create_image(server.identity, image_name, image_description)
-      image_id          = data.body['imageId']
+      data     = compute.create_image(server.identity, image_name, image_description)
+      image_id = data.body['imageId']
       
       ::Fog.wait_for do
         compute.describe_images('ImageId' => image_id).body['imagesSet'].first['imageState'] == 'available'
@@ -94,8 +92,26 @@ class Aws < Fog
     end
   end
   
+  #---
+
+  def destroy(options = {})
+    super do |config|
+      unless config.get(:stop, false)
+        # Keypair destruction
+        key_pair.destroy if key_pair = compute.key_pairs.get(keypair_name)
+      end
+      true  
+    end
+  end
+  
   #-----------------------------------------------------------------------------
   # Utilities
+  
+  def keypair_name
+    "CORL_#{node.plugin_name}"  
+  end
+  
+  #---
   
   def ensure_security_group(group_name, from_port, to_port = nil, options = {})
     config         = Config.ensure(options)
