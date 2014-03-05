@@ -36,6 +36,15 @@ class Aws < Fog
   
   #---
  
+  def init_ssh(ssh_port)
+    # Security group initialization
+    if compute && ssh_port != 22
+      ensure_security_group("CORL_SSH_#{ssh_port}", ssh_port)
+    end
+  end
+  
+  #--- 
+
   def create(options = {})
     super do |method_config|
       # Keypair initialization
@@ -49,36 +58,6 @@ class Aws < Fog
         :public_key => Util::Disk.read(node.public_key)
       )      
       method_config[:key_name] = keypair_name
-      
-      # Security group initialization
-      ssh_port = node.ssh_port
-      
-      if ssh_port != 22
-        group_name = "CORL_SSH_#{ssh_port}"
-        
-        security_group = compute.security_groups.get(group_name)
-        if security_group.nil?
-          security_group = compute.security_groups.create(
-            :name        => group_name,
-            :description => "CORL SSH access to port #{ssh_port}"  
-          )          
-          raise unless security_group          
-        end
-        
-        authorized = false
-        if security_group.ip_permissions  
-          authorized = security_group.ip_permissions.detect do |ip_permission|
-            ip_permission['ipRanges'].first && ip_permission['ipRanges'].first['cidrIp'] == '0.0.0.0/0' &&
-            ip_permission['fromPort'] == ssh_port &&
-            ip_permission['ipProtocol'] == 'tcp' &&
-            ip_permission['toPort'] == ssh_port
-          end
-        end
-        unless authorized
-          security_group.authorize_port_range(Range.new(ssh_port, ssh_port))
-        end                
-        method_config[:groups] = [ "default", group_name ]
-      end
     end
   end
   
@@ -86,11 +65,67 @@ class Aws < Fog
   
   def reload(options = {})
     super do
-      logger.debug("Rebooting AWS machine #{plugin_name}")      
       success = server.reboot
       
       server.wait_for { ready? } if success
       success
+    end
+  end
+  
+  #---
+ 
+  def create_image(options = {})
+    super do |image_name, method_config, success|
+      image_description = method_config.get(:description, "CORL backup image")
+      data              = compute.create_image(server.identity, image_name, image_description)
+      image_id          = data.body['imageId']
+      
+      Fog.wait_for do
+        compute.describe_images('ImageId' => image_id).body['ImagesSet'].first['ImageState'] == 'available'
+      end
+      
+      if image_id
+        node[:image] = image_id
+        success      = true
+      end
+      success
+    end
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def ensure_security_group(group_name, from_port, to_port = nil, options = {})
+    config         = Config.ensure(options)
+    security_group = compute.security_groups.get(group_name)
+    cidrip         = config.get(:cidrip, '0.0.0.0/0')
+    protocol       = config.get(:protocol, 'tcp')
+    to_port        = from_port if to_port.nil?
+    
+    if security_group.nil?
+      security_group = compute.security_groups.create(
+        :name        => group_name,
+        :description => config.get(:description, "Opening port range: #{from_port} to #{to_port}")  
+      )          
+      raise unless security_group # TODO: Better error class       
+    end
+        
+    authorized = false
+    if security_group.ip_permissions  
+      authorized = security_group.ip_permissions.detect do |ip_permission|
+        ip_permission['ipRanges'].first && ip_permission['ipRanges'].first['cidrIp'] == cidrip &&
+        ip_permission['fromPort'] == from_port &&
+        ip_permission['ipProtocol'] == protocol &&
+        ip_permission['toPort'] == to_port
+      end
+    end
+    unless authorized
+      security_group.authorize_port_range(Range.new(from_port, to_port))
+    end
+      
+    if server
+      server.groups = [ group_name ] | server.groups
+      server.save
     end
   end
 end

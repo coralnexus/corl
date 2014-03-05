@@ -236,13 +236,9 @@ class Fog < CORL.plugin_class(:machine)
       success = false
       if server
         logger.debug("Imaging machine #{plugin_name}")
-        image = server.create_image(sprintf(method_config.get(:image_name_format, "%s (%s)"), node.plugin_name, Time.now.to_s))        
-        image.wait_for { ready? }
-      
-        if image
-          node[:image] = image.id
-          success      = true
-        end
+        
+        image_name = sprintf("%s (%s)", node.plugin_name, Time.now.to_s)
+        success    = yield(image_name, method_config, success) if block_given? # Implement in sub classes
       end
       success
     end

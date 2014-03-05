@@ -32,12 +32,25 @@ class Rackspace < Fog
   
   def reload(options = {})
     super do
-      config = Config.ensure(options)
-      logger.debug("Rebooting Rackspace machine #{plugin_name}")
-      
+      config  = Config.ensure(options)
       success = server.reboot(config.get(:type, 'SOFT'))
       
       server.wait_for { ready? } if success
+      success
+    end
+  end
+  
+  #---
+ 
+  def create_image(options = {})
+    super do |image_name, method_config, success|
+      image = server.create_image(image_name)        
+      image.wait_for { ready? }
+      
+      if image
+        node[:image] = image.id
+        success      = true
+      end
       success
     end
   end
