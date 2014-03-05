@@ -76,6 +76,7 @@ class Aws < Fog
  
   def create_image(options = {})
     super do |image_name, method_config, success|
+      image_name        = image_name.gsub(/[^A-Za-z0-9\(\)\.\-\_\/]+/, '_')
       image_description = method_config.get(:description, "CORL backup image")
       data              = compute.create_image(server.identity, image_name, image_description)
       image_id          = data.body['imageId']
