@@ -66,7 +66,6 @@ Gem::Specification.new do |s|
     "lib/CORL/machine/rackspace.rb",
     "lib/CORL/network/default.rb",
     "lib/CORL/node/aws.rb",
-    "lib/CORL/node/google.rb",
     "lib/CORL/node/local.rb",
     "lib/CORL/node/rackspace.rb",
     "lib/CORL/provisioner/puppetnode.rb",
