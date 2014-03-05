@@ -98,7 +98,9 @@ class Aws < Fog
     super do |config|
       unless config.get(:stop, false)
         # Keypair destruction
-        key_pair.destroy if key_pair = compute.key_pairs.get(keypair_name)
+        if key_pair = compute.key_pairs.get(keypair_name)
+          key_pair.destroy
+        end
       end
       true  
     end
