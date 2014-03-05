@@ -53,7 +53,7 @@ class Aws < Fog
   #---
   
   def create_config
-    { :flavor_id => machine_type, :image_id => image }  
+    { :flavor_id => machine_type, :image_id => image, :username => user }  
   end
   
   #-----------------------------------------------------------------------------
@@ -63,11 +63,20 @@ class Aws < Fog
     super do |op, config|
       if op == :config
         config.defaults(create_config)
-        config.defaults({ :username => user })
       end
     end
   end
  
+  #---
+  
+  def start(options = {})
+    super do |op, config|
+      if op == :config
+        config.defaults(create_config)
+      end
+    end
+  end
+  
   #-----------------------------------------------------------------------------
   # Utilities
   
