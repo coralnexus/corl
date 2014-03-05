@@ -710,7 +710,7 @@ class Node < CORL.plugin_class(:base)
         myself.status = code.success
         
         # Transmit authorisation / credential files
-        package_files = [ '.fog', '.netrc', '.google-privatekey.p12' ]
+        package_files = [ '.fog', '.netrc', '.google-privatekey.p12', '.vimrc' ]
         auth_files.each do |file|
           package_files = file.gsub(local_path + '/', '')
         end
