@@ -136,10 +136,10 @@ class Fog < CORL.plugin_class(:machine)
   #---
   
   def create(options = {})
-    super do |method_config|
+    super do |config|
       if compute
-        yield(method_config) if block_given?
-        myself.server = compute.servers.bootstrap(method_config.export)
+        yield(config) if block_given?
+        myself.server = compute.servers.bootstrap(config.export)
       end
       myself.server ? true : false
     end
@@ -219,11 +219,11 @@ class Fog < CORL.plugin_class(:machine)
   #---
   
   def reload(options = {})
-    super do |method_config|
+    super do |config|
       success = false
       if server
-        success = block_given? ? yield(method_config) : true            
-        success = init_ssh_session(server, true, method_config.get(:tries, 5), method_config.get(:sleep_time, 5)) if success
+        success = block_given? ? yield(config) : true            
+        success = init_ssh_session(server, true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
       end
       success
     end
@@ -232,14 +232,14 @@ class Fog < CORL.plugin_class(:machine)
   #---
  
   def create_image(options = {})
-    super do |method_config|
+    super do |config|
       success = false
       if server
         logger.debug("Imaging machine #{plugin_name}")
         
         image_name = sprintf("%s (%s)", node.plugin_name, Time.now.to_s)
-        success    = yield(image_name, method_config, success) if block_given? # Implement in sub classes
-        success    = init_ssh_session(server, true, method_config.get(:tries, 5), method_config.get(:sleep_time, 5)) if success
+        success    = yield(image_name, config, success) if block_given? # Implement in sub classes
+        success    = init_ssh_session(server, true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
       end
       success
     end
@@ -248,15 +248,14 @@ class Fog < CORL.plugin_class(:machine)
   #---
   
   def stop(options = {})
-    super do
+    super do |config|
       success = true
-      if server && create_image(options)      
+      if server && create_image(config)      
         logger.debug("Stopping machine #{plugin_name}")
-        success = server.destroy
+        success = destroy(config.import({ :stop => true }))
       else
         success = false            
       end
-      close_ssh_session if success
       success
     end
   end
@@ -264,11 +263,12 @@ class Fog < CORL.plugin_class(:machine)
   #---
 
   def destroy(options = {})
-    super do
+    super do |config|
       success = false
       if server
         logger.debug("Destroying machine #{plugin_name}")
         success = server.destroy
+        success = yield(config) if success && block_given?
       end
       close_ssh_session if success
       success
