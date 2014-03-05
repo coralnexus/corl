@@ -239,6 +239,7 @@ class Fog < CORL.plugin_class(:machine)
         
         image_name = sprintf("%s (%s)", node.plugin_name, Time.now.to_s)
         success    = yield(image_name, method_config, success) if block_given? # Implement in sub classes
+        success    = init_ssh_session(server, true, method_config.get(:tries, 5), method_config.get(:sleep_time, 5)) if success
       end
       success
     end
