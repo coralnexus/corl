@@ -49,7 +49,7 @@ class Network < CORL.plugin_class(:base)
     groups = {}
     
     each_node_config do |provider, name, info|
-      search_node(provider, name, :groups, [], :array).each do |group|
+      search_node(provider, name, :settings, [], :array).each do |group|
         group = group.to_sym
         groups[group] = [] unless groups.has_key?(group)
         groups[group] << { :provider => provider, :name => name }
@@ -211,7 +211,7 @@ class Network < CORL.plugin_class(:base)
     
     # Set node data
     node = set_node(provider, name, { 
-      :groups       => array(config.delete(:groups, [])), 
+      :settings     => array(config.delete(:groups, [])), 
       :region       => config.delete(:region, nil),
       :machine_type => config.delete(:machine_type, nil),
       :image        => config.delete(:image, nil),

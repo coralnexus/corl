@@ -20,7 +20,7 @@ class Node < CORL.plugin_class(:base)
     ui.resource = hostname
     logger      = hostname
     
-    myself[:groups] = [ "all", plugin_provider.to_s, plugin_name.to_s ] | groups 
+    myself[:settings] = [ "all", plugin_provider.to_s, plugin_name.to_s ] | setting(:settings, [], :array)
     
     unless reload
       @cli_interface = Util::Liquid.new do |method, args, &code|
@@ -114,7 +114,7 @@ class Node < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   
   def groups
-    array(myself[:groups])
+    array(myself[:settings])
   end
   
   #-----------------------------------------------------------------------------
