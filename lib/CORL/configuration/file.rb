@@ -319,7 +319,7 @@ class File < CORL.plugin_class(:configuration)
     else
       file_bases = [ "corl", extension_collect(:base) ].flatten
       
-      Manager.connection.loaded_plugins(:translator).each do |provider, info|
+      CORL.loaded_plugins(:translator).each do |provider, info|
         file_bases.each do |file_base|
           config_name = "#{file_base}.#{provider}"
           file        = Util::Disk.filename([ project.directory, config_name ])
