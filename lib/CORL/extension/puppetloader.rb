@@ -11,7 +11,7 @@ class Puppetloader < CORL.plugin_class(:extension)
     if provisioner
       # Register Puppet CORL extensions
       provisioner.env.modules.each do |mod|
-        lib_dir = File.join(mod.path, 'lib', 'corl')
+        lib_dir = File.join(mod.path, 'lib')
         if File.directory?(lib_dir)
           logger.debug("Registering Puppet module at #{lib_dir}")
           connection.register(lib_dir)
