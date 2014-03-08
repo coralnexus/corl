@@ -51,7 +51,7 @@ module Lookup
   def config_initialized?
     ready = false
     if CORL.admin? && hiera && network_path = fact(:corl_network)
-      ready = File.directory?(network_path) && File.directory?(File.join(network_path, 'config')) ? true : false
+      ready = File.directory?(File.join(network_path, 'config')) ? true : false
     end
     ready
   end
@@ -67,7 +67,6 @@ module Lookup
     hiera_scope = config.get(:hiera_scope, {})
     override    = config.get(:override, nil)
     context     = config.get(:context, :priority)    
-    
     
     return_property = config.get(:return_property, false)
     
