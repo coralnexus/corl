@@ -26,11 +26,18 @@ class Network < CORL.plugin_class(:base)
   # Property accessors / modifiers
   
   plugin_collection :node
+  plugin_collection :provisioner
   
   #---
   
   def home
     extension_set(:home, ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] )) 
+  end
+  
+  #---
+  
+  def directory
+    config.directory
   end
   
   #---

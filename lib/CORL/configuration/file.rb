@@ -7,20 +7,10 @@ class File < CORL.plugin_class(:configuration)
   # Configuration plugin interface
   
   def normalize(reload)
-    super
-    
-    logger.info("Setting source configuration project")
-    @project = CORL.project(extended_config(:project, {
-      :directory => _delete(:directory, Dir.pwd),
-      :url       => _delete(:url),
-      :revision  => _delete(:revision),
-      :pull      => true
-    }), _delete(:project_provider))
-        
-    _set(:search, Config.new)
-    _set(:router, Config.new)
-    
-    set_location(@project)
+    super do        
+      _set(:search, Config.new)
+      _set(:router, Config.new)
+    end
   end
   
   #--- 
@@ -31,22 +21,9 @@ class File < CORL.plugin_class(:configuration)
       Util::Disk.close(file_name)
     end
   end
-     
-  #-----------------------------------------------------------------------------
-  # Checks
-  
-  def can_persist?
-    project.can_persist?
-  end
-      
+    
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
-
-  def project
-    @project
-  end
-  
-  #---
   
   def search
     _get(:search)
@@ -61,27 +38,8 @@ class File < CORL.plugin_class(:configuration)
   #-----------------------------------------------------------------------------
   
   def set_location(directory)
-    if directory && directory.is_a?(CORL::Plugin::Project)
-      logger.debug("Setting source project directory from other project at #{directory.directory}")
-      project.set_location(directory.directory)
-      
-    elsif directory && directory.is_a?(String) || directory.is_a?(Symbol)
-      logger.debug("Setting source project directory to #{directory}")
-      project.set_location(directory.to_s)
-    end
+    super
     search_files if directory
-  end
-  
-  #---
-  
-  def remote(name)
-    project.remote(name)
-  end
-  
-  #---
-  
-  def set_remote(name, location)
-    project.set_remote(name, location)
   end
   
   #-----------------------------------------------------------------------------
