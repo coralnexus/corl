@@ -13,7 +13,8 @@ class File < CORL.plugin_class(:configuration)
     @project = CORL.project(extended_config(:project, {
       :directory => _delete(:directory, Dir.pwd),
       :url       => _delete(:url),
-      :revision  => _delete(:revision)
+      :revision  => _delete(:revision),
+      :pull      => true
     }), _delete(:project_provider))
         
     _set(:search, Config.new)
@@ -132,10 +133,13 @@ class File < CORL.plugin_class(:configuration)
   # file_data[config_name][key...] = config
   
   def separate    
-    file_data = Config.new
+    file_data        = Config.new
+    default_provider = CORL.type_default(:translator)
     
     split_config = lambda do |properties, local_router, parents = []|
       properties.each do |name, value|
+        next if name.to_sym == :nodes
+        
         keys = [ parents, name ].flatten
         
         if value.is_a?(Hash) && ! value.empty?
@@ -171,8 +175,7 @@ class File < CORL.plugin_class(:configuration)
               file_data.set([ config_name, keys ].flatten, value)
             else
               # Resort to sane defaults
-              default_provider = CORL.type_default(:translator)
-              config_name      = "corl.#{default_provider}"
+              config_name = "corl.#{default_provider}"
               file_data.set([ config_name, keys ].flatten, value)
             end      
           end
@@ -180,8 +183,16 @@ class File < CORL.plugin_class(:configuration)
       end
     end
     
+    if config.get(:nodes, false)
+      config[:nodes].each do |provider, data|
+        data.each do |name, info|
+          file_data.set([ File.join('nodes', provider, "#{name}.#{default_provider}"), :nodes, provider, name ], info)  
+        end
+      end
+    end    
+    
     # Whew!  Glad that's over...
-    split_config.call(config.export, router.export)
+    split_config.call(Util::Data.subset(config.export, config.keys - [ :nodes ]), router.export)
     file_data     
   end
   protected :separate
@@ -313,27 +324,44 @@ class File < CORL.plugin_class(:configuration)
   # Utilities
    
   def search_files
+    
+    add_search_file = lambda do |config_name, file, provider, info|
+      if Util::Disk.exists?(file)            
+        search[config_name] = {
+          :provider => provider,
+          :info     => info,
+          :file     => file
+        }
+        ObjectSpace.define_finalizer(myself, myself.class.finalize(file))
+      else
+        logger.info("Configuration file #{file} does not exist")   
+      end  
+    end
+    
     if Util::Data.empty?(project.directory)
       logger.debug("Clearing configuration file information")      
       search.clear
     else
-      file_bases = [ "corl", extension_collect(:base) ].flatten
+      translators = CORL.loaded_plugins(:translator)
+      file_bases  = [ "corl", extension_collect(:base) ].flatten
       
-      CORL.loaded_plugins(:translator).each do |provider, info|
+      project.localize do
+        translators.each do |provider, info|
+          Dir.glob(::File.join('nodes', '**', "*.#{provider}")).each do |file|
+            config_name = file.gsub(".#{provider}", '')
+            file        = ::File.join(project.directory, file)
+            
+            add_search_file.call(config_name, file, provider, info)  
+          end
+        end
+      end
+      
+      translators.each do |provider, info|
         file_bases.each do |file_base|
           config_name = "#{file_base}.#{provider}"
           file        = Util::Disk.filename([ project.directory, config_name ])
-          
-          if Util::Disk.exists?(file)            
-            search[config_name] = {
-              :provider => provider,
-              :info     => info,
-              :file     => file
-            }
-            ObjectSpace.define_finalizer(myself, myself.class.finalize(file))
-          else
-            logger.info("Configuration file #{file} does not exist")   
-          end
+         
+          add_search_file.call(config_name, file, provider, info)
         end
       end     
       logger.debug("Setting configuration file information to #{search.inspect}")
