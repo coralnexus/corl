@@ -36,14 +36,16 @@ CORL = Nucleon
 require 'hiera'
 require 'facter'
 
-#---
+#-------------------------------------------------------------------------------
+# Localization
 
 # TODO: Make this dynamically settable
 
 I18n.enforce_available_locales = false
 I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir)
 
-#---
+#-------------------------------------------------------------------------------
+# Include CORL libraries
 
 # Mixins for classes
 Dir.glob(File.join(mixin_dir, '*.rb')).each do |file|
@@ -66,6 +68,26 @@ end
 # Special errors
 nucleon_require(core_dir, :errors)
 
+#-------------------------------------------------------------------------------
+# Class and module additions / updates
+
+module CORL
+  class Config
+    include Mixin::Lookup  
+  end
+  
+  #---
+  
+  module Plugin
+    class Base
+      extend Mixin::Macro::NetworkSettings    
+    end
+  end
+end
+
+#-------------------------------------------------------------------------------
+# Include CORL plugins
+
 # Include facade
 nucleon_require(core_dir, :facade)
 
@@ -79,20 +101,6 @@ module CORL
  
   def self.VERSION
     File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))  
-  end
-  
-  #-----------------------------------------------------------------------------
-  
-  class Config
-    include Mixin::Lookup  
-  end
-  
-  #-----------------------------------------------------------------------------
-  
-  module Plugin
-  class Base
-    extend Mixin::Macro::NetworkSettings    
-  end
   end
   
   #-----------------------------------------------------------------------------
