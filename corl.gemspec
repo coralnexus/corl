@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-03-05"
+  s.date = "2014-03-08"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -45,6 +45,7 @@ Gem::Specification.new do |s|
     "corl.gemspec",
     "lib/CORL/action/authorize.rb",
     "lib/CORL/action/bootstrap.rb",
+    "lib/CORL/action/build.rb",
     "lib/CORL/action/destroy.rb",
     "lib/CORL/action/exec.rb",
     "lib/CORL/action/image.rb",
@@ -76,6 +77,7 @@ Gem::Specification.new do |s|
     "lib/core/facade.rb",
     "lib/core/mixin/action/keypair.rb",
     "lib/core/mixin/lookup.rb",
+    "lib/core/mixin/macro/network_settings.rb",
     "lib/core/mod/fog_aws_server.rb",
     "lib/core/mod/hiera_backend.rb",
     "lib/core/plugin/action.rb",
@@ -87,9 +89,12 @@ Gem::Specification.new do |s|
     "lib/core/plugin/node.rb",
     "lib/core/plugin/provisioner.rb",
     "lib/corl.rb",
+    "lib/facter/corl_build.rb",
     "lib/facter/corl_config_ready.rb",
     "lib/facter/corl_exists.rb",
     "lib/facter/corl_network.rb",
+    "lib/facter/custom_facts.rb",
+    "lib/facter/vagrant_exists.rb",
     "lib/hiera/corl_logger.rb",
     "lib/puppet/indirector/corl.rb",
     "lib/puppet/indirector/data_binding/corl.rb",
