@@ -1,6 +1,6 @@
 
 Facter.add(:corl_network) do
-  confine :kernel => :linux
+  confine :kernel => :linux # TODO: Extend this to work with more systems
     
   setcode do
     require 'corl'
