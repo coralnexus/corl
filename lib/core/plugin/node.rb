@@ -308,6 +308,12 @@ class Node < CORL.plugin_class(:base)
     myself[:image]
   end
   
+  #---
+  
+  def provisioners(provider)
+    network.provisioners(provider)
+  end
+  
   #-----------------------------------------------------------------------------
   # Settings groups
   

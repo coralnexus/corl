@@ -17,6 +17,7 @@ lib_dir          = File.dirname(__FILE__)
 core_dir         = File.join(lib_dir, 'core')
 mixin_dir        = File.join(core_dir, 'mixin')
 mixin_action_dir = File.join(mixin_dir, 'action')
+macro_dir        = File.join(mixin_dir, 'macro')
 util_dir         = File.join(core_dir, 'util')
 mod_dir          = File.join(core_dir, 'mod')
  
@@ -51,6 +52,9 @@ end
 Dir.glob(File.join(mixin_action_dir, '*.rb')).each do |file|
   require file
 end
+Dir.glob(File.join(macro_dir, '*.rb')).each do |file|
+  require file
+end
 
 #---
 
@@ -81,6 +85,14 @@ module CORL
   
   class Config
     include Mixin::Lookup  
+  end
+  
+  #-----------------------------------------------------------------------------
+  
+  module Plugin
+  class Base
+    extend Mixin::Macro::NetworkSettings    
+  end
   end
   
   #-----------------------------------------------------------------------------
