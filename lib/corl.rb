@@ -35,6 +35,7 @@ CORL = Nucleon
 
 require 'hiera'
 require 'facter'
+require 'puppet'
 
 #-------------------------------------------------------------------------------
 # Localization
