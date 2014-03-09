@@ -42,13 +42,9 @@ class Build < Plugin::CloudAction
           provisioners.each do |provider, node_profiles|
             provider_build_directory = File.join(build_directory, provider)
             
-            provisioners = node.provisioners(provider)
-            
-            if provisioners
+            if provisioners = node.provisioners(provider)
               provisioners.each do |name, provisioner|
-                dbg(name, 'name')
-                dbg(provisioner, 'provisioner')
-                #provisioner.build(provider_build_directory)
+                provisioner.build(provider_build_directory)
               end
             end
           end
