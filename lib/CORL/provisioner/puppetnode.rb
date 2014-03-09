@@ -40,7 +40,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     Puppet.settings.set_value(name.to_sym, value, id)
   end
   
-  #---
+  #-----------------------------------------------------------------------------
   
   def modulepath=modulepath
     set_puppet_setting(:modulepath, array(modulepath))
@@ -48,15 +48,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   end
   
   #---
-
-  def modules=modules
-    myself[:modules] = hash(modules)
-  end
   
-  def modules
-    hash(myself[:modules])
-  end
-   
   def env
     @env
   end
@@ -296,16 +288,47 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   # Puppet operations
   
   def build(build_directory)
-    super do |locations, init_location|
+    super do |locations, init_location, config|
       init_location.call(:modules, nil)
       
       init_location.call(:profiles, :pp)
       init_location.call(:default, :pp)
-      
+        
       # Build modules
       
+      locations[:module] = {}
       
-    end  
+      init_profile = lambda do |package_name, profile_name, profile_info|
+        package_id     = id(package_name)
+        base_directory = File.join(locations[:modules], package_id.to_s, profile_name.to_s)
+        
+        if profile_info.has_key?(:modules)
+          profile_info[:modules].each do |module_name, module_reference|
+            module_directory = File.join(base_directory, module_name.to_s)
+                
+            module_project = CORL.project(extended_config(:puppet_module, {
+              :directory => File.join(build_directory, module_directory),
+              :url       => module_reference,
+              :create    => true,
+              :pull      => true
+            }))
+            raise unless module_project                
+          end
+          locations[:module][module_id(package_name, profile_name)] = base_directory
+        end
+      end     
+      
+      hash(config.get([ :provisioners, plugin_provider ])).each do |package_name, package_info|
+        if package_info.has_key?(:profiles)
+          package_info[:profiles].each do |profile_name, profile_info|
+            init_profile.call(package_name, profile_name, profile_info)
+          end
+        end
+      end
+      profiles.each do |profile_name, profile_info|
+        init_profile.call(plugin_name, profile_name, profile_info)
+      end   
+    end     
   end
   
   #---
@@ -401,6 +424,20 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   
   #-----------------------------------------------------------------------------
   # Utilities
+  
+  def module_id(package_name, profile_name)
+    "#{package_name}:::#{profile_name}"
+  end
+  
+  def module_info(module_id)
+    components = module_id.split(':::')
+    { :package_name => components[0], 
+      :package_id   => id(components[0]), 
+      :profile_name => components[1] 
+    }
+  end
+  
+  #---
   
   def to_name(name)
     Util::Data.value(name).to_s.gsub(/[\/\\\-\.]/, '_')

@@ -26,8 +26,9 @@ class Provisioner < CORL.plugin_class(:base)
 
   #---
   
-  def id
-    plugin_name.gsub('::', '_').to_sym
+  def id(name = nil)
+    name = plugin_name if name.nil?
+    name.to_s.gsub('::', '_').to_sym
   end
   
   #---
@@ -52,22 +53,14 @@ class Provisioner < CORL.plugin_class(:base)
   
   #---
   
-  def packages=packages
-    myself[:packages] = hash(packages)
-  end
-  
   def packages
     hash(myself[:packages])
   end
   
   #---
   
-  def profiles=profiles
-    myself[:profiles] = array(profiles)
-  end
-  
   def profiles
-    array(myself[:profiles])
+    hash(myself[:profiles])
   end
   
   #-----------------------------------------------------------------------------
@@ -79,8 +72,12 @@ class Provisioner < CORL.plugin_class(:base)
   
   #---
   
-  def build(build_directory)
-    locations = {}
+  def build(build_directory, options = {})
+    config = Config.ensure(options)
+    
+    build_directory = build_directory.to_s
+    locations       = Config.new({ :package => {} })
+    package_config  = Config.new
     
     init_location = lambda do |name, ext = '', base_directory = nil|
       name = name.to_sym
@@ -89,7 +86,7 @@ class Provisioner < CORL.plugin_class(:base)
           
       # Create directory
       locations[name] = File.join(locations[:build], name.to_s)    
-      FileUtils.mkdir_p(locations[name])
+      FileUtils.mkdir_p(File.join(build_directory, locations[name]))
      
       # Copy directory contents
       unless ext.nil?
@@ -99,7 +96,7 @@ class Provisioner < CORL.plugin_class(:base)
         if File.directory?(local_directory)  
           unless Dir.glob(File.join(local_directory, "*#{ext}")).empty?
             locations[name] = File.join(locations[:build], name.to_s)
-            FileUtils.cp_r(local_directory, locations[:build])
+            FileUtils.cp_r(local_directory, File.join(build_directory, locations[:build]))
           end
         end
         
@@ -107,7 +104,7 @@ class Provisioner < CORL.plugin_class(:base)
         gateway_file = File.join(base_directory, "#{name}#{ext}")
       
         if File.exists?(gateway_file)
-          FileUtils.cp(gateway_file, locations[:build])  
+          FileUtils.cp(gateway_file, File.join(build_directory, locations[:build])) 
         end
       end  
     end
@@ -116,19 +113,27 @@ class Provisioner < CORL.plugin_class(:base)
       package_directory = File.join(locations[:packages], name.to_s)
         
       project = CORL.configuration(extended_config(:package, {
-        :directory => package_directory,
+        :directory => File.join(build_directory, package_directory),
         :url       => reference
       }))
-      unless project
-        success = false
-        break
-      end
+      raise unless project
       
-      dbg(project.export, 'exported package contents')    
+      package_config.import(project.export)
+      locations[:package][name] = package_directory
+      
+      if project.get([ :provisioners, plugin_provider ], false)
+        project.get_hash([ :provisioners, plugin_provider ]).each do |prov_name, info|
+          if info.has_key?(:packages)
+            info[:packages].each do |sub_name, sub_reference|
+              init_package.call(sub_name, sub_reference)
+            end
+          end
+        end
+      end
     end
     
-    locations[:build] = File.join(build_directory.to_s, id.to_s)    
-    FileUtils.mkdir_p(locations[:build])
+    locations[:build] = id.to_s    
+    FileUtils.mkdir_p(File.join(build_directory, locations[:build]))
     
     init_location.call(:packages, nil)
     
@@ -136,10 +141,17 @@ class Provisioner < CORL.plugin_class(:base)
     packages.each do |name, reference|
       init_package.call(name, reference)
     end
-      
-    yield(locations, init_location) if block_given?
+     
+    yield(locations, init_location, package_config) if block_given?
     
-    myself[:build_locations] = locations
+    myself[:build_locations] = locations.export
+    
+    network.save(config.import({ 
+      :commit      => true,
+      :allow_empty => true,
+      :message     => config.get(:message, "Built #{plugin_provider} provisioner #{plugin_name}"),
+      :remote      => config.get(:remote, :edit)
+    }))
   end
   
   #---
