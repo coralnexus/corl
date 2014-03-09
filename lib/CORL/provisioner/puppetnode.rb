@@ -7,29 +7,56 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   # Provisioner plugin interface
    
   def normalize(reload)
-    super
-    
-    unless reload
-      require 'puppet'
-    
-      if CORL.log_level == :debug
-        Puppet.debug = true
-      end
-      Puppet.initialize_settings
-    
-      myself.plugin_name = :default if plugin_name.to_sym == :puppetnode
-       
-      @env      = Puppet::Node::Environment.new
-      @compiler = Puppet::Parser::Compiler.new(node)
+    super do
+      unless reload
+        if CORL.log_level == :debug
+          Puppet.debug = true
+        end
+        Puppet.initialize_settings
+                
+        @env      = Puppet::Node::Environment.new(id)
+        @compiler = Puppet::Parser::Compiler.new(node)
+      end    
+      init_scope
     end
-    
-    init_scope
-    register
+  end
+  
+  #---
+  
+  def register
+    env.modules.each do |mod|
+      lib_dir = File.join(mod.path, 'lib')
+      if File.directory?(lib_dir)
+        logger.debug("Registering Puppet module at #{lib_dir}")
+        CORL.register(lib_dir)
+      end
+    end
   end
   
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
- 
+  
+  def set_puppet_setting(name, value)
+    Puppet.settings.set_value(name.to_sym, value, id)
+  end
+  
+  #---
+  
+  def modulepath=modulepath
+    set_puppet_setting(:modulepath, array(modulepath))
+    register
+  end
+  
+  #---
+
+  def modules=modules
+    myself[:modules] = hash(modules)
+  end
+  
+  def modules
+    hash(myself[:modules])
+  end
+   
   def env
     @env
   end
@@ -50,17 +77,17 @@ class Puppetnode < CORL.plugin_class(:provisioner)
       facts     = facts_obj.values if facts_obj
     end
     
-    set(:facts, facts)  
+    @facts = facts  
   end
   protected :init_facts
   
   #---
   
   def facts(reset = false)
-    if reset || ! get(:facts)
+    if reset || ! @facts
       init_facts
     end
-    get(:facts)
+    @facts
   end
   
   #---
@@ -267,6 +294,21 @@ class Puppetnode < CORL.plugin_class(:provisioner)
 
   #-----------------------------------------------------------------------------
   # Puppet operations
+  
+  def build(build_directory)
+    super do |locations, init_location|
+      init_location.call(:modules, nil)
+      
+      init_location.call(:profiles, :pp)
+      init_location.call(:default, :pp)
+      
+      # Build modules
+      
+      
+    end  
+  end
+  
+  #---
   
   def lookup(property, default = nil, options = {})
     config = Config.ensure(options)
