@@ -144,7 +144,7 @@ class File < CORL.plugin_class(:configuration)
     if config.get(:nodes, false)
       config[:nodes].each do |provider, data|
         data.each do |name, info|
-          file_data.set([ File.join('nodes', provider, "#{name}.#{default_provider}"), :nodes, provider, name ], info)  
+          file_data.set([ ::File.join('nodes', provider.to_s, "#{name}.#{default_provider}"), :nodes, provider, name ], info)  
         end
       end
     end    
@@ -306,7 +306,7 @@ class File < CORL.plugin_class(:configuration)
       project.localize do
         translators.each do |provider, info|
           Dir.glob(::File.join('nodes', '**', "*.#{provider}")).each do |file|
-            config_name = file.gsub(".#{provider}", '')
+            config_name = file
             file        = ::File.join(project.directory, file)
             
             add_search_file.call(config_name, file, provider, info)  
