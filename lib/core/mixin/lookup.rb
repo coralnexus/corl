@@ -8,14 +8,20 @@ module Lookup
   
   def facts
     fact_map = {}
-    Facter.list.each do |name|
-      fact_map[name] = Facter.value(name)
+    
+    CORL.silence do
+      Facter.list.each do |name|
+        fact_map[name] = Facter.value(name)
+      end
     end
+    
     fact_map
   end
   
   def fact(name)
-    Facter.value(name)
+    CORL.silence do
+      Facter.value(name)
+    end
   end
   
   #-----------------------------------------------------------------------------

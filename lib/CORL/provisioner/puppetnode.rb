@@ -13,7 +13,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           Puppet.debug = true
         end
         Puppet.initialize_settings
-                
+        
         @env      = Puppet::Node::Environment.new(id)
         @compiler = Puppet::Parser::Compiler.new(node)
       end    
@@ -64,11 +64,13 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   def init_facts
     facts = {}
     
-    unless Puppet[:node_name_value].empty?
-      facts_obj = Puppet::Node::Facts.indirection.find(Puppet[:node_name_value])
-      facts     = facts_obj.values if facts_obj
+    CORL.silence do
+      unless Puppet[:node_name_value].empty?
+        facts_obj = Puppet::Node::Facts.indirection.find(Puppet[:node_name_value])
+        facts     = facts_obj.values if facts_obj
+      end
     end
-    
+           
     @facts = facts  
   end
   protected :init_facts
@@ -90,12 +92,14 @@ class Puppetnode < CORL.plugin_class(:provisioner)
       Puppet[:node_name_value] = name
     end
     
-    node = Puppet::Node.indirection.find(Puppet[:node_name_value])
+    node = CORL.silence do
+      Puppet::Node.indirection.find(Puppet[:node_name_value])
+    end
     
     if facts = facts(true)
       node.merge(facts.values)
     end
-
+    
     file = Puppet[:classfile]
     if FileTest.exists?(file)
       node.classes = File.read(file).split(/[\s\n]+/)
