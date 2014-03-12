@@ -310,8 +310,39 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
-  def provisioners(provider)
-    network.provisioners(provider)
+  def profiles=profiles
+    myself[:profiles] = array(profiles)
+  end
+  
+  def profiles
+    array(myself[:profiles])
+  end
+  
+  #---
+  
+  def provisioner_info
+    provisioner_info = {}
+        
+    # Compose needed provisioners and profiles
+    profiles.each do |profile|        
+      if info = Plugin::Provisioner.translate_reference(profile)
+        provider = info[:provider]
+            
+        provisioner_info[provider] = { :profiles => [] } unless provisioner_info.has_key?(provider)
+        provisioner_info[provider][:profiles] += info[:profiles]
+      end
+    end
+    provisioner_info
+  end
+  
+  #---
+  
+  def provisioners
+    provisioners = {}        
+    provisioner_info.each do |provider, node_profiles|
+      provisioners[provider] = network.provisioners(provider)
+    end    
+    provisioners
   end
   
   #-----------------------------------------------------------------------------
@@ -328,6 +359,19 @@ class Node < CORL.plugin_class(:base)
     
   #-----------------------------------------------------------------------------
   # Machine operations
+  
+  def build(options = {})
+    provisioners.each do |provider, collection|
+      provider_info = provisioner_info[provider]
+      profiles      = provider_info[:profiles]
+          
+      collection.each do |name, provisioner|
+        provisioner.build(options)
+      end
+    end
+  end
+  
+  #---
   
   def attach_keys(keypair)
     base_name   = "#{plugin_provider}-#{plugin_name}"

@@ -18,37 +18,8 @@ class Build < Plugin::CloudAction
   def execute
     super do |node, network|
       if network && node
-        profiles     = array(node[:profiles])
-        provisioners = {}
-        
-        # Compose needed provisioners and profiles
-        profiles.each do |profile|
-          info = Plugin::Provisioner.translate_reference(profile)
-          
-          if info
-            provider = info[:provider]
-            
-            provisioners[provider] = { :profiles => [] } unless provisioners.has_key?(providers)
-            provisioners[provider][:profiles] += info[:profiles]
-          end
-        end
-                
-        unless provisioners.empty?
-          build_directory = File.join(network.directory, 'build')
-          
-          FileUtils.rm_rf(build_directory)
-          FileUtils.mkdir(build_directory)
-          
-          provisioners.each do |provider, node_profiles|
-            provider_build_directory = File.join(build_directory, provider)
-            
-            if provisioners = node.provisioners(provider)
-              provisioners.each do |name, provisioner|
-                provisioner.build(provider_build_directory)
-              end
-            end
-          end
-        end        
+        info('corl.actions.build.start')  
+        node.build
       else
         myself.status = code.network_failure
       end

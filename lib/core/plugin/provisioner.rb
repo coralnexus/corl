@@ -14,11 +14,12 @@ class Provisioner < CORL.plugin_class(:base)
     register
   end
   
-  #---
+  #-----------------------------------------------------------------------------
+  # Checks
 
   def initialized?(options = {})
   end
-     
+  
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
 
@@ -43,6 +44,12 @@ class Provisioner < CORL.plugin_class(:base)
   
   #---
   
+  def build_directory
+    File.join(network.directory, 'build', plugin_provider.to_s)
+  end
+  
+  #---
+  
   def gateway=gateway
     myself[:gateway] = gateway
   end
@@ -63,6 +70,63 @@ class Provisioner < CORL.plugin_class(:base)
     hash(myself[:profiles])
   end
   
+  def find_profiles(reset = false)
+    allowed_profiles = []  
+    build_info(reset).each do |package_name, package_info|
+      hash(package_info[:profiles]).each do |profile_name, profile_info|
+        allowed_profiles << concatenate([ package_name, 'profile', profile_name ])
+      end
+    end
+    profiles.each do |profile_name, profile_info|
+      allowed_profiles << concatenate([ plugin_name, 'profile', profile_name ])
+    end
+    allowed_profiles  
+  end
+  protected :find_profiles
+  
+  #---
+  
+  def supported_profiles(profile_names = nil)
+    found    = []    
+    profiles = build_profiles
+    
+    if profile_names.nil?
+      found = profiles  
+    else
+      profile_names.each do |name|
+        name = name.to_s
+        if profiles.include?(name)
+          found << name
+        end
+      end
+    end
+    found.empty? ? false : found
+  end
+     
+  #---
+  
+  def build_locations(reset = false)
+    locations = hash(myself[:build_locations])
+    build if reset || locations.empty?
+    myself[:build_locations]
+  end
+  
+  #---
+  
+  def build_info(reset = false)
+    info = hash(myself[:build_info])
+    build if reset || info.empty?
+    myself[:build_info]
+  end
+  
+  #---
+  
+  def build_profiles(reset = false)
+    profiles = array(myself[:build_profiles])
+    build if reset || profiles.empty?
+    myself[:build_profiles]
+  end
+  
   #-----------------------------------------------------------------------------
   # Provisioner operations
  
@@ -72,31 +136,29 @@ class Provisioner < CORL.plugin_class(:base)
   
   #---
   
-  def build(build_directory, options = {})
+  def build(options = {})
     config = Config.ensure(options)
     
-    build_directory = build_directory.to_s
-    locations       = Config.new({ :package => {} })
-    package_config  = Config.new
+    locations    = Config.new({ :package => {} })
+    package_info = Config.new
     
     init_location = lambda do |name, ext = '', base_directory = nil|
-      name = name.to_sym
-      
+      name           = name.to_sym      
       base_directory = directory if base_directory.nil?
+      build_base     = build_directory
           
       # Create directory
-      locations[name] = File.join(locations[:build], name.to_s)    
-      FileUtils.mkdir_p(File.join(build_directory, locations[name]))
+      locations[name] = File.join(locations[:build], name.to_s)        
+      FileUtils.mkdir_p(File.join(build_base, locations[name]))
      
       # Copy directory contents
       unless ext.nil?
         ext             = ! ext.to_s.empty? ? ".#{ext}" : ''
         local_directory = File.join(base_directory, name.to_s)
-    
+        
         if File.directory?(local_directory)  
-          unless Dir.glob(File.join(local_directory, "*#{ext}")).empty?
-            locations[name] = File.join(locations[:build], name.to_s)
-            FileUtils.cp_r(local_directory, File.join(build_directory, locations[:build]))
+          unless Dir.glob(File.join(local_directory, "*#{ext}")).empty?            
+            FileUtils.cp_r(local_directory, File.join(build_base, locations[:build]))
           end
         end
         
@@ -104,7 +166,7 @@ class Provisioner < CORL.plugin_class(:base)
         gateway_file = File.join(base_directory, "#{name}#{ext}")
       
         if File.exists?(gateway_file)
-          FileUtils.cp(gateway_file, File.join(build_directory, locations[:build])) 
+          FileUtils.cp(gateway_file, File.join(build_base, locations[:build]))
         end
       end  
     end
@@ -114,11 +176,12 @@ class Provisioner < CORL.plugin_class(:base)
         
       project = CORL.configuration(extended_config(:package, {
         :directory => File.join(build_directory, package_directory),
-        :url       => reference
+        :url       => reference,
+        :create    => true
       }))
       raise unless project
       
-      package_config.import(project.export)
+      package_info.import(project.export)
       locations[:package][name] = package_directory
       
       if project.get([ :provisioners, plugin_provider ], false)
@@ -132,8 +195,11 @@ class Provisioner < CORL.plugin_class(:base)
       end
     end
     
-    locations[:build] = id.to_s    
-    FileUtils.mkdir_p(File.join(build_directory, locations[:build]))
+    locations[:build]     = id.to_s
+    local_build_directory = File.join(build_directory, locations[:build])   
+    
+    FileUtils.rm_rf(local_build_directory)
+    FileUtils.mkdir_p(local_build_directory)
     
     init_location.call(:packages, nil)
     
@@ -142,13 +208,15 @@ class Provisioner < CORL.plugin_class(:base)
       init_package.call(name, reference)
     end
      
-    yield(locations, init_location, package_config) if block_given?
+    yield(locations, package_info, init_location) if block_given?
     
     myself[:build_locations] = locations.export
+    myself[:build_info]      = package_info.get([ :provisioners, plugin_provider ])
+    myself[:build_profiles]  = find_profiles
     
-    network.save(config.import({ 
+    network.save(config.import({
       :commit      => true,
-      :allow_empty => true,
+      :allow_empty => true, 
       :message     => config.get(:message, "Built #{plugin_provider} provisioner #{plugin_name}"),
       :remote      => config.get(:remote, :edit)
     }))
@@ -174,7 +242,7 @@ class Provisioner < CORL.plugin_class(:base)
   
   #---
   
-  def provision(options = {})
+  def provision(profiles, options = {})
     # Implement in providers
   end
        
@@ -212,7 +280,7 @@ class Provisioner < CORL.plugin_class(:base)
   #---
   
   def self.translate_reference(reference)
-    # ex: puppetnode:::profile::something,profile::else
+    # ex: puppetnode:::profile::something,profile::somethingelse
     if reference && reference.match(/^\s*([a-zA-Z0-9_-]+):::([^\s]+)\s*$/)
       provider = $1
       profiles = $2
@@ -234,6 +302,17 @@ class Provisioner < CORL.plugin_class(:base)
   
   def translate_reference(reference)
     myself.class.translate_reference(reference)
+  end
+  
+  #---
+  
+  def concatenate(components, capitalize = false)
+    if capitalize
+      name = components.collect { |s| s.capitalize }.join("::")
+    else
+      name = components.join("::")
+    end
+    name
   end
 end
 end

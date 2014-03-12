@@ -16,8 +16,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         
         @env      = Puppet::Node::Environment.new(id)
         @compiler = Puppet::Parser::Compiler.new(node)
-      end    
-      init_scope
+      end
     end
   end
   
@@ -65,12 +64,9 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     facts = {}
     
     CORL.silence do
-      unless Puppet[:node_name_value].empty?
-        facts_obj = Puppet::Node::Facts.indirection.find(Puppet[:node_name_value])
-        facts     = facts_obj.values if facts_obj
-      end
+      facts_obj = Puppet::Node::Facts.indirection.find(id)
+      facts     = facts_obj.values if facts_obj
     end
-           
     @facts = facts  
   end
   protected :init_facts
@@ -87,25 +83,11 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #---
   
   def init_node
-    if name
-      name_orig = Puppet[:node_name_value]
-      Puppet[:node_name_value] = name
-    end
-    
     node = CORL.silence do
-      Puppet::Node.indirection.find(Puppet[:node_name_value])
+      Puppet::Node.indirection.find(id)
     end
-    
-    if facts = facts(true)
-      node.merge(facts.values)
-    end
-    
-    file = Puppet[:classfile]
-    if FileTest.exists?(file)
-      node.classes = File.read(file).split(/[\s\n]+/)
-    end
-    
-    Puppet[:node_name_value] = name_orig if name_orig
+    node.merge(facts) unless facts(true).empty?
+        
     @node = node
   end
   protected :init_node
@@ -124,7 +106,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   def init_scope
     @scope       = Puppet::Parser::Scope.new(compiler)
     scope.source = Puppet::Resource::Type.new(:node, node.name)
-    scope.parent = compiler.topscope  
+    scope.parent = compiler.topscope 
   end
 
   #---
@@ -136,8 +118,6 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #---
   
   def init_catalog
-    node = node(true)
-    
     starttime = Time.now
     catalog   = Puppet::Resource::Catalog.indirection.find(node.name, :use_node => node)
 
@@ -235,7 +215,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
       
   def add(type_name, resources, defaults = {}, options = {})
     info = type_info(type_name)
-    PuppetExt::ResourceGroup.new(self, info, defaults).add(resources, options)
+    PuppetExt::ResourceGroup.new(myself, info, defaults).add(resources, options)
   end
   
   #---
@@ -291,8 +271,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #-----------------------------------------------------------------------------
   # Puppet operations
   
-  def build(build_directory)
-    super do |locations, init_location, config|
+  def build(options = {})
+    super do |locations, package_info, init_location|
       init_location.call(:modules, nil)
       
       init_location.call(:profiles, :pp)
@@ -318,20 +298,20 @@ class Puppetnode < CORL.plugin_class(:provisioner)
             }))
             raise unless module_project                
           end
-          locations[:module][module_id(package_name, profile_name)] = base_directory
+          locations[:module][profile_id(package_name, profile_name)] = base_directory
         end
       end     
       
-      hash(config.get([ :provisioners, plugin_provider ])).each do |package_name, package_info|
-        if package_info.has_key?(:profiles)
-          package_info[:profiles].each do |profile_name, profile_info|
+      hash(package_info.get([ :provisioners, plugin_provider ])).each do |package_name, info|
+        if info.has_key?(:profiles)
+          info[:profiles].each do |profile_name, profile_info|
             init_profile.call(package_name, profile_name, profile_info)
           end
         end
       end
       profiles.each do |profile_name, profile_info|
         init_profile.call(plugin_name, profile_name, profile_info)
-      end   
+      end
     end     
   end
   
@@ -341,10 +321,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     config = Config.ensure(options)
     value  = nil
     
-    puppet_scope = config.get(:puppet_scope, scope)
-    
-    base_names = config.get(:search, nil)
-     
+    puppet_scope   = config.get(:puppet_scope, scope)    
+    base_names     = config.get(:search, nil)     
     search_name    = config.get(:search_name, true)
     reverse_lookup = config.get(:reverse_lookup, true)
     
@@ -404,24 +382,35 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     return false unless missing.empty?
     true
   end
-  
+   
   #---
     
-  def provision(options = {})
-    config = Config.ensure(options)
+  def provision(profiles, options = {})
+    locations = build_locations
+    manifest  = gateway
     
-    if ! Util::Data.empty?(config[:code])
-      Puppet[:code] = config[:code]
-      
-    elsif ! Util::Data.empty?(config[:manifest])
-      Puppet[:manifest] = config[:manifest]
-    end
-
+    if manifest.match(/^packages\/.*/)
+      dbg(locations[:build], 'build')
+      dbg(manifest, 'manifest')
+      manifest = File.join('build', locations[:build], manifest)
+    else
+      #manifest = File.join(directory, manifest)    
+    end    
+    
+    dbg(manifest, 'manifest')
+    dbg(profiles, 'profiles')
+    
     begin
-      return configure(config[:node])
+      set_puppet_setting(:manifest, manifest)
+      dbg(env[:manifest], 'manifest')
+      
+      init_scope
+      
+      configurer = Puppet::Configurer.new
+      configurer.run(:catalog => catalog, :pluginsync => false)
       
     rescue => detail
-      Puppet.log_exception(detail)
+      #Puppet.log_exception(detail)
     end
     false
   end
@@ -429,16 +418,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def module_id(package_name, profile_name)
-    "#{package_name}:::#{profile_name}"
-  end
-  
-  def module_info(module_id)
-    components = module_id.split(':::')
-    { :package_name => components[0], 
-      :package_id   => id(components[0]), 
-      :profile_name => components[1] 
-    }
+  def profile_id(package_name, profile_name)
+    concatenate([ package_name, 'profile', profile_name ], false)
   end
   
   #---
@@ -466,14 +447,6 @@ class Puppetnode < CORL.plugin_class(:provisioner)
       'name'
     end
   end
-      
-  #---
-  
-  def configure
-    configurer = Puppet::Configurer.new
-    configurer.run(:catalog => catalog, :pluginsync => false)
-  end
-  protected :configure
 end
 end
 end
