@@ -19,7 +19,7 @@ class Configuration < CORL.plugin_class(:base)
       :directory => _delete(:directory, Dir.pwd),
       :url       => _delete(:url),
       :revision  => _delete(:revision),
-      :create    => true,
+      :create    => _delete(:create, false),
       :pull      => true
     }), _delete(:project_provider))
         
