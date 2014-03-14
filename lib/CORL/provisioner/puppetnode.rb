@@ -3,20 +3,16 @@ module CORL
 module Provisioner
 class Puppetnode < CORL.plugin_class(:provisioner)
   
+  @@puppet_lock = Mutex.new
+  
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
    
   def normalize(reload)
     super do
-      unless reload
-        if CORL.log_level == :debug
-          Puppet.debug = true
-        end
-        Puppet.initialize_settings
-        
-        @env      = Puppet::Node::Environment.new(id)
-        @compiler = Puppet::Parser::Compiler.new(node)
-      end
+      if CORL.log_level == :debug
+        Puppet.debug = true
+      end   
     end
   end
   
@@ -35,110 +31,26 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
   
-  def set_puppet_setting(name, value)
-    Puppet.settings.set_value(name.to_sym, value, id)
-  end
-  
-  #-----------------------------------------------------------------------------
-  
-  def modulepath=modulepath
-    set_puppet_setting(:modulepath, array(modulepath))
-    register
-  end
-  
-  #---
-  
-  def env
-    @env
-  end
-  
-  #---
-  
   def compiler
     @compiler
   end
-  
-  #---
-    
-  def init_facts
-    facts = {}
-    
-    CORL.silence do
-      facts_obj = Puppet::Node::Facts.indirection.find(id)
-      facts     = facts_obj.values if facts_obj
-    end
-    @facts = facts  
-  end
-  protected :init_facts
-  
+   
   #---
   
-  def facts(reset = false)
-    if reset || ! @facts
-      init_facts
-    end
-    @facts
+  def env
+    compiler.environment
   end
   
-  #---
-  
-  def init_node
-    node = CORL.silence do
-      Puppet::Node.indirection.find(id)
-    end
-    node.merge(facts) unless facts(true).empty?
-        
-    @node = node
-  end
-  protected :init_node
-  
-  #---
-  
-  def node(reset = false)
-    if reset || ! @node
-      init_node
-    end
-    @node
-  end
-  
-  #---
-  
-  def init_scope
-    @scope       = Puppet::Parser::Scope.new(compiler)
-    scope.source = Puppet::Resource::Type.new(:node, node.name)
-    scope.parent = compiler.topscope 
-  end
-
   #---
   
   def scope
-    @scope
+    compiler.topscope
   end
   
   #---
   
-  def init_catalog
-    starttime = Time.now
-    catalog   = Puppet::Resource::Catalog.indirection.find(node.name, :use_node => node)
-
-    catalog = catalog.to_ral
-    catalog.finalize
-
-    catalog.retrieval_duration = Time.now - starttime
-
-    catalog.write_class_file
-    catalog.write_resource_file
-    
-    @catalog = catalog  
-  end
-  
-  #---
-  
-  def catalog(reset = false)
-    if reset || ! @catalog
-      init_catalog
-    end
-    @catalog
+  def catalog
+    compiler.catalog
   end
   
   #-----------------------------------------------------------------------------
@@ -205,13 +117,6 @@ class Puppetnode < CORL.plugin_class(:provisioner)
      
   #-----------------------------------------------------------------------------
   # Catalog alterations
-  
-  def clear
-    init_catalog
-    myself
-  end
-  
-  #---
       
   def add(type_name, resources, defaults = {}, options = {})
     info = type_info(type_name)
@@ -340,6 +245,15 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         break unless Util::Data.undef?(value)  
       end
     end
+    if Util::Data.undef?(value)
+      components = property.split('::')
+      
+      if components.length > 1
+        #last = components.pop
+        components += [ 'default', components.pop ]
+        value = puppet_scope.lookupvar('::' + components.flatten.join('::'))
+      end
+    end
     if Util::Data.undef?(value) && search_name
       value = puppet_scope.lookupvar("::#{property}")
     end
@@ -350,13 +264,15 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   
   #--
   
-  def import(files, base_dir = nil)
-    resource_types.loader.import(file, base_dir + '/')
+  def import(files)
+    array(files).each do |file|
+      resource_types.loader.import(file, network.directory)
+    end
   end
   
   #---
   
-  def include(resource_name, properties, options = {})
+  def include(resource_name, properties = {})
     class_data = {}
     
     if resource_name.is_a?(Array)
@@ -364,60 +280,161 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     else
       resource_name = [ resource_name ]
     end
-      
+     
     resource_name.each do |name|
-      classes = lookup(name, [], options)
-      if classes.is_a?(Array)
-        classes.each do |klass|
-          class_data[klass] = parameters
-        end
-      end  
+      class_data[name.to_s] = properties  
     end
-      
-    klasses = compiler.evaluate_classes(class_data, myself, false)
+    
+    klasses = compiler.evaluate_classes(class_data, scope, false)
     missing = class_data.keys.find_all do |klass|
       ! klasses.include?(klass)
     end
-
     return false unless missing.empty?
     true
+  end
+  
+  #---
+  
+  def add_search_path(type, resource_name)
+    Config.set_options([ :all, type ], { :search => [ resource_name.to_s ] })  
   end
    
   #---
     
   def provision(profiles, options = {})
     locations = build_locations
-    manifest  = gateway
     
-    if manifest.match(/^packages\/.*/)
-      dbg(locations[:build], 'build')
-      dbg(manifest, 'manifest')
-      manifest = File.join('build', locations[:build], manifest)
-    else
-      #manifest = File.join(directory, manifest)    
-    end    
+    include_location = lambda do |type, add_to_catalog = true, add_search_path = false|      
+      locations[:package].each do |name, package_directory|
+        gateway       = File.join(build_directory, package_directory, "#{type}.pp")
+        resource_name = concatenate([ name, type ])
+        
+        add_search_path(type, resource_name) if add_search_path
+        
+        if File.exists?(gateway)
+          import(gateway)
+          include(resource_name, { :before => 'Anchor[gateway-init]' }) if add_to_catalog                   
+        end
+        
+        directory = File.join(build_directory, package_directory, type.to_s)
+        Dir.glob(File.join(directory, '*.pp')).each do |file|
+          resource_name = concatenate([ name, type, File.basename(file).gsub('.pp', '') ])
+          import(file)
+          include(resource_name, { :before => 'Anchor[gateway-init]' }) if add_to_catalog
+        end        
+      end
     
-    dbg(manifest, 'manifest')
-    dbg(profiles, 'profiles')
+      gateway       = File.join(build_directory, locations[:build], "#{type}.pp")
+      resource_name = concatenate([ plugin_name, type ])
+      
+      add_search_path(type, resource_name) if add_search_path
+     
+      if File.exists?(gateway)
+        import(gateway)
+        include(resource_name, { :before => 'Anchor[gateway-init]' }) if add_to_catalog                   
+      end
     
-    begin
-      set_puppet_setting(:manifest, manifest)
-      dbg(env[:manifest], 'manifest')
-      
-      init_scope
-      
-      configurer = Puppet::Configurer.new
-      configurer.run(:catalog => catalog, :pluginsync => false)
-      
-    rescue => detail
-      #Puppet.log_exception(detail)
+      if locations.has_key?(type)
+        directory = File.join(build_directory, locations[type])
+        Dir.glob(File.join(directory, '*.pp')).each do |file|
+          resource_name = concatenate([ plugin_name, type, File.basename(file).gsub('.pp', '') ])
+          import(file)
+          include(resource_name, { :before => 'Anchor[gateway-init]' }) if add_to_catalog
+        end
+      end
     end
+    
+    @@puppet_lock.synchronize do
+      init_puppet(profiles)
+      register     
+      
+      # Include defaults
+      include_location.call(:default, true, true)
+      
+      env.modules.each do |mod|
+        default_file = File.join(mod.path, 'manifests', 'default.pp')
+        
+        if File.exists?(default_file)
+          import(default_file)
+          include("#{mod.name}::default", { :before => 'Anchor[gateway-init]' })
+        end  
+      end
+      
+      # Import and include needed profiles
+      include_location.call(:profiles, false)
+      
+      profiles.each do |profile|
+        include(profile, { :require => 'Anchor[gateway-exit]' })
+      end
+      
+      begin
+        dbg(catalog, 'puppet catalog')
+      
+        #configurer = Puppet::Configurer.new
+        #configurer.run(:catalog => catalog, :pluginsync => false)
+      
+      rescue Exception => error
+        raise error
+        Puppet.log_exception(error)
+      end
+    end    
     false
   end
   
   #-----------------------------------------------------------------------------
   # Utilities
   
+  def init_puppet(profiles)
+    locations = build_locations
+    
+    # Must be in this order!!
+    Puppet.initialize_settings
+    
+    # TODO: Figure out how to store these damn settings in a specialized
+    # environment without phantom empty environment issues.
+      
+    node = get_node    
+    Puppet[:node_name_value] = id
+    
+    if manifest = gateway
+      if manifest.match(/^packages\/.*/)
+        manifest = File.join(build_directory, locations[:build], manifest)
+      else
+        manifest = File.join(network.directory, directory, manifest)    
+      end    
+      Puppet[:manifest] = manifest   
+    end
+    
+    unless profiles.empty?
+      modulepath = profiles.collect do |profile|
+        File.join(build_directory, locations[:module][profile.to_sym])
+      end
+      Puppet[:modulepath] = array(modulepath).join(File::PATH_SEPARATOR)
+    end
+    
+    @compiler = Puppet::Parser::Compiler.new(node)
+            
+    # Initialize the compiler so we can can lookup and include stuff
+    # This is ugly but seems to be the only way.
+    compiler.compile   
+  end
+  protected :init_puppet
+  
+  #---
+   
+  def get_node
+    node = Puppet::Node.indirection.find(id)
+         
+    if facts = Puppet::Node::Facts.indirection.find(id)
+      facts.name = id
+      node.merge(facts.values)
+    end
+    node
+  end
+  protected :get_node
+  
+  #---
+ 
   def profile_id(package_name, profile_name)
     concatenate([ package_name, 'profile', profile_name ], false)
   end
@@ -446,6 +463,12 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     else
       'name'
     end
+  end
+  
+  #---
+  
+  def concatenate(components, capitalize = false)
+    super(components, capitalize, '::')
   end
 end
 end

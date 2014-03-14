@@ -345,6 +345,12 @@ class Node < CORL.plugin_class(:base)
     provisioners
   end
   
+  #---
+  
+  def build_time
+    myself[:build]
+  end
+  
   #-----------------------------------------------------------------------------
   # Settings groups
   
@@ -361,14 +367,24 @@ class Node < CORL.plugin_class(:base)
   # Machine operations
   
   def build(options = {})
+    config = Config.ensure(options)
+    info   = provisioner_info
+    
     provisioners.each do |provider, collection|
-      provider_info = provisioner_info[provider]
+      provider_info = info[provider]
       profiles      = provider_info[:profiles]
           
       collection.each do |name, provisioner|
         provisioner.build(options)
       end
     end
+    
+    myself[:build] = Time.now.to_s
+    
+    save(extended_config(:build, {
+      :message => config.get(:message, "Built #{plugin_provider} node: #{plugin_name}"),
+      :remote  => config.get(:remote, :edit)  
+    }))
   end
   
   #---
@@ -961,6 +977,7 @@ class Node < CORL.plugin_class(:base)
         delete_setting(:public_ip)
         delete_setting(:private_ip)
         delete_setting(:ssh_port)
+        delete_setting(:build)
         
         myself[:state] = :stopped
         

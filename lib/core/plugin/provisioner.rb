@@ -11,7 +11,7 @@ class Provisioner < CORL.plugin_class(:base)
   def normalize(reload)
     super
     yield if block_given?
-    register
+    #register
   end
   
   #-----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ class Provisioner < CORL.plugin_class(:base)
   #---
   
   def build_directory
-    File.join(network.directory, 'build', plugin_provider.to_s)
+    File.join(network.build_directory, plugin_provider.to_s)
   end
   
   #---
@@ -172,7 +172,7 @@ class Provisioner < CORL.plugin_class(:base)
     end
     
     init_package = lambda do |name, reference|
-      package_directory = File.join(locations[:packages], name.to_s)
+      package_directory = File.join(locations[:packages], id(name).to_s)
         
       project = CORL.configuration(extended_config(:package, {
         :directory => File.join(build_directory, package_directory),
@@ -236,7 +236,7 @@ class Provisioner < CORL.plugin_class(:base)
   
   #---
   
-  def include(resource_name, properties, options = {})
+  def include(resource_name, properties = {})
     # Implement in providers
   end
   
@@ -306,11 +306,19 @@ class Provisioner < CORL.plugin_class(:base)
   
   #---
   
-  def concatenate(components, capitalize = false)
-    if capitalize
-      name = components.collect { |s| s.capitalize }.join("::")
+  def concatenate(components, capitalize = false, joiner = '::')
+    if components.is_a?(Array)
+      components = components.collect do |str|
+        str.to_s.split('__')  
+      end.flatten
     else
-      name = components.join("::")
+      components = [ components.to_s ]
+    end
+    
+    if capitalize
+      name = components.collect {|str| str.capitalize }.join(joiner)
+    else
+      name = components.join(joiner)
     end
     name
   end

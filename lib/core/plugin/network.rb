@@ -42,6 +42,12 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
+  def build_directory
+    File.join(directory, 'build')
+  end
+  
+  #---
+  
   def remote(name)
     config.remote(name)
   end
