@@ -1,6 +1,6 @@
 
 class Hiera
-  module CORL_logger
+  module Corl_logger
     class << self
       def suitable?
         defined?(::CORL) == "constant"
