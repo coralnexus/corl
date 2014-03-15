@@ -21,7 +21,6 @@ module Puppet
     return unless puppet_scope
     
     each_module(config) do |mod|
-      dbg(mod.path, mod.name)
       unless @@register.has_key?(mod.path)
         lib_dir = File.join(mod.path, 'lib')
         if File.directory?(lib_dir)
@@ -255,10 +254,7 @@ module Puppet
     puppet_scope = config.get(:puppet_scope, nil)  
     return nil unless puppet_scope
     
-    dbg('in each module')
-    
     puppet_scope.compiler.environment.modules.each do |mod|
-      dbg(mod, 'module')
       values << code.call(mod)
     end
     values

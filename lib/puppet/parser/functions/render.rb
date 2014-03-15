@@ -26,12 +26,7 @@ This function returns the string-ified form of a given value.
         :force        => true,
         :merge        => true
       })
-      dbg(provider, 'template provider')
-      dbg(config, 'template config')
-      dbg(data, 'template data')
-      dbg(CORL.loaded_plugins(:template), 'loaded templates')
       value = CORL.template(config, provider).render(data)
-      dbg(value, 'rendered template')
     end
     return value
   end
