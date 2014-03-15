@@ -14,19 +14,24 @@ This function returns the string-ified form of a given value.
       raise(Puppet::ParseError, "render(): Must have a template class name and an optional source value specified; " +
         "given (#{args.size} for 2)") if args.size < 1
     
-      class_name = args[0]  
-      data       = ( args.size > 1 ? args[1] : {} )
-      options    = ( args.size > 2 ? args[2] : {} )
+      provider = args[0]  
+      data     = ( args.size > 1 ? args[1] : {} )
+      options  = ( args.size > 2 ? args[2] : {} )
     
       config = CORL::Config.init_flat(options, [ :data, :render ], {
+        :provisioner  => :puppetnode,
         :hiera_scope  => self,
         :puppet_scope => self,
         :search       => 'core::default',
-        :init_fact    => 'hiera_ready',
         :force        => true,
         :merge        => true
       })
-      value = CORL.template(class_name, config).render(data)
+      dbg(provider, 'template provider')
+      dbg(config, 'template config')
+      dbg(data, 'template data')
+      dbg(CORL.loaded_plugins(:template), 'loaded templates')
+      value = CORL.template(config, provider).render(data)
+      dbg(value, 'rendered template')
     end
     return value
   end

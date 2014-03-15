@@ -21,10 +21,10 @@ If no value is found in the defined sources, it returns an empty array ([])
       options  = ( args.size > 2 ? args[2] : {} )
     
       config = CORL::Config.init_flat(options, [ :param, :global_array ], {
+        :provisioner  => :puppetnode,
         :hiera_scope  => self,
         :puppet_scope => self,
         :search       => 'core::default',
-        :init_fact    => 'hiera_ready',
         :force        => true,
         :merge        => true
       })

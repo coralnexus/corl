@@ -14,24 +14,23 @@ If no value is found in the defined sources, it returns an empty array ([])
       raise(Puppet::ParseError, "module_array(): Define at least the variable name " +
         "given (#{args.size} for 1)") if args.size < 1
 
-      var_name      = args[0]
-      default_value = ( args.size > 1 ? args[1] : [] )
-      options       = ( args.size > 2 ? args[2] : {} )
-
-      module_name      = self.source.module_name
-      module_var_name  = "#{module_name}::#{var_name}"
-      default_var_name = "#{module_name}::default::#{var_name}"
+      var_name = args[0]
+      default  = ( args.size > 1 ? args[1] : [] )
+      options  = ( args.size > 2 ? args[2] : {} )
+      
+      module_name     = self.source.module_name
+      module_var_name = "#{module_name}::#{var_name}"
       
       config = CORL::Config.init(options, [ :param, :module_array ], module_name, {
+        :provisioner  => :puppetnode,
         :hiera_scope  => self,
         :puppet_scope => self,
         :search       => 'core::default',
         :search_name  => false,
-        :init_fact    => 'hiera_ready',
         :force        => true,
         :merge        => true
       })
-      value = CORL::Config.lookup_array([ module_var_name, default_var_name ], default, config)
+      value = CORL::Config.lookup_array(module_var_name, default, config)
     end
     return value
   end

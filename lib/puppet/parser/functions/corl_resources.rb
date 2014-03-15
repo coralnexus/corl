@@ -39,10 +39,10 @@ If no resources are found, it returns without creating anything.
       options         = ( args[4] ? args[4] : {} )
 
       config = CORL::Config.init_flat(options, [ :resource, :corl_resources ], {
+        :provisioner     => :puppetnode,
         :hiera_scope     => self,
         :puppet_scope    => self,
         :search          => 'core::default',
-        :init_fact       => 'hiera_ready',
         :force           => true,
         :merge           => true,
         :resource_prefix => tag,
@@ -51,8 +51,10 @@ If no resources are found, it returns without creating anything.
       
       resources = CORL::Config.normalize(resources, override_var, config)
       defaults  = CORL::Config.normalize(defaults, default_var, config)
-          
-      CORL.provisioner(:puppet).add(definition_name, resources, defaults, config)
+      
+      dbg(resources, definition_name)
+      dbg(defaults, 'defaults')    
+      CORL::Util::Puppet.add(definition_name, resources, defaults, config)
     end
   end
 end

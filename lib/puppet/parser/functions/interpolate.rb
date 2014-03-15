@@ -19,7 +19,7 @@ This function interpolates values from one hash to another for configuration inj
       options = ( args.size > 2 ? args[2] : {} )
       
       config = CORL::Config.init_flat(options, [ :data, :interpolate ])
-      value  = CORL::Util::Data.interpolate(value, data, config.options)
+      value  = CORL::Util::Data.interpolate(value, data, config.export)
     end
     return value
   end

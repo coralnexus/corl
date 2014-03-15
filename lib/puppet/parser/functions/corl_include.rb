@@ -25,9 +25,18 @@ If no value is found in the defined sources, it does not include any classes.
 
       var_name   = args[0]
       parameters = ( args.size > 1 ? args[1] : {} )
-      options    = ( args.size > 2 ? args[2] : {} ) 
-            
-      unless CORL.provisioner(:puppet).include(var_name, parameters, options)
+      options    = ( args.size > 2 ? args[2] : {} )
+      
+      config = CORL::Config.init_flat(options, [ :include ], {
+        :hiera_scope  => self,
+        :puppet_scope => self,
+        :search       => 'core::default',
+        :force        => true,
+        :merge        => true
+      })
+      dbg(var_name, 'var name')
+      dbg(parameters, 'parameters')           
+      unless CORL::Util::Puppet.include(var_name, parameters, config)
         # Throw an error if we didn't evaluate all of the classes.
         str = "Could not find class"
         str += "es" if missing.length > 1
