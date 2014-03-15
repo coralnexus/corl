@@ -36,6 +36,7 @@ CORL = Nucleon
 require 'hiera'
 require 'facter'
 require 'puppet'
+require 'puppet/configurer'
 
 #-------------------------------------------------------------------------------
 # Localization
@@ -62,9 +63,9 @@ end
 #---
 
 # Include CORL utilities
-#[].each do |name| 
-#  nucleon_require(util_dir, name)
-#end
+[ :puppet ].each do |name| 
+  nucleon_require(util_dir, name)
+end
 
 # Special errors
 nucleon_require(core_dir, :errors)
@@ -72,8 +73,9 @@ nucleon_require(core_dir, :errors)
 #-------------------------------------------------------------------------------
 # Class and module additions / updates
 
-module CORL
+module Nucleon
   class Config
+    extend Mixin::Lookup
     include Mixin::Lookup  
   end
   

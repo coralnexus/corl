@@ -11,7 +11,6 @@ class Provisioner < CORL.plugin_class(:base)
   def normalize(reload)
     super
     yield if block_given?
-    #register
   end
   
   #-----------------------------------------------------------------------------
@@ -130,7 +129,7 @@ class Provisioner < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Provisioner operations
  
-  def register
+  def register(options = {})
     # Implement in providers
   end
   
@@ -230,13 +229,13 @@ class Provisioner < CORL.plugin_class(:base)
   
   #--
   
-  def import(files)
+  def import(files, options = {})
     # Implement in providers
   end
   
   #---
   
-  def include(resource_name, properties = {})
+  def include(resource_name, properties = {}, options = {})
     # Implement in providers
   end
   

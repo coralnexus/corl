@@ -1,41 +1,25 @@
 
 module CORL
-module PuppetExt
+module Util
+module Puppet
 class Resource < Core
   
-  extend Mixin::SubConfig
+  include Mixin::SubConfig
    
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
-  def initialize(provisioner, info, title, properties = {})
+  def initialize(info, title, properties = {})
     super({
-      :title       => string(title),
-      :info        => symbol_map(hash(info)),
-      :provisioner => provisioner,
-      :ready       => false
+      :title => string(title),
+      :info  => symbol_map(hash(info)),
+      :ready => false
     })
     import(properties) 
   end
-     
-  #-----------------------------------------------------------------------------
-  # Checks
-
       
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
-  
-  def provisioner(default = nil)
-    return _get(:provisioner, default)
-  end
-  
-  #---
-  
-  def provisioner=provisioner
-    _set(:provisioner, provisioner)
-  end
-  
-  #---
   
   def info(default = {})
     return hash(_get(:info, default))
@@ -100,8 +84,6 @@ class Resource < Core
     config = Config.ensure(options)
     
     tag(config[:tag])
-    
-    render(config)
     translate(config)
     
     _set(:ready, true) # Ready for resource creation
@@ -138,7 +120,7 @@ class Resource < Core
         config.set(:normalize_template, config.get("normalize_#{target}", true))
         config.set(:interpolate_template, config.get("interpolate_#{target}", true))
         
-        resource[target] = CORL.template(resource[name], config).render(resource[target])
+        resource[target] = CORL.template(config, resource[name]).render(resource[target])
         resource.delete(name)         
       end
     end
@@ -149,7 +131,8 @@ class Resource < Core
 
   def render(options = {})
     resource = self.class.render(export, options)
-    clear(options)
+    clear
+    dbg(resource, 'resource')
     import(resource, options)    
     return self
   end
@@ -243,3 +226,5 @@ class Resource < Core
 end
 end
 end
+end
+

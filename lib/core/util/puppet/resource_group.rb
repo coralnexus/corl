@@ -1,40 +1,24 @@
 
 module CORL
-module PuppetExt
+module Util
+module Puppet
 class ResourceGroup < Core
   
-  extend Mixin::SubConfig
+  include Mixin::SubConfig
    
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
-  def initialize(provisioner, type_info, default = {})
+  def initialize(type_info, default = {})
     super({
-      :info        => hash(type_info),
-      :provisioner => provisioner,
-      :default     => symbol_map(hash(default))
+      :info    => hash(type_info),
+      :default => symbol_map(hash(default))
     })
     self.resources = {}
   end
      
   #-----------------------------------------------------------------------------
-  # Checks
-
-      
-  #-----------------------------------------------------------------------------
   # Property accessors / modifiers
-  
-  def provisioner(default = nil)
-    return _get(:provisioner, default)
-  end
-  
-  #---
-  
-  def provisioner=provisioner
-    _set(:provisioner, provisioner)
-  end
-  
-  #---
   
   def info(default = {})
     return hash(_get(:info, default))
@@ -84,25 +68,19 @@ class ResourceGroup < Core
   
   #---
   
-  def clear
-    self.resources = {}
-    return self
-  end
-  
-  #---
-  
   def add(resources, options = {})
     config    = Config.ensure(options)
-    resources = normalize(resources, config)
+    resources = normalize(info[:name], resources, config)
     
     unless Util::Data.empty?(resources)
       collection = self.resources
       resources.each do |title, resource|
-        provisioner.add_resource(info, title, resource.export)
+        Util::Puppet.add_resource(info, title, Config.ensure(resource).export, config)
         collection[title] = resource
       end
       self.resources = collection
     end
+    dbg(collection, info[:name])
     return self
   end
   
@@ -142,7 +120,7 @@ class ResourceGroup < Core
         else
           normalize = true
           
-          namevar = provisioner.namevar(type_name, name)
+          namevar = Util::Puppet.namevar(type_name, name)
           if resources[name].has_key?(namevar)
             value = resources[name][namevar]
             if Util::Data.empty?(value)
@@ -156,7 +134,7 @@ class ResourceGroup < Core
                 new_resource = resources[name].clone
                 new_resource[namevar] = item
                 
-                resources[item_name] = Resource.render(new_resource, config)
+                resources[item_name] = Util::Puppet::Resource.render(new_resource, config)
                 add_composite_resource(name, item_name)
               end
               resources.delete(name)
@@ -165,7 +143,7 @@ class ResourceGroup < Core
           end
           
           if normalize
-            resource = Resource.new(provisioner, info, name, resources[name])
+            resource = Util::Puppet::Resource.new(info, name, resources[name])
             resource.defaults(default, config.import({ :groups => self.composite_resources }))
             
             resources[name] = resource
@@ -203,3 +181,5 @@ class ResourceGroup < Core
 end
 end
 end
+end
+
