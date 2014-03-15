@@ -32,7 +32,7 @@ module Lookup
   #---
   
   def hiera_config
-    config_file = CORL.value(:hiera_config_file, nil)
+    config_file = CORL.value(:hiera_config_file, File.join(Hiera::Util.config_dir, 'hiera.yaml'))
     config      = {}
 
     if config_file && File.exist?(config_file)
@@ -93,12 +93,12 @@ module Lookup
             unless hiera_scope.respond_to?('[]')
               hiera_scope = Hiera::Scope.new(hiera_scope)
             end
-            value = hiera.lookup(property, nil, hiera_scope, override, context)
+            value = hiera.lookup(property.to_s, nil, hiera_scope, override, context)
           end 
     
           if provisioner && Util::Data.undef?(value)
             # Search the provisioner scope (only admins can provision a machine)
-            value = CORL.provisioner(provisioner).lookup(property, default, config)
+            value = CORL.provisioner({ :name => :lookup }, provisioner).lookup(property, default, config)
           end
         end
       end
@@ -107,8 +107,11 @@ module Lookup
     value = Util::Data.value(value)
     
     if ! Config.get_property(first_property) || ! Util::Data.undef?(value)
-      Config.set_property(first_property, value)
+      Config.set_property(first_property.to_s, value)
     end
+    
+    dbg(value, properties.to_s) unless return_property
+    
     return value, first_property if return_property
     value
   end
@@ -118,7 +121,7 @@ module Lookup
   def lookup_array(properties, default = [], options = {})
     config          = Config.ensure(options) 
     value, property = lookup(properties, nil, config.import({ :return_property => true }))
-    
+     
     if Util::Data.undef?(value)
       value = default
         
@@ -131,8 +134,10 @@ module Lookup
     unless value.is_a?(Array)
       value = ( Util::Data.empty?(value) ? [] : [ value ] )
     end
+       
+    Config.set_property(property.to_s, value)
     
-    Config.set_property(property, value)
+    dbg(value, properties.to_s)
     value
   end
     
@@ -155,7 +160,9 @@ module Lookup
       value = ( Util::Data.empty?(value) ? {} : { :value => value } )
     end
     
-    Config.set_property(property, value)
+    Config.set_property(property.to_s, value)
+    
+    dbg(value, properties.to_s)
     value
   end
   
