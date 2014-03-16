@@ -1,4 +1,4 @@
-
+    
 module CORL
 module Provisioner
 class Puppetnode < CORL.plugin_class(:provisioner)
@@ -70,10 +70,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     
     @compiler = Puppet::Parser::Compiler.new(node)
     register
-     
-    # Initialize the compiler so we can can lookup and include stuff
-    # This is ugly but seems to be the only way.
-    compiler.compile
+    node
   end
   protected :init_puppet
   
@@ -158,15 +155,6 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   
   #---
   
-  def include(resource_name, properties = {}, options = {})
-    Util::Puppet.include(resource_name, properties, Config.ensure(options).defaults({
-      :provisioner  => :puppetnode, 
-      :puppet_scope => scope      
-    }))
-  end
-  
-  #---
-  
   def add_search_path(type, resource_name)
     Config.set_options([ :all, type ], { :search => [ resource_name.to_s ] })  
   end
@@ -177,7 +165,9 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     locations = build_locations
     success   = true
     
-    include_location = lambda do |type, add_to_catalog = true, add_search_path = false|      
+    include_location = lambda do |type, add_search_path = false|
+      classes = {}
+            
       locations[:package].each do |name, package_directory|
         gateway       = File.join(build_directory, package_directory, "#{type}.pp")
         resource_name = concatenate([ name, type ])
@@ -186,14 +176,14 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         
         if File.exists?(gateway)
           import(gateway)
-          include(resource_name, { :before => 'Anchor[gateway_init]' }) if add_to_catalog                   
+          classes[resource_name] = { :before => 'Anchor[gateway_init]' }                  
         end
         
         directory = File.join(build_directory, package_directory, type.to_s)
         Dir.glob(File.join(directory, '*.pp')).each do |file|
           resource_name = concatenate([ name, type, File.basename(file).gsub('.pp', '') ])
           import(file)
-          include(resource_name, { :before => 'Anchor[gateway_init]' }) if add_to_catalog
+          classes[resource_name] = { :before => 'Anchor[gateway_init]' }
         end        
       end
     
@@ -204,7 +194,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
      
       if File.exists?(gateway)
         import(gateway)
-        include(resource_name, { :before => 'Anchor[gateway_init]' }) if add_to_catalog                   
+        classes[resource_name] = { :before => 'Anchor[gateway_init]' }                 
       end
     
       if locations.has_key?(type)
@@ -212,26 +202,30 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         Dir.glob(File.join(directory, '*.pp')).each do |file|
           resource_name = concatenate([ plugin_name, type, File.basename(file).gsub('.pp', '') ])
           import(file)
-          include(resource_name, { :before => 'Anchor[gateway_init]' }) if add_to_catalog
+          classes[resource_name] = { :before => 'Anchor[gateway_init]' }
         end
       end
+      classes
     end
     
     @@puppet_lock.synchronize do
       begin
         start_time = Time.now
         
-        init_puppet(profiles)
+        node = init_puppet(profiles)
         
         # Include defaults
-        include_location.call(:default, true, true)
+        classes = include_location.call(:default, true)
       
         # Import and include needed profiles
         include_location.call(:profiles, false)
       
         profiles.each do |profile|
-          include(profile, { :require => 'Anchor[gateway_exit]' })
+          classes[profile.to_s] = { :require => 'Anchor[gateway_exit]' }
         end
+        
+        node.classes = classes
+        compiler.compile
         
         # Start system configuration 
         catalog = compiler.catalog.to_ral
