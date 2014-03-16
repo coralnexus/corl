@@ -226,19 +226,7 @@ class Provisioner < CORL.plugin_class(:base)
   def lookup(property, default = nil, options = {})
     # Implement in providers
   end
-  
-  #--
-  
-  def import(files, options = {})
-    # Implement in providers
-  end
-  
-  #---
-  
-  def include(resource_name, properties = {}, options = {})
-    # Implement in providers
-  end
-  
+   
   #---
   
   def provision(profiles, options = {})
