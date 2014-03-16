@@ -1,10 +1,10 @@
 
 require 'puppet/indirector/terminus'
 
-class Puppet::Indirector::CORL < Puppet::Indirector::Terminus
+class Puppet::Indirector::Corl < Puppet::Indirector::Terminus
   
   def initialize(*args)
-    unless CORL::Config.initialized?
+    unless CORL::Config.config_initialized?
       raise "CORL terminus not supported without the CORL library"
     end
     super
