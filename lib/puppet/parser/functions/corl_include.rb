@@ -34,20 +34,7 @@ If no value is found in the defined sources, it does not include any classes.
         :force        => true,
         :merge        => true
       })
-      dbg(var_name, 'var name')
-      dbg(parameters, 'parameters')           
-      unless CORL::Util::Puppet.include(var_name, parameters, config)
-        # Throw an error if we didn't evaluate all of the classes.
-        str = "Could not find class"
-        str += "es" if missing.length > 1
-
-        str += " " + missing.join(", ")
-
-        if n = namespaces and ! n.empty? and n != [""]
-          str += " in namespaces #{@namespaces.join(", ")}"
-        end
-        self.fail Puppet::ParseError, str
-      end      
+      CORL::Util::Puppet.include(var_name, parameters, config)
     end
   end
 end

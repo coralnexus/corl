@@ -47,13 +47,16 @@ If no resources are found, it returns without creating anything.
         :merge           => true,
         :resource_prefix => tag,
         :title_prefix    => tag
-      })
+      })      
+      unless tag.empty?
+        config[:tag]             = tag
+        config[:resource_prefix] = tag
+        config[:title_prefix]    = tag
+      end
       
       resources = CORL::Config.normalize(resources, override_var, config)
       defaults  = CORL::Config.normalize(defaults, default_var, config)
       
-      dbg(resources, definition_name)
-      dbg(defaults, 'defaults')    
       CORL::Util::Puppet.add(definition_name, resources, defaults, config)
     end
   end
