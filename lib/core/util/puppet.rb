@@ -131,7 +131,6 @@ module Puppet
       klass = puppet_scope.find_hostclass(title)
       return unless klass
       
-      #dbg(properties, "class #{title}")
       klass.ensure_in_catalog(puppet_scope, properties)
       puppet_scope.catalog.add_class(title)
     end  
@@ -160,7 +159,6 @@ module Puppet
     if type[:type] == :define
       type[:resource].instantiate_resource(puppet_scope, resource)
     end
-    #dbg(resource, "definition/type #{type[:type]} #{title}")
     puppet_scope.compiler.add_resource(puppet_scope, resource)
   end
     
