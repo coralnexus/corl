@@ -16,6 +16,12 @@ class ResourceGroup < Core
     })
     self.resources = {}
   end
+  
+  #---
+  
+  def inspect
+    "#{self.class}#{info.to_s}[#{composite_resources.keys.length}]"
+  end
      
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
@@ -70,23 +76,27 @@ class ResourceGroup < Core
   
   def add(resources, options = {})
     config    = Config.ensure(options)
-    resources = normalize(info[:name], resources, config)
     
-    unless Util::Data.empty?(resources)
+    dbg(resources, 'before')
+    dbg(default, 'defaults')
+    resources = normalize(info[:name], resources, config)
+     
+    unless Data.empty?(resources)
       collection = self.resources
       resources.each do |title, resource|
-        Util::Puppet.add_resource(info, title, Config.ensure(resource).export, config)
+        dbg(resource.export, "#{info[:type]} #{info[:name]}: #{title}")
+        Puppet.add_resource(info, title, resource.export, config)
         collection[title] = resource
       end
       self.resources = collection
     end
-    dbg(collection, info[:name])
     return self
   end
   
   #---
   
   def add_composite_resource(name, resource_names)
+    name            = name.to_sym
     composite       = self.composite_resources    
     composite[name] = [] unless composite[name].is_a?(Array)
     
@@ -95,11 +105,12 @@ class ResourceGroup < Core
     end
     
     resource_names.each do |r_name|
+      r_name = r_name.to_sym
+      
       unless composite[name].include?(r_name)
         composite[name] << r_name
       end
     end
-    
     self.composite_resources = composite
   end
   protected :add_composite_resource
@@ -111,19 +122,19 @@ class ResourceGroup < Core
     self.composite_resources = {}
     
     config    = Config.ensure(options)
-    resources = Util::Data.value(resources)
+    resources = Data.value(resources)
     
-    unless Util::Data.empty?(resources)
+    unless Data.empty?(resources)
       resources.keys.each do |name|
-        if ! resources[name] || resources[name].empty? || ! resources[name].is_a?(Hash)        
+        if ! resources[name] || resources[name].empty? || ! resources[name].is_a?(Hash)
           resources.delete(name)
         else
           normalize = true
           
-          namevar = Util::Puppet.namevar(type_name, name)
+          namevar = Puppet.namevar(type_name, name)
           if resources[name].has_key?(namevar)
             value = resources[name][namevar]
-            if Util::Data.empty?(value)
+            if Data.empty?(value)
               resources.delete(name)
               normalize = false
               
@@ -134,7 +145,7 @@ class ResourceGroup < Core
                 new_resource = resources[name].clone
                 new_resource[namevar] = item
                 
-                resources[item_name] = Util::Puppet::Resource.render(new_resource, config)
+                resources[item_name] = Resource.new(self, info, item_name, new_resource).defaults(default, config)               
                 add_composite_resource(name, item_name)
               end
               resources.delete(name)
@@ -143,12 +154,13 @@ class ResourceGroup < Core
           end
           
           if normalize
-            resource = Util::Puppet::Resource.new(info, name, resources[name])
-            resource.defaults(default, config.import({ :groups => self.composite_resources }))
-            
+            resource = Resource.new(self, info, name, resources[name]).defaults(default, config)
             resources[name] = resource
           end
         end
+      end
+      resources.each do |name, resource|
+        resource.process(config)
       end
     end
     return translate(resources, config)

@@ -24,7 +24,7 @@ module Puppet
       unless @@register.has_key?(mod.path)
         lib_dir = File.join(mod.path, 'lib')
         if File.directory?(lib_dir)
-          logger.info("Registering Puppet module at #{lib_dir}")
+          logger.debug("Registering Puppet module at #{lib_dir}")
           CORL.register(lib_dir)
           @@register[mod.path] = true
         end
@@ -86,22 +86,38 @@ module Puppet
   # Catalog alterations
       
   def self.add(type_name, resources, defaults = {}, options = {})
+    config  = Config.ensure(options)
+    
+    puppet_scope = config.get(:puppet_scope, nil)    
+    return unless puppet_scope
+    
     info = type_info(type_name, options)
-    Util::Puppet::ResourceGroup.new(info, defaults).add(resources, options)
+    ResourceGroup.new(info, defaults).add(resources, config)
   end
   
   #---
   
   def self.add_resource(type, title, properties, options = {})
+    config  = Config.ensure(options)
+    
+    puppet_scope = config.get(:puppet_scope, nil)    
+    return unless puppet_scope
+    
     if type.is_a?(String)
-      type = type_info(type, options)
+      type = type_info(type, config)
     end
     
     case type[:type]
     when :type, :define
-      add_definition(type, title, properties, options)
+      CORL.ui_group(puppet_scope.source.module_name) do |ui|
+        #ui.info("Adding #{type[:name]} #{title} definition")
+      end
+      add_definition(type, title, properties, config)
     when :class
-      add_class(title, properties, options)
+      CORL.ui_group(puppet_scope.source.module_name) do |ui|
+        #ui.info("Adding #{title} class")
+      end
+      add_class(title, properties, config)
     end
   end
 
@@ -115,6 +131,7 @@ module Puppet
       klass = puppet_scope.find_hostclass(title)
       return unless klass
       
+      #dbg(properties, "class #{title}")
       klass.ensure_in_catalog(puppet_scope, properties)
       puppet_scope.catalog.add_class(title)
     end  
@@ -124,8 +141,8 @@ module Puppet
   
   def self.add_definition(type, title, properties, options = {})
     config       = Config.ensure(options)
-    puppet_scope = config.get(:puppet_scope, nil)
     
+    puppet_scope = config.get(:puppet_scope, nil)    
     return unless puppet_scope
         
     type = type_info(type, config) if type.is_a?(String)
@@ -143,6 +160,7 @@ module Puppet
     if type[:type] == :define
       type[:resource].instantiate_resource(puppet_scope, resource)
     end
+    #dbg(resource, "definition/type #{type[:type]} #{title}")
     puppet_scope.compiler.add_resource(puppet_scope, resource)
   end
     
@@ -153,8 +171,6 @@ module Puppet
     
     puppet_scope = config.get(:puppet_scope, nil)  
     return unless puppet_scope
-    
-    register_plugins(options)
     
     if types = puppet_scope.environment.known_resource_types
       Util::Data.array(files).each do |file|
@@ -168,8 +184,6 @@ module Puppet
   def self.include(resource_name, properties = {}, options = {})
     config     = Config.ensure(options)
     class_data = {}
-    
-    dbg(properties, 'given parameters')
         
     puppet_scope = config.get(:puppet_scope, nil)
     return false unless puppet_scope
@@ -191,7 +205,6 @@ module Puppet
       end
     end
     
-    dbg(class_data, 'class data')
     klasses = puppet_scope.compiler.evaluate_classes(class_data, puppet_scope, false)
     missing = class_data.keys.find_all do |klass|
       ! klasses.include?(klass)

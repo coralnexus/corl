@@ -9,8 +9,9 @@ class Resource < Core
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
   
-  def initialize(info, title, properties = {})
+  def initialize(group, info, title, properties = {})
     super({
+      :group => group,
       :title => string(title),
       :info  => symbol_map(hash(info)),
       :ready => false
@@ -20,6 +21,12 @@ class Resource < Core
       
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
+  
+  def group
+    return _get(:group)
+  end
+  
+  #---
   
   def info(default = {})
     return hash(_get(:info, default))
@@ -55,7 +62,6 @@ class Resource < Core
     super(defaults, options)
     
     _set(:ready, false)
-    process(options)
     return self 
   end
 
@@ -65,7 +71,6 @@ class Resource < Core
     super(properties, options)
     
     _set(:ready, false)
-    process(options)
     return self  
   end
       
@@ -84,6 +89,7 @@ class Resource < Core
     config = Config.ensure(options)
     
     tag(config[:tag])
+    render(config)
     translate(config)
     
     _set(:ready, true) # Ready for resource creation
@@ -92,15 +98,21 @@ class Resource < Core
   
   #---
   
-  def tag(tag, append = true)
-    unless Util::Data.empty?(tag)
-      tag           = tag.to_s.split(/\s*,\s*/)
+  def tag(tags, append = true)
+    unless Data.empty?(tags)
+      if tags.is_a?(String)
+        tags = tags.to_s.split(/\s*,\s*/)
+      else
+        tags = tags.flatten
+      end
       resource_tags = get(:tag)
       
       if ! resource_tags || ! append
-        set(:tag, tag)
+        set(:tag, tags)
       else
-        resource_tags << tag
+        tags.each do |tag|
+          resource_tags << tag unless resource_tags.include?(tag)  
+        end
         set(:tag, resource_tags)
       end
     end
@@ -114,7 +126,7 @@ class Resource < Core
     config   = Config.ensure(options)
     
     resource.keys.each do |name|
-      if match = name.match(/^(.+)_template$/)
+      if match = name.to_s.match(/^(.+)_template$/)
         target = match.captures[0]
         
         config.set(:normalize_template, config.get("normalize_#{target}", true))
@@ -132,8 +144,7 @@ class Resource < Core
   def render(options = {})
     resource = self.class.render(export, options)
     clear
-    dbg(resource, 'resource')
-    import(resource, options)    
+    import(Config.ensure(resource).export, options)    
     return self
   end
   
@@ -154,7 +165,7 @@ class Resource < Core
   # Utilities
   
   def translate_resource_refs(resource_refs, options = {})
-    return :undef if Util::Data.undef?(resource_refs)
+    return :undef if Data.undef?(resource_refs)
     
     config         = Config.ensure(options)
     resource_names = config.get(:resource_names, {})
@@ -165,12 +176,12 @@ class Resource < Core
     title_flags    = config.get(:title_flags, '')
     title_regexp   = Regexp.new(title_pattern, title_flags.split(''))
     
-    groups         = config.get(:groups, {})
-    
     allow_single   = config.get(:allow_single_return, true)    
     
     type_name      = info[:name].sub(/^\@?\@/, '')
     values         = []
+    
+    composite_resources = group.composite_resources
         
     case resource_refs
     when String
@@ -185,19 +196,19 @@ class Resource < Core
     end
     
     resource_refs.collect! do |value|
-      if value.is_a?(::Puppet::Resource) || ! value.match(title_regexp)
-        value
+      if value.is_a?(::Puppet::Resource) || ! value.to_s.match(title_regexp)
+        value.to_s
           
-      elsif resource_names.has_key?(value)
+      elsif resource_names.has_key?(value.to_s)
         if ! title_prefix.empty?
           "#{title_prefix}_#{value}"
         else
-          value
+          value.to_s
         end
         
-      elsif groups.has_key?(value) && ! groups[value].empty?
+      elsif composite_resources.has_key?(value.to_sym) && ! composite_resources[value.to_sym].empty?
         results = []
-        groups[value].each do |resource_name|
+        composite_resources[value.to_sym].each do |resource_name|
           unless title_prefix.empty?
             resource_name = "#{title_prefix}_#{resource_name}"
           end

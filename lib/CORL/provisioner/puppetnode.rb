@@ -44,6 +44,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     
     # Must be in this order!!
     Puppet.initialize_settings
+    Puppet::Util::Log.newdestination(:console)
     
     # TODO: Figure out how to store these damn settings in a specialized
     # environment without phantom empty environment issues.
@@ -68,7 +69,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     end
     
     @compiler = Puppet::Parser::Compiler.new(node)
-           
+    register
+     
     # Initialize the compiler so we can can lookup and include stuff
     # This is ugly but seems to be the only way.
     compiler.compile
@@ -140,8 +142,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   
   def lookup(property, default = nil, options = {})
     Util::Puppet.lookup(property, default, Config.ensure(options).defaults({ 
-      :puppet_scope => scope,
-      :provisioner  => :puppetnode
+      :provisioner  => :puppetnode,
+      :puppet_scope => scope      
     }))
   end
   
@@ -157,9 +159,9 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #---
   
   def include(resource_name, properties = {}, options = {})
-    Util::Puppet.include(resource_name, properties, Config.ensure(options).defaults({ 
-      :puppet_scope => scope,
-      :provisioner  => :puppetnode 
+    Util::Puppet.include(resource_name, properties, Config.ensure(options).defaults({
+      :provisioner  => :puppetnode, 
+      :puppet_scope => scope      
     }))
   end
   
@@ -217,31 +219,29 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     
     @@puppet_lock.synchronize do
       begin
+        start_time = Time.now
+        
         init_puppet(profiles)
         
-        # Import and include resources
-        starttime = Time.now     
-      
         # Include defaults
-        #include_location.call(:default, true, true)
+        include_location.call(:default, true, true)
       
         # Import and include needed profiles
-        #include_location.call(:profiles, false)
+        include_location.call(:profiles, false)
       
-        #profiles.each do |profile|
-        #  include(profile, { :require => 'Anchor[gateway_exit]' })
-        #end
+        profiles.each do |profile|
+          include(profile, { :require => 'Anchor[gateway_exit]' })
+        end
         
         # Start system configuration 
-        #catalog = compiler.catalog
-        #dbg(catalog, 'catalog')      
-        #catalog.finalize
-        #catalog.retrieval_duration = Time.now - starttime
-
-        #configurer = Puppet::Configurer.new
-        #if ! configurer.run(:catalog => catalog, :pluginsync => false)
-        #  success = false
-        #end
+        catalog = compiler.catalog.to_ral
+        catalog.finalize
+        catalog.retrieval_duration = Time.now - start_time
+        
+        configurer = Puppet::Configurer.new
+        if ! configurer.run(:catalog => catalog, :pluginsync => false)
+          success = false
+        end
       
       rescue Exception => error
         raise error
