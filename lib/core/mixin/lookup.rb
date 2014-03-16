@@ -110,8 +110,6 @@ module Lookup
       Config.set_property(first_property.to_s, value)
     end
     
-    dbg(value, properties.to_s) unless return_property
-    
     return value, first_property if return_property
     value
   end
@@ -136,8 +134,6 @@ module Lookup
     end
        
     Config.set_property(property.to_s, value)
-    
-    dbg(value, properties.to_s)
     value
   end
     
@@ -161,8 +157,6 @@ module Lookup
     end
     
     Config.set_property(property.to_s, value)
-    
-    dbg(value, properties.to_s)
     value
   end
   
@@ -199,8 +193,7 @@ module Lookup
   
     when Hash
       results = data
-    end
-    
+    end    
     results
   end
 end
