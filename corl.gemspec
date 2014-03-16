@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-03-10"
+  s.date = "2014-03-16"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -69,8 +69,6 @@ Gem::Specification.new do |s|
     "lib/CORL/node/local.rb",
     "lib/CORL/node/rackspace.rb",
     "lib/CORL/provisioner/puppetnode.rb",
-    "lib/CORL/provisioner/puppetnode/resource.rb",
-    "lib/CORL/provisioner/puppetnode/resource_group.rb",
     "lib/CORL/template/environment.rb",
     "lib/core/errors.rb",
     "lib/core/facade.rb",
@@ -87,6 +85,9 @@ Gem::Specification.new do |s|
     "lib/core/plugin/network.rb",
     "lib/core/plugin/node.rb",
     "lib/core/plugin/provisioner.rb",
+    "lib/core/util/puppet.rb",
+    "lib/core/util/puppet/resource.rb",
+    "lib/core/util/puppet/resource_group.rb",
     "lib/corl.rb",
     "lib/facter/corl_build.rb",
     "lib/facter/corl_config_ready.rb",
@@ -97,10 +98,10 @@ Gem::Specification.new do |s|
     "lib/hiera/corl_logger.rb",
     "lib/puppet/indirector/corl.rb",
     "lib/puppet/indirector/data_binding/corl.rb",
-    "lib/puppet/parser/functions/config_initialized.rb",
     "lib/puppet/parser/functions/corl_include.rb",
+    "lib/puppet/parser/functions/corl_initialize.rb",
+    "lib/puppet/parser/functions/corl_merge.rb",
     "lib/puppet/parser/functions/corl_resources.rb",
-    "lib/puppet/parser/functions/deep_merge.rb",
     "lib/puppet/parser/functions/ensure.rb",
     "lib/puppet/parser/functions/file_exists.rb",
     "lib/puppet/parser/functions/global_array.rb",
