@@ -225,12 +225,15 @@ class Provisioner < CORL.plugin_class(:base)
   
   def lookup(property, default = nil, options = {})
     # Implement in providers
+    nil
   end
    
   #---
   
   def provision(profiles, options = {})
-    # Implement in providers
+    success = yield if block_given?
+    Config.save_properties(Config.get_options(:corl_log)) if success
+    success
   end
        
   #-----------------------------------------------------------------------------

@@ -186,88 +186,90 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #---
     
   def provision(profiles, options = {})
-    locations = build_locations
-    success   = true
+    super do
+      locations = build_locations
+      success   = true
     
-    include_location = lambda do |type, add_search_path = false|
-      classes = {}
+      include_location = lambda do |type, add_search_path = false|
+        classes = {}
             
-      locations[:package].each do |name, package_directory|
-        gateway       = File.join(build_directory, package_directory, "#{type}.pp")
-        resource_name = concatenate([ name, type ])
+        locations[:package].each do |name, package_directory|
+          gateway       = File.join(build_directory, package_directory, "#{type}.pp")
+          resource_name = concatenate([ name, type ])
         
+          add_search_path(type, resource_name) if add_search_path
+        
+          if File.exists?(gateway)
+            import(gateway)
+            classes[resource_name] = { :before => 'Anchor[gateway_init]' }                  
+          end
+        
+          directory = File.join(build_directory, package_directory, type.to_s)
+          Dir.glob(File.join(directory, '*.pp')).each do |file|
+            resource_name = concatenate([ name, type, File.basename(file).gsub('.pp', '') ])
+            import(file)
+            classes[resource_name] = { :before => 'Anchor[gateway_init]' }
+          end        
+        end
+    
+        gateway       = File.join(build_directory, locations[:build], "#{type}.pp")
+        resource_name = concatenate([ plugin_name, type ])
+      
         add_search_path(type, resource_name) if add_search_path
-        
+     
         if File.exists?(gateway)
           import(gateway)
-          classes[resource_name] = { :before => 'Anchor[gateway_init]' }                  
+          classes[resource_name] = { :before => 'Anchor[gateway_init]' }                 
         end
+    
+        if locations.has_key?(type)
+          directory = File.join(build_directory, locations[type])
+          Dir.glob(File.join(directory, '*.pp')).each do |file|
+            resource_name = concatenate([ plugin_name, type, File.basename(file).gsub('.pp', '') ])
+            import(file)
+            classes[resource_name] = { :before => 'Anchor[gateway_init]' }
+          end
+        end
+        classes
+      end
+    
+      @@puppet_lock.synchronize do
+        begin
+          start_time = Time.now
         
-        directory = File.join(build_directory, package_directory, type.to_s)
-        Dir.glob(File.join(directory, '*.pp')).each do |file|
-          resource_name = concatenate([ name, type, File.basename(file).gsub('.pp', '') ])
-          import(file)
-          classes[resource_name] = { :before => 'Anchor[gateway_init]' }
-        end        
-      end
-    
-      gateway       = File.join(build_directory, locations[:build], "#{type}.pp")
-      resource_name = concatenate([ plugin_name, type ])
+          node = init_puppet(profiles)
+        
+          # Include defaults
+          classes = include_location.call(:default, true)
       
-      add_search_path(type, resource_name) if add_search_path
-     
-      if File.exists?(gateway)
-        import(gateway)
-        classes[resource_name] = { :before => 'Anchor[gateway_init]' }                 
-      end
-    
-      if locations.has_key?(type)
-        directory = File.join(build_directory, locations[type])
-        Dir.glob(File.join(directory, '*.pp')).each do |file|
-          resource_name = concatenate([ plugin_name, type, File.basename(file).gsub('.pp', '') ])
-          import(file)
-          classes[resource_name] = { :before => 'Anchor[gateway_init]' }
+          # Import needed profiles
+          include_location.call(:profiles, false)
+      
+          profiles.each do |profile|
+            classes[profile.to_s] = { :require => 'Anchor[gateway_exit]' }
+          end
+        
+          # Compile catalog
+          node.classes = classes
+          compiler.compile
+        
+          # Start system configuration 
+          catalog = compiler.catalog.to_ral
+          catalog.finalize
+          catalog.retrieval_duration = Time.now - start_time
+        
+          configurer = Puppet::Configurer.new
+          if ! configurer.run(:catalog => catalog, :pluginsync => false)
+            success = false
+          end
+        
+        rescue Exception => error
+          raise error
+          Puppet.log_exception(error)
         end
-      end
-      classes
+      end    
+      success
     end
-    
-    @@puppet_lock.synchronize do
-      begin
-        start_time = Time.now
-        
-        node = init_puppet(profiles)
-        
-        # Include defaults
-        classes = include_location.call(:default, true)
-      
-        # Import needed profiles
-        include_location.call(:profiles, false)
-      
-        profiles.each do |profile|
-          classes[profile.to_s] = { :require => 'Anchor[gateway_exit]' }
-        end
-        
-        # Compile catalog
-        node.classes = classes
-        compiler.compile
-        
-        # Start system configuration 
-        catalog = compiler.catalog.to_ral
-        catalog.finalize
-        catalog.retrieval_duration = Time.now - start_time
-        
-        configurer = Puppet::Configurer.new
-        if ! configurer.run(:catalog => catalog, :pluginsync => false)
-          success = false
-        end
-        
-      rescue Exception => error
-        raise error
-        Puppet.log_exception(error)
-      end
-    end    
-    success
   end
   
   #-----------------------------------------------------------------------------
