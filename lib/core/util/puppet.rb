@@ -198,8 +198,6 @@ module Puppet
         classes.each do |klass|
           class_data[klass] = properties
         end
-      else
-        class_data[name.to_s] = properties  
       end
     end
     
