@@ -75,16 +75,12 @@ class ResourceGroup < Core
   #---
   
   def add(resources, options = {})
-    config    = Config.ensure(options)
-    
-    dbg(resources, 'before')
-    dbg(default, 'defaults')
+    config    = Config.ensure(options)    
     resources = normalize(info[:name], resources, config)
      
     unless Data.empty?(resources)
       collection = self.resources
       resources.each do |title, resource|
-        dbg(resource.export, "#{info[:type]} #{info[:name]}: #{title}")
         Puppet.add_resource(info, title, resource.export, config)
         collection[title] = resource
       end
