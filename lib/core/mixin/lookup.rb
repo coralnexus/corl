@@ -74,7 +74,8 @@ module Lookup
     
     hiera_scope = config.get(:hiera_scope, {})
     override    = config.get(:override, nil)
-    context     = config.get(:context, :priority)    
+    context     = config.get(:context, :priority)
+    debug       = config.get(:debug, false)    
     
     return_property = config.get(:return_property, false)
     
@@ -88,7 +89,10 @@ module Lookup
       first_property = property unless first_property
       
       # Try to load facts first (these can not be overridden)
-      unless value = fact(property)
+      value = fact(property)
+      debug_lookup(config, property, value, "Fact lookup")
+      
+      unless value
         if CORL.admin? 
           if config_initialized?
             # Try to find in Hiera data store (these might be security sensitive)
@@ -96,16 +100,21 @@ module Lookup
               hiera_scope = Hiera::Scope.new(hiera_scope)
             end
             value = hiera.lookup(property.to_s, nil, hiera_scope, override, context)
+            debug_lookup(config, property, value, "Hiera lookup")
           end 
     
           if provisioner && Util::Data.undef?(value)
             # Search the provisioner scope (only admins can provision a machine)
             value = CORL.provisioner({ :name => :lookup }, provisioner).lookup(property, default, config)
+            debug_lookup(config, property, value, "Provisioner lookup")
           end
         end
       end
     end
-    value = default if Util::Data.undef?(value) # Resort to default
+    if Util::Data.undef?(value) # Resort to default
+      value = default
+      debug_lookup(config, first_property, value, "Default value")
+    end
     value = Util::Data.value(value)
     
     if ! Config.get_property(first_property) || ! Util::Data.undef?(value)
@@ -124,15 +133,18 @@ module Lookup
      
     if Util::Data.undef?(value)
       value = default
+      debug_lookup(config, property, value, "Array default value")
         
     elsif ! Util::Data.empty?(default)
       if config.get(:merge, false)
         value = Util::Data.merge([default, value], config)
+        debug_lookup(config, property, value, "Merged value with default")
       end
     end
     
     unless value.is_a?(Array)
       value = ( Util::Data.empty?(value) ? [] : [ value ] )
+      debug_lookup(config, property, value, "Final array value")
     end
        
     Config.set_property(property.to_s, value)
@@ -147,15 +159,18 @@ module Lookup
     
     if Util::Data.undef?(value)
       value = default
+      debug_lookup(config, property, value, "Hash default value")
         
     elsif ! Util::Data.empty?(default)
       if config.get(:merge, false)
         value = Util::Data.merge([default, value], config)
+        debug_lookup(config, property, value, "Merged value with default")
       end
     end
     
     unless value.is_a?(Hash)
       value = ( Util::Data.empty?(value) ? {} : { :value => value } )
+      debug_lookup(config, property, value, "Final hash value")
     end
     
     Config.set_property(property.to_s, value)
@@ -197,6 +212,17 @@ module Lookup
       results = data
     end    
     results
+  end
+  
+  #---
+  
+  def debug_lookup(config, property, value, label)
+    if config.get(:debug, false)
+      CORL.ui_group(property.to_s) do |ui|
+        dump = CORL.render_object(value)
+        ui.info("#{label}: #{dump}")
+      end
+    end
   end
 end
 end

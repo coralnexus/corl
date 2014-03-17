@@ -233,7 +233,11 @@ module Puppet
       base_names = base_names.reverse if reverse_lookup
         
       base_names.each do |base|
-        value = puppet_scope.lookupvar("::#{base}::#{property}")
+        search_property_name = "::#{base}::#{property}"
+        
+        value = puppet_scope.lookupvar(search_property_name)
+        Config.debug_lookup(config, search_property_name, value, "Puppet override lookup")
+        
         break unless Util::Data.undef?(value)  
       end
     end
@@ -241,12 +245,18 @@ module Puppet
       components = property.to_s.split('::')
       
       if components.length > 1
-        components += [ 'default', components.pop ]
-        value = puppet_scope.lookupvar('::' + components.flatten.join('::'))
+        components          += [ 'default', components.pop ]
+        search_property_name = '::' + components.flatten.join('::')
+        
+        value = puppet_scope.lookupvar(search_property_name)
+        Config.debug_lookup(config, search_property_name, value, "Puppet default lookup")
       end
     end
     if Util::Data.undef?(value) && search_name
-      value = puppet_scope.lookupvar("::#{property}")
+      search_property_name = "::#{property}"
+      
+      value = puppet_scope.lookupvar(search_property_name)
+      Config.debug_lookup(config, search_property_name, value, "Puppet name lookup")
     end
     
     ::Puppet::Util::Log.level = log_level
