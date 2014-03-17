@@ -42,12 +42,35 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   def init_puppet(profiles)
     locations = build_locations
     
-    # Must be in this order!!
     Puppet.initialize_settings
-    Puppet::Util::Log.newdestination(:console)
+    Puppet::Util::Log.newdesttype id do
+      def handle(msg)
+        levels = {
+          :emerg   => { :name => 'emergency', :send => :error },
+          :alert   => { :name => 'alert', :send => :error },
+          :crit    => { :name => 'critical', :send => :error },
+          :err     => { :name => 'error', :send => :error },
+          :warning => { :name => 'warning', :send => :warn },
+          :notice  => { :name => 'notice', :send => :success },
+          :info    => { :name => 'info', :send => :info },
+          :debug   => { :name => 'debug', :send => :debug }
+        }
+
+        str   = msg.respond_to?(:multiline) ? msg.multiline : msg.to_s
+        str   = msg.source == "Puppet" ? str : "#{msg.source}: #{str}"
+        level = levels[msg.level]
+        
+        CORL.ui_group("puppetnode::#{name}(#{level[:name]})") do |ui|        
+          ui.send(level[:send], str)
+        end
+      end
+    end
+    Puppet::Util::Log.newdestination(id)
     
     # TODO: Figure out how to store these damn settings in a specialized
     # environment without phantom empty environment issues.
+    
+    Puppet[:default_file_terminus] = :file_server
       
     node = get_node    
     Puppet[:node_name_value] = id.to_s
@@ -217,13 +240,14 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         # Include defaults
         classes = include_location.call(:default, true)
       
-        # Import and include needed profiles
+        # Import needed profiles
         include_location.call(:profiles, false)
       
         profiles.each do |profile|
           classes[profile.to_s] = { :require => 'Anchor[gateway_exit]' }
         end
         
+        # Compile catalog
         node.classes = classes
         compiler.compile
         
