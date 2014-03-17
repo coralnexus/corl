@@ -32,6 +32,8 @@ module Lookup
   #---
   
   def hiera_config
+    Kernel.load File.join(File.dirname(__FILE__), '..', 'mod', 'hiera_backend.rb')
+    
     config_file = CORL.value(:hiera_config_file, File.join(Hiera::Util.config_dir, 'hiera.yaml'))
     config      = {}
 
