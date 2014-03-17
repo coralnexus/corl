@@ -24,7 +24,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
               :warning => { :name => 'warning', :send => :warn },
               :notice  => { :name => 'notice', :send => :success },
               :info    => { :name => 'info', :send => :info },
-              :debug   => { :name => 'debug', :send => :debug }
+              :debug   => { :name => 'debug', :send => :info }
             }
             str   = msg.respond_to?(:multiline) ? msg.multiline : msg.to_s
             str   = msg.source == "Puppet" ? str : "#{msg.source}: #{str}"
@@ -190,7 +190,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
       locations = build_locations
       success   = true
     
-      include_location = lambda do |type, add_search_path = false|
+      include_location = lambda do |type, parameters = {}, add_search_path = false|
         classes = {}
             
         locations[:package].each do |name, package_directory|
@@ -201,14 +201,14 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         
           if File.exists?(gateway)
             import(gateway)
-            classes[resource_name] = { :before => 'Anchor[gateway_init]' }                  
+            classes[resource_name] = parameters                 
           end
         
           directory = File.join(build_directory, package_directory, type.to_s)
           Dir.glob(File.join(directory, '*.pp')).each do |file|
             resource_name = concatenate([ name, type, File.basename(file).gsub('.pp', '') ])
             import(file)
-            classes[resource_name] = { :before => 'Anchor[gateway_init]' }
+            classes[resource_name] = parameters
           end        
         end
     
@@ -219,7 +219,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
      
         if File.exists?(gateway)
           import(gateway)
-          classes[resource_name] = { :before => 'Anchor[gateway_init]' }                 
+          classes[resource_name] = parameters                
         end
     
         if locations.has_key?(type)
@@ -227,7 +227,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           Dir.glob(File.join(directory, '*.pp')).each do |file|
             resource_name = concatenate([ plugin_name, type, File.basename(file).gsub('.pp', '') ])
             import(file)
-            classes[resource_name] = { :before => 'Anchor[gateway_init]' }
+            classes[resource_name] = parameters
           end
         end
         classes
@@ -240,10 +240,10 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           node = init_puppet(profiles)
         
           # Include defaults
-          classes = include_location.call(:default, true)
+          classes = include_location.call(:default, {}, true)
       
           # Import needed profiles
-          include_location.call(:profiles, false)
+          include_location.call(:profiles, {}, false)
       
           profiles.each do |profile|
             classes[profile.to_s] = { :require => 'Anchor[gateway_exit]' }
@@ -253,15 +253,17 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           node.classes = classes
           compiler.compile
         
-          # Start system configuration 
+          # Start system configuration
           catalog = compiler.catalog.to_ral
           catalog.finalize
           catalog.retrieval_duration = Time.now - start_time
+          
+          #dbg(catalog, 'catalog')
         
-          configurer = Puppet::Configurer.new
-          if ! configurer.run(:catalog => catalog, :pluginsync => false)
-            success = false
-          end
+          #configurer = Puppet::Configurer.new
+          #if ! configurer.run(:catalog => catalog, :pluginsync => false)
+          #  success = false
+          #end
         
         rescue Exception => error
           raise error
