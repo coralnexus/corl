@@ -12,10 +12,33 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     super do
       if CORL.log_level == :debug
         Puppet.debug = true
-      end   
-    end
+      end
+      unless reload
+        Puppet::Util::Log.newdesttype id do
+          def handle(msg)
+            levels = {
+              :emerg   => { :name => 'emergency', :send => :error },
+              :alert   => { :name => 'alert', :send => :error },
+              :crit    => { :name => 'critical', :send => :error },
+              :err     => { :name => 'error', :send => :error },
+              :warning => { :name => 'warning', :send => :warn },
+              :notice  => { :name => 'notice', :send => :success },
+              :info    => { :name => 'info', :send => :info },
+              :debug   => { :name => 'debug', :send => :debug }
+            }
+            str   = msg.respond_to?(:multiline) ? msg.multiline : msg.to_s
+            str   = msg.source == "Puppet" ? str : "#{msg.source}: #{str}"
+            level = levels[msg.level]
+        
+            CORL.ui_group("puppetnode::#{name}(#{level[:name]})") do |ui|        
+              ui.send(level[:send], str)
+            end
+          end
+        end
+      end
+    end  
   end
-  
+    
   #---
   
   def register(options = {})
@@ -43,28 +66,6 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     locations = build_locations
     
     Puppet.initialize_settings
-    Puppet::Util::Log.newdesttype id do
-      def handle(msg)
-        levels = {
-          :emerg   => { :name => 'emergency', :send => :error },
-          :alert   => { :name => 'alert', :send => :error },
-          :crit    => { :name => 'critical', :send => :error },
-          :err     => { :name => 'error', :send => :error },
-          :warning => { :name => 'warning', :send => :warn },
-          :notice  => { :name => 'notice', :send => :success },
-          :info    => { :name => 'info', :send => :info },
-          :debug   => { :name => 'debug', :send => :debug }
-        }
-
-        str   = msg.respond_to?(:multiline) ? msg.multiline : msg.to_s
-        str   = msg.source == "Puppet" ? str : "#{msg.source}: #{str}"
-        level = levels[msg.level]
-        
-        CORL.ui_group("puppetnode::#{name}(#{level[:name]})") do |ui|        
-          ui.send(level[:send], str)
-        end
-      end
-    end
     Puppet::Util::Log.newdestination(id)
     
     # TODO: Figure out how to store these damn settings in a specialized
@@ -260,7 +261,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         if ! configurer.run(:catalog => catalog, :pluginsync => false)
           success = false
         end
-      
+        
       rescue Exception => error
         raise error
         Puppet.log_exception(error)
