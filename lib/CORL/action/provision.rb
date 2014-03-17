@@ -36,8 +36,6 @@ class Provision < Plugin::CloudAction
               profiles      = provider_info[:profiles]
           
               collection.each do |name, provisioner|
-                build_profiles = provisioner.build_profiles
-            
                 if supported_profiles = provisioner.supported_profiles(profiles)
                   profile_success = provisioner.provision(supported_profiles)
                   success         = false unless profile_success
