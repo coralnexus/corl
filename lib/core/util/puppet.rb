@@ -95,7 +95,7 @@ module Puppet
     
     if config.get(:debug, false)
       CORL.ui.info("\n", { :prefix => false })
-      CORL.ui_group(Util::Console.yellow(info[:name])) do |ui|
+      CORL.ui_group(Util::Console.purple(info[:name])) do |ui|
         ui.info("-----------------------------------------------------")
       end
     end   
@@ -118,13 +118,15 @@ module Puppet
     
     case type[:type]
     when :type, :define
-      CORL.ui_group(display_name) do |ui|
-        ui.info("Adding #{type[:name]} #{title}")
+      CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
+        rendered_title = Util::Console.blue(title)
+        ui.info("Adding #{type[:name]} #{rendered_title}")
       end
       add_definition(type, title, properties, config)
     when :class
-      CORL.ui_group(display_name) do |ui|
-        ui.info("Adding #{title} class")
+      CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
+        rendered_title = Util::Console.blue(title)
+        ui.info("Adding class #{rendered_title}")
       end
       add_class(title, properties, config)
     end
@@ -211,7 +213,7 @@ module Puppet
       classes = Config.lookup(name, nil, config)
       if classes.is_a?(Array)
         classes.each do |klass|
-          CORL.ui_group(display_name) do |ui|
+          CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
             ui.info("Including class #{klass}")
           end
           class_data[klass] = properties
@@ -221,7 +223,7 @@ module Puppet
     
     if config.get(:debug, false)      
       CORL.ui.info("\n", { :prefix => false })
-      CORL.ui_group(Util::Console.yellow("#{display_name} include")) do |ui|
+      CORL.ui_group(Util::Console.cyan("#{display_name} include")) do |ui|
         ui.info("-----------------------------------------------------")
         
         dump = Util::Console.green(CORL.render_object(class_data))        
@@ -337,7 +339,7 @@ module Puppet
   
   def self.debug_resource(config, title, properties)
     if config.get(:debug, false)
-      CORL.ui_group(Util::Console.yellow(title.to_s)) do |ui|
+      CORL.ui_group(Util::Console.cyan(title.to_s)) do |ui|
         dump = Util::Console.green(CORL.render_object(properties))        
         
         ui.info(":\n#{dump}")

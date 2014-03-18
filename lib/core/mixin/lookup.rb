@@ -90,7 +90,7 @@ module Lookup
       
       if debug
         CORL.ui.info("\n", { :prefix => false })
-        CORL.ui_group(Util::Console.yellow(property)) do |ui|
+        CORL.ui_group(Util::Console.purple(property)) do |ui|
           ui.info("-----------------------------------------------------")
         end
       end
@@ -230,7 +230,7 @@ module Lookup
   
   def debug_lookup(config, property, value, label)
     if config.get(:debug, false)
-      CORL.ui_group(Util::Console.yellow(property.to_s)) do |ui|
+      CORL.ui_group(Util::Console.cyan(property.to_s)) do |ui|
         dump = Util::Console.green(CORL.render_object(value))
         
         if dump.match(/\n+/)
