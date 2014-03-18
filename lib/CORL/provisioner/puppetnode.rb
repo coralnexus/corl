@@ -186,7 +186,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #---
     
   def provision(profiles, options = {})
-    super do
+    super do |config|
       locations = build_locations
       success   = true
     
@@ -235,9 +235,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     
       @@puppet_lock.synchronize do
         begin
-          start_time = Time.now
-        
-          node = init_puppet(profiles)
+          start_time = Time.now        
+          node       = init_puppet(profiles)
         
           # Include defaults
           classes = include_location.call(:default, {}, true)
@@ -246,7 +245,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           include_location.call(:profiles, {}, false)
       
           profiles.each do |profile|
-            classes[profile.to_s] = { :require => 'Anchor[gateway_exit]' }
+            classes[profile.to_s] = { :require => 'Anchor[profile_start]' }
           end
         
           # Compile catalog
@@ -258,12 +257,12 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           catalog.finalize
           catalog.retrieval_duration = Time.now - start_time
           
-          #dbg(catalog, 'catalog')
-        
-          #configurer = Puppet::Configurer.new
-          #if ! configurer.run(:catalog => catalog, :pluginsync => false)
-          #  success = false
-          #end
+          unless config.get(:dry_run, false)
+            configurer = Puppet::Configurer.new
+            if ! configurer.run(:catalog => catalog, :pluginsync => false)
+              success = false
+            end
+          end
         
         rescue Exception => error
           raise error
