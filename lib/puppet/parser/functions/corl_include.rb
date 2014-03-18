@@ -23,17 +23,27 @@ If no value is found in the defined sources, it does not include any classes.
       raise(Puppet::ParseError, "corl_include(): Define at least the variable name " +
         "given (#{args.size} for 1)") if args.size < 1
 
-      var_name   = args[0]
-      parameters = ( args.size > 1 ? args[1] : {} )
-      options    = ( args.size > 2 ? args[2] : {} )
+      var_name    = args[0]
+      parameters  = ( args.size > 1 ? args[1] : {} )
+      options     = ( args.size > 2 ? args[2] : {} )
       
-      config = CORL::Config.init_flat(options, [ :include ], {
+      module_name = parent_module_name
+      contexts    = [ :include ]
+      
+      default_options = {
         :hiera_scope  => self,
         :puppet_scope => self,
         :search       => 'core::default',
         :force        => true,
         :merge        => true
-      })
+      }
+      
+      if module_name
+        config = CORL::Config.init(options, contexts, module_name, default_options)  
+      else
+        config = CORL::Config.init_flat(options, contexts, default_options)
+      end
+      
       CORL::Util::Puppet.include(var_name, parameters, config)
     end
   end
