@@ -128,7 +128,10 @@ module Lookup
       Config.set_property(first_property.to_s, value)
     end
     
-    return value, first_property if return_property
+    if return_property
+      return value, first_property
+    end
+    CORL.ui.info("\n", { :prefix => false }) if debug
     value
   end
     
@@ -155,6 +158,7 @@ module Lookup
     end
        
     Config.set_property(property.to_s, value)
+    CORL.ui.info("\n", { :prefix => false }) if config.get(:debug, false)
     value
   end
     
@@ -181,6 +185,7 @@ module Lookup
     end
     
     Config.set_property(property.to_s, value)
+    CORL.ui.info("\n", { :prefix => false }) if config.get(:debug, false)
     value
   end
   
