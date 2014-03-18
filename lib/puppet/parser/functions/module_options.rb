@@ -17,7 +17,9 @@ EOS
       options  = args[1]
       force    = ( args[2] ? true : false )
       
-      CORL::Config.set_options(CORL::Util::Data.prefix(self.source.module_name, contexts), options, force)
+      if module_name = parent_module_name
+        CORL::Config.set_options(CORL::Util::Data.prefix(module_name, contexts), options, force)
+      end
     end
   end
 end
