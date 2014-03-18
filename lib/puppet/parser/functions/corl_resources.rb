@@ -37,21 +37,27 @@ If no resources are found, it returns without creating anything.
       default_var     = tag_var.empty? ? nil : "#{tag_var}::#{type_name}_defaults"
       
       options         = ( args[4] ? args[4] : {} )
+      module_name     = parent_module_name
 
-      config = CORL::Config.init_flat(options, [ :resource, :corl_resources ], {
-        :provisioner     => :puppetnode,
-        :hiera_scope     => self,
-        :puppet_scope    => self,
-        :search          => 'core::default',
-        :force           => true,
-        :merge           => true,
-        :resource_prefix => tag,
-        :title_prefix    => tag
-      })      
+      contexts        = [ :resource ]
+      default_options = {
+        :provisioner  => :puppetnode,
+        :hiera_scope  => self,
+        :puppet_scope => self,
+        :search       => 'core::default',
+        :force        => true,
+        :merge        => true
+      }      
       unless tag.empty?
-        config[:tag]             = tag
-        config[:resource_prefix] = tag
-        config[:title_prefix]    = tag
+        default_options[:tag]             = tag
+        default_options[:resource_prefix] = tag
+        default_options[:title_prefix]    = tag
+      end
+      
+      if module_name
+        config = CORL::Config.init(options, contexts, module_name, default_options)  
+      else
+        config = CORL::Config.init_flat(options, contexts, default_options)
       end
       
       resources = CORL::Config.normalize(resources, override_var, config)
