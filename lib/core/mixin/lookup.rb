@@ -145,7 +145,7 @@ module Lookup
     elsif ! Util::Data.empty?(default)
       if config.get(:merge, false)
         value = Util::Data.merge([default, value], config)
-        debug_lookup(config, property, value, "Merged value with default")
+        debug_lookup(config, property, value, "Merged array value with default")
       end
     end
     
@@ -171,7 +171,7 @@ module Lookup
     elsif ! Util::Data.empty?(default)
       if config.get(:merge, false)
         value = Util::Data.merge([default, value], config)
-        debug_lookup(config, property, value, "Merged value with default")
+        debug_lookup(config, property, value, "Merged hash value with default")
       end
     end
     
