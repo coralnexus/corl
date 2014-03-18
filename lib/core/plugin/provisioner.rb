@@ -231,7 +231,8 @@ class Provisioner < CORL.plugin_class(:base)
   #---
   
   def provision(profiles, options = {})
-    success = yield if block_given?
+    config  = Config.ensure(options)
+    success = yield(config) if block_given?
     Config.save_properties(Config.get_options(:corl_log)) if success
     success
   end
