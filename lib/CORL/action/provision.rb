@@ -12,6 +12,7 @@ class Provision < Plugin::CloudAction
             :provision_failure
             
       register :dry_run, :bool, false
+      register :color, :bool, true
     end
   end
   
