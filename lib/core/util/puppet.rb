@@ -92,6 +92,13 @@ module Puppet
     return unless puppet_scope
     
     info = type_info(type_name, options)
+    
+    if config.get(:debug, false)
+      CORL.ui.info("\n", { :prefix => false })
+      CORL.ui_group(Util::Console.yellow(info[:name])) do |ui|
+        ui.info("-----------------------------------------------------")
+      end
+    end   
     ResourceGroup.new(info, defaults).add(resources, config)
   end
   
@@ -107,15 +114,17 @@ module Puppet
       type = type_info(type, config)
     end
     
+    display_name = puppet_scope.parent_module_name ? puppet_scope.parent_module_name : 'top'
+    
     case type[:type]
     when :type, :define
-      CORL.ui_group(puppet_scope.source.module_name) do |ui|
-        #ui.info("Adding #{type[:name]} #{title} definition")
+      CORL.ui_group(display_name) do |ui|
+        ui.info("Adding #{type[:name]} #{title}")
       end
       add_definition(type, title, properties, config)
     when :class
-      CORL.ui_group(puppet_scope.source.module_name) do |ui|
-        #ui.info("Adding #{title} class")
+      CORL.ui_group(display_name) do |ui|
+        ui.info("Adding #{title} class")
       end
       add_class(title, properties, config)
     end
@@ -131,6 +140,7 @@ module Puppet
       klass = puppet_scope.find_hostclass(title)
       return unless klass
       
+      debug_resource(config, title, properties)
       klass.ensure_in_catalog(puppet_scope, properties)
       puppet_scope.catalog.add_class(title)
     end  
@@ -139,7 +149,7 @@ module Puppet
   #---
   
   def self.add_definition(type, title, properties, options = {})
-    config       = Config.ensure(options)
+    config = Config.ensure(options)
     
     puppet_scope = config.get(:puppet_scope, nil)    
     return unless puppet_scope
@@ -152,13 +162,16 @@ module Puppet
     
     namevar       = namevar(type[:name], title).to_sym
     resource_name = properties.has_key?(namevar) ? properties[namevar] : title
+    properties    = { :name => resource_name }.merge(properties)
     
-    { :name => resource_name }.merge(properties).each do |key, value|
+    properties.each do |key, value|
       resource.set_parameter(key, value)
     end
     if type[:type] == :define
       type[:resource].instantiate_resource(puppet_scope, resource)
     end
+    
+    debug_resource(config, title, properties)
     puppet_scope.compiler.add_resource(puppet_scope, resource)
   end
     
@@ -248,13 +261,11 @@ module Puppet
         components          += [ 'default', components.pop ]
         search_property_name = components.flatten.join('::')
         
-        value = puppet_scope.lookupvar('::' + search_property_name)
+        value = puppet_scope.lookupvar("::#{search_property_name}")
         Config.debug_lookup(config, search_property_name, value, "Puppet default lookup")
       end
     end
     if Util::Data.undef?(value) && search_name
-      search_property_name = "::#{property}"
-      
       value = puppet_scope.lookupvar("::#{property}")
       Config.debug_lookup(config, property, value, "Puppet name lookup")
     end
@@ -302,6 +313,19 @@ module Puppet
       type.key_attributes.first.to_s
     else
       'name'
+    end
+  end
+  
+  #---
+  
+  def self.debug_resource(config, title, properties)
+    if config.get(:debug, false)
+      CORL.ui_group(Util::Console.yellow(title.to_s)) do |ui|
+        dump = Util::Console.green(CORL.render_object(properties))        
+        
+        ui.info(":\n#{dump}")
+        ui.info("\n", { :prefix => false })       
+      end
     end
   end      
 end
