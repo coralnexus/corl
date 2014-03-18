@@ -10,6 +10,8 @@ class Provision < Plugin::CloudAction
     super do
       codes :network_failure,
             :provision_failure
+            
+      register :dry_run, :bool, false
     end
   end
   
@@ -37,7 +39,7 @@ class Provision < Plugin::CloudAction
           
               collection.each do |name, provisioner|
                 if supported_profiles = provisioner.supported_profiles(profiles)
-                  profile_success = provisioner.provision(supported_profiles)
+                  profile_success = provisioner.provision(supported_profiles, settings)
                   success         = false unless profile_success
                 end
               end
