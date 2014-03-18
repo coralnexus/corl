@@ -37,9 +37,10 @@ If no resources are found, it returns without creating anything.
       default_var     = tag_var.empty? ? nil : "#{tag_var}::#{type_name}_defaults"
       
       options         = ( args[4] ? args[4] : {} )
+      
       module_name     = parent_module_name
-
       contexts        = [ :resource ]
+      
       default_options = {
         :provisioner  => :puppetnode,
         :hiera_scope  => self,
