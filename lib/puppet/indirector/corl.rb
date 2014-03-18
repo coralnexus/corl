@@ -13,15 +13,27 @@ class Puppet::Indirector::Corl < Puppet::Indirector::Terminus
   #---
 
   def find(request)
-    config = CORL::Config.init_flat({}, [ :param, :data_binding ], {
+    puppet_scope = request.options[:variables]    
+    module_name  = nil
+    module_name  = puppet_scope.source.module_name if puppet_scope.source
+    contexts     = [ :param, :data_binding ]
+    
+    default_options = {
       :provisioner  => :puppetnode,
-      :hiera_scope  => request.options[:variables],
-      :puppet_scope => request.options[:variables],
+      :hiera_scope  => puppet_scope,
+      :puppet_scope => puppet_scope,
       :search       => 'core::default',
       :search_name  => false,
       :force        => true,
       :merge        => true
-    })    
+    }
+    
+    if module_name
+      config = CORL::Config.init({}, contexts, module_name, default_options)  
+    else
+      config = CORL::Config.init_flat({}, contexts, default_options)
+    end
+          
     value = CORL::Config.lookup(request.key, nil, config)
   end
 end
