@@ -28,19 +28,22 @@ If no value is found in the defined sources, it returns an empty string ('')
       default  = ( args.size > 1 ? args[1] : '' )
       options  = ( args.size > 2 ? args[2] : {} )
     
-      module_name     = self.source.module_name
-      module_var_name = "#{module_name}::#{var_name}"
+      module_name = parent_module_name
       
-      config = CORL::Config.init(options, [ :param, :module_param ], module_name, {
-        :provisioner  => :puppetnode,
-        :hiera_scope  => self,
-        :puppet_scope => self,
-        :search       => 'core::default',
-        :search_name  => false,
-        :force        => true,
-        :merge        => true
-      })
-      value = CORL::Config.lookup(module_var_name, default, config)
+      if module_name
+        module_var_name = "#{module_name}::#{var_name}"
+      
+        config = CORL::Config.init(options, [ :param, :module_param ], module_name, {
+          :provisioner  => :puppetnode,
+          :hiera_scope  => self,
+          :puppet_scope => self,
+          :search       => 'core::default',
+          :search_name  => false,
+          :force        => true,
+          :merge        => true
+        })
+        value = CORL::Config.lookup(module_var_name, default, config)
+      end
     end
     return value
   end
