@@ -88,6 +88,13 @@ module Lookup
       property       = property.to_sym
       first_property = property unless first_property
       
+      if debug
+        CORL.ui.info("\n", { :prefix => false })
+        CORL.ui_group(Util::Console.yellow(property)) do |ui|
+          ui.info("-----------------------------------------------------")
+        end
+      end
+      
       # Try to load facts first (these can not be overridden)
       value = fact(property)
       debug_lookup(config, property, value, "Fact lookup")
@@ -218,9 +225,14 @@ module Lookup
   
   def debug_lookup(config, property, value, label)
     if config.get(:debug, false)
-      CORL.ui_group(property.to_s) do |ui|
-        dump = CORL.render_object(value)
-        ui.info("#{label}: #{dump}")
+      CORL.ui_group(Util::Console.yellow(property.to_s)) do |ui|
+        dump = Util::Console.green(CORL.render_object(value))
+        
+        if dump.match(/\n+/)
+          ui.info("#{label}:\n#{dump}")  
+        else
+          ui.info("#{label}: #{dump}")  
+        end        
       end
     end
   end
