@@ -113,6 +113,7 @@ module Lookup
           if provisioner && Util::Data.undef?(value)
             # Search the provisioner scope (only admins can provision a machine)
             value = CORL.provisioner({ :name => :lookup }, provisioner).lookup(property, default, config)
+            value = Hiera::Backend.parse_answer(value, hiera_scope) if hiera_scope
             debug_lookup(config, property, value, "Provisioner lookup")
           end
         end
