@@ -8,6 +8,8 @@ en:
         options:
           parallel: |-
             Enable parallelism of node action execution (default %{default_value})
+          net_remote: |-
+            Optional network project remote name to use in updating and storing changes remotely (default %{default_value})
           net_provider: |-
             CORL network provider to use for managing cloud nodes (default %{default_value})
           node_provider: |-
@@ -152,7 +154,9 @@ en:
           Now seeding CORL node
       provision:
         options:
-          provider: |-
-            Provisioner provider to use to provision the node (default %{default_value})
+          dry_run: |-
+            Whether or not to build the provisioner catalog without configuring the system (default %{default_value})
+          color: |-
+            Whether or not to output log messages in color (default %{default_value})
         start: |-
           Starting provision run
