@@ -1,10 +1,10 @@
-= CORL (Coral Orchestration and Research Library)
+=== CORL (Coral Orchestration and Research Library)
 
 Coming soon!
 
 Note:  This library is still very early in development!
 
-== Contributing to CORL
+==== Contributing to CORL
  
 * Check out the latest {major}.{minor} branch to make sure the feature hasn't 
   been implemented or the bug hasn't been fixed yet.
@@ -19,7 +19,7 @@ Note:  This library is still very early in development!
   to have your own version, or is otherwise necessary, that is fine, but 
   please isolate to its own commit so I can cherry-pick around it.
 
-== Copyright
+==== Copyright
 
 Licensed under GPLv3.  See LICENSE.txt for further details.
 
