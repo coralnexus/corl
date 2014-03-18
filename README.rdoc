@@ -1,4 +1,4 @@
-= CORL (Cluster Orchestration and Research Library)
+= CORL (Coral Orchestration and Research Library)
 
 Coming soon!
 
