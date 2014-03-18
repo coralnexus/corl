@@ -234,7 +234,9 @@ class Puppetnode < CORL.plugin_class(:provisioner)
       end
     
       @@puppet_lock.synchronize do
-        begin
+        begin          
+          ui.info("Starting catalog generation")
+          
           start_time = Time.now        
           node       = init_puppet(profiles)
         
@@ -258,6 +260,9 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           catalog.retrieval_duration = Time.now - start_time
           
           unless config.get(:dry_run, false)
+            ui.info("\n", { :prefix => false })
+            ui.info("Starting configuration run")
+                        
             configurer = Puppet::Configurer.new
             if ! configurer.run(:catalog => catalog, :pluginsync => false)
               success = false
