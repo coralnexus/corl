@@ -114,7 +114,7 @@ module Puppet
       type = type_info(type, config)
     end
     
-    display_name = puppet_scope.parent_module_name ? puppet_scope.parent_module_name : 'top'
+    display_name = puppet_scope.parent_module_name ? puppet_scope.parent_module_name : 'toplevel'
     
     case type[:type]
     when :type, :define
@@ -199,6 +199,8 @@ module Puppet
     puppet_scope = config.get(:puppet_scope, nil)
     return false unless puppet_scope
     
+    display_name = puppet_scope.parent_module_name ? puppet_scope.parent_module_name : 'toplevel'
+    
     if resource_name.is_a?(Array)
       resource_name = resource_name.flatten
     else
@@ -209,8 +211,23 @@ module Puppet
       classes = Config.lookup(name, nil, config)
       if classes.is_a?(Array)
         classes.each do |klass|
+          CORL.ui_group(display_name) do |ui|
+            ui.info("Including class #{klass}")
+          end
           class_data[klass] = properties
         end
+      end
+    end
+    
+    if config.get(:debug, false)      
+      CORL.ui.info("\n", { :prefix => false })
+      CORL.ui_group(Util::Console.yellow("#{display_name} include")) do |ui|
+        ui.info("-----------------------------------------------------")
+        
+        dump = Util::Console.green(CORL.render_object(class_data))        
+        
+        ui.info(":\n#{dump}")
+        ui.info("\n", { :prefix => false }) 
       end
     end
     
