@@ -226,7 +226,7 @@ module Puppet
       CORL.ui_group(Util::Console.cyan("#{display_name} include")) do |ui|
         ui.info("-----------------------------------------------------")
         
-        dump = Util::Console.green(CORL.render_object(class_data))        
+        dump = Util::Console.green(Util::Data.to_json(class_data, true))        
         
         ui.info(":\n#{dump}")
         ui.info("\n", { :prefix => false }) 
@@ -340,7 +340,7 @@ module Puppet
   def self.debug_resource(config, title, properties)
     if config.get(:debug, false)
       CORL.ui_group(Util::Console.cyan(title.to_s)) do |ui|
-        dump = Util::Console.green(CORL.render_object(properties))        
+        dump = Util::Console.green(Util::Data.to_json(properties, true))        
         
         ui.info(":\n#{dump}")
         ui.info("\n", { :prefix => false })       
