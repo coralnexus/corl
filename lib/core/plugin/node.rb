@@ -221,7 +221,7 @@ class Node < CORL.plugin_class(:base)
   
   def private_key
     config_key = myself[:private_key]
-    return File.expand_path(config_key) if config_key
+    return File.expand_path(config_key, network.directory) if config_key
     nil
   end
   
@@ -233,7 +233,7 @@ class Node < CORL.plugin_class(:base)
   
   def public_key
     config_key = myself[:public_key]
-    return File.expand_path(config_key) if config_key
+    return File.expand_path(config_key, network.directory) if config_key
   end
   
   #---
