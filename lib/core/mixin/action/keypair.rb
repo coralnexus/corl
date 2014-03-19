@@ -72,7 +72,7 @@ module Keypair
       :bits    => settings[:key_bits],
       :comment => settings[:key_comment]
     })
-    @keypair = Util::SSH.generate(options)
+    @keypair = Util::SSH.generate(config)
     settings.import({ :keypair => @keypair })
   end
   

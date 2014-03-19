@@ -35,12 +35,13 @@ class Keypair < Plugin::CloudAction
         
           if settings[:json]
             private_key = Util::Console.blue(Util::Data.to_json(keys.encrypted_key, true))
-            ssh_key     = Util::Console.green(Util::Data.to_json(keys.ssh_key, true))  
+            ssh_key     = keys.ssh_key.gsub(/^ssh\-[a-z]+\s+/, '')           
+            ssh_key     = Util::Console.green(Util::Data.to_json(ssh_key, true))
           else
             private_key = Util::Console.blue(keys.encrypted_key)
             ssh_key     = Util::Console.green(keys.ssh_key)       
           end
-        
+          
           ui.info("SSH private key:\n#{private_key}")
           ui.info("SSH public key:\n#{ssh_key}")
           ui.info("\n", { :prefix => false }) 
