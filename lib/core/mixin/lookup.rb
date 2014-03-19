@@ -113,7 +113,6 @@ module Lookup
           if provisioner && Util::Data.undef?(value)
             # Search the provisioner scope (only admins can provision a machine)
             value = CORL.provisioner({ :name => :lookup }, provisioner).lookup(property, default, config)
-            value = Hiera::Backend.parse_answer(value, hiera_scope) if hiera_scope
             debug_lookup(config, property, value, "Provisioner lookup")
           end
         end
@@ -123,11 +122,13 @@ module Lookup
       value = default
       debug_lookup(config, first_property, value, "Default value")
     end
-    value = Util::Data.value(value)
+    value = Util::Data.value(value, config.get(:undefined_value, :undefined))
     
     if ! Config.get_property(first_property) || ! Util::Data.undef?(value)
       Config.set_property(first_property.to_s, value)
     end
+    
+    debug_lookup(config, first_property, value, 'Internalized value')
     
     if return_property
       return value, first_property
@@ -155,8 +156,10 @@ module Lookup
     
     unless value.is_a?(Array)
       value = ( Util::Data.empty?(value) ? [] : [ value ] )
-      debug_lookup(config, property, value, "Final array value")
     end
+    
+    value = Util::Data.value(value, config.get(:undefined_value, :undefined))
+    debug_lookup(config, property, value, "Final array value")
        
     Config.set_property(property.to_s, value)
     CORL.ui.info("\n", { :prefix => false }) if config.get(:debug, false)
@@ -182,8 +185,10 @@ module Lookup
     
     unless value.is_a?(Hash)
       value = ( Util::Data.empty?(value) ? {} : { :value => value } )
-      debug_lookup(config, property, value, "Final hash value")
     end
+    
+    value = Util::Data.value(value, config.get(:undefined_value, :undefined))
+    debug_lookup(config, property, value, "Final hash value")
     
     Config.set_property(property.to_s, value)
     CORL.ui.info("\n", { :prefix => false }) if config.get(:debug, false)
@@ -232,7 +237,7 @@ module Lookup
   def debug_lookup(config, property, value, label)
     if config.get(:debug, false)
       CORL.ui_group(Util::Console.cyan(property.to_s)) do |ui|
-        dump = Util::Console.green(CORL.render_object(value))
+        dump = Util::Console.green(Util::Data.to_json(value, true))
         
         if dump.match(/\n+/)
           ui.info("#{label}:\n#{dump}")  
