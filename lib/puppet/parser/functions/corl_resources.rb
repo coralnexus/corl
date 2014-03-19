@@ -39,15 +39,16 @@ If no resources are found, it returns without creating anything.
       options         = ( args[4] ? args[4] : {} )
       
       module_name     = parent_module_name
-      contexts        = [ :resource ]
+      contexts        = [ :resource, type_name ]
       
       default_options = {
-        :provisioner  => :puppetnode,
-        :hiera_scope  => self,
-        :puppet_scope => self,
-        :search       => 'core::default',
-        :force        => true,
-        :merge        => true
+        :provisioner     => :puppetnode,
+        :hiera_scope     => self,
+        :puppet_scope    => self,
+        :search          => 'core::default',
+        :force           => true,
+        :merge           => true,
+        :undefined_value => :undef
       }      
       unless tag.empty?
         default_options[:tag]             = tag

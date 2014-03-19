@@ -16,16 +16,17 @@ class Puppet::Indirector::Corl < Puppet::Indirector::Terminus
     puppet_scope = request.options[:variables]    
     module_name  = nil
     module_name  = puppet_scope.source.module_name if puppet_scope.source
-    contexts     = [ :param, :data_binding ]
+    contexts     = [ :param, :data_binding, request.key ]
     
     default_options = {
-      :provisioner  => :puppetnode,
-      :hiera_scope  => puppet_scope,
-      :puppet_scope => puppet_scope,
-      :search       => 'core::default',
-      :search_name  => false,
-      :force        => true,
-      :merge        => true
+      :provisioner     => :puppetnode,
+      :hiera_scope     => puppet_scope,
+      :puppet_scope    => puppet_scope,
+      :search          => 'core::default',
+      :search_name     => false,
+      :force           => true,
+      :merge           => true,
+      :undefined_value => :undef
     }
     
     if module_name

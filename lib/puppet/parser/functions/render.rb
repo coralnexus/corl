@@ -17,16 +17,41 @@ This function returns the string-ified form of a given value.
       provider = args[0]  
       data     = ( args.size > 1 ? args[1] : {} )
       options  = ( args.size > 2 ? args[2] : {} )
+      
+      module_name = parent_module_name
+      contexts    = [ :data, :render, "template_#{provider}" ]
     
-      config = CORL::Config.init_flat(options, [ :data, :render ], {
-        :provisioner  => :puppetnode,
-        :hiera_scope  => self,
-        :puppet_scope => self,
-        :search       => 'core::default',
-        :force        => true,
-        :merge        => true
-      })
+      default_options = {
+        :provisioner     => :puppetnode,
+        :hiera_scope     => self,
+        :puppet_scope    => self,
+        :search          => 'core::default',
+        :force           => true,
+        :merge           => true,
+        :undefined_value => :undef
+      }
+      
+      if module_name
+        config = CORL::Config.init(options, contexts, module_name, default_options)  
+      else
+        config = CORL::Config.init_flat(options, contexts, default_options)
+      end
+      
       value = CORL.template(config, provider).render(data)
+      
+      if config.get(:debug, false)      
+        CORL.ui.info("\n", { :prefix => false })
+        CORL.ui_group(CORL::Util::Console.cyan("#{provider} template")) do |ui|
+          ui.info("-----------------------------------------------------")
+        
+          source_dump  = CORL::Util::Console.blue(CORL::Util::Data.to_json(data, true))
+          value_render = CORL::Util::Console.green(value)       
+        
+          ui.info("Data:\n#{source_dump}")
+          ui.info("Rendered:\n#{value_render}")
+          ui.info("\n", { :prefix => false }) 
+        end
+      end
     end
     return value
   end

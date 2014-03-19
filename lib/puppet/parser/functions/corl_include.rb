@@ -28,14 +28,15 @@ If no value is found in the defined sources, it does not include any classes.
       options     = ( args.size > 2 ? args[2] : {} )
       
       module_name = parent_module_name
-      contexts    = [ :include ]
+      contexts    = [ :include, var_name ]
       
       default_options = {
-        :hiera_scope  => self,
-        :puppet_scope => self,
-        :search       => 'core::default',
-        :force        => true,
-        :merge        => true
+        :hiera_scope     => self,
+        :puppet_scope    => self,
+        :search          => 'core::default',
+        :force           => true,
+        :merge           => true,
+        :undefined_value => :undef
       }
       
       if module_name

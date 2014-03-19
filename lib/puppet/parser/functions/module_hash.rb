@@ -23,14 +23,15 @@ If no value is found in the defined sources, it returns an empty hash ({})
       if module_name
         module_var_name = "#{module_name}::#{var_name}"
       
-        config = CORL::Config.init(options, [ :param, :module_hash ], module_name, {
-          :provisioner  => :puppetnode,
-          :hiera_scope  => self,
-          :puppet_scope => self,
-          :search       => 'core::default',
-          :search_name  => false,
-          :force        => true,
-          :merge        => true
+        config = CORL::Config.init(options, [ :param, :module_hash, var_name ], module_name, {
+          :provisioner     => :puppetnode,
+          :hiera_scope     => self,
+          :puppet_scope    => self,
+          :search          => 'core::default',
+          :search_name     => false,
+          :force           => true,
+          :merge           => true,
+          :undefined_value => :undef
         })
         value = CORL::Config.lookup_hash(module_var_name, default, config)
       end

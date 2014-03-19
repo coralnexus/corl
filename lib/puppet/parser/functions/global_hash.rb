@@ -20,13 +20,14 @@ If no value is found in the defined sources, it returns an empty hash ({})
       default  = ( args.size > 1 ? args[1] : {} )  
       options  = ( args.size > 2 ? args[2] : {} )
     
-      config = CORL::Config.init_flat(options, [ :param, :global_hash ], {
-        :provisioner  => :puppetnode,
-        :hiera_scope  => self,
-        :puppet_scope => self,
-        :search       => 'core::default',
-        :force        => true,
-        :merge        => true
+      config = CORL::Config.init_flat(options, [ :param, :global_hash, var_name ], {
+        :provisioner     => :puppetnode,
+        :hiera_scope     => self,
+        :puppet_scope    => self,
+        :search          => 'core::default',
+        :force           => true,
+        :merge           => true,
+        :undefined_value => :undef
       })
       value = CORL::Config.lookup_hash(var_name, default, config)
     end
