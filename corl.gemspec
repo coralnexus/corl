@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-03-16"
+  s.date = "2014-03-19"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -50,6 +50,7 @@ Gem::Specification.new do |s|
     "lib/CORL/action/exec.rb",
     "lib/CORL/action/image.rb",
     "lib/CORL/action/images.rb",
+    "lib/CORL/action/keypair.rb",
     "lib/CORL/action/lookup.rb",
     "lib/CORL/action/machines.rb",
     "lib/CORL/action/provision.rb",
