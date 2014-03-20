@@ -116,23 +116,24 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   # Provisioner interface operations
   
   def build(options = {})
-    super do |locations, package_info, init_location|
-      init_location.call(:modules, nil)
+    super do |locations, package_info|
+      success = true
       
-      init_location.call(:profiles, :pp)
-      init_location.call(:default, :pp)
-        
       # Build modules
-      
       locations[:module] = {}
       
       init_profile = lambda do |package_name, profile_name, profile_info|
-        package_id     = id(package_name)
-        base_directory = File.join(locations[:modules], package_id.to_s, profile_name.to_s)
+        package_id      = id(package_name)
+        base_directory  = File.join(locations[:build], 'modules', package_id.to_s, profile_name.to_s)
+        profile_success = true
+        
+        ui.info("Building CORL profile #{blue(profile_name)} modules into #{green(base_directory)}")
         
         if profile_info.has_key?(:modules)
           profile_info[:modules].each do |module_name, module_reference|
             module_directory = File.join(base_directory, module_name.to_s)
+            
+            ui.info("Building Puppet module #{blue(module_name)} at #{purple(module_reference)} into #{green(module_directory)}")
                 
             module_project = CORL.project(extended_config(:puppet_module, {
               :directory => File.join(build_directory, module_directory),
@@ -140,22 +141,34 @@ class Puppetnode < CORL.plugin_class(:provisioner)
               :create    => true,
               :pull      => true
             }))
-            raise unless module_project                
+            unless module_project
+              ui.warn("Puppet module #{cyan(module_name)} failed to initialize")
+              profile_success = false
+              break
+            end             
           end
-          locations[:module][profile_id(package_name, profile_name)] = base_directory
+          locations[:module][profile_id(package_name, profile_name)] = base_directory if profile_success
+          profile_success
         end
       end     
       
       hash(package_info.get([ :provisioners, plugin_provider ])).each do |package_name, info|
         if info.has_key?(:profiles)
           info[:profiles].each do |profile_name, profile_info|
-            init_profile.call(package_name, profile_name, profile_info)
+            unless init_profile.call(package_name, profile_name, profile_info)
+              success = false
+              break
+            end
           end
         end
       end
       profiles.each do |profile_name, profile_info|
-        init_profile.call(plugin_name, profile_name, profile_info)
-      end
+        unless init_profile.call(plugin_name, profile_name, profile_info)
+          success = false
+          break  
+        end
+      end      
+      success
     end     
   end
   
