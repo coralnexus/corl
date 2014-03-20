@@ -27,10 +27,10 @@ class Puppetnode < CORL.plugin_class(:provisioner)
               :debug   => { :name => 'debug', :send => :info }
             }
             str   = msg.respond_to?(:multiline) ? msg.multiline : msg.to_s
-            str   = msg.source == "Puppet" ? str : "#{msg.source}: #{str}"
+            str   = msg.source == "Puppet" ? str : "#{purple(msg.source)}: #{str}"
             level = levels[msg.level]
         
-            CORL.ui_group("puppetnode::#{name}(#{level[:name]})") do |ui|        
+            CORL.ui_group("puppetnode::#{name}(#{yellow(level[:name])})", :cyan) do |ui|        
               ui.send(level[:send], str)
             end
           end
@@ -207,37 +207,38 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         classes = {}
             
         locations[:package].each do |name, package_directory|
-          gateway       = File.join(build_directory, package_directory, "#{type}.pp")
+          type_gateway  = File.join(build_directory, package_directory, "#{type}.pp")
           resource_name = concatenate([ name, type ])
         
           add_search_path(type, resource_name) if add_search_path
         
-          if File.exists?(gateway)
-            import(gateway)
+          if File.exists?(type_gateway)
+            import(type_gateway)
             classes[resource_name] = parameters                 
           end
         
-          directory = File.join(build_directory, package_directory, type.to_s)
-          Dir.glob(File.join(directory, '*.pp')).each do |file|
+          type_directory = File.join(build_directory, package_directory, type.to_s)
+          Dir.glob(File.join(type_directory, '*.pp')).each do |file|
             resource_name = concatenate([ name, type, File.basename(file).gsub('.pp', '') ])
             import(file)
             classes[resource_name] = parameters
           end        
         end
     
-        gateway       = File.join(build_directory, locations[:build], "#{type}.pp")
+        type_gateway  = File.join(directory, "#{type}.pp")
         resource_name = concatenate([ plugin_name, type ])
       
         add_search_path(type, resource_name) if add_search_path
      
-        if File.exists?(gateway)
-          import(gateway)
+        if File.exists?(type_gateway)
+          import(type_gateway)
           classes[resource_name] = parameters                
         end
     
-        if locations.has_key?(type)
-          directory = File.join(build_directory, locations[type])
-          Dir.glob(File.join(directory, '*.pp')).each do |file|
+        type_directory = File.join(directory, type.to_s)
+        
+        if File.directory?(type_directory)
+          Dir.glob(File.join(type_directory, '*.pp')).each do |file|
             resource_name = concatenate([ plugin_name, type, File.basename(file).gsub('.pp', '') ])
             import(file)
             classes[resource_name] = parameters
@@ -262,7 +263,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           profiles.each do |profile|
             classes[profile.to_s] = { :require => 'Anchor[profile_start]' }
           end
-        
+          
           # Compile catalog
           node.classes = classes
           compiler.compile
