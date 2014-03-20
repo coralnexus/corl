@@ -34,7 +34,7 @@ class Physical < CORL.plugin_class(:machine)
   #---
   
   def hostname
-    fact(:hostname)
+    fact(:fqdn)
   end
   
   #---
