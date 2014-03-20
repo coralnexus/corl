@@ -222,16 +222,10 @@ class Provisioner < CORL.plugin_class(:base)
   
   def provision(profiles, options = {})
     config  = Config.ensure(options)
-    
-    use_colors               = Util::Console.use_colors
-    Util::Console.use_colors = config.get(:color, true)
-    
     success = yield(config) if block_given?
+    
     Config.save_properties(Config.get_options(:corl_log)) if success
     success
-    
-  ensure
-    Util::Console.use_colors = use_colors  
   end
        
   #-----------------------------------------------------------------------------

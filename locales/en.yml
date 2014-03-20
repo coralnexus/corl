@@ -159,7 +159,5 @@ en:
         options:
           dry_run: |-
             Whether or not to build the provisioner catalog without configuring the system (default %{default_value})
-          color: |-
-            Whether or not to output log messages in color (default %{default_value})
         start: |-
           Starting provision run
