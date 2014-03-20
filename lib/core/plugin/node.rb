@@ -11,13 +11,15 @@ class Node < CORL.plugin_class(:base)
   def normalize(reload)
     super
     
+    @class_color = :purple
+    
     export.each do |name, value|
       myself[name] = value
     end
     
     yield if block_given? # Chance to create a machine to feed hostname
     
-    ui.resource = hostname
+    ui.resource = Util::Console.colorize(hostname, @class_color)
     logger      = hostname
     
     myself[:settings] = [ "all", plugin_provider.to_s, plugin_name.to_s ] | setting(:settings, [], :array)
@@ -162,7 +164,7 @@ class Node < CORL.plugin_class(:base)
     hostname = myself[:hostname]
     
     if hostname.to_s != ui.resource.to_s 
-      ui.resource = hostname
+      ui.resource = Util::Console.colorize(hostname, @class_color)
       logger      = hostname
     end
     hostname
@@ -367,24 +369,33 @@ class Node < CORL.plugin_class(:base)
   # Machine operations
   
   def build(options = {})
-    config = Config.ensure(options)
-    info   = provisioner_info
+    config  = Config.ensure(options)
+    success = true
     
     provisioners.each do |provider, collection|
-      provider_info = info[provider]
-      profiles      = provider_info[:profiles]
+      ui.info("Building #{provider} provisioner collection")
           
       collection.each do |name, provisioner|
-        provisioner.build(options)
+        ui.info("Building #{name} provisioner")
+        
+        unless provisioner.build(options)
+          success = false
+          break
+        end
       end
     end
     
-    myself[:build] = Time.now.to_s
+    if success
+      ui.success("Saving successful build")
+      
+      myself[:build] = Time.now.to_s
     
-    save(extended_config(:build, {
-      :message => config.get(:message, "Built #{plugin_provider} node: #{plugin_name}"),
-      :remote  => config.get(:remote, :edit)  
-    }))
+      success = save(extended_config(:build, {
+        :message => config.get(:message, "Built #{plugin_provider} node: #{plugin_name}"),
+        :remote  => config.get(:remote, :edit)  
+      }))
+    end
+    success
   end
   
   #---
