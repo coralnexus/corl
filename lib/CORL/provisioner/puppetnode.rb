@@ -27,10 +27,10 @@ class Puppetnode < CORL.plugin_class(:provisioner)
               :debug   => { :name => 'debug', :send => :info }
             }
             str   = msg.respond_to?(:multiline) ? msg.multiline : msg.to_s
-            str   = msg.source == "Puppet" ? str : "#{purple(msg.source)}: #{str}"
+            str   = msg.source == "Puppet" ? str : "#{CORL.purple(msg.source)}: #{str}"
             level = levels[msg.level]
         
-            CORL.ui_group("puppetnode::#{name}(#{yellow(level[:name])})", :cyan) do |ui|        
+            CORL.ui_group("puppetnode::#{name}(#{CORL.yellow(level[:name])})", :cyan) do |ui|        
               ui.send(level[:send], str)
             end
           end
