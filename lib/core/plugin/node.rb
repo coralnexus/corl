@@ -635,9 +635,9 @@ class Node < CORL.plugin_class(:base)
           results = active_machine.exec(commands, config.export) do |type, command, data|
             unless local?
               if type == :error
-                alert(data.gsub(/^\[[^\]]+\]\s*/, ''))
+                alert(data.gsub(/^(\e\[\d\d?m)?\[[^\]]+\]\s*/, '\\1'))
               else
-                render(data.gsub(/^\[[^\]]+\]\s*/, ''))
+                render(data.gsub(/^(\e\[\d\d?m)?\[[^\]]+\]\s*/, '\\1'))
               end
             end
             yield(:progress, { :type => type, :command => command, :data => data }) if block_given?   
