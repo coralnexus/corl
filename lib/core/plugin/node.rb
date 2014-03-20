@@ -4,6 +4,7 @@ module Plugin
 class Node < CORL.plugin_class(:base)
   
   include Celluloid
+  task_class TaskThread
  
   #-----------------------------------------------------------------------------
   # Node plugin interface
