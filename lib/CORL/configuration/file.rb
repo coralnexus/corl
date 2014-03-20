@@ -72,10 +72,10 @@ class File < CORL.plugin_class(:configuration)
         
           if parser && raw && ! raw.empty?
             logger.debug("Source configuration file contents: #{raw}")            
-            file_properties = parser.parse(raw)
+            parse_properties = parser.parse(raw)
             
-            generate_routes.call(config_name, file_properties)
-            properties.import(file_properties)
+            generate_routes.call(config_name, parse_properties)
+            properties.import(parse_properties)
           end         
         end
       end
@@ -121,8 +121,9 @@ class File < CORL.plugin_class(:configuration)
         else
           if local_router.is_a?(String)
             # Router is a config_name string
-            file_data.set([ local_router, keys ].flatten, value)          
-          elsif router.is_a?(Hash)
+            file_data.set([ local_router, keys ].flatten, value)
+                     
+          elsif local_router.is_a?(Hash)
             # Router is a hash with sub options we have to pick from
             config_name = select_largest(local_router)
             file_data.set([ config_name, keys ].flatten, value)  
@@ -182,7 +183,7 @@ class File < CORL.plugin_class(:configuration)
       end
       if success && ! config_files.empty?
         commit_files = [ config_files, method_config.get_array(:files) ].flatten
-          
+        
         logger.debug("Source configuration rendering: #{rendering}")        
         success = update_project(commit_files, method_config)
       end
