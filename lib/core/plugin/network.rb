@@ -4,6 +4,7 @@ module Plugin
 class Network < CORL.plugin_class(:base)
   
   init_plugin_collection 
+  task_class TaskThread
   
   #-----------------------------------------------------------------------------
   # Cloud plugin interface
