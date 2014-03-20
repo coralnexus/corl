@@ -133,7 +133,7 @@ class Network < CORL.plugin_class(:base)
     local_node = node_by_ip(ip_address, require_new)
         
     if local_node.nil?
-      name       = Util::Data.ensure_value(lookup(:hostname), ip_address)    
+      name       = Util::Data.ensure_value(lookup(:fqdn), ip_address)    
       local_node = CORL.node(name, extended_config(:local_node).import({ :meta => { :parent => myself }}), :local) 
     else
       local_node.network = myself
