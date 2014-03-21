@@ -76,7 +76,7 @@ class ResourceGroup < Core
   
   def add(resources, options = {})
     config    = Config.ensure(options)    
-    resources = normalize(info[:name], resources, config)
+    resources = normalize(info[:name], resources.dup, config)
      
     unless Data.empty?(resources)
       collection = self.resources
