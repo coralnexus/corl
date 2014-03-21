@@ -180,7 +180,6 @@ class Provisioner < CORL.plugin_class(:base)
     
     local_build_directory = File.join(build_directory, locations[:build])   
     
-    FileUtils.rm_rf(local_build_directory)
     FileUtils.mkdir_p(local_build_directory)
     
     # Build packages
