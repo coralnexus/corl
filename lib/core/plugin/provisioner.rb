@@ -147,11 +147,13 @@ class Provisioner < CORL.plugin_class(:base)
       package_success   = true
       
       ui.info("Building package #{blue(name)} at #{purple(reference)} into #{green(package_directory)}")
+      
+      full_package_directory = File.join(build_directory, package_directory)
         
       project = CORL.configuration(extended_config(:package, {
-        :directory => File.join(build_directory, package_directory),
+        :directory => full_package_directory,
         :url       => reference,
-        :create    => true
+        :create    => File.directory?(full_package_directory) ? false : true
       }))
       unless project
         ui.warn("Project #{cyan(name)} failed to initialize")

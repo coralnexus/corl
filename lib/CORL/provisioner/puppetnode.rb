@@ -135,11 +135,13 @@ class Puppetnode < CORL.plugin_class(:provisioner)
             module_directory = File.join(base_directory, module_name.to_s)
             
             ui.info("Building Puppet module #{blue(module_name)} at #{purple(module_reference)} into #{green(module_directory)}")
+            
+            full_module_directory = File.join(build_directory, module_directory)
                 
             module_project = CORL.project(extended_config(:puppet_module, {
-              :directory => File.join(build_directory, module_directory),
+              :directory => full_module_directory,
               :url       => module_reference,
-              :create    => true,
+              :create    => File.directory?(full_module_directory) ? false : true,
               :pull      => true
             }))
             unless module_project
