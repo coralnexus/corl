@@ -44,7 +44,13 @@ module NetworkSettings
   
     define_method :[]= do |name, value|
       set_setting(name, value)
-    end   
+    end
+    
+    #---
+  
+    define_method :groups do
+      array(myself[:settings])
+    end     
   end
 end
 end

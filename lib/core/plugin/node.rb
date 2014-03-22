@@ -76,51 +76,9 @@ class Node < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  def network
-    return plugin_parent
-  end
- 
-  def network=network
-    myself.plugin_parent = network
-  end
+  network_settings :node
   
   #---
-  
-  def setting(property, default = nil, format = false)
-    return network.node_setting(plugin_provider, plugin_name, property, default, format)
-  end
-  
-  def search(property, default = nil, format = false)
-    return network.search_node(plugin_provider, plugin_name, property, default, format)
-  end
-  
-  def set_setting(property, value = nil)
-    network.set_node_setting(plugin_provider, plugin_name, property, value)
-  end
-  
-  def delete_setting(property)
-    network.delete_node_setting(plugin_provider, plugin_name, property)
-  end
-  
-  #---
- 
-  def [](name, default = nil, format = false)
-    search(name, default, format)
-  end
-  
-  #---
-  
-  def []=(name, value)
-    set_setting(name, value)
-  end
-   
-  #-----------------------------------------------------------------------------
-  
-  def groups
-    array(myself[:settings])
-  end
-  
-  #-----------------------------------------------------------------------------
   
   def machine
     @machine
