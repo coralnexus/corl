@@ -132,7 +132,22 @@ class Resource < Core
         config.set(:normalize_template, config.get("normalize_#{target}", true))
         config.set(:interpolate_template, config.get("interpolate_#{target}", true))
         
-        resource[target] = CORL.template(config, resource[name]).render(resource[target])
+        input_data       = resource[target]        
+        resource[target] = CORL.template(config, resource[name]).render(input_data)
+        
+        if config.get(:debug, false)
+          CORL.ui.info("\n", { :prefix => false })
+          CORL.ui_group("#{resource[name]} template", :cyan) do |ui|
+            ui.info("-----------------------------------------------------")
+        
+            source_dump  = Console.blue(Data.to_json(input_data, true))
+            value_render = Console.green(resource[target])       
+        
+            ui.info("Data:\n#{source_dump}")
+            ui.info("Rendered:\n#{value_render}")
+            ui.info("\n", { :prefix => false }) 
+          end
+        end
         resource.delete(name)         
       end
     end
