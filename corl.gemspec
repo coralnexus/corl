@@ -38,6 +38,7 @@ Gem::Specification.new do |s|
     "bootstrap/lib/shell/validators.sh",
     "bootstrap/os/ubuntu/00_base.sh",
     "bootstrap/os/ubuntu/01_git.sh",
+    "bootstrap/os/ubuntu/02-editor.sh",
     "bootstrap/os/ubuntu/05_ruby.sh",
     "bootstrap/os/ubuntu/06_puppet.sh",
     "bootstrap/os/ubuntu/09_nucleon.sh",
