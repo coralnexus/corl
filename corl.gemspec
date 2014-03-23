@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-03-22"
+  s.date = "2014-03-23"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -77,6 +77,7 @@ Gem::Specification.new do |s|
     "lib/core/mixin/lookup.rb",
     "lib/core/mixin/macro/network_settings.rb",
     "lib/core/mod/fog_aws_server.rb",
+    "lib/core/mod/fog_rackspace_server.rb",
     "lib/core/mod/hiera_backend.rb",
     "lib/core/plugin/action.rb",
     "lib/core/plugin/configuration.rb",
