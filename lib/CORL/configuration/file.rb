@@ -170,12 +170,13 @@ class File < CORL.plugin_class(:configuration)
     super do |method_config|
       config_files = []
       success      = true      
-      search_data  = Config.new(search.export)
+      deleted_keys = search.export.keys
       
       separate.export.each do |config_name, router_data|
-        info     = search_data.delete(config_name)
-        provider = info[:provider]
-        file     = info[:file]
+        info         = search[config_name]
+        provider     = info[:provider]
+        file         = info[:file]        
+        deleted_keys = deleted_keys - [ config_name ]
         
         if renderer = CORL.translator(method_config, provider)
           rendering = renderer.generate(router_data)
@@ -192,8 +193,12 @@ class File < CORL.plugin_class(:configuration)
       end
       if success
         # Check for removals
-        search_data.export.each do |config_name, info|
+        deleted_keys.each do |config_name|
+          info = search[config_name]
+          
+          search.delete(config_name)
           FileUtils.rm_f(info[:file])
+          
           config_files << config_name
         end
       end
