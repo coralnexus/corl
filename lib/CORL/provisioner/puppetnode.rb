@@ -72,7 +72,6 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     # environment without phantom empty environment issues.
     
     Puppet[:default_file_terminus] = :file_server
-    Puppet[:graph] = true
       
     node = get_node    
     Puppet[:node_name_value] = id.to_s
