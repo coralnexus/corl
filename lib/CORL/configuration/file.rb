@@ -169,10 +169,11 @@ class File < CORL.plugin_class(:configuration)
   def save(options = {})
     super do |method_config|
       config_files = []
-      success      = true
+      success      = true      
+      search_data  = Config.new(search.export)
       
       separate.export.each do |config_name, router_data|
-        info     = search[config_name]
+        info     = search_data.delete(config_name)
         provider = info[:provider]
         file     = info[:file]
         
@@ -189,7 +190,15 @@ class File < CORL.plugin_class(:configuration)
         end
         break unless success        
       end
+      if success
+        # Check for removals
+        search_data.export.each do |config_name, info|
+          FileUtils.rm_f(info[:file])
+          config_files << config_name
+        end
+      end
       if success && ! config_files.empty?
+        # Commit changes
         commit_files = [ config_files, method_config.get_array(:files) ].flatten
         
         logger.debug("Source configuration rendering: #{rendering}")        
