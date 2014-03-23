@@ -77,6 +77,13 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     node = get_node    
     Puppet[:node_name_value] = id.to_s
     
+    unless profiles.empty?
+      modulepath = profiles.collect do |profile|
+        File.join(build_directory, locations[:module][profile.to_sym])
+      end
+      Puppet[:modulepath] = array(modulepath).join(File::PATH_SEPARATOR)
+    end
+    
     if manifest = gateway
       if manifest.match(/^packages\/.*/)
         manifest = File.join(build_directory, locations[:build], manifest)
@@ -84,13 +91,6 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         manifest = File.join(network.directory, directory, manifest)    
       end    
       Puppet[:manifest] = manifest   
-    end
-    
-    unless profiles.empty?
-      modulepath = profiles.collect do |profile|
-        File.join(build_directory, locations[:module][profile.to_sym])
-      end
-      Puppet[:modulepath] = array(modulepath).join(File::PATH_SEPARATOR)
     end
     
     @compiler = Puppet::Parser::Compiler.new(node)
