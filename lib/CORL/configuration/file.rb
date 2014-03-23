@@ -143,9 +143,18 @@ class File < CORL.plugin_class(:configuration)
     end
     
     if config.get(:nodes, false)
+      dbg(config[:nodes], 'nodes')
       config[:nodes].each do |provider, data|
         data.each do |name, info|
-          file_data.set([ ::File.join('nodes', provider.to_s, "#{name}.#{default_provider}"), :nodes, provider, name ], info)  
+          config_name = ::File.join('nodes', provider.to_s, "#{name}.#{default_provider}")
+          file_data.set([ config_name, :nodes, provider, name ], info)
+          
+          unless search[config_name]
+            search[config_name] = {
+              :provider => default_provider,
+              :file     => ::File.join(project.directory, config_name)
+            }
+          end
         end
       end
     end    
@@ -164,7 +173,10 @@ class File < CORL.plugin_class(:configuration)
       success      = true
       
       separate.export.each do |config_name, router_data|
+        dbg(config_name, 'config name')
         info     = search[config_name]
+        dbg(info, 'info')
+        dbg(router_data, 'router data')
         provider = info[:provider]
         file     = info[:file]
         

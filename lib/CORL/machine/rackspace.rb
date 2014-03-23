@@ -8,6 +8,11 @@ class Rackspace < Fog
    
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
+  
+  def set_connection
+    super
+    Kernel.load File.join(File.dirname(__FILE__), '..', '..', 'core', 'mod', 'fog_rackspace_server.rb')
+  end
  
   #-----------------------------------------------------------------------------
   # Management
