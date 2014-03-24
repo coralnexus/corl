@@ -49,17 +49,21 @@ class Spawn < Plugin::CloudAction
       
       if network
         if keypair && keypair_clean
+          hostnames     = []
           results       = []
           node_provider = settings.delete(:node_provider)
           
           settings.delete(:hostnames).each do |hostname|
+            hostnames << extract_hostnames(hostname)
+          end
+          hostnames.flatten.each do |hostname|
             if settings[:parallel]
               results << network.future.add_node(node_provider, hostname, settings)
             else
               results << network.add_node(node_provider, hostname, settings)    
             end
           end
-          results     = results.map { |future| future.value } if settings[:parallel]                  
+          results       = results.map { |future| future.value } if settings[:parallel]                  
           myself.status = code.batch_error if results.include?(false)
         else
           myself.status = code.key_failure  
@@ -69,6 +73,30 @@ class Spawn < Plugin::CloudAction
       end
     end
   end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def extract_hostnames(hostname)
+    hostnames = []
+    
+    if hostname.match(/([^\[]+)\[([^\]]+)\](.*)/)
+      before = $1
+      range  = $2
+      after  = $3
+      
+      low, high = range.split(/\s*\-\s*/)
+      range     = Range.new(low, high)
+      
+      range.each do |item|
+        hostnames << "#{before}#{item}#{after}"  
+      end
+    else
+      hostnames = [ hostname ]
+    end
+    hostnames
+  end
+  protected :extract_hostnames
 end
 end
 end
