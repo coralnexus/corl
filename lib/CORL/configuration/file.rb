@@ -175,8 +175,11 @@ class File < CORL.plugin_class(:configuration)
       separate.export.each do |config_name, router_data|
         info         = search[config_name]
         provider     = info[:provider]
-        file         = info[:file]        
+        file         = info[:file]
+        file_dir     = ::File.dirname(file)       
         deleted_keys = deleted_keys - [ config_name ]
+        
+        FileUtils.mkdir_p(file_dir) unless Dir.exists?(file_dir)
         
         if renderer = CORL.translator(method_config, provider)
           rendering = renderer.generate(router_data)
@@ -356,7 +359,7 @@ class File < CORL.plugin_class(:configuration)
   def fetch_project(options = {})
     config  = Config.ensure(options)
     success = true
-    if remote = config.get(:remote, nil)
+    if ! fact(:vagrant_exists) && remote = config.get(:remote, nil)
       logger.info("Pulling configuration updates from remote #{remote}")
       success = project.pull(remote, config) if config.get(:pull, true)   
     end
@@ -376,7 +379,7 @@ class File < CORL.plugin_class(:configuration)
     logger.info("Committing changes to configuration files")        
     success = project.commit(commit_files, config)
           
-    if success && remote = config.get(:remote, nil)
+    if success && ! fact(:vagrant_exists) && remote = config.get(:remote, nil)
       logger.info("Pushing configuration updates to remote #{remote}")
       success = project.pull(remote, config) if config.get(:pull, true)
       success = project.push(remote, config) if success && config.get(:push, true)      
