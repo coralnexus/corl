@@ -4,8 +4,7 @@ module Plugin
 class Node < CORL.plugin_class(:base)
   
   include Celluloid
-  task_class TaskThread
- 
+  
   #-----------------------------------------------------------------------------
   # Node plugin interface
    
@@ -18,12 +17,10 @@ class Node < CORL.plugin_class(:base)
       myself[name] = value
     end
     
-    yield if block_given? # Chance to create a machine to feed hostname
-    
     ui.resource = Util::Console.colorize(hostname, @class_color)
     logger      = hostname
     
-    myself[:settings] = [ "all", plugin_provider.to_s, plugin_name.to_s ] | setting(:settings, [], :array)
+    add_groups([ "all", plugin_provider.to_s, plugin_name.to_s ])
     
     unless reload
       @cli_interface = Util::Liquid.new do |method, args, &code|
@@ -317,7 +314,7 @@ class Node < CORL.plugin_class(:base)
   
   def machine_config
     name   = myself[:id]
-    name   = myself[:hostname] if name.nil?
+    name   = myself[:hostname] if name.nil? || name.empty?
     config = Config.new({ :name => name })
     
     yield(config) if block_given?
@@ -435,6 +432,8 @@ class Node < CORL.plugin_class(:base)
     
     if machine
       config = Config.ensure(options)
+      
+      clear_cache
       
       if extension_check(:create, { :config => config })
         logger.info("Creating node: #{plugin_name}")
@@ -594,22 +593,26 @@ class Node < CORL.plugin_class(:base)
           results = active_machine.exec(commands, config.export) do |type, command, data|
             unless local?
               if type == :error
-                alert(data)
+                alert(filter_output(type, data))
               else
-                render(data)
+                render(filter_output(type, data))
               end
             end
             yield(:progress, { :type => type, :command => command, :data => data }) if block_given?   
           end
         end
         
-        success  = true
-        results.each do |result|
-          success = false if result.status != code.success  
-        end
-        if success
-          yield(:process, config) if block_given?
-          extension(:exec_success, { :config => config, :results => results }) 
+        if results
+          success = true
+          results.each do |result|
+            success = false if result.status != code.success  
+          end
+          if success
+            yield(:process, config) if block_given?
+            extension(:exec_success, { :config => config, :results => results }) 
+          end
+        else
+          results = [ Util::Shell::Result.new(:error, 255) ]
         end
       end
     else
@@ -638,14 +641,14 @@ class Node < CORL.plugin_class(:base)
     
     admin_command = ''
     if as_admin
-      admin_command = 'sudo' if user.to_s == 'ubuntu'
+      admin_command = 'sudo' if user.to_s != 'root'
       admin_command = extension_set(:admin_command, admin_command, config)
     end
     
     results = exec({ :commands => [ "#{admin_command} #{command.to_s}".strip ] }) do |op, data|
       yield(op, data) if block_given?  
-    end
-    results.first
+    end    
+    results.first 
   end
   
   #---
@@ -809,16 +812,19 @@ class Node < CORL.plugin_class(:base)
     config = Config.ensure(options)
     
     # Record machine parameters
-    id(true)
-    public_ip(true)
-    private_ip(true)
-    state(true)
+    if block_given?
+      # Provider or external configuration preparation
+      yield(config)  
+    else
+      # Default configuration preparation
+      id(true)
+      public_ip(true)
+      private_ip(true)
+      state(true)
     
-    machine_type(false)
-    image(false)
-    
-    # Provider or external configuration preparation
-    yield(config) if block_given?
+      machine_type(false)
+      image(false)
+    end
     
     network.save(config.import({ 
       :commit      => true,
@@ -943,15 +949,19 @@ class Node < CORL.plugin_class(:base)
         
         myself.machine = nil
         
-        delete_setting(:id)
-        delete_setting(:public_ip)
-        delete_setting(:private_ip)
-        delete_setting(:ssh_port)
-        delete_setting(:build)
+        override_settings = false
+        override_settings = yield(:finalize, config) if success && block_given?
         
-        myself[:state] = :stopped
+        if success && ! override_settings
+          delete_setting(:id)
+          delete_setting(:public_ip)
+          delete_setting(:private_ip)
+          delete_setting(:ssh_port)
+          delete_setting(:build)
         
-        success = save(config) if success
+          myself[:state] = :stopped
+        end
+        success = save(config)
         
         if success && block_given?
           process_success = yield(:process, config)
@@ -1005,6 +1015,7 @@ class Node < CORL.plugin_class(:base)
         
         if success
           extension(:destroy_success, { :config => config })
+          clear_cache
         end
       end
     else
@@ -1091,6 +1102,12 @@ class Node < CORL.plugin_class(:base)
     result.status == code.success ? true : false  
   end
   
+  #---
+  
+  def filter_output(type, data)
+    data  
+  end
+   
   #-----------------------------------------------------------------------------
   # Machine type utilities
   
