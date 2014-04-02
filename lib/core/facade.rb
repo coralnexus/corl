@@ -1,6 +1,31 @@
 
 module CORL
 module Facade
+  
+  #-----------------------------------------------------------------------------
+  # Local identification
+  
+  def public_ip
+    if Config.fact(:vagrant_exists)
+      Config.fact(:ipaddress_eth1)  
+    else
+      CORL.ip_address  
+    end
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Vagrant related
+  
+  def vagrant?
+    Vagrant.command ? true : false
+  end
+  
+  #---
+  
+  def vagrant_config(directory, config)
+    require File.join(File.dirname(__FILE__), 'vagrant', 'config.rb')
+    Vagrant::Config.register(directory, config)
+  end
     
   #-----------------------------------------------------------------------------
   # Core plugin type facade
@@ -39,8 +64,6 @@ module Facade
   def provisioner(options, provider = nil)
     plugin(:provisioner, provider, options)
   end
-  
-  #---
   
   def provisioners(data, build_hash = false, keep_array = false)
     plugins(:provisioner, data, build_hash, keep_array)
