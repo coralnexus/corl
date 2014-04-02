@@ -7,7 +7,6 @@ class Machine < CORL.plugin_class(:base)
   # Machine plugin interface
   
   def normalize(reload)
-    myself.plugin_name = node[:id]
   end
        
   #-----------------------------------------------------------------------------
@@ -85,12 +84,6 @@ class Machine < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Management
   
-  def init_ssh(ssh_port)
-    # Implement in sub classes if needed
-  end
-  
-  #--- 
-
   def load
     success = true
     
@@ -158,7 +151,7 @@ class Machine < CORL.plugin_class(:base)
     results = []
     
     if running?
-      logger.debug("Executing command on #{plugin_provider} machine with: #{options.inspect}")
+      logger.debug("Executing commands on #{plugin_provider} machine with: #{options.inspect}")
       config  = Config.ensure(options)      
       results = yield(config, results) if block_given?
     else
@@ -246,12 +239,12 @@ class Machine < CORL.plugin_class(:base)
     else
       logger.debug("Starting #{plugin_provider} machine with: #{options.inspect}")
       
-      if created?
-        logger.debug("Machine #{plugin_name} has already been created") 
+      logger.debug("Machine #{plugin_name} is not running yet")
+      if block_given?
+        success = yield(config)  
       else
-        logger.debug("Machine #{plugin_name} does not yet exist")
-        success = create(options)
-      end      
+        success = create(options)  
+      end            
     end
     
     logger.warn("There was an error starting the machine #{plugin_name}") unless success
