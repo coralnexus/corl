@@ -1,0 +1,7 @@
+#
+# CORL Vagrant environment (development platform)
+#-------------------------------------------------------------------------------
+#
+Vagrant.configure('2') do |config|
+  CORL.vagrant_config(File.dirname(__FILE__), config)
+end
