@@ -16,4 +16,9 @@ group :development do
   gem "rspec", "~> 2.10"
   gem "rdoc", "~> 3.12"
   gem "yard", "~> 0.8"
+  gem "vagrant", :git => "https://github.com/mitchellh/vagrant.git"
+end
+
+group :plugins do
+  gem "corl", :path => "."
 end
