@@ -53,6 +53,18 @@ class Configuration < CORL.plugin_class(:base)
   
   #---
   
+  def cache
+    project.cache
+  end
+  
+  #---
+  
+  def ignore(files)
+    project.ignore(files)
+  end
+  
+  #---
+  
   def autoload(default = false)
     _get(:autoload, default)
   end
