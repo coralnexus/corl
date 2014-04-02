@@ -149,7 +149,7 @@ class Fog < CORL.plugin_class(:machine)
   
   def download(remote_path, local_path, options = {})
     super do |config, success|
-      logger.debug("Executing SCP download to #{local_path} from #{remote_path} on machine #{name}") 
+      logger.debug("Executing SCP download to #{local_path} from #{remote_path} on machine #{plugin_name}") 
       
       begin
         if init_ssh_session(server)
