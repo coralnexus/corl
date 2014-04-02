@@ -160,7 +160,10 @@ en:
           Starting %{provider} machine %{name} 
       stop:
         start: |-
-          Stopping %{provider} machine %{name}        
+          Stopping %{provider} machine %{name}
+      destroy:
+        start: |-
+          Destroying %{provider} machine %{name}        
       build:
         start: |-
           Building provisioner project
