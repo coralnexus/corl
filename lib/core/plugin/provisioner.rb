@@ -4,8 +4,7 @@ module Plugin
 class Provisioner < CORL.plugin_class(:base)
   
   include Celluloid
-  task_class TaskThread
- 
+  
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
   
