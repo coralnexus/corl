@@ -1,5 +1,29 @@
 
 module CORL
+module Vagrant
+  
+  #
+  # Since we can execute CORL actions from within Vagrant on a combination of
+  # Vagrant VMs and remote server instances we need a way to tap into the 
+  # Vagrant environment and operate on CORL configured Vagrant machines.
+  # 
+  # This command is set in the CORL launcher Vagrant command plugin execute 
+  # method.  It is then accessible anywhere within CORL if we have used that
+  # Vagrant command as an execution gateway.  If not it will be nil, giving us
+  # a convienient method for checking whether we are executing through Vagrant
+  # which is used in the CORL Vagrant {Node} and {Machine} plugins.
+  #  
+  @@command = nil
+  
+  def self.command=command
+    @@command = command
+  end
+  
+  def self.command
+    @@command
+  end  
+end
+
 module Plugin
 class CloudAction < CORL.plugin_class(:action)
   
@@ -38,10 +62,11 @@ class CloudAction < CORL.plugin_class(:action)
       true
     end
     register :node_provider, :str, :local, 'corl.core.action.options.node_provider' do |value|
-      value = value.to_sym
+      value          = value.to_sym      
+      node_providers = node_plugins.keys
       
-      unless node_plugins.keys.include?(value)
-        warn('corl.core.action.errors.node_provider', { :value => value, :choices => node_plugins.keys.join(", ") })
+      unless CORL.vagrant? || node_providers.include?(value)
+        warn('corl.core.action.errors.node_provider', { :value => value, :choices => node_providers.join(", ") })
         next false
       end
       true  
