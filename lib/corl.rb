@@ -20,6 +20,7 @@ mixin_action_dir = File.join(mixin_dir, 'action')
 macro_dir        = File.join(mixin_dir, 'macro')
 util_dir         = File.join(core_dir, 'util')
 mod_dir          = File.join(core_dir, 'mod')
+vagrant_dir      = File.join(core_dir, 'vagrant')
  
 #-------------------------------------------------------------------------------
 # CORL requirements
@@ -96,6 +97,13 @@ nucleon_require(core_dir, :facade)
 
 # Include CORL core plugins
 nucleon_require(core_dir, :plugin)
+
+# Include Vagrant plugins (only include if running inside Vagrant)
+begin
+  require "vagrant"
+  nucleon_require(vagrant_dir, :plugins)
+rescue LoadError
+end
 
 #-------------------------------------------------------------------------------
 # CORL interface
