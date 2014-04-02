@@ -11,15 +11,15 @@ class Fog < CORL.plugin_class(:node)
   # Node plugin interface
    
   def normalize(reload)
-    super do
-      myself.region  = region 
+    super
+    
+    myself.region  = region 
       
-      unless reload
-        machine_provider = :fog
-        machine_provider = yield if block_given?
+    unless reload
+      machine_provider = :fog
+      machine_provider = yield if block_given?
                         
-        myself.machine = create_machine(:machine, machine_provider, machine_config)
-      end
+      myself.machine = create_machine(:machine, machine_provider, machine_config)
     end
   end
        
@@ -81,8 +81,8 @@ class Fog < CORL.plugin_class(:node)
     if region = myself[:region]
       region
     else
-      first_region = regions.first
-      myself.region  = first_region
+      first_region  = regions.first
+      myself.region = first_region
       first_region
     end
   end
