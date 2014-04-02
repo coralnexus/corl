@@ -152,8 +152,17 @@ en:
             Project reference %{value} failed to parse or provider %{provider} isn't loaded >> Possible providers: %{choices}
         start: |-
           Now seeding CORL node
+      image:
+        start: |-
+          Starting image of %{provider} machine %{name} 
+      start:
+        start: |-
+          Starting %{provider} machine %{name} 
+      stop:
+        start: |-
+          Stopping %{provider} machine %{name}        
       build:
-        start:
+        start: |-
           Building provisioner project
       provision:
         options:
