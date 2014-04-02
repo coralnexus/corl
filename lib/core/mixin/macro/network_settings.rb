@@ -48,9 +48,43 @@ module NetworkSettings
     
     #---
   
+    define_method :cache do
+      network.cache
+    end
+  
+    define_method :cache_setting do |keys, default = nil, format = false|
+      cache.get([ _type, plugin_provider, plugin_name, keys ].flatten, default, format)
+    end
+
+    define_method :set_cache_setting do |keys, value|
+      cache.set([ _type, plugin_provider, plugin_name, keys ].flatten, value)
+    end
+
+    define_method :delete_cache_setting do |keys|
+      cache.delete([ _type, plugin_provider, plugin_name, keys ].flatten)
+    end
+
+    define_method :clear_cache do
+      cache.delete([ _type, plugin_provider, plugin_name ])
+    end
+
+    #---
+  
     define_method :groups do
       array(myself[:settings])
-    end     
+    end
+    
+    #---
+    
+    define_method :add_groups do |groups|
+      myself[:settings] = array(myself[:settings]) | array(groups)
+    end
+    
+    #---
+    
+    define_method :remove_groups do |groups|
+      myself[:settings] = array(myself[:settings]) - array(groups)
+    end    
   end
 end
 end
