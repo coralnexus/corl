@@ -4,7 +4,6 @@ module Plugin
 class Network < CORL.plugin_class(:base)
   
   init_plugin_collection 
-  task_class TaskThread
   
   #-----------------------------------------------------------------------------
   # Cloud plugin interface
@@ -14,6 +13,8 @@ class Network < CORL.plugin_class(:base)
     
     logger.info("Initializing sub configuration from source with: #{myself._export.inspect}")
     myself.config = CORL.configuration(Config.new(myself._export).import({ :autosave => false, :create => false })) unless reload
+    
+    ignore('build')
   end
   
   #-----------------------------------------------------------------------------
@@ -45,6 +46,18 @@ class Network < CORL.plugin_class(:base)
   
   def build_directory
     File.join(directory, 'build')
+  end
+  
+  #---
+  
+  def cache
+    config.cache
+  end
+  
+  #---
+  
+  def ignore(files)
+    config.ignore(files)
   end
   
   #---
@@ -130,7 +143,7 @@ class Network < CORL.plugin_class(:base)
   #---
   
   def local_node(require_new = false)
-    ip_address = CORL.ip_address
+    ip_address = CORL.public_ip  
     local_node = node_by_ip(ip_address, require_new)
         
     if local_node.nil?
@@ -223,15 +236,18 @@ class Network < CORL.plugin_class(:base)
         
     remote_name = config.delete(:remote, :edit)
     
-    # Set node data
-    node = set_node(provider, name, { 
-      :settings     => array(config.delete(:groups, [])), 
+    node_options = Util::Data.clean({ 
+      :settings     => array(config.delete(:groups, [])) | [ "server" ], 
       :region       => config.delete(:region, nil),
       :machine_type => config.delete(:machine_type, nil),
+      :public_ip    => config.delete(:public_ip, nil),
       :image        => config.delete(:image, nil),
       :user         => config.delete(:user, :root),
       :hostname     => name
     })
+    
+    # Set node data
+    node = set_node(provider, name, node_options)
     hook_config = { :node => node, :remote => remote_name, :config => config }
     success     = true
     
@@ -252,11 +268,11 @@ class Network < CORL.plugin_class(:base)
         if success
           seed_project = config.get(:project_reference, nil)
           save_config  = { :commit => true, :remote => remote_name, :push => true }
-               
+                         
           if seed_project && remote_name
             # Reset project remote
             seed_info = Plugin::Project.translate_reference(seed_project)
-          
+                    
             if seed_info
               seed_url    = seed_info[:url]
               seed_branch = seed_info[:revision] if seed_info[:revision]
