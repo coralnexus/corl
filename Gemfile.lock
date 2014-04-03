@@ -106,7 +106,7 @@ GEM
     netrc (0.7.7)
     nokogiri (1.6.1)
       mini_portile (~> 0.5.0)
-    nucleon (0.1.12)
+    nucleon (0.1.11)
       celluloid (~> 0.15)
       childprocess (~> 0.5.0)
       deep_merge (~> 1.0)
