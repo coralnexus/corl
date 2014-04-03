@@ -149,7 +149,7 @@ Gem::Specification.new do |s|
     s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<nucleon>, ["~> 0.1"])
+      s.add_runtime_dependency(%q<nucleon>, [">= 0.1.10", "~> 0.1"])
       s.add_runtime_dependency(%q<fog>, ["~> 1.20"])
       s.add_runtime_dependency(%q<unf>, ["~> 0.1"])
       s.add_runtime_dependency(%q<facter>, ["~> 1.7"])
@@ -160,9 +160,9 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rspec>, ["~> 2.10"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_development_dependency(%q<yard>, ["~> 0.8"])
-      s.add_development_dependency(%q<vagrant>, [">= 0"])
+      s.add_development_dependency(%q<vagrant>, ["~> 1.5"])
     else
-      s.add_dependency(%q<nucleon>, ["~> 0.1"])
+      s.add_dependency(%q<nucleon>, [">= 0.1.10", "~> 0.1"])
       s.add_dependency(%q<fog>, ["~> 1.20"])
       s.add_dependency(%q<unf>, ["~> 0.1"])
       s.add_dependency(%q<facter>, ["~> 1.7"])
@@ -173,10 +173,10 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rspec>, ["~> 2.10"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_dependency(%q<yard>, ["~> 0.8"])
-      s.add_dependency(%q<vagrant>, [">= 0"])
+      s.add_dependency(%q<vagrant>, ["~> 1.5"])
     end
   else
-    s.add_dependency(%q<nucleon>, ["~> 0.1"])
+    s.add_dependency(%q<nucleon>, [">= 0.1.10", "~> 0.1"])
     s.add_dependency(%q<fog>, ["~> 1.20"])
     s.add_dependency(%q<unf>, ["~> 0.1"])
     s.add_dependency(%q<facter>, ["~> 1.7"])
@@ -187,7 +187,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rspec>, ["~> 2.10"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
     s.add_dependency(%q<yard>, ["~> 0.8"])
-    s.add_dependency(%q<vagrant>, [">= 0"])
+    s.add_dependency(%q<vagrant>, ["~> 1.5"])
   end
 end
 
