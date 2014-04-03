@@ -1,11 +1,11 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: d5bb3488d08d4d6ee19dfb7449979400c6431883
+  revision: a57ed3f4a158144f8f087a69ade1d5c74ccdbaf5
   branch: 0.1
   specs:
     nucleon (0.1.12)
       celluloid (~> 0.15)
-      childprocess (~> 0.5.0)
+      childprocess (~> 0.5)
       deep_merge (~> 1.0)
       i18n (~> 0.6)
       log4r (~> 1.1)
