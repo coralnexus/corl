@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem "nucleon", "~> 0.1"
+gem "nucleon", "~> 0.1", ">= 0.1.10", :github => 'coralnexus/nucleon', :branch => '0.1'
 
 gem "fog", "~> 1.20"
 gem "unf", "~> 0.1"
@@ -16,7 +16,7 @@ group :development do
   gem "rspec", "~> 2.10"
   gem "rdoc", "~> 3.12"
   gem "yard", "~> 0.8"
-  gem "vagrant", :git => "https://github.com/mitchellh/vagrant.git"
+  gem "vagrant", "~> 1.5", :github => 'mitchellh/vagrant', :branch => 'master'
 end
 
 group :plugins do
