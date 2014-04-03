@@ -238,7 +238,8 @@ class Vagrant < CORL.plugin_class(:machine)
 
   def destroy(options = {})
     super do |config|
-      run(:destroy, config)
+      # We should handle prompting internally to keep it consistent
+      run(:destroy, config.defaults({ :force_confirm_destroy => true }))
     end
   end
   
