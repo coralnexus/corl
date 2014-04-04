@@ -74,6 +74,12 @@ class Vagrant < CORL.plugin_class(:machine)
     return server.state.id if server
     :not_loaded
   end
+  
+  #---
+    
+  def machine_types
+    [ :virtualbox, :vmware_fusion, :hyperv ]
+  end
         
   #-----------------------------------------------------------------------------
   # Management
@@ -198,15 +204,17 @@ class Vagrant < CORL.plugin_class(:machine)
       
         node.set_cache_setting(:box, box_name)
         node.set_cache_setting(:box_url, box_url)
-            
-        env.action_runner.run(::Vagrant::Action.action_box_add, {
-          :box_name  => box_name,
-          :box_url   => box_url,          
-          :box_clean => false,
-          :box_force => true,
-          :ui        => ::Vagrant::UI::Prefixed.new(env.ui, "box")
-        })
-        load
+        
+        if success    
+          env.action_runner.run(::Vagrant::Action.action_box_add, {
+            :box_name  => box_name,
+            :box_url   => box_url,          
+            :box_clean => false,
+            :box_force => true,
+            :ui        => ::Vagrant::UI::Prefixed.new(env.ui, "box")
+          })
+          load
+        end
         
       rescue Exception => error
         ui.error(error.message)
@@ -239,7 +247,16 @@ class Vagrant < CORL.plugin_class(:machine)
   def destroy(options = {})
     super do |config|
       # We should handle prompting internally to keep it consistent
-      run(:destroy, config.defaults({ :force_confirm_destroy => true }))
+      success = run(:destroy, config.defaults({ :force_confirm_destroy => true }))
+      
+      if success
+        box_name = sprintf("%s", node.id).gsub(/\s+/, '-')
+        
+        env.action_runner.run(::Vagrant::Action.action_box_remove, {
+          :box_name     => box_name,
+          :box_provider => node.machine_type
+        })
+      end
     end
   end
   
