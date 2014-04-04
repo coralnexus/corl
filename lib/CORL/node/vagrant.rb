@@ -200,6 +200,38 @@ class Vagrant < CORL.plugin_class(:node)
       end
     end
     data  
+  end
+   
+  #-----------------------------------------------------------------------------
+  # Machine type utilities
+  
+  def machine_type_id(machine_type)
+    machine_type
+  end
+  
+  #---
+  
+  def render_machine_type(machine_type)
+    machine_type.to_s
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Image utilities
+  
+  def image_id(image)
+    image.id
+  end
+  
+  #---
+  
+  def render_image(image)
+    ''  
+  end
+  
+  #---
+  
+  def image_search_text(image)
+    image.to_s
   end    
 end
 end
