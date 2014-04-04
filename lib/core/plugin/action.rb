@@ -174,6 +174,18 @@ class CloudAction < CORL.plugin_class(:action)
     # Implement in sub classes if needed
     data 
   end
+  
+  #---
+  
+  def ensure_node(node, network, &block)
+    codes :network_failure
+    
+    if network && node
+      block.call
+    else
+      myself.status = code.network_failure
+    end
+  end
 end
 end
 end
