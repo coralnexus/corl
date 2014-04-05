@@ -570,7 +570,8 @@ class Node < CORL.plugin_class(:base)
   execute_block_on_receiver :exec
   
   def exec(options = {})
-    results = nil
+    default_error = Util::Shell::Result.new(:error, 255)
+    results       = [ default_error ]
     
     if machine && machine.running?
       config = Config.ensure(options)
@@ -600,6 +601,8 @@ class Node < CORL.plugin_class(:base)
             end
             yield(:progress, { :type => type, :command => command, :data => data }) if block_given?   
           end
+        else
+          default_error.append_errors("No execution command")    
         end
         
         if results
@@ -612,10 +615,14 @@ class Node < CORL.plugin_class(:base)
             extension(:exec_success, { :config => config, :results => results }) 
           end
         else
-          results = [ Util::Shell::Result.new(:error, 255) ]
+          default_error.append_errors("No execution results")
         end
+      else
+        default_error.append_errors("Execution prevented by exec hook")
       end
     else
+      default_error.append_errors("No attached machine")
+      
       logger.warn("Node #{plugin_name} does not have an attached machine or is not running so cannot execute commands")
     end
     results 
@@ -740,6 +747,7 @@ class Node < CORL.plugin_class(:base)
     codes :local_path_not_found,
           :home_path_lookup_failure,
           :auth_upload_failure,
+          :root_auth_copy_failure,
           :bootstrap_upload_failure,
           :bootstrap_exec_failure,
           :reload_failure
@@ -751,7 +759,7 @@ class Node < CORL.plugin_class(:base)
         # Transmit authorisation / credential files
         package_files = [ '.fog', '.netrc', '.google-privatekey.p12', '.vimrc' ]
         auth_files.each do |file|
-          package_files = file.gsub(local_path + '/', '')
+          package_files << file.gsub(local_path + '/', '')
         end
         send_success = send_files(local_path, user_home, package_files, '0600') do |op, data|
           yield("send_#{op}".to_sym, data) if block_given?
@@ -759,6 +767,14 @@ class Node < CORL.plugin_class(:base)
         end
         unless send_success
           myself.status = code.auth_upload_failure
+        end
+        
+        if user.to_sym != config.get(:root_user, :root).to_sym
+          auth_files     = package_files.collect { |path| "'#{path}'"}
+          root_home_path = config.get(:root_home, '/root')
+          
+          result        = command("cp #{auth_files.join(' ')} #{root_home_path}", { :as_admin => true })
+          myself.status = code.root_auth_copy_failure unless result.status == code.success  
         end
     
         # Send bootstrap package
