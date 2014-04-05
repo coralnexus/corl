@@ -8,8 +8,6 @@ class Destroy < Plugin::CloudAction
   
   def configure
     super do
-      codes :network_failure
-            
       register :destroy_nodes, :array, nil do |values|
         if values.nil?
           warn('corl.actions.destroy.errors.destroy_nodes_empty')
@@ -47,14 +45,12 @@ class Destroy < Plugin::CloudAction
    
   def execute
     super do |local_node, network|
-      if network
+      ensure_network(network) do
         batch_success = network.batch(settings[:destroy_nodes], settings[:node_provider], settings[:parallel]) do |node|
           info('corl.actions.stop.start', { :provider => node.plugin_provider, :name => node.plugin_name })
           node.destroy
         end
         myself.status = code.batch_error unless batch_success
-      else
-        myself.status = code.network_failure  
       end
     end
   end

@@ -11,7 +11,7 @@ class Ip < Plugin::CloudAction
    
   def execute
     super do |node, network|
-      ensure_node(node, network) do
+      ensure_node(node) do
         ui.info(CORL.public_ip)
       end
     end

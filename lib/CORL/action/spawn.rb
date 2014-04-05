@@ -10,8 +10,7 @@ class Spawn < Plugin::CloudAction
   
   def configure
     super do
-      codes :network_failure,
-            :key_failure,
+      codes :key_failure,
             :node_create_failure
       
       register :groups, :array, []      
@@ -43,7 +42,7 @@ class Spawn < Plugin::CloudAction
  
   def execute
     super do |node, network|
-      if network
+      ensure_network(network) do
         if keypair && keypair_clean
           hostnames     = []
           results       = []
@@ -80,8 +79,6 @@ class Spawn < Plugin::CloudAction
         else
           myself.status = code.key_failure  
         end        
-      else
-        myself.status = code.network_failure    
       end
     end
   end

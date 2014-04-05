@@ -30,19 +30,21 @@ class Regions < Plugin::CloudAction
     super do |local_node, network|
       info('corl.actions.regions.start')
       
-      if node = network.test_node(settings[:node_provider])
-        if regions = node.regions
-          regions.each do |region|
-            render(sprintf("> %s", region), { :prefix => false })
-          end
+      ensure_network(network) do
+        if node = network.test_node(settings[:node_provider])
+          if regions = node.regions
+            regions.each do |region|
+              render(sprintf("> %s", region), { :prefix => false })
+            end
           
-          myself.result = regions
-          success('corl.actions.regions.results', { :regions => regions.length }) if regions.length > 1
+            myself.result = regions
+            success('corl.actions.regions.results', { :regions => regions.length }) if regions.length > 1
+          else
+            myself.status = code.region_load_failure
+          end
         else
-          myself.status = code.region_load_failure
+          myself.status = code.node_load_failure
         end
-      else
-        myself.status = code.node_load_failure
       end
     end
   end

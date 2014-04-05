@@ -8,8 +8,6 @@ class Ssh < Plugin::CloudAction
   
   def configure
     super do
-      codes :network_failure
-      
       register :ssh_nodes, :array, nil do |values|
         if values.nil?
           warn('corl.actions.bootstrap.errors.ssh_nodes_empty')
@@ -49,7 +47,7 @@ class Ssh < Plugin::CloudAction
     
   def execute
     super do |local_node, network|
-      if network
+      ensure_network(network) do
         batch_success = network.batch(settings[:ssh_nodes], settings[:node_provider], false) do |node|
           render_options = { :id => node.id, :hostname => node.hostname }
           
@@ -64,8 +62,6 @@ class Ssh < Plugin::CloudAction
           success
         end
         myself.status = code.batch_error unless batch_success
-      else
-        myself.status = code.network_failure
       end
     end
   end

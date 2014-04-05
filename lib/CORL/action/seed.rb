@@ -49,7 +49,7 @@ class Seed < Plugin::CloudAction
     super do |node, network|
       info('corl.actions.seed.start')
       
-      if node && network
+      ensure_node(node) do
         admin_exec do
           network_path = lookup(:corl_network)
           backup_path  = File.join(Dir.tmpdir(), 'corl')
@@ -105,8 +105,6 @@ class Seed < Plugin::CloudAction
             myself.status = code.key_store_failure
           end
         end
-      else
-        myself.status = code.network_load_failure    
       end
     end
   end

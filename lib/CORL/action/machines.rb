@@ -30,19 +30,21 @@ class Machines < Plugin::CloudAction
     super do |local_node, network|
       info('corl.actions.machines.start')
       
-      if node = network.test_node(settings[:node_provider])
-        if machine_types = node.machine_types
-          machine_types.each do |machine_type|
-            render(node.render_machine_type(machine_type), { :prefix => false })
-          end
+      ensure_network(network) do
+        if node = network.test_node(settings[:node_provider])
+          if machine_types = node.machine_types
+            machine_types.each do |machine_type|
+              render(node.render_machine_type(machine_type), { :prefix => false })
+            end
           
-          myself.result = machine_types
-          success('corl.actions.machines.results', { :machines => machine_types.length }) if machine_types.length > 1
+            myself.result = machine_types
+            success('corl.actions.machines.results', { :machines => machine_types.length }) if machine_types.length > 1
+          else
+            myself.status = code.machine_load_failure
+          end
         else
-          myself.status = code.machine_load_failure
+          myself.status = code.node_load_failure
         end
-      else
-        myself.status = code.node_load_failure
       end
     end
   end

@@ -8,8 +8,6 @@ class Bootstrap < Plugin::CloudAction
   
   def configure
     super do
-      codes :network_failure
-      
       register :auth_files, :array, [] do |values|
         success = true
         values.each do |value|
@@ -69,7 +67,7 @@ class Bootstrap < Plugin::CloudAction
     
   def execute
     super do |local_node, network|
-      if network
+      ensure_network(network) do
         batch_success = network.batch(settings[:bootstrap_nodes], settings[:node_provider], settings[:parallel]) do |node|
           render_options = { :id => node.id, :hostname => node.hostname }
           
@@ -84,8 +82,6 @@ class Bootstrap < Plugin::CloudAction
           success
         end
         myself.status = code.batch_error unless batch_success
-      else
-        myself.status = code.network_failure
       end
     end
   end

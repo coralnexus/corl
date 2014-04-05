@@ -8,8 +8,7 @@ class Provision < Plugin::CloudAction
   
   def configure
     super do
-      codes :network_failure,
-            :provision_failure
+      codes :provision_failure
             
       register :dry_run, :bool, false
     end
@@ -20,9 +19,9 @@ class Provision < Plugin::CloudAction
   
   def execute
     super do |node, network|
-      if network && node
-        info('corl.actions.provision.start')
-        
+      info('corl.actions.provision.start')
+      
+      ensure_node(node) do        
         success = true
         
         if CORL.admin?
@@ -47,8 +46,6 @@ class Provision < Plugin::CloudAction
             myself.status = code.provision_failure unless success
           end
         end
-      else
-        myself.status = code.network_failure  
       end
     end
   end

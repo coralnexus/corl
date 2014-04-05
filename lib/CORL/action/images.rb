@@ -35,19 +35,21 @@ class Images < Plugin::CloudAction
     super do |local_node, network|
       info('corl.actions.images.start')
       
-      if node = network.test_node(settings[:node_provider], { :region => settings[:region] })
-        if images = node.images(settings[:search], settings)
-          images.each do |image|
-            render(node.render_image(image), { :prefix => false })
-          end
+      ensure_network(network) do
+        if node = network.test_node(settings[:node_provider], { :region => settings[:region] })
+          if images = node.images(settings[:search], settings)
+            images.each do |image|
+              render(node.render_image(image), { :prefix => false })
+            end
           
-          myself.result = images
-          success('corl.actions.images.results', { :images => images.length }) if images.length > 1
+            myself.result = images
+            success('corl.actions.images.results', { :images => images.length }) if images.length > 1
+          else
+            myself.status = code.image_load_failure
+          end
         else
-          myself.status = code.image_load_failure
+          myself.status = code.node_load_failure
         end
-      else
-        myself.status = code.node_load_failure
       end
     end
   end

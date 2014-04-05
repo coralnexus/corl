@@ -8,8 +8,7 @@ class Vagrantfile < Plugin::CloudAction
   
   def configure
     super do    
-      codes :network_failure,
-            :vagrant_backup_failure,
+      codes :vagrant_backup_failure,
             :vagrant_save_failure,
             :network_save_failure
     end
@@ -22,7 +21,7 @@ class Vagrantfile < Plugin::CloudAction
     super do |node, network|
       info('corl.actions.vagrantfile.start')
       
-      if network
+      ensure_network(network) do
         generated_vagrantfile_name = File.join(CORL.lib_path, 'core', 'vagrant', 'Vagrantfile')        
         project_vagrantfile_name   = File.join(network.directory, 'Vagrantfile')
         success                    = true
@@ -48,8 +47,6 @@ class Vagrantfile < Plugin::CloudAction
             end
           end
         end 
-      else
-        myself.status = code.network_failure
       end
     end
   end

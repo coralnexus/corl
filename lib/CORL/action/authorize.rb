@@ -8,8 +8,7 @@ class Authorize < Plugin::CloudAction
   
   def configure
     super do
-      codes :network_failure,
-            :key_store_failure
+      codes :key_store_failure
       
       register :public_key, :str, nil
     end
@@ -28,7 +27,7 @@ class Authorize < Plugin::CloudAction
     super do |node, network|
       info('corl.actions.authorize.start')
       
-      if network && node
+      ensure_node(node) do
         ssh_path        = Util::SSH.key_path
         authorized_keys = File.join(ssh_path, 'authorized_keys')        
         public_key      = settings[:public_key].strip
@@ -47,8 +46,6 @@ class Authorize < Plugin::CloudAction
             myself.status = code.key_store_failure
           end
         end
-      else
-        myself.status = code.network_failure
       end
     end
   end

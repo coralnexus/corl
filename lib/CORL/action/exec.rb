@@ -8,8 +8,6 @@ class Exec < Plugin::CloudAction
   
   def configure
     super do
-      codes :network_failure
-            
       register :command, :array, nil
     end
   end
@@ -25,7 +23,7 @@ class Exec < Plugin::CloudAction
    
   def execute
     super do |node, network|
-      if network && node
+      ensure_node(node) do
         if settings[:command].length > 1
           settings[:command].collect! do |value|
             if value.strip.match(/\s+/)
@@ -38,8 +36,6 @@ class Exec < Plugin::CloudAction
         command_str   = settings[:command].join(' ')
         result        = node.exec({ :commands => [ command_str ] }).first
         myself.status = result.status
-      else
-        myself.status = code.network_failure
       end
     end
   end
