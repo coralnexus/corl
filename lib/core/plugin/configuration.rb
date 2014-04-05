@@ -16,11 +16,12 @@ class Configuration < CORL.plugin_class(:base)
     
     logger.info("Setting source configuration project")
     @project = CORL.project(extended_config(:project, {
-      :directory => _delete(:directory, Dir.pwd),
-      :url       => _delete(:url),
-      :revision  => _delete(:revision),
-      :create    => _delete(:create, false),
-      :pull      => true
+      :directory   => _delete(:directory, Dir.pwd),
+      :url         => _delete(:url),
+      :revision    => _delete(:revision),
+      :create      => _delete(:create, false),
+      :pull        => true,
+      :internal_ip => CORL.public_ip # Needed for seeding Vagrant VMs
     }), _delete(:project_provider))
         
     _init(:autoload, true)
