@@ -251,12 +251,29 @@ class Vagrant < CORL.plugin_class(:machine)
       
       if success
         box_name = sprintf("%s", node.id).gsub(/\s+/, '-')
+        found    = false
         
-        env.action_runner.run(::Vagrant::Action.action_box_remove, {
-          :box_name     => box_name,
-          :box_provider => node.machine_type
-        })
+        # TODO: Figure out box versions.
+        
+        env.boxes.all.each do |info|
+          registered_box_name     = info[0]
+          registered_box_version  = info[1]
+          registered_box_provider = info[2]
+          
+          if box_name == registered_box_name
+            found = true
+            break
+          end
+        end        
+        
+        if found
+          env.action_runner.run(::Vagrant::Action.action_box_remove, {
+            :box_name     => box_name,
+            :box_provider => node.machine_type
+          })
+        end
       end
+      success
     end
   end
   
