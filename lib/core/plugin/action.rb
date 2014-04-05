@@ -119,7 +119,7 @@ class CloudAction < CORL.plugin_class(:action)
     #
     # A fork in the road...
     #
-    if network.has_nodes? && ! settings[:nodes].empty?
+    if network && network.has_nodes? && ! settings[:nodes].empty?
       # Execute action on remote nodes 
       success = network.batch(settings[:nodes], settings[:node_provider], settings[:parallel]) do |node|
         exec_config = Config.new(settings)
@@ -135,7 +135,8 @@ class CloudAction < CORL.plugin_class(:action)
       myself.status = code.batch_error unless success
     else
       # Execute statement locally
-      node = network.local_node
+      node = nil
+      node = network.local_node if network
       
       if validate(node, network)
         yield(node, network) if block_given?
@@ -177,13 +178,23 @@ class CloudAction < CORL.plugin_class(:action)
   
   #---
   
-  def ensure_node(node, network, &block)
+  def ensure_network(network, &block)
     codes :network_failure
     
-    if network && node
+    if network
       block.call
     else
       myself.status = code.network_failure
+    end
+  end
+  
+  def ensure_node(node, &block)
+    codes :node_failure
+    
+    if node
+      block.call
+    else
+      myself.status = code.node_failure
     end
   end
 end
