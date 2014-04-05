@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: a57ed3f4a158144f8f087a69ade1d5c74ccdbaf5
+  revision: 92232495c4e46a3b114e99ada5157915a654e458
   branch: 0.1
   specs:
     nucleon (0.1.12)
@@ -17,10 +17,10 @@ GIT
 
 GIT
   remote: git://github.com/mitchellh/vagrant.git
-  revision: 6a7c25f19827fc85e8bb979bd58a82ea52433411
+  revision: 1bef7dec61212f585288377a9fbc42ef91f5b6de
   branch: master
   specs:
-    vagrant (1.5.2)
+    vagrant (1.5.3.dev)
       bundler (~> 1.5.2)
       childprocess (~> 0.5.0)
       erubis (~> 2.7.0)
@@ -47,7 +47,6 @@ GEM
   remote: http://rubygems.org/
   specs:
     addressable (2.3.6)
-    atomic (1.1.16)
     builder (3.2.2)
     celluloid (0.15.2)
       timers (~> 1.1.0)
@@ -160,8 +159,7 @@ GEM
       addressable (~> 2.3.5)
       faraday (~> 0.8, < 0.10)
     sshkey (1.6.1)
-    thread_safe (0.3.1)
-      atomic (>= 1.1.7, < 2)
+    thread_safe (0.3.2)
     timers (1.1.0)
     unf (0.1.4)
       unf_ext
