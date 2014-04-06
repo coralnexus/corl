@@ -69,13 +69,14 @@ class Seed < Plugin::CloudAction
             
             render("Seeding network configuration from #{settings[:project_reference]}")
             project = CORL.project(extended_config(:project, {
-              :directory => network_path,
-              :reference => project_info.get(:reference, nil),
-              :url       => project_info.get(:url, settings[:project_reference]),
-              :revision  => project_info.get(:revision, settings[:project_branch]),
-              :create    => true,
-              :pull      => true,
-              :keys      => keys
+              :directory   => network_path,
+              :reference   => project_info.get(:reference, nil),
+              :url         => project_info.get(:url, settings[:project_reference]),
+              :revision    => project_info.get(:revision, settings[:project_branch]),
+              :create      => true,
+              :pull        => true,
+              :keys        => keys,
+              :internal_ip => CORL.public_ip # Needed for seeding Vagrant VMs
             }), project_info[:provider])
         
             if project
