@@ -271,6 +271,10 @@ class Vagrant < CORL.plugin_class(:machine)
             :box_name     => box_name,
             :box_provider => node.machine_type
           })
+          
+          box_name = sprintf("%s", node.id).gsub(/\s+/, '-')
+          box_path = File.join(node.network.directory, 'boxes', "#{box_name}.box")
+          Util::Disk.delete(box_path)
         end
       end
       success
@@ -299,8 +303,8 @@ class Vagrant < CORL.plugin_class(:machine)
   def new_machine(id)
     server = nil
     if command && ! id.empty?
-      if env.vagrantfile.machine_names.include?(id.to_sym)
-        refresh_config
+      refresh_config
+      if env.vagrantfile.machine_names.include?(id.to_sym)        
         server = command.vm_machine(id.to_sym, node.machine_type, true)
       end
     end
