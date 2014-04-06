@@ -3,20 +3,29 @@
 # Because we create configurations and operate on resulting machines during
 # the course of a single CLI command run we need to be able to reload the 
 # configurations based on updates to fetch Vagrant VMs and run Vagrant machine 
-# actions.  TODO: Inquire about inclusion in Vagrant core?
+# actions.  TODO: Inquire about some form of inclusion in Vagrant core?
 #
 module Vagrant
 class Vagrantfile
+  
   def reload
-    @loader.clear_config_cache
+    @loader.clear_config_cache(@keys)
     @config, _ = @loader.load(@keys)
   end
 end
 
 module Config
 class Loader
-  def clear_config_cache
+  def clear_config_cache(sources = nil)
     @config_cache = {}
+    
+    if sources
+      keep = {}
+      sources.each do |source|
+        keep[source] = @sources[source] if @sources[source]
+      end
+      @sources = keep
+    end    
   end    
 end
 end
