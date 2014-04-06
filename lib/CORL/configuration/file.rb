@@ -359,7 +359,7 @@ class File < CORL.plugin_class(:configuration)
   def fetch_project(options = {})
     config  = Config.ensure(options)
     success = true
-    if ! fact(:vagrant_exists) && remote = config.get(:remote, nil)
+    if remote = config.get(:remote, nil)
       logger.info("Pulling configuration updates from remote #{remote}")
       success = project.pull(remote, config) if config.get(:pull, true)   
     end
@@ -379,7 +379,7 @@ class File < CORL.plugin_class(:configuration)
     logger.info("Committing changes to configuration files")        
     success = project.commit(commit_files, config)
           
-    if success && ! fact(:vagrant_exists) && remote = config.get(:remote, nil)
+    if success && remote = config.get(:remote, nil)
       logger.info("Pushing configuration updates to remote #{remote}")
       success = project.pull(remote, config) if config.get(:pull, true)
       success = project.push(remote, config) if success && config.get(:push, true)      
