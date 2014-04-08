@@ -1,9 +1,9 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: 75c4b10685105b84cff809ba24d2a5637d3f2c9c
+  revision: 924063f5b5fd6680e438d7b3ea91bc655e7e6837
   branch: 0.1
   specs:
-    nucleon (0.1.12)
+    nucleon (0.1.13)
       celluloid (~> 0.15)
       childprocess (~> 0.5)
       deep_merge (~> 1.0)
@@ -17,7 +17,7 @@ GIT
 
 GIT
   remote: git://github.com/mitchellh/vagrant.git
-  revision: 1bef7dec61212f585288377a9fbc42ef91f5b6de
+  revision: e8f1f301e6bab643ae652d2ed1fcee0c6ee820c4
   branch: master
   specs:
     vagrant (1.5.3.dev)
@@ -89,7 +89,7 @@ GEM
       multi_json (>= 1.7.5, < 2.0)
       nokogiri (~> 1.6.0)
       oauth2
-    hashie (2.0.5)
+    hashie (2.1.0)
     hiera (1.3.2)
       json_pure
     highline (1.6.21)
@@ -159,7 +159,7 @@ GEM
       addressable (~> 2.3.5)
       faraday (~> 0.8, < 0.10)
     sshkey (1.6.1)
-    thread_safe (0.3.2)
+    thread_safe (0.3.3)
     timers (1.1.0)
     unf (0.1.4)
       unf_ext
