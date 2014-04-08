@@ -104,16 +104,18 @@ class Vagrant < CORL.plugin_class(:machine)
   def download(remote_path, local_path, options = {})
     super do |config, success|
       begin
-        server.communicate.tap do |comm|
-          comm.download(remote_path, local_path)  
+        if init_ssh_session
+          Util::SSH.download(node.public_ip, node.user, remote_path, local_path, config.export) do |name, received, total|
+            yield(name, received, total) if block_given?
+          end
+          true
+        else
+          false
         end
-        success = true
-          
       rescue Exception => error
         ui.error(error.message)
-        success = false
+        false
       end
-      success
     end  
   end
   
@@ -122,16 +124,18 @@ class Vagrant < CORL.plugin_class(:machine)
   def upload(local_path, remote_path, options = {})
     super do |config, success|
       begin
-        server.communicate.tap do |comm|
-          comm.upload(local_path, remote_path)  
+        if init_ssh_session
+          Util::SSH.upload(node.public_ip, node.user, local_path, remote_path, config.export) do |name, sent, total|
+            yield(name, sent, total) if block_given?
+          end
+          true
+        else
+          false
         end
-        success = true
-          
       rescue Exception => error
         ui.error(error.message)
-        success = false
+        false
       end
-      success
     end  
   end
   
@@ -139,41 +143,22 @@ class Vagrant < CORL.plugin_class(:machine)
   
   def exec(commands, options = {})
     super do |config, results|
-      codes :vagrant_exec_failed
-        
-      begin
-        server.communicate.tap do |comm|            
-          commands.each do |command|
-            as_admin = command.match(/^sudo\s+/) ? true : false
-            result   = Util::Shell::Result.new(command.gsub(/^sudo\s+/, '').strip)
-            
-            result.status = comm.execute(result.command, { :sudo => as_admin }) do |type, data|
-              case type
-              when :stdout
-                result.append_output(data)
-                yield(:output, result.command, data) if block_given?      
-              when :stderr
-                result.append_errors(data)
-                yield(:error, result.command, data) if block_given?  
-              end  
-            end
-            results << result
-          end
+      if init_ssh_session
+        results = Util::SSH.exec(node.public_ip, node.user, commands) do |type, command, data|
+          yield(type, command, data) if block_given?  
         end
-          
-      rescue Exception => error
-        ui.error(error.message)
-        results << Util::Shell::Result.new(command, code.vagrant_exec_failed)
-      end      
+      else
+        results = nil
+      end
       results
-    end    
+    end
   end
   
   #---
   
   def terminal(user, options = {})
     super do |config|
-      run(:ssh, { :ssh_opts => config.export }) 
+      Util::SSH.terminal(node.public_ip, user, config.export)
     end
   end
   
@@ -181,7 +166,8 @@ class Vagrant < CORL.plugin_class(:machine)
   
   def reload(options = {})
     super do |config|
-      run(:reload, config)
+      success = run(:reload, config)
+      success = init_ssh_session(true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
     end
   end
 
@@ -200,6 +186,7 @@ class Vagrant < CORL.plugin_class(:machine)
       FileUtils.rm_f(box_path)
       
       begin
+        close_ssh_session
         success = run(:package, config.defaults({ 'package.output' => box_path }), false)
       
         node.set_cache_setting(:box, box_name)
@@ -277,6 +264,7 @@ class Vagrant < CORL.plugin_class(:machine)
           Util::Disk.delete(box_path)
         end
       end
+      close_ssh_session if success
       success
     end
   end
@@ -353,6 +341,34 @@ class Vagrant < CORL.plugin_class(:machine)
     success
   end
   protected :run
+  
+  #---
+    
+  def init_ssh_session(reset = false, tries = 5, sleep_secs = 5)
+    success = true
+        
+    begin
+      Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key, reset)
+            
+    rescue Exception => error
+      if tries > 1
+        sleep(sleep_secs)
+        
+        tries -= 1
+        reset  = true
+        retry
+      else
+        success = false
+      end
+    end
+    success
+  end
+  
+  #---
+  
+  def close_ssh_session
+    Util::SSH.close_session(node.public_ip, node.user)
+  end
 end
 end
 end
