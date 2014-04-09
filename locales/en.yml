@@ -161,6 +161,9 @@ en:
       stop:
         start: |-
           Stopping %{provider} machine %{name}
+      reboot:
+        start: |-
+          Rebooting %{provider} machine %{name}
       destroy:
         start: |-
           Destroying %{provider} machine %{name}        
