@@ -10,9 +10,9 @@ class Puppetnode < CORL.plugin_class(:provisioner)
    
   def normalize(reload)
     super do
-      #if CORL.log_level == :debug
+      if CORL.log_level == :debug
         Puppet.debug = true
-      #end
+      end
       unless reload
         Puppet::Util::Log.newdesttype id do
           def handle(msg)
@@ -29,7 +29,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
             str   = msg.respond_to?(:multiline) ? msg.multiline : msg.to_s
             str   = msg.source == "Puppet" ? str : "#{CORL.blue(msg.source)}: #{str}"
             level = levels[msg.level]
-        
+            
             CORL.ui_group("puppetnode::#{name}(#{CORL.yellow(level[:name])})", :cyan) do |ui|        
               ui.send(level[:send], str)
             end
@@ -66,7 +66,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     
     configured_environment = Puppet.lookup(:current_environment)
     apply_environment      = configured_environment
-        
+    
+    Puppet[:environment]           = apply_environment.name  
     Puppet[:node_name_value]       = id.to_s
     Puppet[:default_file_terminus] = :file_server
     
@@ -255,13 +256,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           environment = init_puppet(profiles)
           
           Puppet.override(:environments => Puppet::Environments::Static.new(environment)) do
-            node_id = id.to_s
-            node    = Puppet::Node.indirection.find(node_id)
-         
-            if facts = Puppet::Node::Facts.indirection.find(node_id)
-              facts.name = node_id
-              node.merge(facts.values)
-            end
+            node      = get_node
             @compiler = Puppet::Parser::Compiler.new(node)
                         
             # Include defaults
@@ -286,7 +281,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
             unless config.get(:dry_run, false)
               ui.info("\n", { :prefix => false })
               ui.info("Starting configuration run")
-                        
+              
+              # Configure the machine          
               configurer = Puppet::Configurer.new
               if ! configurer.run(:catalog => catalog, :pluginsync => false)
                 success = false
