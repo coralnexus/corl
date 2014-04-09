@@ -159,13 +159,8 @@ class CloudAction < CORL.plugin_class(:action)
     end
     
     # Load network if it exists
-    network_config = extended_config(:network, { :directory => network_path, :name => network_path })
-    
-    network = CORL.network(
-      CORL.sha1(network_config), 
-      network_config, 
-      settings[:net_provider]
-    )
+    network_config = extended_config(:network, { :directory => network_path })
+    network        = CORL.network(network_path, network_config, settings[:net_provider])
     network  
   end
   

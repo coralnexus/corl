@@ -95,10 +95,7 @@ module Config
   
   def self.load_network(directory)
     # Load network if it exists
-    CORL.network(
-      :vagrant, 
-      CORL.config(:vagrant_network, { :directory => directory, :name => directory })
-    )
+    CORL.network(directory, CORL.config(:vagrant_network, { :directory => directory }))
   end
   
   #---

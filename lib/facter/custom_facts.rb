@@ -5,8 +5,8 @@ begin
   # Load network if it exists
   if CORL.admin?
     network_path   = Facter.value("corl_network")
-    network_config = CORL.config(:network, { :directory => network_path, :name => network_path })    
-    network        = CORL.network(CORL.sha1(network_config), network_config, :default)
+    network_config = CORL.config(:network, { :directory => network_path })    
+    network        = CORL.network(network_path, network_config, :default)
 
     if network && node = network.local_node
       Facter.add(:corl_provider) do
