@@ -654,7 +654,9 @@ class Node < CORL.plugin_class(:base)
     
     results = exec({ :commands => [ "#{admin_command} #{command.to_s}".strip ] }) do |op, data|
       yield(op, data) if block_given?  
-    end    
+    end
+    
+    CORL.remove_plugin(command)    
     results.first 
   end
   
