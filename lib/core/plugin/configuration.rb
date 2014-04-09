@@ -32,6 +32,12 @@ class Configuration < CORL.plugin_class(:base)
     
     set_location(@project)
   end
+  
+  #---
+  
+  def remove_plugin
+    CORL.remove_plugin(@project)
+  end
    
   #-----------------------------------------------------------------------------
   # Checks

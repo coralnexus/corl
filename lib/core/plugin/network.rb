@@ -17,6 +17,12 @@ class Network < CORL.plugin_class(:base)
     ignore('build')
   end
   
+  #---
+  
+  def remove_plugin
+    CORL.remove_plugin(config)
+  end
+  
   #-----------------------------------------------------------------------------
   # Checks
   
