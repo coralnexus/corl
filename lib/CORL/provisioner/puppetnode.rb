@@ -1,4 +1,4 @@
-    
+   
 module CORL
 module Provisioner
 class Puppetnode < CORL.plugin_class(:provisioner)
@@ -10,9 +10,9 @@ class Puppetnode < CORL.plugin_class(:provisioner)
    
   def normalize(reload)
     super do
-      if CORL.log_level == :debug
+      #if CORL.log_level == :debug
         Puppet.debug = true
-      end
+      #end
       unless reload
         Puppet::Util::Log.newdesttype id do
           def handle(msg)
@@ -38,12 +38,6 @@ class Puppetnode < CORL.plugin_class(:provisioner)
       end
     end  
   end
-    
-  #---
-  
-  def register(options = {})
-    Util::Puppet.register_plugins(Config.ensure(options).defaults({ :puppet_scope => scope }))
-  end
   
   #-----------------------------------------------------------------------------
   # Property accessor / modifiers
@@ -68,19 +62,18 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     Puppet.initialize_settings
     Puppet::Util::Log.newdestination(id)
     
-    # TODO: Figure out how to store these damn settings in a specialized
-    # environment without phantom empty environment issues.
+    Puppet::Transaction::Report.indirection.cache_class = :yaml
     
+    configured_environment = Puppet.lookup(:current_environment)
+    apply_environment      = configured_environment
+        
+    Puppet[:node_name_value]       = id.to_s
     Puppet[:default_file_terminus] = :file_server
-      
-    node = get_node    
-    Puppet[:node_name_value] = id.to_s
     
     unless profiles.empty?
       modulepath = profiles.collect do |profile|
         File.join(build_directory, locations[:module][profile.to_sym])
       end
-      Puppet[:modulepath] = array(modulepath).join(File::PATH_SEPARATOR)
     end
     
     if manifest = gateway
@@ -88,13 +81,18 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         manifest = File.join(build_directory, locations[:build], manifest)
       else
         manifest = File.join(network.directory, directory, manifest)    
-      end    
-      Puppet[:manifest] = manifest   
+      end
     end
     
-    @compiler = Puppet::Parser::Compiler.new(node)
-    register
-    node
+    if modulepath && manifest
+      apply_environment = apply_environment.override_with(:manifest => manifest, :modulepath => array(modulepath))    
+    elsif modulepath   
+      apply_environment = apply_environment.override_with(:modulepath => array(modulepath))      
+    elsif manifest
+      apply_environment = apply_environment.override_with(:manifest => manifest)  
+    end
+                 
+    apply_environment
   end
   protected :init_puppet
   
@@ -253,41 +251,52 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         begin          
           ui.info("Starting catalog generation")
           
-          start_time = Time.now        
-          node       = init_puppet(profiles)
-        
-          # Include defaults
-          classes = include_location.call(:default, {}, true)
-      
-          # Import needed profiles
-          include_location.call(:profiles, {}, false)
-      
-          profiles.each do |profile|
-            classes[profile.to_s] = { :require => 'Anchor[profile_start]' }
-          end
+          start_time  = Time.now        
+          environment = init_puppet(profiles)
           
-          # Compile catalog
-          node.classes = classes
-          compiler.compile
-        
-          # Start system configuration
-          catalog = compiler.catalog.to_ral
-          catalog.finalize
-          catalog.retrieval_duration = Time.now - start_time
-          
-          unless config.get(:dry_run, false)
-            ui.info("\n", { :prefix => false })
-            ui.info("Starting configuration run")
-                        
-            configurer = Puppet::Configurer.new
-            if ! configurer.run(:catalog => catalog, :pluginsync => false)
-              success = false
+          Puppet.override(:environments => Puppet::Environments::Static.new(environment)) do
+            node_id = id.to_s
+            node    = Puppet::Node.indirection.find(node_id)
+         
+            if facts = Puppet::Node::Facts.indirection.find(node_id)
+              facts.name = node_id
+              node.merge(facts.values)
             end
+            @compiler = Puppet::Parser::Compiler.new(node)
+                        
+            # Include defaults
+            classes = include_location.call(:default, {}, true)
+      
+            # Import needed profiles
+            include_location.call(:profiles, {}, false)
+      
+            profiles.each do |profile|
+              classes[profile.to_s] = { :require => 'Anchor[profile_start]' }
+            end
+          
+            node.classes = classes
+            
+            # Compile catalog
+            compiler.compile
+            
+            catalog = compiler.catalog.to_ral
+            catalog.finalize
+            catalog.retrieval_duration = Time.now - start_time
+            
+            unless config.get(:dry_run, false)
+              ui.info("\n", { :prefix => false })
+              ui.info("Starting configuration run")
+                        
+              configurer = Puppet::Configurer.new
+              if ! configurer.run(:catalog => catalog, :pluginsync => false)
+                success = false
+              end
+            end             
           end
         
         rescue Exception => error
-          raise error
           Puppet.log_exception(error)
+          raise error
         end
       end    
       success
