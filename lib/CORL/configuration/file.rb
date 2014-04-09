@@ -76,7 +76,8 @@ class File < CORL.plugin_class(:configuration)
             
             generate_routes.call(config_name, parse_properties)
             properties.import(parse_properties)
-          end         
+          end
+          CORL.remove_plugin(parser) if parser         
         end
       end
     end
@@ -189,6 +190,7 @@ class File < CORL.plugin_class(:configuration)
           else
             success = false
           end
+          CORL.remove_plugin(renderer)
         else
           success = false
         end
