@@ -21,6 +21,10 @@ class Network < CORL.plugin_class(:base)
   
   def remove_plugin
     CORL.remove_plugin(config)
+    
+    each_plugin do |type, provider, name, plugin|
+      CORL.remove_plugin(plugin)  
+    end
   end
   
   #-----------------------------------------------------------------------------
