@@ -56,6 +56,13 @@ class Node < CORL.plugin_class(:base)
     @local_context       = true
     myself.local_machine = create_machine(:local_machine, :physical)
   end
+  
+  #---
+  
+  def remove_plugin
+    CORL.remove_plugin(local_machine) if local_machine
+    CORL.remove_plugin(machine) if machine
+  end
        
   #-----------------------------------------------------------------------------
   # Checks
