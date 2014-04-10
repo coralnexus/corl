@@ -27,10 +27,6 @@ vagrant_dir      = File.join(core_dir, 'vagrant')
 
 $:.unshift(lib_dir) unless $:.include?(lib_dir) || $:.include?(File.expand_path(lib_dir))
 
-#---
-  
-require 'rubygems'
-
 require 'nucleon_base'
 CORL = Nucleon
 
