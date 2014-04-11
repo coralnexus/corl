@@ -105,25 +105,25 @@ class Provisioner < CORL.plugin_class(:base)
   #---
   
   def build_locations(reset = false)
-    locations = hash(myself[:build_locations])
+    locations = cache_setting(:build_locations, {}, :hash)
     build if reset || locations.empty?
-    myself[:build_locations]
+    cache_setting(:build_locations, {}, :hash)
   end
   
   #---
   
   def build_info(reset = false)
-    info = hash(myself[:build_info])
+    info = cache_setting(:build_info, {}, :hash)
     build if reset || info.empty?
-    myself[:build_info]
+    cache_setting(:build_info, {}, :hash)
   end
   
   #---
   
   def build_profiles(reset = false)
-    profiles = array(myself[:build_profiles])
+    profiles = cache_setting(:build_profiles, [], :array)
     build if reset || profiles.empty?
-    myself[:build_profiles]
+    cache_setting(:build_profiles, [], :array)
   end
   
   #-----------------------------------------------------------------------------
@@ -196,17 +196,10 @@ class Provisioner < CORL.plugin_class(:base)
       success = yield(locations, package_info) if block_given?
     
       if success
-        # Save the updates (should build the same on all nodes in same system)
-        myself[:build_locations] = locations.export
-        myself[:build_info]      = package_info.get([ :provisioners, plugin_provider ])
-        myself[:build_profiles]  = find_profiles
-    
-        success = network.save(config.import({
-          :commit      => true,
-          :allow_empty => true, 
-          :message     => config.get(:message, "Built #{plugin_provider} provisioner #{plugin_name}"),
-          :remote      => config.get(:remote, :edit)
-        }))
+        # Save the updates in the local project cache
+        set_cache_setting(:build_locations, locations.export)
+        set_cache_setting(:build_info, package_info.get([ :provisioners, plugin_provider ]))
+        set_cache_setting(:build_profiles, find_profiles)
       end
     end
     success
