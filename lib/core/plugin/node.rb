@@ -3,7 +3,8 @@ module Nucleon
 module Plugin
 class Node < CORL.plugin_class(:base)
   
-  CORL.parallelize(self, :exec, :command, :action)
+  include Parallel
+  external_block_exec :exec, :command, :action
   
   #-----------------------------------------------------------------------------
   # Node plugin interface
