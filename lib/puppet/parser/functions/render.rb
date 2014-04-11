@@ -37,7 +37,10 @@ This function returns the string-ified form of a given value.
         config = CORL::Config.init_flat(options, contexts, default_options)
       end
       
-      value = CORL.template(config, provider).render(data)
+      template = CORL.template(config, provider)
+      value    = template.render(data)
+      
+      CORL.remove_plugin(template)
       
       if config.get(:debug, false)      
         CORL.ui.info("\n", { :prefix => false })
