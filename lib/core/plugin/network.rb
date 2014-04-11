@@ -3,7 +3,7 @@ module Nucleon
 module Plugin
 class Network < CORL.plugin_class(:base)
   
-  init_plugin_collection 
+  init_plugin_collection(:add_node, :batch) 
   
   #-----------------------------------------------------------------------------
   # Cloud plugin interface
@@ -236,8 +236,6 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
-  execute_block_on_receiver :add_node if CORL.parallel?
-  
   def add_node(provider, name, options = {})
     config = Config.ensure(options)
     
@@ -330,8 +328,6 @@ class Network < CORL.plugin_class(:base)
   end
   
   #---
-  
-  execute_block_on_receiver :batch if CORL.parallel?
   
   def batch(node_references, default_provider = nil, parallel = true, &code)
     success = true

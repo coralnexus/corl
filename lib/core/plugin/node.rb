@@ -3,7 +3,7 @@ module Nucleon
 module Plugin
 class Node < CORL.plugin_class(:base)
   
-  CORL.parallelize(self)
+  CORL.parallelize(self, :exec, :command, :action)
   
   #-----------------------------------------------------------------------------
   # Node plugin interface
@@ -574,8 +574,6 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
-  execute_block_on_receiver :exec if CORL.parallel?
-  
   def exec(options = {})
     default_error = Util::Shell::Result.new(:error, 255)
     results       = [ default_error ]
@@ -643,8 +641,6 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
-  execute_block_on_receiver :command if CORL.parallel?
-  
   def command(command, options = {})
     config   = Config.ensure(options)
     as_admin = config.delete(:as_admin, false)
@@ -668,8 +664,6 @@ class Node < CORL.plugin_class(:base)
   end
   
   #---
-  
-  execute_block_on_receiver :action if CORL.parallel?
   
   def action(provider, options = {})
     codes :network_load_error
