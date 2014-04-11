@@ -236,7 +236,7 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
-  execute_block_on_receiver :add_node
+  execute_block_on_receiver :add_node if CORL.parallel?
   
   def add_node(provider, name, options = {})
     config = Config.ensure(options)
@@ -331,7 +331,7 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
-  execute_block_on_receiver :batch
+  execute_block_on_receiver :batch if CORL.parallel?
   
   def batch(node_references, default_provider = nil, parallel = true, &code)
     success = true
@@ -340,7 +340,7 @@ class Network < CORL.plugin_class(:base)
       # Execute action on selected nodes      
       nodes = nodes_by_reference(node_references, default_provider)
       
-      if parallel
+      if CORL.parallel? && parallel
         values = []
         nodes.each do |node|
           values << Celluloid::Future.new(node, &code)

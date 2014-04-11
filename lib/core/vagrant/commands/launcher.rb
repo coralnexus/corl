@@ -4,7 +4,7 @@ module CORL
 module Command
 class Launcher < ::Vagrant.plugin("2", :command)
   
-  include Celluloid
+  ::CORL.parallelize(self) # Mainly for auto locking of resources
   
   #-----------------------------------------------------------------------------
   
@@ -24,7 +24,7 @@ class Launcher < ::Vagrant.plugin("2", :command)
 
   def execute
     # Set the base command so we can access in any actions executed
-    ::CORL::Vagrant.command = current_actor   
+    ::CORL::Vagrant.command = ::CORL.handle(self)   
     ::CORL.executable(@argv - [ "--" ], "vagrant corl")
   end
   

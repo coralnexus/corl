@@ -3,7 +3,7 @@ module Nucleon
 module Plugin
 class Node < CORL.plugin_class(:base)
   
-  include Celluloid
+  CORL.parallelize(self)
   
   #-----------------------------------------------------------------------------
   # Node plugin interface
@@ -574,7 +574,7 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
-  execute_block_on_receiver :exec
+  execute_block_on_receiver :exec if CORL.parallel?
   
   def exec(options = {})
     default_error = Util::Shell::Result.new(:error, 255)
@@ -643,7 +643,7 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
-  execute_block_on_receiver :command
+  execute_block_on_receiver :command if CORL.parallel?
   
   def command(command, options = {})
     config   = Config.ensure(options)
@@ -669,7 +669,7 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
-  execute_block_on_receiver :action
+  execute_block_on_receiver :action if CORL.parallel?
   
   def action(provider, options = {})
     codes :network_load_error

@@ -3,7 +3,7 @@ module Nucleon
 module Plugin
 class Provisioner < CORL.plugin_class(:base)
   
-  include Celluloid
+  CORL.parallelize(self)
   
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
