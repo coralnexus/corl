@@ -3,7 +3,7 @@ class Hiera
 module Backend
 class << self
   #
-  # NOTE: This function is overridden so we can collect accumulated hiera
+  # NOTE: This method is overridden so we can collect accumulated hiera
   # parameters and their values on a particular provisioning run for reporting 
   # purposes.
   #
@@ -37,8 +37,12 @@ class << self
     answer = resolve_answer(answer, resolution_type) unless answer.nil?
     answer = parse_string(default, scope) if answer.nil? and default.is_a?(String)
     answer = default if answer.nil?
-        
-    CORL::Config.set_property(key, answer) # This is why we override this function!!
+    
+    # This is why we override this method!!
+    # TODO: Submit a patch that allows for some kind of hook into the process.
+    if CORL::Config.get_property(key).nil? || answer    
+      CORL::Config.set_property(key, answer)
+    end
     return answer
   end
 end

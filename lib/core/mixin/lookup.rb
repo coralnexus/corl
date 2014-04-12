@@ -124,8 +124,8 @@ module Lookup
     end
     value = Util::Data.value(value, config.get(:undefined_value, :undefined))
     
-    if ! Config.get_property(first_property) || value
-      Config.set_property(first_property.to_s, value)
+    if Config.get_property(first_property).nil? || value
+      Config.set_property(first_property, value)
     end
     
     debug_lookup(config, first_property, value, 'Internalized value')
@@ -161,7 +161,7 @@ module Lookup
     value = Util::Data.value(value, config.get(:undefined_value, :undefined))
     debug_lookup(config, property, value, "Final array value")
        
-    Config.set_property(property.to_s, value)
+    Config.set_property(property, value)
     CORL.ui.info("\n", { :prefix => false }) if config.get(:debug, false)
     value
   end
@@ -190,7 +190,7 @@ module Lookup
     value = Util::Data.value(value, config.get(:undefined_value, :undefined))
     debug_lookup(config, property, value, "Final hash value")
     
-    Config.set_property(property.to_s, value)
+    Config.set_property(property, value)
     CORL.ui.info("\n", { :prefix => false }) if config.get(:debug, false)
     value
   end
