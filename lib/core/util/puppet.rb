@@ -270,10 +270,10 @@ module Puppet
         value = puppet_scope.lookupvar("::#{search_property_name}")
         Config.debug_lookup(config, search_property_name, value, "Puppet override lookup")
         
-        break unless Util::Data.undef?(value)  
+        break unless value.nil?  
       end
     end
-    if Util::Data.undef?(value)
+    if value.nil?
       components = property.to_s.split('::')
       
       if components.length > 1
@@ -284,7 +284,7 @@ module Puppet
         Config.debug_lookup(config, search_property_name, value, "Puppet default lookup")
       end
     end
-    if Util::Data.undef?(value) && search_name
+    if value.nil? && search_name
       value = puppet_scope.lookupvar("::#{property}")
       Config.debug_lookup(config, property, value, "Puppet name lookup")
     end

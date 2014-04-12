@@ -110,7 +110,7 @@ module Lookup
             debug_lookup(config, property, value, "Hiera lookup")
           end 
     
-          if provisioner && Util::Data.undef?(value)
+          if provisioner && value.nil?
             # Search the provisioner scope (only admins can provision a machine)
             value = CORL.provisioner({ :name => :lookup }, provisioner).lookup(property, default, config)
             debug_lookup(config, property, value, "Provisioner lookup")
@@ -118,13 +118,13 @@ module Lookup
         end
       end
     end
-    if Util::Data.undef?(value) # Resort to default
+    if value.nil? # Resort to default
       value = default
       debug_lookup(config, first_property, value, "Default value")
     end
     value = Util::Data.value(value, config.get(:undefined_value, :undefined))
     
-    if ! Config.get_property(first_property) || ! Util::Data.undef?(value)
+    if ! Config.get_property(first_property) || value
       Config.set_property(first_property.to_s, value)
     end
     
