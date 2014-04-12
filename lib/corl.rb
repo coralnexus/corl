@@ -15,6 +15,7 @@
 
 lib_dir          = File.dirname(__FILE__)
 core_dir         = File.join(lib_dir, 'core')
+mod_dir          = File.join(core_dir, 'mod')
 mixin_dir        = File.join(core_dir, 'mixin')
 mixin_action_dir = File.join(mixin_dir, 'action')
 macro_dir        = File.join(mixin_dir, 'macro')
@@ -45,6 +46,11 @@ I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir
 
 #-------------------------------------------------------------------------------
 # Include CORL libraries
+
+# Monkey patches (depreciate as fast as possible)
+nucleon_require(mod_dir, :facter_loader)
+
+#---
 
 # Mixins for classes
 Dir.glob(File.join(mixin_dir, '*.rb')).each do |file|
