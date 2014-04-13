@@ -21,25 +21,45 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
 
   def provision
     @machine.communicate.tap do |comm|
-      network_path = config.network_path
-      network      = config.network
-      node         = config.node
+      network = config.network
+      node    = config.node
       
-      # Make sure the CORL network directory is properly set up
-      comm.sudo("rm -Rf #{network_path}")
-      comm.sudo("ln -s /vagrant #{network_path}")
-      
-      # Make sure the CORL SSH keys are allowed
-      if node.public_key
-        ssh_key = ::CORL::Util::Disk.read(node.public_key)
-        
-        if ssh_key && ! ssh_key.empty?
-          comm.execute("echo '#{ssh_key}' > \$HOME/.ssh/authorized_keys")
-          node.set_cache_setting(:use_private_key, true)
-        end
+      if network && node
+        # Provision the server
+        network.init_node(node, clean(::CORL.config(:vagrant_node_init, {
+          :force             => config.force_updates,
+          :home              => config.user_home,
+          :home_env_var      => config.user_home_env_var,
+          :root_user         => config.root_user,
+          :root_home         => config.root_home,
+          :bootstrap         => config.bootstrap,
+          :bootstrap_path    => config.bootstrap_path,
+          :bootstrap_glob    => config.bootstrap_glob,
+          :bootstrap_init    => config.bootstrap_init,
+          :auth_files        => config.auth_files,
+          :seed              => config.seed,
+          :project_reference => config.project_reference,
+          :project_branch    => config.project_branch,
+          :provision         => config.provision,
+          :dry_run           => config.dry_run
+        }).export))
       end
     end
   end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def clean(options)
+    options.keys.each do |key|
+      value = options[key]
+      if value.nil?
+        options.delete(key)
+      end  
+    end
+    options  
+  end
+  protected :clean
 end
 end
 end
