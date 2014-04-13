@@ -81,11 +81,9 @@ module Config
           end
           
           # Provisioner configuration
-          unless configure_provisioner(network, node, machine)
+          unless configure_provisioner(network, node, machine, &code)
             raise "Configuration of Vagrant provisioner failed: #{node_name}"
           end
-          
-          code.call(network, node, machine) if code
         end        
       end
     end
@@ -95,7 +93,7 @@ module Config
   
   def self.load_network(directory)
     # Load network if it exists
-    CORL.network(directory, CORL.config(:vagrant_network, { :directory => directory }))
+    @@network = CORL.network(directory, CORL.config(:vagrant_network, { :directory => directory }))
   end
   
   #---
@@ -269,14 +267,15 @@ module Config
   
   #---
   
-  def self.configure_provisioner(network, node, machine)
+  def self.configure_provisioner(network, node, machine, &code)
     success = true
     
     # CORL provisioning
     machine.vm.provision :corl do |provisioner|
-      provisioner.network_path = CORL::Config.fact(:corl_network)
-      provisioner.network      = network
-      provisioner.node         = node    
+      provisioner.network = network
+      provisioner.node    = node
+      
+      code.call(node, machine, provisioner) if code   
     end
     success  
   end
