@@ -176,3 +176,15 @@ en:
             Whether or not to build the provisioner catalog without configuring the system (default %{default_value})
         start: |-
           Starting provision run
+    vagrant:
+      actions:
+        init_keys:
+          start: |-
+            Initializing CORL development keys...
+        create_shares:
+          start: |-
+            Creating CORL specific shares...
+        delete_cache:
+          start: |-
+            Clearing CORL cache for this machine...
+            
