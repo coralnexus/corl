@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: 924063f5b5fd6680e438d7b3ea91bc655e7e6837
+  revision: fb965843204533b1e971cfe01b9021efdb75c0b6
   branch: 0.1
   specs:
     nucleon (0.1.13)
@@ -17,7 +17,7 @@ GIT
 
 GIT
   remote: git://github.com/mitchellh/vagrant.git
-  revision: e8f1f301e6bab643ae652d2ed1fcee0c6ee820c4
+  revision: e3501f2079bcb251cb2950ca1299a6490e82e8b3
   branch: master
   specs:
     vagrant (1.5.3.dev)
@@ -25,7 +25,7 @@ GIT
       childprocess (~> 0.5.0)
       erubis (~> 2.7.0)
       i18n (~> 0.6.0)
-      listen (~> 2.4.0)
+      listen (~> 2.7.1)
       log4r (~> 1.1.9, < 1.1.11)
       net-scp (~> 1.1.0)
       net-ssh (>= 2.6.6, < 2.8.0)
@@ -50,6 +50,9 @@ GEM
     builder (3.2.2)
     celluloid (0.15.2)
       timers (~> 1.1.0)
+    celluloid-io (0.15.0)
+      celluloid (>= 0.15.0)
+      nio4r (>= 0.5.0)
     childprocess (0.5.2)
       ffi (~> 1.0, >= 1.0.11)
     deep_merge (1.0.1)
@@ -67,7 +70,7 @@ GEM
       fog-core (~> 1.21, >= 1.21.1)
       fog-json
       nokogiri (~> 1.5, >= 1.5.11)
-    fog-brightbox (0.0.1)
+    fog-brightbox (0.0.2)
       fog-core
       fog-json
     fog-core (1.21.1)
@@ -89,7 +92,7 @@ GEM
       multi_json (>= 1.7.5, < 2.0)
       nokogiri (~> 1.6.0)
       oauth2
-    hashie (2.1.0)
+    hashie (2.1.1)
     hiera (1.3.2)
       json_pure
     highline (1.6.21)
@@ -107,8 +110,9 @@ GEM
     json_pure (1.8.1)
     jwt (0.1.11)
       multi_json (>= 1.5)
-    listen (2.4.1)
+    listen (2.7.1)
       celluloid (>= 0.15.2)
+      celluloid-io (>= 0.15.0)
       rb-fsevent (>= 0.9.3)
       rb-inotify (>= 0.9)
     log4r (1.1.10)
@@ -121,6 +125,7 @@ GEM
       net-ssh (>= 2.6.5)
     net-ssh (2.7.0)
     netrc (0.7.7)
+    nio4r (1.0.0)
     nokogiri (1.6.1)
       mini_portile (~> 0.5.0)
     oauth2 (0.9.3)
