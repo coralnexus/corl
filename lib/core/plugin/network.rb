@@ -268,7 +268,9 @@ class Network < CORL.plugin_class(:base)
       end
       
       if success && node.save({ :remote => remote_name, :message => "Created machine #{name} on #{provider}" })
-        success = init_node(node, config)
+        success = init_node(node, config) do |op, data|
+          block_given? ? yield(op, data) : data  
+        end
       end
     end    
     success 
