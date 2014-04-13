@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2014-04-10"
+  s.date = "2014-04-13"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -84,6 +84,7 @@ Gem::Specification.new do |s|
     "lib/core/mixin/action/keypair.rb",
     "lib/core/mixin/lookup.rb",
     "lib/core/mixin/macro/network_settings.rb",
+    "lib/core/mod/facter_loader.rb",
     "lib/core/mod/fog_aws_server.rb",
     "lib/core/mod/fog_rackspace_server.rb",
     "lib/core/mod/hiera_backend.rb",
@@ -99,6 +100,10 @@ Gem::Specification.new do |s|
     "lib/core/util/puppet/resource.rb",
     "lib/core/util/puppet/resource_group.rb",
     "lib/core/vagrant/Vagrantfile",
+    "lib/core/vagrant/action.rb",
+    "lib/core/vagrant/actions/create_shares.rb",
+    "lib/core/vagrant/actions/delete_cache.rb",
+    "lib/core/vagrant/actions/init_keys.rb",
     "lib/core/vagrant/commands/launcher.rb",
     "lib/core/vagrant/config.rb",
     "lib/core/vagrant/plugins.rb",
