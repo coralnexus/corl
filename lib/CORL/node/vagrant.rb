@@ -86,6 +86,7 @@ class Vagrant < CORL.plugin_class(:node)
     super do |op, config|
       if op == :config
         config.import(exec_options(:create))
+        config[:provision_enabled] = false
       end     
     end
   end
@@ -135,6 +136,7 @@ class Vagrant < CORL.plugin_class(:node)
     super do |op, config|
       if op == :config
         config.import(exec_options(:start))
+        config[:provision_enabled] = false
       end
     end
   end
