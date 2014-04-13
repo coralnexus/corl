@@ -4,7 +4,7 @@ module CORL
 module Command
 class Launcher < ::Vagrant.plugin("2", :command)
   
-  ::CORL.parallelize(self) # Mainly for auto locking of resources
+  include ::CORL::Parallel # Mainly for auto locking of resources
   
   #-----------------------------------------------------------------------------
   
