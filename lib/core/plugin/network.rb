@@ -255,7 +255,7 @@ class Network < CORL.plugin_class(:base)
     })
     
     # Set node data
-    node = set_node(provider, name, node_options)
+    node        = set_node(provider, name, node_options)
     hook_config = { :node => node, :remote => remote_name, :config => config }
     success     = true
     
@@ -268,50 +268,76 @@ class Network < CORL.plugin_class(:base)
       end
       
       if success && node.save({ :remote => remote_name, :message => "Created machine #{name} on #{provider}" })
-        # Bootstrap new machine
-        success = node.bootstrap(home, extended_config(:bootstrap, config)) do |op, data|
-          block_given? ? yield("bootstrap_#{op}".to_sym, data) : data
-        end  
-        
-        if success
-          seed_project = config.get(:project_reference, nil)
-          save_config  = { :commit => true, :remote => remote_name, :push => true }
-                         
-          if seed_project && remote_name
-            # Reset project remote
-            seed_info = Plugin::Project.translate_reference(seed_project)
-                    
-            if seed_info
-              seed_url    = seed_info[:url]
-              seed_branch = seed_info[:revision] if seed_info[:revision]
-            else
-              seed_url = seed_project                
-            end
-            set_remote(:origin, seed_url) if remote_name.to_sym == :edit
-            set_remote(remote_name, seed_url)
-            save_config[:pull] = false
-          end
-          
-          # Save network changes (preliminary)
-          success = node.save(extended_config(:node_save, save_config))
-        
-          if success && seed_project
-            # Seed machine with remote project reference
-            result = node.seed({
-              :project_reference => seed_project,
-              :project_branch    => seed_branch
-            }) do |op, data|
-              yield("seed_#{op}".to_sym, data)
-            end
-            success = result.status == code.success
-          end
-        
-          # Update local network project
-          success = load({ :remote => remote_name, :pull => true }) if success
-        end
+        success = init_node(node, config)
       end
     end    
     success 
+  end
+  
+  #---
+  
+  def init_node(node, options = {})
+    config  = Config.ensure(options)
+    success = true
+    
+    bootstrap = config.delete(:bootstrap, true)
+    seed      = config.delete(:seed, true)
+    provision = config.delete(:provision, true)
+    
+    if bootstrap
+      # Bootstrap machine
+      success = node.bootstrap(home, extended_config(:bootstrap, config)) do |op, data|
+        block_given? ? yield("bootstrap_#{op}".to_sym, data) : data
+      end
+    end
+        
+    if success
+      if seed
+        seed_project = config.get(:project_reference, nil)
+        save_config  = { :commit => true, :remote => remote_name, :push => true }
+                         
+        if seed_project && remote_name
+          # Reset project remote
+          seed_info = Plugin::Project.translate_reference(seed_project)
+                    
+          if seed_info
+            seed_url    = seed_info[:url]
+            seed_branch = seed_info[:revision] if seed_info[:revision]
+          else
+            seed_url = seed_project                
+          end
+          set_remote(:origin, seed_url) if remote_name.to_sym == :edit
+          set_remote(remote_name, seed_url)
+          save_config[:pull] = false
+        end
+          
+        # Save network changes (preliminary)
+        success = node.save(extended_config(:node_save, save_config))
+        
+        if success && seed_project
+          # Seed machine with remote project reference
+          result = node.seed({
+            :project_reference => seed_project,
+            :project_branch    => seed_branch
+          }) do |op, data|
+            yield("seed_#{op}".to_sym, data)
+          end
+          success = result.status == code.success
+        end
+      end
+      
+      if success && provision
+        # Run configured provisioners on machine
+        result = node.provision(config) do |op, data|
+          yield("provision_#{op}".to_sym, data)  
+        end
+        success = result.status == code.success
+      end
+        
+      # Update local network project
+      success = load({ :remote => remote_name, :pull => true }) if success
+    end
+    success
   end
   
   #-----------------------------------------------------------------------------
