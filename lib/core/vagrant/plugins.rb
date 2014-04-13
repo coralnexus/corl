@@ -9,13 +9,19 @@ class Plugin < ::Vagrant.plugin('2')
   
   name '[C]oral [O]rchestration and [R]esearch [L]ibrary'
   description 'The `corl` plugin provides an easy way to develop and test CORL networks locally from within Vagrant.'
-      
-  @@command_dir     = File.join(File.dirname(__FILE__), 'commands')
-  @@provisioner_dir = File.join(File.dirname(__FILE__), 'provisioner') 
+  
+  @@directory       = File.dirname(__FILE__) 
+  @@action_dir      = File.join(@@directory, 'actions')   
+  @@command_dir     = File.join(@@directory, 'commands')
+  @@provisioner_dir = File.join(@@directory, 'provisioner')
+  
+  #--- 
+  
+  nucleon_require(@@directory, :action)
+  nucleon_require(@@command_dir, :launcher)  
 
   # Commands (only one, which launches Nucleon actions)
-  command(:corl) do
-    nucleon_require(@@command_dir, :launcher)
+  command(:corl) do    
     Command::Launcher # Meta command for action launcher
   end
       
@@ -27,6 +33,22 @@ class Plugin < ::Vagrant.plugin('2')
   provisioner(:corl) do
     nucleon_require(@@provisioner_dir, :provisioner)
     Provisioner::CORL
+  end
+  
+  # Action hooks
+  action_hook 'init-keys', :machine_action_up do |hook|
+    nucleon_require(@@action_dir, :init_keys)
+    hook.after Vagrant::Action::Builtin::WaitForCommunicator, Action::InitKeys
+  end
+  
+  action_hook 'create-shares', :machine_action_up do |hook|
+    nucleon_require(@@action_dir, :create_shares)
+    hook.after Action::InitKeys, Action::CreateShares
+  end
+  
+  action_hook 'delete-cache', :machine_action_destroy do |hook|
+    nucleon_require(@@action_dir, :delete_cache)
+    hook.after Vagrant::Action::Builtin::ProvisionerCleanup, Action::DeleteCache
   end
 end
 end
