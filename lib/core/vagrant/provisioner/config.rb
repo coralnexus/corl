@@ -19,13 +19,13 @@ class CORL < ::Vagrant.plugin("2", :config)
     @root_user         = UNSET_VALUE
     @root_home         = UNSET_VALUE
     
-    @bootstrap         = true
+    @bootstrap         = false
     @bootstrap_path    = UNSET_VALUE
     @bootstrap_glob    = UNSET_VALUE
     @bootstrap_init    = UNSET_VALUE
     @auth_files        = UNSET_VALUE
     
-    @seed              = true
+    @seed              = false
     @project_reference = UNSET_VALUE
     @project_branch    = UNSET_VALUE
     

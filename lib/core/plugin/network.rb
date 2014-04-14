@@ -268,7 +268,7 @@ class Network < CORL.plugin_class(:base)
       end
       
       if success && node.save({ :remote => remote_name, :message => "Created machine #{name} on #{provider}" })
-        success = init_node(node, config) do |op, data|
+        success = init_node(node, config.defaults({ :bootstrap => true, :seed => true })) do |op, data|
           block_given? ? yield(op, data) : data  
         end
       end
@@ -282,8 +282,14 @@ class Network < CORL.plugin_class(:base)
     config  = Config.ensure(options)
     success = true
     
-    bootstrap = config.delete(:bootstrap, true)
-    seed      = config.delete(:seed, true)
+    bootstrap = config.delete(:bootstrap, false)
+    seed      = config.delete(:seed, false)
+    
+    unless node.cache_setting(:initialized)
+      bootstrap = true
+      seed      = true
+    end
+       
     provision = config.delete(:provision, true)
     
     if bootstrap
@@ -327,6 +333,8 @@ class Network < CORL.plugin_class(:base)
           success = result.status == code.success
         end
       end
+      
+      node.set_cache_setting(:initialized, true) if success
       
       if success && provision
         # Run configured provisioners on machine
