@@ -21,6 +21,12 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
 
   def provision
     @machine.communicate.tap do |comm|
+      unless ::CORL::Vagrant.command
+        # Hackish solution to ensure our code has access to Vagrant machines.
+        # This serves as a Vagrant VM manager.
+        ::CORL::Vagrant.command = Command::Launcher.new([], @machine.env)
+      end
+    
       network = config.network
       node    = config.node
       
