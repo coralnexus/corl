@@ -1,9 +1,9 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: fb965843204533b1e971cfe01b9021efdb75c0b6
+  revision: f665008257c0307125812676a84ebe2820e05398
   branch: 0.1
   specs:
-    nucleon (0.1.13)
+    nucleon (0.1.14)
       celluloid (~> 0.15)
       childprocess (~> 0.5)
       deep_merge (~> 1.0)
@@ -17,7 +17,7 @@ GIT
 
 GIT
   remote: git://github.com/mitchellh/vagrant.git
-  revision: e3501f2079bcb251cb2950ca1299a6490e82e8b3
+  revision: ec35190cfc920dc816b446f1845060d819d5a7c2
   branch: master
   specs:
     vagrant (1.5.3.dev)
