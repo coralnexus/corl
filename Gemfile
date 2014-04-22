@@ -8,7 +8,7 @@ gem "unf", "~> 0.1"
 gem "facter", "~> 1.7"
 gem "hiera", "~> 1.3"
 
-gem "puppet", "~> 3.2"
+gem "puppet", "~> 3.2", "<= 3.4.3"
 
 group :development do
   gem "bundler", "~> 1.2"
