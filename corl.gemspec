@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2014-04-14"
+  s.date = "2014-04-22"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -112,7 +112,6 @@ Gem::Specification.new do |s|
     "lib/corl.rb",
     "lib/facter/corl_build.rb",
     "lib/facter/corl_config_ready.rb",
-    "lib/facter/corl_exists.rb",
     "lib/facter/corl_network.rb",
     "lib/facter/custom_facts.rb",
     "lib/facter/vagrant_exists.rb",
@@ -161,7 +160,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<unf>, ["~> 0.1"])
       s.add_runtime_dependency(%q<facter>, ["~> 1.7"])
       s.add_runtime_dependency(%q<hiera>, ["~> 1.3"])
-      s.add_runtime_dependency(%q<puppet>, ["~> 3.2"])
+      s.add_runtime_dependency(%q<puppet>, ["<= 3.4.3", "~> 3.2"])
       s.add_development_dependency(%q<bundler>, ["~> 1.2"])
       s.add_development_dependency(%q<jeweler>, ["~> 2.0"])
       s.add_development_dependency(%q<rspec>, ["~> 2.10"])
@@ -174,7 +173,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<unf>, ["~> 0.1"])
       s.add_dependency(%q<facter>, ["~> 1.7"])
       s.add_dependency(%q<hiera>, ["~> 1.3"])
-      s.add_dependency(%q<puppet>, ["~> 3.2"])
+      s.add_dependency(%q<puppet>, ["<= 3.4.3", "~> 3.2"])
       s.add_dependency(%q<bundler>, ["~> 1.2"])
       s.add_dependency(%q<jeweler>, ["~> 2.0"])
       s.add_dependency(%q<rspec>, ["~> 2.10"])
@@ -188,7 +187,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<unf>, ["~> 0.1"])
     s.add_dependency(%q<facter>, ["~> 1.7"])
     s.add_dependency(%q<hiera>, ["~> 1.3"])
-    s.add_dependency(%q<puppet>, ["~> 3.2"])
+    s.add_dependency(%q<puppet>, ["<= 3.4.3", "~> 3.2"])
     s.add_dependency(%q<bundler>, ["~> 1.2"])
     s.add_dependency(%q<jeweler>, ["~> 2.0"])
     s.add_dependency(%q<rspec>, ["~> 2.10"])
