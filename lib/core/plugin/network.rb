@@ -282,12 +282,15 @@ class Network < CORL.plugin_class(:base)
     config  = Config.ensure(options)
     success = true
     
-    bootstrap = config.delete(:bootstrap, false)
-    seed      = config.delete(:seed, false)
+    bootstrap_requested = config.has_key?(:bootstrap)
+    bootstrap           = config.delete(:bootstrap, false)
+    
+    seed_requested      = config.has_key?(:seed)
+    seed                = config.delete(:seed, false)
     
     unless node.cache_setting(:initialized)
-      bootstrap = true
-      seed      = true
+      bootstrap = true unless bootstrap_requested
+      seed      = true unless seed_requested
     end
        
     provision = config.delete(:provision, true)
