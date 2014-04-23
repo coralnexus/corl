@@ -18,6 +18,8 @@ class Seed < Plugin::CloudAction
       
       register :project_branch, :str, 'master'
       register :project_reference, :str, nil do |value|
+        next true if value.nil?
+        
         value           = value.to_sym
         project_plugins = CORL.loaded_plugins(:project)
         
