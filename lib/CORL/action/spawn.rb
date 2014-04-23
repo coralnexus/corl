@@ -13,6 +13,10 @@ class Spawn < Plugin::CloudAction
       codes :key_failure,
             :node_create_failure
       
+      register :bootstrap, :bool, true
+      register :seed, :bool, true
+      register :provision, :bool, true
+      
       register :groups, :array, []      
       register :region, :str, nil
       register :machine_type, :str, nil
