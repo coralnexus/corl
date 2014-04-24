@@ -146,7 +146,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/coralnexus/corl"
   s.licenses = ["GPLv3"]
   s.rdoc_options = ["--title", "Cluster Orchestration and Research Library", "--main", "README.rdoc", "--line-numbers"]
-  s.required_ruby_version = Gem::Requirement.new(">= 2.0")
+  s.required_ruby_version = Gem::Requirement.new(">= 1.9.1")
   s.rubyforge_project = "corl"
   s.rubygems_version = "2.2.2"
   s.summary = "Cluster Orchestration and Research Library"
