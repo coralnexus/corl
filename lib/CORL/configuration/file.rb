@@ -12,15 +12,6 @@ class File < CORL.plugin_class(:configuration)
       _set(:router, Config.new)
     end
   end
-  
-  #--- 
-  
-  def self.finalize(file_name)
-    proc do
-      logger.debug("Finalizing file: #{file_name}")
-      Util::Disk.close(file_name)
-    end
-  end
     
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
@@ -318,7 +309,6 @@ class File < CORL.plugin_class(:configuration)
           :info     => info,
           :file     => file
         }
-        ObjectSpace.define_finalizer(myself, myself.class.finalize(file))
       else
         logger.info("Configuration file #{file} does not exist")   
       end  
