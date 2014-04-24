@@ -14,6 +14,8 @@ class Network < CORL.plugin_class(:base)
     logger.info("Initializing sub configuration from source with: #{myself._export.inspect}")
     myself.config = CORL.configuration(Config.new(myself._export).import({ :autosave => false, :create => false })) unless reload
     
+    config.delete(:directory) # TODO: Figure out what to do with this??
+    
     ignore('build')
   end
   
