@@ -313,8 +313,22 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
+  def build_time=time
+    myself[:build] = time
+  end
+  
   def build_time
     myself[:build]
+  end
+  
+  #---
+  
+  def bootstrap_script=bootstrap
+    myself[:bootstrap] = bootstrap
+  end
+  
+  def bootstrap_script
+    myself[:bootstrap]  
   end
   
   #-----------------------------------------------------------------------------
@@ -349,10 +363,10 @@ class Node < CORL.plugin_class(:base)
       end
     end
     
-    if success
+    if success && config.delete(:save, true)
       ui.success("Saving successful build")
       
-      myself[:build] = Time.now.to_s
+      myself.build_time = Time.now.to_s
     
       success = save(extended_config(:build, {
         :message => config.get(:message, "Built #{plugin_provider} node: #{plugin_name}"),
@@ -798,7 +812,7 @@ class Node < CORL.plugin_class(:base)
           if status == code.success
             remote_script = File.join(remote_bootstrap_path, bootstrap_init)
             
-            myself[:bootstrap] = remote_script
+            myself.bootstrap_script = remote_script
             
             result = command("HOSTNAME='#{hostname}' #{remote_script}", { :as_admin => true }) do |op, data|
               yield("exec_#{op}".to_sym, data) if block_given?

@@ -61,6 +61,26 @@ class Vagrant < CORL.plugin_class(:node)
     hash(myself[:shares])
   end
   
+  #---
+  
+  def build_time=time
+    set_cache_setting(:build, time)
+  end
+  
+  def build_time
+    cache_setting(:build, nil)
+  end
+  
+  #---
+  
+  def bootstrap_script=bootstrap
+    set_cache_setting(:bootstrap, bootstrap)
+  end
+  
+  def bootstrap_script
+    cache_setting(:bootstrap, nil)  
+  end
+  
   #-----------------------------------------------------------------------------
   # Settings groups
     
@@ -81,6 +101,12 @@ class Vagrant < CORL.plugin_class(:node)
   
   #-----------------------------------------------------------------------------
   # Node operations
+  
+  def build(options = {})
+    super(Config.ensure(options).import({ :save => false }))  
+  end
+  
+  #---
   
   def create(options = {})
     super do |op, config|
