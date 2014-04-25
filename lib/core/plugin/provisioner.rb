@@ -107,7 +107,7 @@ class Provisioner < CORL.plugin_class(:base)
   def build_locations(reset = false)
     locations = cache_setting(:build_locations, {}, :hash)
     build if reset || locations.empty?
-    cache_setting(:build_locations, {}, :hash)
+    symbol_map(cache_setting(:build_locations, {}, :hash))
   end
   
   #---
@@ -115,7 +115,7 @@ class Provisioner < CORL.plugin_class(:base)
   def build_info(reset = false)
     info = cache_setting(:build_info, {}, :hash)
     build if reset || info.empty?
-    cache_setting(:build_info, {}, :hash)
+    symbol_map(cache_setting(:build_info, {}, :hash))
   end
   
   #---
