@@ -363,10 +363,10 @@ class Node < CORL.plugin_class(:base)
       end
     end
     
+    myself.build_time = Time.now.to_s if success
+    
     if success && config.delete(:save, true)
-      ui.success("Saving successful build")
-      
-      myself.build_time = Time.now.to_s
+      ui.success("Saving successful build")    
     
       success = save(extended_config(:build, {
         :message => config.get(:message, "Built #{plugin_provider} node: #{plugin_name}"),
@@ -884,7 +884,7 @@ class Node < CORL.plugin_class(:base)
         success = save(config) if success
         
         if success
-          if bootstrap_script = myself[:bootstrap]
+          if config.get(:bootstrap, true) && bootstrap_script
             result = command("HOSTNAME='#{hostname}' #{bootstrap_script}", { :as_admin => true }) do |op, data|
               yield("bootstrap_#{op}".to_sym, data) if block_given?
               data
