@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2014-04-25"
+  s.date = "2014-04-28"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -83,6 +83,7 @@ Gem::Specification.new do |s|
     "lib/core/facade.rb",
     "lib/core/mixin/action/keypair.rb",
     "lib/core/mixin/lookup.rb",
+    "lib/core/mixin/machine/ssh.rb",
     "lib/core/mixin/macro/network_settings.rb",
     "lib/core/mod/facter_loader.rb",
     "lib/core/mod/fog_aws_server.rb",
