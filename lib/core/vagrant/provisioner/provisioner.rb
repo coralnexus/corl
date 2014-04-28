@@ -32,7 +32,7 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
       
       if network && node
         # Provision the server
-        network.init_node(node, clean(::CORL.config(:vagrant_node_init, {
+        success = network.init_node(node, clean(::CORL.config(:vagrant_node_init, {
           :force             => config.force_updates,
           :home              => config.user_home,
           :home_env_var      => config.user_home_env_var,
@@ -49,6 +49,8 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
           :provision         => config.provision,
           :dry_run           => config.dry_run
         }).export))
+        
+        node.ui.warn("CORL provisioner failed") unless success
       end
     end
   end
