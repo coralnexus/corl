@@ -611,15 +611,21 @@ class Node < CORL.plugin_class(:base)
         end
         
         if commands = config.get(:commands, nil)
-          results = active_machine.exec(commands, config.export) do |type, command, data|
-            unless local?
-              if type == :error
-                alert(filter_output(type, data))
-              else
-                render(filter_output(type, data))
+          begin
+            test = active_machine.exec(commands, config.export) do |type, command, data|
+              unless local?
+                if type == :error
+                  alert(filter_output(type, data))
+                else
+                  render(filter_output(type, data))
+                end
               end
+              yield(:progress, { :type => type, :command => command, :data => data }) if block_given?   
             end
-            yield(:progress, { :type => type, :command => command, :data => data }) if block_given?   
+            results = test if test
+            
+          rescue Exception => error
+            default_error.append_errors(error.message)   
           end
         else
           default_error.append_errors("No execution command")    
