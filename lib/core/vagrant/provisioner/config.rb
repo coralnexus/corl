@@ -19,17 +19,17 @@ class CORL < ::Vagrant.plugin("2", :config)
     @root_user         = UNSET_VALUE
     @root_home         = UNSET_VALUE
     
-    @bootstrap         = false
+    @bootstrap         = UNSET_VALUE
     @bootstrap_path    = UNSET_VALUE
     @bootstrap_glob    = UNSET_VALUE
     @bootstrap_init    = UNSET_VALUE
     @auth_files        = UNSET_VALUE
     
-    @seed              = false
+    @seed              = UNSET_VALUE
     @project_reference = UNSET_VALUE
     @project_branch    = UNSET_VALUE
     
-    @provision         = true
+    @provision         = UNSET_VALUE
     @dry_run           = false
   end
   
@@ -43,13 +43,17 @@ class CORL < ::Vagrant.plugin("2", :config)
     @root_user         = nil if @root_user == UNSET_VALUE
     @root_home         = nil if @root_home == UNSET_VALUE
     
+    @bootstrap         = nil if @bootstrap == UNSET_VALUE
     @bootstrap_path    = nil if @bootstrap_path == UNSET_VALUE
     @bootstrap_glob    = nil if @bootstrap_glob == UNSET_VALUE
     @bootstrap_init    = nil if @bootstrap_init == UNSET_VALUE
     @auth_files        = nil if @auth_files == UNSET_VALUE
     
+    @seed              = nil if @seed == UNSET_VALUE
     @project_reference = nil if @project_reference == UNSET_VALUE
     @project_branch    = nil if @project_branch == UNSET_VALUE
+    
+    @provision         = nil if @provision == UNSET_VALUE
   end
   
   #-----------------------------------------------------------------------------
