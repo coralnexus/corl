@@ -3,6 +3,10 @@ module CORL
 module Machine
 class Vagrant < CORL.plugin_class(:machine)
   
+  include Mixin::Machine::SSH
+  
+  #---
+  
   @@lock = Mutex.new
     
   #-----------------------------------------------------------------------------
@@ -101,56 +105,25 @@ class Vagrant < CORL.plugin_class(:machine)
   
   #---
   
-  def download(remote_path, local_path, options = {})
+  def download(remote_path, local_path, options = {}, &code)
     super do |config, success|
-      begin
-        if init_ssh_session
-          Util::SSH.download(node.public_ip, node.user, remote_path, local_path, config.export) do |name, received, total|
-            yield(name, received, total) if block_given?
-          end
-          true
-        else
-          false
-        end
-      rescue Exception => error
-        ui.error(error.message)
-        false
-      end
+      ssh_download(remote_path, local_path, config, &code)
     end  
   end
   
   #---
   
-  def upload(local_path, remote_path, options = {})
+  def upload(local_path, remote_path, options = {}, &code)
     super do |config, success|
-      begin
-        if init_ssh_session
-          Util::SSH.upload(node.public_ip, node.user, local_path, remote_path, config.export) do |name, sent, total|
-            yield(name, sent, total) if block_given?
-          end
-          true
-        else
-          false
-        end
-      rescue Exception => error
-        ui.error(error.message)
-        false
-      end
+      ssh_upload(local_path, remote_path, config, &code)
     end  
   end
   
   #---
   
-  def exec(commands, options = {})
-    super do |config, results|
-      if init_ssh_session
-        results = Util::SSH.exec(node.public_ip, node.user, commands) do |type, command, data|
-          yield(type, command, data) if block_given?  
-        end
-      else
-        results = nil
-      end
-      results
+  def exec(commands, options = {}, &code)
+    super do |config|
+      ssh_exec(commands, config, &code)
     end
   end
   
@@ -158,7 +131,7 @@ class Vagrant < CORL.plugin_class(:machine)
   
   def terminal(user, options = {})
     super do |config|
-      Util::SSH.terminal(node.public_ip, user, config.export)
+      ssh_terminal(user, config)
     end
   end
   
@@ -203,7 +176,7 @@ class Vagrant < CORL.plugin_class(:machine)
           load
         end
         
-      rescue Exception => error
+      rescue => error
         ui.error(error.message)
         success = false
       end
@@ -332,7 +305,7 @@ class Vagrant < CORL.plugin_class(:machine)
         
         server.send(:action, action.to_sym, params)
         
-      rescue Exception => error
+      rescue => error
         ui.error(error)
         ui.error(Util::Data.to_yaml(error.backtrace))
         success = false
@@ -341,34 +314,6 @@ class Vagrant < CORL.plugin_class(:machine)
     success
   end
   protected :run
-  
-  #---
-    
-  def init_ssh_session(reset = false, tries = 5, sleep_secs = 5)
-    success = true
-        
-    begin
-      Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key, reset)
-            
-    rescue Exception => error
-      if tries > 1
-        sleep(sleep_secs)
-        
-        tries -= 1
-        reset  = true
-        retry
-      else
-        success = false
-      end
-    end
-    success
-  end
-  
-  #---
-  
-  def close_ssh_session
-    Util::SSH.close_session(node.public_ip, node.user)
-  end
 end
 end
 end

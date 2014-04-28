@@ -6,6 +6,8 @@ nucleon_require(File.dirname(__FILE__), :machine)
 module CORL
 module Machine
 class Fog < CORL.plugin_class(:machine)
+  
+  include Mixin::Machine::SSH
  
   #-----------------------------------------------------------------------------
   # Checks
@@ -135,10 +137,10 @@ class Fog < CORL.plugin_class(:machine)
   
   #---
   
-  def create(options = {})
+  def create(options = {}, &code)
     super do |config|
       if compute
-        yield(config) if block_given?
+        code.call(config) if code
         myself.server = compute.servers.bootstrap(config.export)
       end
       myself.server ? true : false
@@ -147,64 +149,25 @@ class Fog < CORL.plugin_class(:machine)
   
   #---
   
-  def download(remote_path, local_path, options = {})
+  def download(remote_path, local_path, options = {}, &code)
     super do |config, success|
-      logger.debug("Executing SCP download to #{local_path} from #{remote_path} on machine #{plugin_name}") 
-      
-      begin
-        if init_ssh_session(server)
-          Util::SSH.download(node.public_ip, node.user, remote_path, local_path, config.export) do |name, received, total|
-            yield(name, received, total) if block_given?
-          end
-          true
-        else
-          false
-        end
-      rescue Exception => error
-        ui.error(error.message)
-        false
-      end
+      ssh_download(remote_path, local_path, config, &code)
     end  
   end
   
   #---
   
-  def upload(local_path, remote_path, options = {})
+  def upload(local_path, remote_path, options = {}, &code)
     super do |config, success|
-      logger.debug("Executing SCP upload from #{local_path} to #{remote_path} on machine #{plugin_name}") 
-      
-      begin
-        if init_ssh_session(server)
-          Util::SSH.upload(node.public_ip, node.user, local_path, remote_path, config.export) do |name, sent, total|
-            yield(name, sent, total) if block_given?
-          end
-          true
-        else
-          false
-        end
-      rescue Exception => error
-        ui.error(error.message)
-        false
-      end
+      ssh_upload(local_path, remote_path, config, &code)
     end  
   end
   
   #---
   
-  def exec(commands, options = {})
-    super do |config, results|
-      if commands
-        logger.debug("Executing SSH commands ( #{commands.inspect} ) on machine #{plugin_name}")
-        
-        if init_ssh_session(server)
-          results = Util::SSH.exec(node.public_ip, node.user, commands) do |type, command, data|
-            yield(type, command, data) if block_given?  
-          end
-        else
-          results = nil
-        end
-      end
-      results
+  def exec(commands, options = {}, &code)
+    super do |config|
+      ssh_exec(commands, config, &code)
     end
   end
   
@@ -212,36 +175,27 @@ class Fog < CORL.plugin_class(:machine)
   
   def terminal(user, options = {})
     super do |config|
-      Util::SSH.terminal(node.public_ip, user, config.export)
+      ssh_terminal(user, config)
     end
   end
   
   #---
   
-  def reload(options = {})
+  def reload(options = {}, &code)
     super do |config|
-      success = false
-      if server
-        success = block_given? ? yield(config) : true            
-        success = init_ssh_session(server, true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
-      end
-      success
+      success = code ? code.call(config) : true            
+      success = init_ssh_session(true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
     end
   end
 
   #---
  
-  def create_image(options = {})
+  def create_image(options = {}, &code)
     super do |config|
-      success = false
-      if server
-        logger.debug("Imaging machine #{plugin_name}")
-        
-        image_name = sprintf("%s (%s)", node.plugin_name, Time.now.to_s)
-        success    = yield(image_name, config, success) if block_given? # Implement in sub classes
-        success    = init_ssh_session(server, true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
-      end
-      success
+      image_name = sprintf("%s (%s)", node.plugin_name, Time.now.to_s)
+      
+      success = code ? code.call(image_name, config, success) : true 
+      success = init_ssh_session(true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
     end
   end
   
@@ -249,27 +203,18 @@ class Fog < CORL.plugin_class(:machine)
   
   def stop(options = {})
     super do |config|
-      success = true
-      if server && create_image(config)      
-        logger.debug("Stopping machine #{plugin_name}")
-        success = destroy(config.import({ :stop => true }))
-      else
-        success = false            
-      end
-      success
+      success = false            
+      success = destroy(config.import({ :stop => true })) if create_image(config)
     end
   end
   
   #---
 
-  def destroy(options = {})
+  def destroy(options = {}, &code)
     super do |config|
-      success = false
-      if server
-        logger.debug("Destroying machine #{plugin_name}")
-        success = server.destroy
-        success = yield(config) if success && block_given?
-      end
+      success = server.destroy
+      success = code.call(config) if success && code
+      
       close_ssh_session if success
       success
     end
@@ -278,32 +223,8 @@ class Fog < CORL.plugin_class(:machine)
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def init_ssh_session(server, reset = false, tries = 5, sleep_secs = 5)
+  def ssh_wait_for_ready
     server.wait_for { ready? }
-    
-    success = true
-        
-    begin
-      Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key, reset)
-            
-    rescue Exception => error
-      if tries > 1
-        sleep(sleep_secs)
-        
-        tries -= 1
-        reset  = true
-        retry
-      else
-        success = false
-      end
-    end
-    success
-  end
-  
-  #---
-  
-  def close_ssh_session
-    Util::SSH.close_session(node.public_ip, node.user)
   end
 end
 end

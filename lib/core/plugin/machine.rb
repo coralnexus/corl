@@ -151,7 +151,7 @@ class Machine < CORL.plugin_class(:base)
     results = []
     
     if running?
-      logger.debug("Executing commands on #{plugin_provider} machine with: #{options.inspect}")
+      logger.info("Executing commands ( #{commands.inspect} ) on machine #{plugin_name}")
       config  = Config.ensure(options)      
       results = yield(config, results) if block_given?
     else
