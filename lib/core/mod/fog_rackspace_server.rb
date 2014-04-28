@@ -18,6 +18,7 @@ class Server
     @password = nil if password_lock
     
     Fog::SSH.new(ssh_ip_address, username, credentials).run(commands)
+    
   rescue Errno::ECONNREFUSED, Net::SSH::Disconnect
     sleep(1)
     retry

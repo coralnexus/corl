@@ -22,13 +22,19 @@ class Server
       Nucleon::Util::SSH.session(ssh_ip_address, username, ssh_port, private_key_path, true)
       results = Nucleon::Util::SSH.exec(ssh_ip_address, username, commands)
             
-    rescue Exception => error
+    rescue Net::SSH::HostKeyMismatch => error
+      error.remember_host!
+      sleep 0.2
+      reset = true
+      retry
+      
+    rescue Net::SSH::ConnectionTimeout, Net::SSH::Disconnect => error     
       if tries > 1
-        sleep(sleep_secs)        
+        sleep(sleep_secs)
+        
         tries -= 1
+        reset  = true
         retry
-      else
-        raise error
       end
     end
   end

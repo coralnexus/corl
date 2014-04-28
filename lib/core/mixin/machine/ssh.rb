@@ -20,7 +20,7 @@ module SSH
       reset = true
       retry
 
-    rescue Net::SSH::ConnectionTimeout => error     
+    rescue Net::SSH::ConnectionTimeout, Net::SSH::Disconnect => error     
       if tries > 1
         sleep(sleep_secs)
         
@@ -33,6 +33,7 @@ module SSH
       
     rescue => error
       ui.warn(error)
+      success = false
     end
     success
   end
