@@ -1,4 +1,3 @@
-
 module CORL
 module Mixin
 module Machine
@@ -16,13 +15,11 @@ module SSH
       Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key, reset)
             
     rescue Net::SSH::HostKeyMismatch => error
-      if error.is_a?(Net::SSH::HostKeyMismatch)
-        error.remember_host!
-        sleep 0.2
-        reset = true
-        retry
-      end
-      
+      error.remember_host!
+      sleep 0.2
+      reset = true
+      retry
+
     rescue Net::SSH::ConnectionTimeout => error     
       if tries > 1
         sleep(sleep_secs)
