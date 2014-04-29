@@ -120,13 +120,13 @@ module Puppet
     when :type, :define
       CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
         rendered_title = Util::Console.blue(title)
-        ui.info("Adding #{type[:name]} #{rendered_title}")
+        ui.info("Adding #{type[:name].capitalize}[#{rendered_title}]")
       end
       add_definition(type, title, properties, config)
     when :class
       CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
         rendered_title = Util::Console.blue(title)
-        ui.info("Adding class #{rendered_title}")
+        ui.info("Adding Class[#{rendered_title}]")
       end
       add_class(title, properties, config)
     end
@@ -214,7 +214,8 @@ module Puppet
       if classes.is_a?(Array)
         classes.each do |klass|
           CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
-            ui.info("Including class #{klass}")
+            rendered_klass = Util::Console.blue(klass)
+            ui.info("Including Class[#{rendered_klass}]")
           end
           class_data[klass] = properties
         end
