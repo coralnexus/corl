@@ -120,7 +120,7 @@ module Puppet
     when :type, :define
       CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
         rendered_title    = Util::Console.blue(title)
-        rendered_resource = Util::Console.green("#{type[:name].capitalize}[#{rendered_title}]")
+        rendered_resource = Util::Console.green("#{type_name(type[:name])}[#{rendered_title}]")
         ui.info("Adding #{rendered_resource}")
       end
       add_definition(type, title, properties, config)
