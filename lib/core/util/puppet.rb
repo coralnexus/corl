@@ -217,7 +217,7 @@ module Puppet
         classes.each do |klass|
           CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
             rendered_klass    = Util::Console.blue(klass)
-            rendered_resource = Util::Console.green(rendered_klass)
+            rendered_resource = Util::Console.green("Class[#{rendered_klass}]")
             ui.info("Including #{rendered_resource}")
           end
           class_data[klass] = properties
