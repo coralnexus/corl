@@ -20,7 +20,7 @@ module SSH
       reset = true
       retry
 
-    rescue Net::SSH::ConnectionTimeout, Net::SSH::Disconnect => error     
+    rescue Errno::ECONNREFUSED, Net::SSH::ConnectionTimeout, Net::SSH::Disconnect => error     
       if tries > 1
         sleep(sleep_secs)
         
