@@ -593,7 +593,7 @@ class Node < CORL.plugin_class(:base)
     default_error = Util::Shell::Result.new(:error, 255)
     results       = [ default_error ]
     
-    if machine && machine.running?
+    if local? && local_machine || machine && machine.running?
       config = Config.ensure(options)
       
       if extension_check(:exec, { :config => config })
