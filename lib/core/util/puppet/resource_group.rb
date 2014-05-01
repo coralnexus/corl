@@ -121,6 +121,8 @@ class ResourceGroup < Core
     resources = Data.value(resources)
     
     unless Data.empty?(resources)
+      resource_names = {}
+      
       resources.keys.each do |name|
         if ! resources[name] || resources[name].empty? || ! resources[name].is_a?(Hash)
           resources.delete(name)
@@ -151,10 +153,13 @@ class ResourceGroup < Core
           
           if normalize
             resource = Resource.new(self, info, name, resources[name]).defaults(default, config)
-            resources[name] = resource
+            resource_names[name] = true
+            resources[name]      = resource
           end
         end
       end
+      
+      config[:resource_names] = resource_names
       resources.each do |name, resource|
         resource.process(config)
       end
@@ -168,14 +173,7 @@ class ResourceGroup < Core
   def translate(resources, options = {})
     config  = Config.ensure(options)
     results = {}
-        
-    prefix   = config.get(:resource_prefix, '')    
-    name_map = {}
-    
-    resources.keys.each do |name|
-      name_map[name] = true
-    end
-    config[:resource_names] = name_map
+    prefix  = config.get(:resource_prefix, '')    
     
     resources.each do |name, resource|
       unless prefix.empty?
