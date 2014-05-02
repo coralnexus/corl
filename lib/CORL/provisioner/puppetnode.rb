@@ -28,6 +28,10 @@ class Puppetnode < CORL.plugin_class(:provisioner)
             str = msg.respond_to?(:multiline) ? msg.multiline : msg.to_s
             str = msg.source == "Puppet" ? str : "#{CORL.blue(msg.source)}: #{str}"
             level = levels[msg.level]
+            
+            if [ :warn, :error ].include?(level[:send])
+              myself.status = 111
+            end
         
             CORL.ui_group("puppetnode::#{name}(#{CORL.yellow(level[:name])})", :cyan) do |ui|
               ui.send(level[:send], str)
@@ -252,6 +256,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         begin
           ui.info("Starting catalog generation")
           
+          myself.status = code.success
+          
           start_time = Time.now
           node = init_puppet(profiles)
         
@@ -289,6 +295,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           Puppet.log_exception(error)
         end
       end
+      success = false if myself.status != code.success
       success
     end
   end
