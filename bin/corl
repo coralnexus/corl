@@ -1,3 +1,9 @@
 #!/usr/bin/env ruby
 require 'corl'
-exit(CORL.executable(ARGV, :corl))
+
+if nucleon_locate :vagrant
+  system(*[ 'vagrant', 'corl', ARGV ].flatten)
+  exit($?.exitstatus)
+else
+  exit(CORL.executable(ARGV, :corl))  
+end
