@@ -4,6 +4,14 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   
   @@puppet_lock = Mutex.new
   
+  #---
+  
+  @@status = {}
+  
+  def self.status
+    @@status
+  end
+  
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
    
@@ -30,7 +38,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
             level = levels[msg.level]
             
             if [ :warn, :error ].include?(level[:send])
-              myself.status = 111
+              ::CORL::Provisioner::Puppetnode.status[name] = 111
             end
         
             CORL.ui_group("puppetnode::#{name}(#{CORL.yellow(level[:name])})", :cyan) do |ui|
@@ -256,7 +264,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
         begin
           ui.info("Starting catalog generation")
           
-          myself.status = code.success
+          @@status[id] = code.success
           
           start_time = Time.now
           node = init_puppet(profiles)
@@ -295,7 +303,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           Puppet.log_exception(error)
         end
       end
-      success = false if myself.status != code.success
+      success = false if @@status[id] != code.success
       success
     end
   end
