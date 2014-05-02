@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require 'corl'
 
-if nucleon_locate :vagrant
+if ! CORL.admin? && nucleon_locate(:vagrant)
   system(*[ 'vagrant', 'corl', ARGV ].flatten)
   exit($?.exitstatus)
 else
