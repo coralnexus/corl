@@ -9,6 +9,15 @@ class Lookup < Plugin::CloudAction
   def configure
     super do
       register :property, :str, nil
+      register :context, :str, :priority do |value|
+        success = true
+        options = [ :priority, :array, :hash ]
+        unless options.include?(value.to_sym)
+          warn('corl.actions.lookup.errors.context', { :value => value, :options => options.join(', ') })
+          success = false
+        end
+        success
+      end
     end
   end
   

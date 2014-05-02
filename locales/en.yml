@@ -141,6 +141,13 @@ en:
         options:
           command: |-
             Command line executable and arguments to execute on machine
+      lookup:
+        options:
+          context: |-
+            Lookup evaluation context; priority, array, hash (default %{default_value})
+        errors:
+          context: |-
+            Lookup evaluation context %{value} is not valid >> Possible contexts: %{choices}
       seed:
         options:
           project_branch: |-
