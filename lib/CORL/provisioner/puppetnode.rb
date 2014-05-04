@@ -83,9 +83,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     # environment without phantom empty environment issues.
     
     Puppet[:default_file_terminus] = :file_server
-      
-    node = get_node
-    Puppet[:node_name_value] = id.to_s
+    Puppet[:node_name_value]       = id.to_s
     
     unless profiles.empty?
       modulepath = profiles.collect do |profile|
@@ -103,6 +101,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
       Puppet[:manifest] = manifest
     end
     
+    node      = get_node
     @compiler = Puppet::Parser::Compiler.new(node)
     register
     node
