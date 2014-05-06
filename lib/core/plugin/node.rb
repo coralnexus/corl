@@ -741,6 +741,7 @@ class Node < CORL.plugin_class(:base)
         end
         
         config[:private_keys] = private_key
+        config[:port]         = ssh_port
         
         myself.status = active_machine.terminal(user, config.export)
         
