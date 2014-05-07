@@ -29,7 +29,6 @@ module Facade
   end
   
   def vagrant_config(directory, config, &code)
-    require File.join(File.dirname(__FILE__), 'vagrant', 'config.rb')
     Vagrant::Config.register(directory, config, &code)
     @@vagrant_config_loaded = true
   end

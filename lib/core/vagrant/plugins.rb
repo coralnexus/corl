@@ -17,6 +17,7 @@ class Plugin < ::Vagrant.plugin('2')
   
   #--- 
   
+  nucleon_require(@@directory, :config)
   nucleon_require(@@directory, :action)
   nucleon_require(@@command_dir, :launcher)  
 
