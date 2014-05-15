@@ -32,24 +32,23 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
       
       if network && node
         # Provision the server
-        success = true
-        #success = network.init_node(node, clean(::CORL.config(:vagrant_node_init, {
-        #  :force             => config.force_updates,
-        #  :home              => config.user_home,
-        #  :home_env_var      => config.user_home_env_var,
-        #  :root_user         => config.root_user,
-        #  :root_home         => config.root_home,
-        #  :bootstrap         => config.bootstrap,
-        #  :bootstrap_path    => config.bootstrap_path,
-        #  :bootstrap_glob    => config.bootstrap_glob,
-        #  :bootstrap_init    => config.bootstrap_init,
-        #  :auth_files        => config.auth_files,
-        #  :seed              => config.seed,
-        #  :project_reference => config.project_reference,
-        #  :project_branch    => config.project_branch,
-        #  :provision         => config.provision,
-        #  :dry_run           => config.dry_run
-        #}).export))
+        success = network.init_node(node, clean(::CORL.config(:vagrant_node_init, {
+          :force             => config.force_updates,
+          :home              => config.user_home,
+          :home_env_var      => config.user_home_env_var,
+          :root_user         => config.root_user,
+          :root_home         => config.root_home,
+          :bootstrap         => config.bootstrap,
+          :bootstrap_path    => config.bootstrap_path,
+          :bootstrap_glob    => config.bootstrap_glob,
+          :bootstrap_init    => config.bootstrap_init,
+          :auth_files        => config.auth_files,
+          :seed              => config.seed,
+          :project_reference => config.project_reference,
+          :project_branch    => config.project_branch,
+          :provision         => config.provision,
+          :dry_run           => config.dry_run
+        }).export))
         
         node.ui.warn("CORL provisioner failed") unless success
       end
