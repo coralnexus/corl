@@ -240,20 +240,39 @@ module Config
   #---
   
   def self.configure_shares(node, machine)
-    success = true
+    bindfs_installed = Gems.exist?('vagrant-bindfs')
+    success          = true
+    
+    if bindfs_installed
+      machine.vm.synced_folder ".", "/vagrant", disabled: true
+      machine.vm.synced_folder ".", "/tmp/vagrant", :type => "nfs"
+      machine.bindfs.bind_folder "/tmp/vagrant", "/vagrant"
+    end
     
     Util::Data.hash(node.shares).each do |name, options|
-      config     = CORL::Config.ensure(options)      
+      config     = CORL::Config.ensure(options)
+      share_type = config.get(:type, nil)      
       local_dir  = config.delete(:local, '')
       remote_dir = config.delete(:remote, '')
       
       config.init(:create, true)
       
       unless local_dir.empty? || remote_dir.empty?
-        share_options = {}
+        bindfs_options = config.delete(:bindfs, {})
+        share_options  = {}
       
         config.keys.each do |key|
           share_options[key] = Util::Data.value(config[key])
+        end      
+        
+        if share_type && share_type.to_sym == :nfs && bindfs_installed
+          final_dir  = remote_dir
+          remote_dir = [ '/tmp', remote_dir.sub(/^\//, '') ].join('/')
+          
+          #dbg(remote_dir, 'vm bindfs local')
+          #dbg(final_dir, 'vm bindfs remote')
+          #dbg(bindfs_options, 'vm bindfs options')  
+          machine.bindfs.bind_folder remote_dir, final_dir, bindfs_options
         end
         
         #dbg(local_dir, 'vm share local')

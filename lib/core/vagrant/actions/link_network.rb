@@ -2,11 +2,11 @@
 module VagrantPlugins
 module CORL
 module Action
-class CreateShares < BaseAction
+class LinkNetwork < BaseAction
 
   def call(env)
     super do
-      env[:ui].info I18n.t("corl.vagrant.actions.create_shares.start")
+      env[:ui].info I18n.t("corl.vagrant.actions.link_network.start")
       
       vm.communicate.tap do |comm|
         # TODO: Figure out a better solution for remote network path.

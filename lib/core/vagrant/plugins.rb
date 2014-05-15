@@ -42,9 +42,9 @@ class Plugin < ::Vagrant.plugin('2')
     hook.after Vagrant::Action::Builtin::WaitForCommunicator, Action::InitKeys
   end
   
-  action_hook 'create-shares', :machine_action_up do |hook|
-    nucleon_require(@@action_dir, :create_shares)
-    hook.after Action::InitKeys, Action::CreateShares
+  action_hook 'link-network', :machine_action_up do |hook|
+    nucleon_require(@@action_dir, :link_network)
+    hook.after Action::InitKeys, Action::LinkNetwork
   end
   
   action_hook 'delete-cache', :machine_action_destroy do |hook|
