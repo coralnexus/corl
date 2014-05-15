@@ -29,14 +29,14 @@ Jeweler::Tasks.new do |gem|
   gem.name                  = "corl"
   gem.homepage              = "http://github.com/coralnexus/corl"
   gem.rubyforge_project     = 'corl'
-  gem.license               = "GPLv3"
+  gem.license               = "Apache License, Version 2.0"
   gem.email                 = "adrian.webb@coralnexus.com"
   gem.authors               = ["Adrian Webb"]
-  gem.summary               = %Q{Cluster Orchestration and Research Library}
+  gem.summary               = %Q{Coral Orchestration and Research Library}
   gem.description           = %Q{Framework that provides a simple foundation for growing organically in the cloud} 
   gem.required_ruby_version = '>= 1.9.1'
   gem.has_rdoc              = true
-  gem.rdoc_options << '--title' << 'Cluster Orchestration and Research Library' <<
+  gem.rdoc_options << '--title' << 'Coral Orchestration and Research Library' <<
                       '--main' << 'README.rdoc' <<
                       '--line-numbers'
                       
