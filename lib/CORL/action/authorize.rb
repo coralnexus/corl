@@ -10,6 +10,7 @@ class Authorize < Plugin::CloudAction
     super do
       codes :key_store_failure
       
+      register :reset, :bool, false
       register :public_key, :str, nil
     end
   end
@@ -33,6 +34,8 @@ class Authorize < Plugin::CloudAction
         public_key      = settings[:public_key].strip
         key_found       = false
         
+        File.delete(authorized_keys) if settings[:reset]
+                
         if File.exists?(authorized_keys)
           Util::Disk.read(authorized_keys).split("\n").each do |line|
             if line.strip.include?(public_key)
