@@ -44,6 +44,12 @@ class Network < CORL.plugin_class(:base)
   
   #---
   
+  def hiera_override_dir
+    File.join(directory, 'config')
+  end
+  
+  #---
+  
   def home
     extension_set(:home, ( ENV['USER'] == 'root' ? '/root' : ENV['HOME'] )) 
   end
@@ -157,15 +163,15 @@ class Network < CORL.plugin_class(:base)
   def local_node(require_new = false)
     ip_address = CORL.public_ip  
     local_node = node_by_ip(ip_address, require_new)
-        
+    
     if local_node.nil?
-      name       = Util::Data.ensure_value(lookup(:fqdn), ip_address)    
+      name       = Util::Data.ensure_value(lookup(:fqdn), ip_address)
       local_node = CORL.node(name, extended_config(:local_node).import({ :meta => { :parent => myself }}), :local) 
     else
       local_node.network = myself
       local_node.normalize(true)
       local_node.localize               
-    end    
+    end
     local_node
   end
   

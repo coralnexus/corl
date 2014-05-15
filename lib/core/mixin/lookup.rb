@@ -9,19 +9,17 @@ module Lookup
   def facts
     fact_map = {}
     
-    CORL.silence do
-      Facter.list.each do |name|
-        fact_map[name] = Facter.value(name)
-      end
+    Facter.list.each do |name|
+      fact_map[name] = Facter.value(name)
     end
-    
+        
     fact_map
   end
   
+  #---
+  
   def fact(name)
-    CORL.silence do
-      Facter.value(name)
-    end
+    Facter.value(name)
   end
   
   #-----------------------------------------------------------------------------
@@ -31,25 +29,67 @@ module Lookup
   
   #---
   
-  def hiera_config
+  def hiera_override_dir
+    nil # Override if needed. (See network and node plugins)
+  end
+  
+  #---
+  
+  def hiera_facts
+    facts # Override if needed. (See node plugin)
+  end
+  
+  #---
+  
+  def hiera_configuration
     Kernel.load File.join(File.dirname(__FILE__), '..', 'mod', 'hiera_backend.rb')
     
+    backends    = CORL.value(:hiera_backends, [ "json", "yaml" ])
     config_file = CORL.value(:hiera_config_file, File.join(Hiera::Util.config_dir, 'hiera.yaml'))
     config      = {}
 
-    if config_file && File.exist?(config_file)
+    if CORL.admin? && config_file && File.exist?(config_file)
       config = Hiera::Config.load(config_file)
     end
     config[:logger] = :corl
     
-    results = CORL.config(:hiera_config, { :config => config })
-    results[:config]
+    unless config[:merge_behavior]
+      config[:merge_behavior] = "deeper"
+    end
+    
+    unless config[:backends]
+      config[:backends] = backends
+    end
+    
+    if override_dir = hiera_override_dir
+      backends.each do |backend|
+        if config[:backends].include?(backend)
+          backend = backend.to_sym
+          config[backend] = {} unless config[backend]
+          config[backend][:datadir] = override_dir
+        end
+      end
+    end
+    
+    hiera_config = CORL.config(:hiera, config)
+    loaded_facts = Util::Data.prefix('::', hiera_facts, '')
+    
+    unless loaded_facts.empty?
+      hiera_config[:hierarchy].collect! do |search| 
+        Hiera::Interpolate.interpolate(search, loaded_facts, {})
+      end
+    end
+    
+    unless config[:hierarchy]
+      config[:hierarchy] = [ "common" ]
+    end
+    hiera_config.export
   end
   
   #---
 
-  def hiera
-    @@hiera = Hiera.new(:config => hiera_config) if @@hiera.nil?
+  def hiera(reset = false)
+    @@hiera = Hiera.new(:config => hiera_configuration) if reset || @@hiera.nil?
     @@hiera
   end
   
@@ -58,8 +98,14 @@ module Lookup
       
   def config_initialized?
     ready = false
-    if CORL.admin? && hiera && network_path = fact(:corl_network)
-      ready = File.directory?(File.join(network_path, 'config')) ? true : false
+    if hiera
+      if CORL.admin?
+        if network_path = fact(:corl_network)
+          ready = File.directory?(File.join(network_path, 'config'))
+        end
+      else
+        ready = hiera_override_dir && File.directory?(hiera_override_dir)
+      end
     end
     ready
   end
@@ -100,21 +146,19 @@ module Lookup
       debug_lookup(config, property, value, "Fact lookup")
       
       unless value
-        if CORL.admin? 
-          if config_initialized?
-            # Try to find in Hiera data store (these might be security sensitive)
-            unless hiera_scope.respond_to?('[]')
-              hiera_scope = Hiera::Scope.new(hiera_scope)
-            end
-            value = hiera.lookup(property.to_s, nil, hiera_scope, override, context)
-            debug_lookup(config, property, value, "Hiera lookup")
-          end 
-    
-          if provisioner && value.nil?
-            # Search the provisioner scope (only admins can provision a machine)
-            value = CORL.provisioner({ :name => :lookup }, provisioner).lookup(property, default, config)
-            debug_lookup(config, property, value, "Provisioner lookup")
+        if config_initialized?
+          # Try to find in Hiera data store
+          unless hiera_scope.respond_to?('[]')
+            hiera_scope = Hiera::Scope.new(hiera_scope)
           end
+          value = hiera.lookup(property.to_s, nil, hiera_scope, override, context)
+          debug_lookup(config, property, value, "Hiera lookup")
+        end 
+    
+        if CORL.admin? && provisioner && value.nil?
+          # Search the provisioner scope (only admins can provision a machine)
+          value = CORL.provisioner({ :name => :lookup }, provisioner).lookup(property, default, config)
+          debug_lookup(config, property, value, "Provisioner lookup")
         end
       end
     end

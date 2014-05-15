@@ -22,8 +22,9 @@ module NetworkSettings
       network.send("#{_type}_setting", plugin_provider, plugin_name, property, default, format)
     end
   
-    define_method :search do |property, default = nil, format = false|
-      network.send("search_#{_type}", plugin_provider, plugin_name, property, default, format)
+    define_method :search do |property, default = nil, format = false, lookup_settings = true|
+      extra_groups = ( lookup_settings ? lookup_array(:settings) : [] )
+      network.send("search_#{_type}", plugin_provider, plugin_name, property, default, format, extra_groups)
     end
   
     define_method :set_setting do |property, value = nil|
@@ -77,13 +78,13 @@ module NetworkSettings
     #---
     
     define_method :add_groups do |groups|
-      myself[:settings] = array(myself[:settings]) | array(groups)
+      myself[:settings] = array(setting(:settings)) | array(groups)
     end
     
     #---
     
     define_method :remove_groups do |groups|
-      myself[:settings] = array(myself[:settings]) - array(groups)
+      myself[:settings] = array(setting(:settings)) - array(groups)
     end    
   end
 end

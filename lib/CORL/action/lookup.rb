@@ -34,9 +34,10 @@ class Lookup < Plugin::CloudAction
     super do |node, network|
       ensure_node(node) do
         property = settings.delete(:property)
-        value    = node.lookup(property, nil, settings)
+        value    = lookup(property, nil, settings)
       
-        ui.info(sprintf("#{property} = %s", value.inspect))
+        ui.info(Util::Data.to_json(value, true))
+        myself.result = value
       end
     end
   end

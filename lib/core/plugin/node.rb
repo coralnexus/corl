@@ -85,6 +85,23 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
+  def hiera_override_dir
+    network.hiera_override_dir
+  end
+  
+  #---
+  
+  def hiera_facts
+    default_configs = extended_config(:hiera_default_facts, {
+      :fqdn          => hostname, 
+      :hostname      => hostname.gsub(/\..*$/, ''),
+      :corl_provider => plugin_provider.to_s
+    })
+    Config.new(lookup_facts).defaults(default_configs).export
+  end
+  
+  #---
+  
   def machine
     @machine
   end
@@ -106,26 +123,26 @@ class Node < CORL.plugin_class(:base)
   #---
   
   def id(reset = false)
-    myself[:id] = machine.plugin_name if machine && ( reset || myself[:id].nil? )
-    myself[:id]
+    myself[:id] = machine.plugin_name if machine && ( reset || setting(:id).nil? )
+    setting(:id)
   end
   
   #---
   
   def public_ip(reset = false)
-    myself[:public_ip] = machine.public_ip if machine && ( reset || myself[:public_ip].nil? )
-    myself[:public_ip]
+    myself[:public_ip] = machine.public_ip if machine && ( reset || setting(:public_ip).nil? )
+    setting(:public_ip)
   end
   
   def private_ip(reset = false)
-    myself[:private_ip] = machine.private_ip if machine && ( reset || myself[:private_ip].nil? )
-    myself[:private_ip]
+    myself[:private_ip] = machine.private_ip if machine && ( reset || setting(:private_ip).nil? )
+    setting(:private_ip)
   end
   
   #---
   
   def hostname
-    hostname = myself[:hostname]
+    hostname = setting(:hostname)
     
     if hostname.to_s != ui.resource.to_s 
       ui.resource = Util::Console.colorize(hostname, @class_color)
@@ -137,8 +154,8 @@ class Node < CORL.plugin_class(:base)
   #---
   
   def state(reset = false)
-    myself[:state] = machine.state if machine && ( reset || myself[:state].nil? )
-    myself[:state]
+    myself[:state] = machine.state if machine && ( reset || setting(:state).nil? )
+    setting(:state)
   end
   
   #---
@@ -276,12 +293,22 @@ class Node < CORL.plugin_class(:base)
   
   #---
   
+  def custom_facts=facts
+    myself[:facts] = hash(facts)
+  end
+  
+  def custom_facts
+    search(:facts, {}, :hash, false)
+  end
+  
+  #---
+  
   def profiles=profiles
     myself[:profiles] = array(profiles)
   end
   
   def profiles
-    array(myself[:profiles])
+    [ array(myself[:profiles]), lookup_array(:profiles).reverse ].flatten
   end
   
   #---
@@ -335,8 +362,8 @@ class Node < CORL.plugin_class(:base)
   # Settings groups
   
   def machine_config
-    name   = myself[:id]
-    name   = myself[:hostname] if name.nil? || name.empty?
+    name   = setting(:id)
+    name   = setting(:hostname) if name.nil? || name.empty?
     config = Config.new({ :name => name })
     
     yield(config) if block_given?
@@ -753,6 +780,49 @@ class Node < CORL.plugin_class(:base)
       logger.warn("Node #{plugin_name} does not have an attached machine or is not running so cannot launch terminal")
     end
     status == code.success
+  end
+  
+  #---
+  
+  def lookup_facts
+    if ! local? && bootstrap_script
+      result = run.facts
+      
+      if result.status == code.success
+        return Util::Data.symbol_map(Util::Data.parse_json(result.output))
+      end
+    end
+    local? ? facts : custom_facts
+  end
+  
+  #---
+  
+  def lookup_config(property, default = nil, options = {})
+    if ! local? && bootstrap_script
+      config = Config.ensure(options).import({ :property => property })
+      result = run.lookup(config)
+    
+      if result.status == code.success
+        return Util::Data.value(Util::Data.parse_json(result.output), default)
+      end
+      return default
+    end
+    options[:hiera_scope] = Util::Data.prefix('::', lookup_facts, '')
+    lookup(property, default, options)  
+  end
+  
+  #---
+  
+  def lookup_array(property, default = [], options = {})
+    config = Config.ensure(options).import({ :context => :array })
+    lookup_config(property, default, config)  
+  end
+  
+  #---
+  
+  def lookup_hash(property, default = {}, options = {})
+    config = Config.ensure(options).import({ :context => :hash })
+    lookup_config(property, default, config)  
   end
   
   #---
