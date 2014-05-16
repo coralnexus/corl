@@ -14,7 +14,7 @@ class Facts < Plugin::CloudAction
       ensure_node(node) do
         facter_facts = Config.facts
       
-        ui.info(Util::Data.to_json(facter_facts, true))
+        ui.info(Util::Data.to_json(facter_facts, true), { :prefix => false })
         myself.result = facter_facts
       end
     end

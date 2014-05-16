@@ -36,7 +36,7 @@ class Lookup < Plugin::CloudAction
         property = settings.delete(:property)
         value    = lookup(property, nil, settings)
       
-        ui.info(Util::Data.to_json(value, true))
+        ui.info(Util::Data.to_json(value, true), { :prefix => false })
         myself.result = value
       end
     end
