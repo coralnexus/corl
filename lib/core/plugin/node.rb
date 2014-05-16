@@ -298,7 +298,7 @@ class Node < CORL.plugin_class(:base)
   end
   
   def custom_facts
-    search(:facts, {}, :hash, false)
+    search(:facts, {}, :hash)
   end
   
   #---
