@@ -16,6 +16,8 @@ class InitKeys < BaseAction
             comm.execute("echo '#{ssh_key}' > \$HOME/.ssh/authorized_keys")
           end
           node.set_cache_setting(:use_private_key, true)
+          env[:machine].config.ssh.private_key_path = node.private_key
+          
           node.machine.load
         end
       end      
