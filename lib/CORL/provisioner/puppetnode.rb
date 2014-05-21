@@ -82,6 +82,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     # TODO: Figure out how to store these damn settings in a specialized
     # environment without phantom empty environment issues.
     
+    Puppet[:data_binding_terminus] = 'corl'
     Puppet[:default_file_terminus] = :file_server
     Puppet[:node_name_value]       = id.to_s
     
