@@ -1,4 +1,7 @@
 
 [submodule "bootstrap"]
 	path = bootstrap
-	url = git://github.com/coralnexus/corl-bootstrap.git
+	url = https://github.com/coralnexus/corl-bootstrap.git
+[submodule "rdoc/template"]
+	path = rdoc/template
+	url = https://github.com/coralnexus/rdoc-darkfish-template.git
