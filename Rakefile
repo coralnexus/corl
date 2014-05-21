@@ -70,7 +70,7 @@ class RDoc::Options
 end
 
 Rake::RDocTask.new do |rdoc|
-  rdoc.rdoc_dir = 'rdoc/site'
+  rdoc.rdoc_dir = File.join('rdoc', 'site', version)
   
   rdoc.title    = doc_title
   rdoc.main     = 'README.rdoc' 
