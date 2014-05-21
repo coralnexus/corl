@@ -74,14 +74,21 @@ module Lookup
     hiera_config = CORL.config(:hiera, config)
     loaded_facts = Util::Data.prefix('::', hiera_facts, '')
     
+    if hiera_config[:hierarchy]
+      hiera_config[:hierarchy].delete('common')
+    end
+    
     unless loaded_facts.empty?
       hiera_config[:hierarchy].collect! do |search| 
         Hiera::Interpolate.interpolate(search, loaded_facts, {})
       end
     end
     
-    unless config[:hierarchy]
-      config[:hierarchy] = [ "common" ]
+    unless hiera_config[:hierarchy]
+      hiera_config[:hierarchy] = [ 'common' ]
+    end
+    unless hiera_config[:hierarchy].include?('common')
+      hiera_config[:hierarchy] << 'common'
     end
     hiera_config.export
   end
