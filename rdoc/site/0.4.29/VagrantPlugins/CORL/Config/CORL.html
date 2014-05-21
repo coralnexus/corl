@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>class VagrantPlugins::CORL::Config::CORL - corl 0.4.29</title>
+
+<link type="text/css" media="screen" href="../../../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../../";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="../../../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../../js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../../js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../../js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../../js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../../js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="../../../index.html">Home</a>
+    <a href="../../../table_of_contents.html#classes">Classes</a>
+    <a href="../../../table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/core/vagrant/provisioner/config.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">Vagrant.plugin("2", :config)
+  
+</nav>
+
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-c-new">::new</a>
+    
+    <li><a href="#method-i-finalize-21">#finalize!</a>
+    
+    <li><a href="#method-i-validate">#validate</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="../../../README_rdoc.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="../../../CORL.html">CORL</a>
+  
+    <li><a href="../../../CORL/Action.html">CORL::Action</a>
+  
+    <li><a href="../../../CORL/Action/Authorize.html">CORL::Action::Authorize</a>
+  
+    <li><a href="../../../CORL/Action/Bootstrap.html">CORL::Action::Bootstrap</a>
+  
+    <li><a href="../../../CORL/Action/Build.html">CORL::Action::Build</a>
+  
+    <li><a href="../../../CORL/Action/Destroy.html">CORL::Action::Destroy</a>
+  
+    <li><a href="../../../CORL/Action/Exec.html">CORL::Action::Exec</a>
+  
+    <li><a href="../../../CORL/Action/Facts.html">CORL::Action::Facts</a>
+  
+    <li><a href="../../../CORL/Action/Image.html">CORL::Action::Image</a>
+  
+    <li><a href="../../../CORL/Action/Images.html">CORL::Action::Images</a>
+  
+    <li><a href="../../../CORL/Action/Ip.html">CORL::Action::Ip</a>
+  
+    <li><a href="../../../CORL/Action/Keypair.html">CORL::Action::Keypair</a>
+  
+    <li><a href="../../../CORL/Action/Lookup.html">CORL::Action::Lookup</a>
+  
+    <li><a href="../../../CORL/Action/Machines.html">CORL::Action::Machines</a>
+  
+    <li><a href="../../../CORL/Action/Provision.html">CORL::Action::Provision</a>
+  
+    <li><a href="../../../CORL/Action/Reboot.html">CORL::Action::Reboot</a>
+  
+    <li><a href="../../../CORL/Action/Regions.html">CORL::Action::Regions</a>
+  
+    <li><a href="../../../CORL/Action/Revoke.html">CORL::Action::Revoke</a>
+  
+    <li><a href="../../../CORL/Action/Seed.html">CORL::Action::Seed</a>
+  
+    <li><a href="../../../CORL/Action/Spawn.html">CORL::Action::Spawn</a>
+  
+    <li><a href="../../../CORL/Action/Ssh.html">CORL::Action::Ssh</a>
+  
+    <li><a href="../../../CORL/Action/Start.html">CORL::Action::Start</a>
+  
+    <li><a href="../../../CORL/Action/Stop.html">CORL::Action::Stop</a>
+  
+    <li><a href="../../../CORL/Action/Vagrantfile.html">CORL::Action::Vagrantfile</a>
+  
+    <li><a href="../../../CORL/Configuration.html">CORL::Configuration</a>
+  
+    <li><a href="../../../CORL/Configuration/File.html">CORL::Configuration::File</a>
+  
+    <li><a href="../../../CORL/Errors.html">CORL::Errors</a>
+  
+    <li><a href="../../../CORL/Event.html">CORL::Event</a>
+  
+    <li><a href="../../../CORL/Event/Puppet.html">CORL::Event::Puppet</a>
+  
+    <li><a href="../../../CORL/Facade.html">CORL::Facade</a>
+  
+    <li><a href="../../../CORL/Machine.html">CORL::Machine</a>
+  
+    <li><a href="../../../CORL/Machine/Aws.html">CORL::Machine::Aws</a>
+  
+    <li><a href="../../../CORL/Machine/Fog.html">CORL::Machine::Fog</a>
+  
+    <li><a href="../../../CORL/Machine/Physical.html">CORL::Machine::Physical</a>
+  
+    <li><a href="../../../CORL/Machine/Rackspace.html">CORL::Machine::Rackspace</a>
+  
+    <li><a href="../../../CORL/Machine/Vagrant.html">CORL::Machine::Vagrant</a>
+  
+    <li><a href="../../../CORL/Mixin.html">CORL::Mixin</a>
+  
+    <li><a href="../../../CORL/Mixin/Action.html">CORL::Mixin::Action</a>
+  
+    <li><a href="../../../CORL/Mixin/Action/Keypair.html">CORL::Mixin::Action::Keypair</a>
+  
+    <li><a href="../../../CORL/Mixin/Lookup.html">CORL::Mixin::Lookup</a>
+  
+    <li><a href="../../../CORL/Mixin/Machine.html">CORL::Mixin::Machine</a>
+  
+    <li><a href="../../../CORL/Mixin/Machine/SSH.html">CORL::Mixin::Machine::SSH</a>
+  
+    <li><a href="../../../CORL/Mixin/Macro.html">CORL::Mixin::Macro</a>
+  
+    <li><a href="../../../CORL/Mixin/Macro/NetworkSettings.html">CORL::Mixin::Macro::NetworkSettings</a>
+  
+    <li><a href="../../../CORL/Network.html">CORL::Network</a>
+  
+    <li><a href="../../../CORL/Network/Default.html">CORL::Network::Default</a>
+  
+    <li><a href="../../../CORL/Node.html">CORL::Node</a>
+  
+    <li><a href="../../../CORL/Node/Aws.html">CORL::Node::Aws</a>
+  
+    <li><a href="../../../CORL/Node/Fog.html">CORL::Node::Fog</a>
+  
+    <li><a href="../../../CORL/Node/Local.html">CORL::Node::Local</a>
+  
+    <li><a href="../../../CORL/Node/Rackspace.html">CORL::Node::Rackspace</a>
+  
+    <li><a href="../../../CORL/Node/Vagrant.html">CORL::Node::Vagrant</a>
+  
+    <li><a href="../../../CORL/Plugin.html">CORL::Plugin</a>
+  
+    <li><a href="../../../CORL/Plugin/CloudAction.html">CORL::Plugin::CloudAction</a>
+  
+    <li><a href="../../../CORL/Provisioner.html">CORL::Provisioner</a>
+  
+    <li><a href="../../../CORL/Provisioner/Puppetnode.html">CORL::Provisioner::Puppetnode</a>
+  
+    <li><a href="../../../CORL/Template.html">CORL::Template</a>
+  
+    <li><a href="../../../CORL/Template/Environment.html">CORL::Template::Environment</a>
+  
+    <li><a href="../../../CORL/Util.html">CORL::Util</a>
+  
+    <li><a href="../../../CORL/Util/Puppet.html">CORL::Util::Puppet</a>
+  
+    <li><a href="../../../CORL/Util/Puppet/Resource.html">CORL::Util::Puppet::Resource</a>
+  
+    <li><a href="../../../CORL/Util/Puppet/ResourceGroup.html">CORL::Util::Puppet::ResourceGroup</a>
+  
+    <li><a href="../../../CORL/Vagrant.html">CORL::Vagrant</a>
+  
+    <li><a href="../../../CORL/Vagrant/Config.html">CORL::Vagrant::Config</a>
+  
+    <li><a href="../../../VagrantPlugins.html">VagrantPlugins</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL.html">VagrantPlugins::CORL</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Action.html">VagrantPlugins::CORL::Action</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Action/DeleteCache.html">VagrantPlugins::CORL::Action::DeleteCache</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Action/InitKeys.html">VagrantPlugins::CORL::Action::InitKeys</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Action/LinkNetwork.html">VagrantPlugins::CORL::Action::LinkNetwork</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/BaseAction.html">VagrantPlugins::CORL::BaseAction</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Command.html">VagrantPlugins::CORL::Command</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Command/Launcher.html">VagrantPlugins::CORL::Command::Launcher</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Config.html">VagrantPlugins::CORL::Config</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Config/CORL.html">VagrantPlugins::CORL::Config::CORL</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Plugin.html">VagrantPlugins::CORL::Plugin</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Provisioner.html">VagrantPlugins::CORL::Provisioner</a>
+  
+    <li><a href="../../../VagrantPlugins/CORL/Provisioner/CORL.html">VagrantPlugins::CORL::Provisioner::CORL</a>
+  
+    <li><a href="../../../Nucleon.html">Nucleon</a>
+  
+    <li><a href="../../../Nucleon/Config.html">Nucleon::Config</a>
+  
+    <li><a href="../../../Nucleon/Plugin.html">Nucleon::Plugin</a>
+  
+    <li><a href="../../../Nucleon/Plugin/Base.html">Nucleon::Plugin::Base</a>
+  
+    <li><a href="../../../Nucleon/Plugin/Configuration.html">Nucleon::Plugin::Configuration</a>
+  
+    <li><a href="../../../Nucleon/Plugin/Machine.html">Nucleon::Plugin::Machine</a>
+  
+    <li><a href="../../../Nucleon/Plugin/Network.html">Nucleon::Plugin::Network</a>
+  
+    <li><a href="../../../Nucleon/Plugin/Node.html">Nucleon::Plugin::Node</a>
+  
+    <li><a href="../../../Nucleon/Plugin/Provisioner.html">Nucleon::Plugin::Provisioner</a>
+  
+    <li><a href="../../../Puppet.html">Puppet</a>
+  
+    <li><a href="../../../Puppet/DataBinding.html">Puppet::DataBinding</a>
+  
+    <li><a href="../../../Puppet/DataBinding/Corl.html">Puppet::DataBinding::Corl</a>
+  
+    <li><a href="../../../Puppet/Indirector.html">Puppet::Indirector</a>
+  
+    <li><a href="../../../Puppet/Indirector/Corl.html">Puppet::Indirector::Corl</a>
+  
+    <li><a href="../../../Puppet/Parser.html">Puppet::Parser</a>
+  
+    <li><a href="../../../Puppet/Parser/Functions.html">Puppet::Parser::Functions</a>
+  
+    <li><a href="../../../Fog.html">Fog</a>
+  
+    <li><a href="../../../Fog/Compute.html">Fog::Compute</a>
+  
+    <li><a href="../../../Fog/Compute/AWS.html">Fog::Compute::AWS</a>
+  
+    <li><a href="../../../Fog/Compute/AWS/Server.html">Fog::Compute::AWS::Server</a>
+  
+    <li><a href="../../../Fog/Compute/RackspaceV2.html">Fog::Compute::RackspaceV2</a>
+  
+    <li><a href="../../../Fog/Compute/RackspaceV2/Server.html">Fog::Compute::RackspaceV2::Server</a>
+  
+    <li><a href="../../../Vagrant.html">Vagrant</a>
+  
+    <li><a href="../../../Vagrant/Config.html">Vagrant::Config</a>
+  
+    <li><a href="../../../Vagrant/Config/Loader.html">Vagrant::Config::Loader</a>
+  
+    <li><a href="../../../Vagrant/Vagrantfile.html">Vagrant::Vagrantfile</a>
+  
+    <li><a href="../../../Facter.html">Facter</a>
+  
+    <li><a href="../../../Facter/Util.html">Facter::Util</a>
+  
+    <li><a href="../../../Facter/Util/Loader.html">Facter::Util::Loader</a>
+  
+    <li><a href="../../../Hiera.html">Hiera</a>
+  
+    <li><a href="../../../Hiera/Backend.html">Hiera::Backend</a>
+  
+    <li><a href="../../../Hiera/Corl_logger.html">Hiera::Corl_logger</a>
+  
+    <li><a href="../../../Object.html">Object</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class VagrantPlugins::CORL::Config::CORL</h1>
+
+  <div id="description" class="description">
+    
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <!-- Attributes -->
+    <section id="attribute-method-details" class="method-section section">
+      <h3 class="section-header">Attributes</h3>
+
+      
+      <div id="attribute-i-auth_files" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">auth_files</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-bootstrap" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">bootstrap</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-bootstrap_glob" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">bootstrap_glob</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-bootstrap_init" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">bootstrap_init</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-bootstrap_path" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">bootstrap_path</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-dry_run" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">dry_run</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-force_updates" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">force_updates</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-network" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">network</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-node" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">node</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-project_branch" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">project_branch</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-project_reference" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">project_reference</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-provision" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">provision</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-root_home" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">root_home</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-root_user" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">root_user</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-seed" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">seed</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-user_home" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">user_home</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-user_home_env_var" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">user_home_env_var</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section><!-- attribute-method-details -->
+    
+
+    <!-- Methods -->
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Class Methods</h3>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File lib/core/vagrant/provisioner/config.rb, line 10</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>
+  <span class="ruby-keyword">super</span>
+  <span class="ruby-ivar">@network</span>           = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@node</span>              = <span class="ruby-constant">UNSET_VALUE</span>
+  
+  <span class="ruby-ivar">@force_updates</span>     = <span class="ruby-keyword">false</span>
+  <span class="ruby-ivar">@user_home</span>         = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@user_home_env_var</span> = <span class="ruby-constant">UNSET_VALUE</span>
+  
+  <span class="ruby-ivar">@root_user</span>         = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@root_home</span>         = <span class="ruby-constant">UNSET_VALUE</span>
+  
+  <span class="ruby-ivar">@bootstrap</span>         = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@bootstrap_path</span>    = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@bootstrap_glob</span>    = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@bootstrap_init</span>    = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@auth_files</span>        = <span class="ruby-constant">UNSET_VALUE</span>
+  
+  <span class="ruby-ivar">@seed</span>              = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@project_reference</span> = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@project_branch</span>    = <span class="ruby-constant">UNSET_VALUE</span>
+  
+  <span class="ruby-ivar">@provision</span>         = <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@dry_run</span>           = <span class="ruby-keyword">false</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- new-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- new-method -->
+
+    
+    </section><!-- public-class-method-details -->
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-finalize-21" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">finalize!</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="finalize-21-source">
+            <pre><span class="ruby-comment"># File lib/core/vagrant/provisioner/config.rb, line 38</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">finalize!</span>
+  <span class="ruby-keyword">super</span>
+  <span class="ruby-ivar">@user_home</span>         = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@user_home</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@user_home_env_var</span> = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@user_home_env_var</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  
+  <span class="ruby-ivar">@root_user</span>         = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@root_user</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@root_home</span>         = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@root_home</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  
+  <span class="ruby-ivar">@bootstrap</span>         = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@bootstrap</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@bootstrap_path</span>    = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@bootstrap_path</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@bootstrap_glob</span>    = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@bootstrap_glob</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@bootstrap_init</span>    = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@bootstrap_init</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@auth_files</span>        = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@auth_files</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  
+  <span class="ruby-ivar">@seed</span>              = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@seed</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@project_reference</span> = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@project_reference</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  <span class="ruby-ivar">@project_branch</span>    = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@project_branch</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+  
+  <span class="ruby-ivar">@provision</span>         = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@provision</span> <span class="ruby-operator">==</span> <span class="ruby-constant">UNSET_VALUE</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- finalize-21-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- finalize-21-method -->
+
+    
+      <div id="method-i-validate" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">validate</span><span
+            class="method-args">(machine)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="validate-source">
+            <pre><span class="ruby-comment"># File lib/core/vagrant/provisioner/config.rb, line 72</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">validate</span>(<span class="ruby-identifier">machine</span>)
+  <span class="ruby-identifier">errors</span> = <span class="ruby-identifier">_detected_errors</span>
+  
+  <span class="ruby-comment"># TODO: Validation (with action config validators)</span>
+      
+  { <span class="ruby-string">&quot;CORL provisioner&quot;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">errors</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- validate-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- validate-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.2.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

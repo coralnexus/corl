@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>class CORL::Provisioner::Puppetnode - corl 0.4.29</title>
+
+<link type="text/css" media="screen" href="../../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="../../index.html">Home</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/CORL/provisioner/puppetnode.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">CORL.plugin_class(:provisioner)
+  
+</nav>
+
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-c-status">::status</a>
+    
+    <li><a href="#method-i-add_search_path">#add_search_path</a>
+    
+    <li><a href="#method-i-build">#build</a>
+    
+    <li><a href="#method-i-compiler">#compiler</a>
+    
+    <li><a href="#method-i-concatenate">#concatenate</a>
+    
+    <li><a href="#method-i-get_node">#get_node</a>
+    
+    <li><a href="#method-i-handle">#handle</a>
+    
+    <li><a href="#method-i-import">#import</a>
+    
+    <li><a href="#method-i-init_puppet">#init_puppet</a>
+    
+    <li><a href="#method-i-lookup">#lookup</a>
+    
+    <li><a href="#method-i-normalize">#normalize</a>
+    
+    <li><a href="#method-i-profile_id">#profile_id</a>
+    
+    <li><a href="#method-i-provision">#provision</a>
+    
+    <li><a href="#method-i-register">#register</a>
+    
+    <li><a href="#method-i-scope">#scope</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="../../README_rdoc.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="../../CORL.html">CORL</a>
+  
+    <li><a href="../../CORL/Action.html">CORL::Action</a>
+  
+    <li><a href="../../CORL/Action/Authorize.html">CORL::Action::Authorize</a>
+  
+    <li><a href="../../CORL/Action/Bootstrap.html">CORL::Action::Bootstrap</a>
+  
+    <li><a href="../../CORL/Action/Build.html">CORL::Action::Build</a>
+  
+    <li><a href="../../CORL/Action/Destroy.html">CORL::Action::Destroy</a>
+  
+    <li><a href="../../CORL/Action/Exec.html">CORL::Action::Exec</a>
+  
+    <li><a href="../../CORL/Action/Facts.html">CORL::Action::Facts</a>
+  
+    <li><a href="../../CORL/Action/Image.html">CORL::Action::Image</a>
+  
+    <li><a href="../../CORL/Action/Images.html">CORL::Action::Images</a>
+  
+    <li><a href="../../CORL/Action/Ip.html">CORL::Action::Ip</a>
+  
+    <li><a href="../../CORL/Action/Keypair.html">CORL::Action::Keypair</a>
+  
+    <li><a href="../../CORL/Action/Lookup.html">CORL::Action::Lookup</a>
+  
+    <li><a href="../../CORL/Action/Machines.html">CORL::Action::Machines</a>
+  
+    <li><a href="../../CORL/Action/Provision.html">CORL::Action::Provision</a>
+  
+    <li><a href="../../CORL/Action/Reboot.html">CORL::Action::Reboot</a>
+  
+    <li><a href="../../CORL/Action/Regions.html">CORL::Action::Regions</a>
+  
+    <li><a href="../../CORL/Action/Revoke.html">CORL::Action::Revoke</a>
+  
+    <li><a href="../../CORL/Action/Seed.html">CORL::Action::Seed</a>
+  
+    <li><a href="../../CORL/Action/Spawn.html">CORL::Action::Spawn</a>
+  
+    <li><a href="../../CORL/Action/Ssh.html">CORL::Action::Ssh</a>
+  
+    <li><a href="../../CORL/Action/Start.html">CORL::Action::Start</a>
+  
+    <li><a href="../../CORL/Action/Stop.html">CORL::Action::Stop</a>
+  
+    <li><a href="../../CORL/Action/Vagrantfile.html">CORL::Action::Vagrantfile</a>
+  
+    <li><a href="../../CORL/Configuration.html">CORL::Configuration</a>
+  
+    <li><a href="../../CORL/Configuration/File.html">CORL::Configuration::File</a>
+  
+    <li><a href="../../CORL/Errors.html">CORL::Errors</a>
+  
+    <li><a href="../../CORL/Event.html">CORL::Event</a>
+  
+    <li><a href="../../CORL/Event/Puppet.html">CORL::Event::Puppet</a>
+  
+    <li><a href="../../CORL/Facade.html">CORL::Facade</a>
+  
+    <li><a href="../../CORL/Machine.html">CORL::Machine</a>
+  
+    <li><a href="../../CORL/Machine/Aws.html">CORL::Machine::Aws</a>
+  
+    <li><a href="../../CORL/Machine/Fog.html">CORL::Machine::Fog</a>
+  
+    <li><a href="../../CORL/Machine/Physical.html">CORL::Machine::Physical</a>
+  
+    <li><a href="../../CORL/Machine/Rackspace.html">CORL::Machine::Rackspace</a>
+  
+    <li><a href="../../CORL/Machine/Vagrant.html">CORL::Machine::Vagrant</a>
+  
+    <li><a href="../../CORL/Mixin.html">CORL::Mixin</a>
+  
+    <li><a href="../../CORL/Mixin/Action.html">CORL::Mixin::Action</a>
+  
+    <li><a href="../../CORL/Mixin/Action/Keypair.html">CORL::Mixin::Action::Keypair</a>
+  
+    <li><a href="../../CORL/Mixin/Lookup.html">CORL::Mixin::Lookup</a>
+  
+    <li><a href="../../CORL/Mixin/Machine.html">CORL::Mixin::Machine</a>
+  
+    <li><a href="../../CORL/Mixin/Machine/SSH.html">CORL::Mixin::Machine::SSH</a>
+  
+    <li><a href="../../CORL/Mixin/Macro.html">CORL::Mixin::Macro</a>
+  
+    <li><a href="../../CORL/Mixin/Macro/NetworkSettings.html">CORL::Mixin::Macro::NetworkSettings</a>
+  
+    <li><a href="../../CORL/Network.html">CORL::Network</a>
+  
+    <li><a href="../../CORL/Network/Default.html">CORL::Network::Default</a>
+  
+    <li><a href="../../CORL/Node.html">CORL::Node</a>
+  
+    <li><a href="../../CORL/Node/Aws.html">CORL::Node::Aws</a>
+  
+    <li><a href="../../CORL/Node/Fog.html">CORL::Node::Fog</a>
+  
+    <li><a href="../../CORL/Node/Local.html">CORL::Node::Local</a>
+  
+    <li><a href="../../CORL/Node/Rackspace.html">CORL::Node::Rackspace</a>
+  
+    <li><a href="../../CORL/Node/Vagrant.html">CORL::Node::Vagrant</a>
+  
+    <li><a href="../../CORL/Plugin.html">CORL::Plugin</a>
+  
+    <li><a href="../../CORL/Plugin/CloudAction.html">CORL::Plugin::CloudAction</a>
+  
+    <li><a href="../../CORL/Provisioner.html">CORL::Provisioner</a>
+  
+    <li><a href="../../CORL/Provisioner/Puppetnode.html">CORL::Provisioner::Puppetnode</a>
+  
+    <li><a href="../../CORL/Template.html">CORL::Template</a>
+  
+    <li><a href="../../CORL/Template/Environment.html">CORL::Template::Environment</a>
+  
+    <li><a href="../../CORL/Util.html">CORL::Util</a>
+  
+    <li><a href="../../CORL/Util/Puppet.html">CORL::Util::Puppet</a>
+  
+    <li><a href="../../CORL/Util/Puppet/Resource.html">CORL::Util::Puppet::Resource</a>
+  
+    <li><a href="../../CORL/Util/Puppet/ResourceGroup.html">CORL::Util::Puppet::ResourceGroup</a>
+  
+    <li><a href="../../CORL/Vagrant.html">CORL::Vagrant</a>
+  
+    <li><a href="../../CORL/Vagrant/Config.html">CORL::Vagrant::Config</a>
+  
+    <li><a href="../../VagrantPlugins.html">VagrantPlugins</a>
+  
+    <li><a href="../../VagrantPlugins/CORL.html">VagrantPlugins::CORL</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action.html">VagrantPlugins::CORL::Action</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action/DeleteCache.html">VagrantPlugins::CORL::Action::DeleteCache</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action/InitKeys.html">VagrantPlugins::CORL::Action::InitKeys</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action/LinkNetwork.html">VagrantPlugins::CORL::Action::LinkNetwork</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/BaseAction.html">VagrantPlugins::CORL::BaseAction</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Command.html">VagrantPlugins::CORL::Command</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Command/Launcher.html">VagrantPlugins::CORL::Command::Launcher</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Config.html">VagrantPlugins::CORL::Config</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Config/CORL.html">VagrantPlugins::CORL::Config::CORL</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Plugin.html">VagrantPlugins::CORL::Plugin</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Provisioner.html">VagrantPlugins::CORL::Provisioner</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Provisioner/CORL.html">VagrantPlugins::CORL::Provisioner::CORL</a>
+  
+    <li><a href="../../Nucleon.html">Nucleon</a>
+  
+    <li><a href="../../Nucleon/Config.html">Nucleon::Config</a>
+  
+    <li><a href="../../Nucleon/Plugin.html">Nucleon::Plugin</a>
+  
+    <li><a href="../../Nucleon/Plugin/Base.html">Nucleon::Plugin::Base</a>
+  
+    <li><a href="../../Nucleon/Plugin/Configuration.html">Nucleon::Plugin::Configuration</a>
+  
+    <li><a href="../../Nucleon/Plugin/Machine.html">Nucleon::Plugin::Machine</a>
+  
+    <li><a href="../../Nucleon/Plugin/Network.html">Nucleon::Plugin::Network</a>
+  
+    <li><a href="../../Nucleon/Plugin/Node.html">Nucleon::Plugin::Node</a>
+  
+    <li><a href="../../Nucleon/Plugin/Provisioner.html">Nucleon::Plugin::Provisioner</a>
+  
+    <li><a href="../../Puppet.html">Puppet</a>
+  
+    <li><a href="../../Puppet/DataBinding.html">Puppet::DataBinding</a>
+  
+    <li><a href="../../Puppet/DataBinding/Corl.html">Puppet::DataBinding::Corl</a>
+  
+    <li><a href="../../Puppet/Indirector.html">Puppet::Indirector</a>
+  
+    <li><a href="../../Puppet/Indirector/Corl.html">Puppet::Indirector::Corl</a>
+  
+    <li><a href="../../Puppet/Parser.html">Puppet::Parser</a>
+  
+    <li><a href="../../Puppet/Parser/Functions.html">Puppet::Parser::Functions</a>
+  
+    <li><a href="../../Fog.html">Fog</a>
+  
+    <li><a href="../../Fog/Compute.html">Fog::Compute</a>
+  
+    <li><a href="../../Fog/Compute/AWS.html">Fog::Compute::AWS</a>
+  
+    <li><a href="../../Fog/Compute/AWS/Server.html">Fog::Compute::AWS::Server</a>
+  
+    <li><a href="../../Fog/Compute/RackspaceV2.html">Fog::Compute::RackspaceV2</a>
+  
+    <li><a href="../../Fog/Compute/RackspaceV2/Server.html">Fog::Compute::RackspaceV2::Server</a>
+  
+    <li><a href="../../Vagrant.html">Vagrant</a>
+  
+    <li><a href="../../Vagrant/Config.html">Vagrant::Config</a>
+  
+    <li><a href="../../Vagrant/Config/Loader.html">Vagrant::Config::Loader</a>
+  
+    <li><a href="../../Vagrant/Vagrantfile.html">Vagrant::Vagrantfile</a>
+  
+    <li><a href="../../Facter.html">Facter</a>
+  
+    <li><a href="../../Facter/Util.html">Facter::Util</a>
+  
+    <li><a href="../../Facter/Util/Loader.html">Facter::Util::Loader</a>
+  
+    <li><a href="../../Hiera.html">Hiera</a>
+  
+    <li><a href="../../Hiera/Backend.html">Hiera::Backend</a>
+  
+    <li><a href="../../Hiera/Corl_logger.html">Hiera::Corl_logger</a>
+  
+    <li><a href="../../Object.html">Object</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class CORL::Provisioner::Puppetnode</h1>
+
+  <div id="description" class="description">
+    
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Class Methods</h3>
+
+    
+      <div id="method-c-status" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">status</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="status-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 11</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">status</span>
+  <span class="ruby-identifier">@@status</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- status-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- status-method -->
+
+    
+    </section><!-- public-class-method-details -->
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-add_search_path" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_search_path</span><span
+            class="method-args">(type, resource_name)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_search_path-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 208</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">add_search_path</span>(<span class="ruby-identifier">type</span>, <span class="ruby-identifier">resource_name</span>)
+  <span class="ruby-constant">Config</span>.<span class="ruby-identifier">set_options</span>([ <span class="ruby-value">:all</span>, <span class="ruby-identifier">type</span> ], { <span class="ruby-value">:search</span> =<span class="ruby-operator">&gt;</span> [ <span class="ruby-identifier">resource_name</span>.<span class="ruby-identifier">to_s</span> ] })
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- add_search_path-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- add_search_path-method -->
+
+    
+      <div id="method-i-build" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">build</span><span
+            class="method-args">(options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="build-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 129</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">build</span>(<span class="ruby-identifier">options</span> = {})
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">locations</span>, <span class="ruby-identifier">package_info</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">success</span> = <span class="ruby-keyword">true</span>
+    
+    <span class="ruby-comment"># Build modules</span>
+    <span class="ruby-identifier">locations</span>[<span class="ruby-value">:module</span>] = {}
+    
+    <span class="ruby-identifier">init_profile</span> = <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">package_name</span>, <span class="ruby-identifier">profile_name</span>, <span class="ruby-identifier">profile_info</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">package_id</span> = <span class="ruby-identifier">id</span>(<span class="ruby-identifier">package_name</span>)
+      <span class="ruby-identifier">base_directory</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">locations</span>[<span class="ruby-value">:build</span>], <span class="ruby-string">&#39;modules&#39;</span>, <span class="ruby-identifier">package_id</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">profile_name</span>.<span class="ruby-identifier">to_s</span>)
+      <span class="ruby-identifier">profile_success</span> = <span class="ruby-keyword">true</span>
+      
+      <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-node">&quot;Building CORL profile #{blue(profile_name)} modules into #{green(base_directory)}&quot;</span>)
+      
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">profile_info</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-value">:modules</span>)
+        <span class="ruby-identifier">profile_info</span>[<span class="ruby-value">:modules</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">module_name</span>, <span class="ruby-identifier">module_reference</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">module_directory</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">base_directory</span>, <span class="ruby-identifier">module_name</span>.<span class="ruby-identifier">to_s</span>)
+          
+          <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-node">&quot;Building Puppet module #{blue(module_name)} at #{purple(module_reference)} into #{green(module_directory)}&quot;</span>)
+          
+          <span class="ruby-identifier">full_module_directory</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">build_directory</span>, <span class="ruby-identifier">module_directory</span>)
+              
+          <span class="ruby-identifier">module_project</span> = <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">project</span>(<span class="ruby-identifier">extended_config</span>(<span class="ruby-value">:puppet_module</span>, {
+            <span class="ruby-value">:directory</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">full_module_directory</span>,
+            <span class="ruby-value">:url</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">module_reference</span>,
+            <span class="ruby-value">:create</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">directory?</span>(<span class="ruby-identifier">full_module_directory</span>) <span class="ruby-operator">?</span> <span class="ruby-keyword">false</span> <span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+            <span class="ruby-value">:pull</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>
+          }))
+          <span class="ruby-keyword">unless</span> <span class="ruby-identifier">module_project</span>
+            <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">warn</span>(<span class="ruby-node">&quot;Puppet module #{cyan(module_name)} failed to initialize&quot;</span>)
+            <span class="ruby-identifier">profile_success</span> = <span class="ruby-keyword">false</span>
+            <span class="ruby-keyword">break</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-identifier">locations</span>[<span class="ruby-value">:module</span>][<span class="ruby-identifier">profile_id</span>(<span class="ruby-identifier">package_name</span>, <span class="ruby-identifier">profile_name</span>)] = <span class="ruby-identifier">base_directory</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">profile_success</span>
+        <span class="ruby-identifier">profile_success</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    
+    <span class="ruby-identifier">hash</span>(<span class="ruby-identifier">package_info</span>.<span class="ruby-identifier">get</span>([ <span class="ruby-value">:provisioners</span>, <span class="ruby-identifier">plugin_provider</span> ])).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">package_name</span>, <span class="ruby-identifier">info</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">info</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-value">:profiles</span>)
+        <span class="ruby-identifier">info</span>[<span class="ruby-value">:profiles</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">profile_name</span>, <span class="ruby-identifier">profile_info</span><span class="ruby-operator">|</span>
+          <span class="ruby-keyword">unless</span> <span class="ruby-identifier">init_profile</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">package_name</span>, <span class="ruby-identifier">profile_name</span>, <span class="ruby-identifier">profile_info</span>)
+            <span class="ruby-identifier">success</span> = <span class="ruby-keyword">false</span>
+            <span class="ruby-keyword">break</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">profiles</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">profile_name</span>, <span class="ruby-identifier">profile_info</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">unless</span> <span class="ruby-identifier">init_profile</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">plugin_name</span>, <span class="ruby-identifier">profile_name</span>, <span class="ruby-identifier">profile_info</span>)
+        <span class="ruby-identifier">success</span> = <span class="ruby-keyword">false</span>
+        <span class="ruby-keyword">break</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">success</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- build-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- build-method -->
+
+    
+      <div id="method-i-compiler" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">compiler</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="compiler-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 62</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">compiler</span>
+  <span class="ruby-ivar">@compiler</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- compiler-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- compiler-method -->
+
+    
+      <div id="method-i-concatenate" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">concatenate</span><span
+            class="method-args">(components, capitalize = false)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="concatenate-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 320</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">concatenate</span>(<span class="ruby-identifier">components</span>, <span class="ruby-identifier">capitalize</span> = <span class="ruby-keyword">false</span>)
+  <span class="ruby-keyword">super</span>(<span class="ruby-identifier">components</span>, <span class="ruby-identifier">capitalize</span>, <span class="ruby-string">&#39;::&#39;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- concatenate-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- concatenate-method -->
+
+    
+      <div id="method-i-handle" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">handle</span><span
+            class="method-args">(msg)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="handle-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 25</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">handle</span>(<span class="ruby-identifier">msg</span>)
+  <span class="ruby-identifier">levels</span> = {
+    <span class="ruby-value">:emerg</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;emergency&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:error</span> },
+    <span class="ruby-value">:alert</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;alert&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:error</span> },
+    <span class="ruby-value">:crit</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;critical&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:error</span> },
+    <span class="ruby-value">:err</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;error&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:error</span> },
+    <span class="ruby-value">:warning</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;warning&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:warn</span> },
+    <span class="ruby-value">:notice</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;notice&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:success</span> },
+    <span class="ruby-value">:info</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;info&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:info</span> },
+    <span class="ruby-value">:debug</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;debug&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:info</span> }
+  }
+  <span class="ruby-identifier">str</span> = <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:multiline</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">multiline</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-identifier">str</span> = <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">source</span> <span class="ruby-operator">==</span> <span class="ruby-string">&quot;Puppet&quot;</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">str</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{CORL.blue(msg.source)}: #{str}&quot;</span>
+  <span class="ruby-identifier">level</span> = <span class="ruby-identifier">levels</span>[<span class="ruby-identifier">msg</span>.<span class="ruby-identifier">level</span>]
+  
+  <span class="ruby-keyword">if</span> [ <span class="ruby-value">:warn</span>, <span class="ruby-value">:error</span> ].<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">level</span>[<span class="ruby-value">:send</span>])
+    <span class="ruby-operator">::</span><span class="ruby-constant">CORL</span><span class="ruby-operator">::</span><span class="ruby-constant">Provisioner</span><span class="ruby-operator">::</span><span class="ruby-constant">Puppetnode</span>.<span class="ruby-identifier">status</span>[<span class="ruby-identifier">name</span>] = <span class="ruby-value">111</span>
+  <span class="ruby-keyword">end</span>
+        
+  <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">ui_group</span>(<span class="ruby-node">&quot;puppetnode::#{name}(#{CORL.yellow(level[:name])})&quot;</span>, <span class="ruby-value">:cyan</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">ui</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">send</span>(<span class="ruby-identifier">level</span>[<span class="ruby-value">:send</span>], <span class="ruby-identifier">str</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- handle-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- handle-method -->
+
+    
+      <div id="method-i-import" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">import</span><span
+            class="method-args">(files, options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="import-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 199</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">import</span>(<span class="ruby-identifier">files</span>, <span class="ruby-identifier">options</span> = {})
+  <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Puppet</span>.<span class="ruby-identifier">import</span>(<span class="ruby-identifier">files</span>, <span class="ruby-constant">Config</span>.<span class="ruby-identifier">ensure</span>(<span class="ruby-identifier">options</span>).<span class="ruby-identifier">defaults</span>({
+    <span class="ruby-value">:puppet_scope</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">scope</span>,
+    <span class="ruby-value">:puppet_import_base</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">network</span>.<span class="ruby-identifier">directory</span>
+  }))
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- import-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- import-method -->
+
+    
+      <div id="method-i-lookup" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">lookup</span><span
+            class="method-args">(property, default = nil, options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="lookup-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 190</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">property</span>, <span class="ruby-identifier">default</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span> = {})
+  <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Puppet</span>.<span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">property</span>, <span class="ruby-identifier">default</span>, <span class="ruby-constant">Config</span>.<span class="ruby-identifier">ensure</span>(<span class="ruby-identifier">options</span>).<span class="ruby-identifier">defaults</span>({
+    <span class="ruby-value">:provisioner</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:puppetnode</span>,
+    <span class="ruby-value">:puppet_scope</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">scope</span>
+  }))
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- lookup-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- lookup-method -->
+
+    
+      <div id="method-i-normalize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">normalize</span><span
+            class="method-args">(reload)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="normalize-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 18</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">normalize</span>(<span class="ruby-identifier">reload</span>)
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">log_level</span> <span class="ruby-operator">==</span> <span class="ruby-value">:debug</span>
+      <span class="ruby-constant">Puppet</span>.<span class="ruby-identifier">debug</span> = <span class="ruby-keyword">true</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">unless</span> <span class="ruby-identifier">reload</span>
+      <span class="ruby-constant">Puppet</span><span class="ruby-operator">::</span><span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Log</span>.<span class="ruby-identifier">newdesttype</span> <span class="ruby-identifier">id</span> <span class="ruby-keyword">do</span>
+        <span class="ruby-keyword">def</span> <span class="ruby-identifier">handle</span>(<span class="ruby-identifier">msg</span>)
+          <span class="ruby-identifier">levels</span> = {
+            <span class="ruby-value">:emerg</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;emergency&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:error</span> },
+            <span class="ruby-value">:alert</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;alert&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:error</span> },
+            <span class="ruby-value">:crit</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;critical&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:error</span> },
+            <span class="ruby-value">:err</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;error&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:error</span> },
+            <span class="ruby-value">:warning</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;warning&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:warn</span> },
+            <span class="ruby-value">:notice</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;notice&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:success</span> },
+            <span class="ruby-value">:info</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;info&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:info</span> },
+            <span class="ruby-value">:debug</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;debug&#39;</span>, <span class="ruby-value">:send</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:info</span> }
+          }
+          <span class="ruby-identifier">str</span> = <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:multiline</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">multiline</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">to_s</span>
+          <span class="ruby-identifier">str</span> = <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">source</span> <span class="ruby-operator">==</span> <span class="ruby-string">&quot;Puppet&quot;</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">str</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{CORL.blue(msg.source)}: #{str}&quot;</span>
+          <span class="ruby-identifier">level</span> = <span class="ruby-identifier">levels</span>[<span class="ruby-identifier">msg</span>.<span class="ruby-identifier">level</span>]
+          
+          <span class="ruby-keyword">if</span> [ <span class="ruby-value">:warn</span>, <span class="ruby-value">:error</span> ].<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">level</span>[<span class="ruby-value">:send</span>])
+            <span class="ruby-operator">::</span><span class="ruby-constant">CORL</span><span class="ruby-operator">::</span><span class="ruby-constant">Provisioner</span><span class="ruby-operator">::</span><span class="ruby-constant">Puppetnode</span>.<span class="ruby-identifier">status</span>[<span class="ruby-identifier">name</span>] = <span class="ruby-value">111</span>
+          <span class="ruby-keyword">end</span>
+      
+          <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">ui_group</span>(<span class="ruby-node">&quot;puppetnode::#{name}(#{CORL.yellow(level[:name])})&quot;</span>, <span class="ruby-value">:cyan</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">ui</span><span class="ruby-operator">|</span>
+            <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">send</span>(<span class="ruby-identifier">level</span>[<span class="ruby-value">:send</span>], <span class="ruby-identifier">str</span>)
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- normalize-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- normalize-method -->
+
+    
+      <div id="method-i-profile_id" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">profile_id</span><span
+            class="method-args">(package_name, profile_name)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="profile_id-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 314</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">profile_id</span>(<span class="ruby-identifier">package_name</span>, <span class="ruby-identifier">profile_name</span>)
+  <span class="ruby-identifier">concatenate</span>([ <span class="ruby-identifier">package_name</span>, <span class="ruby-string">&#39;profile&#39;</span>, <span class="ruby-identifier">profile_name</span> ], <span class="ruby-keyword">false</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- profile_id-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- profile_id-method -->
+
+    
+      <div id="method-i-provision" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">provision</span><span
+            class="method-args">(profiles, options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="provision-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 214</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">provision</span>(<span class="ruby-identifier">profiles</span>, <span class="ruby-identifier">options</span> = {})
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">locations</span> = <span class="ruby-identifier">build_locations</span>
+    <span class="ruby-identifier">success</span> = <span class="ruby-keyword">true</span>
+  
+    <span class="ruby-identifier">include_location</span> = <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">type</span>, <span class="ruby-identifier">parameters</span> = {}, <span class="ruby-identifier">add_search_path</span> = <span class="ruby-keyword">false</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">classes</span> = {}
+          
+      <span class="ruby-identifier">locations</span>[<span class="ruby-value">:package</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">name</span>, <span class="ruby-identifier">package_directory</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">type_gateway</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">build_directory</span>, <span class="ruby-identifier">package_directory</span>, <span class="ruby-node">&quot;#{type}.pp&quot;</span>)
+        <span class="ruby-identifier">resource_name</span> = <span class="ruby-identifier">concatenate</span>([ <span class="ruby-identifier">name</span>, <span class="ruby-identifier">type</span> ])
+      
+        <span class="ruby-identifier">add_search_path</span>(<span class="ruby-identifier">type</span>, <span class="ruby-identifier">resource_name</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">add_search_path</span>
+      
+        <span class="ruby-keyword">if</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">type_gateway</span>)
+          <span class="ruby-identifier">import</span>(<span class="ruby-identifier">type_gateway</span>)
+          <span class="ruby-identifier">classes</span>[<span class="ruby-identifier">resource_name</span>] = <span class="ruby-identifier">parameters</span>
+        <span class="ruby-keyword">end</span>
+      
+        <span class="ruby-identifier">type_directory</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">build_directory</span>, <span class="ruby-identifier">package_directory</span>, <span class="ruby-identifier">type</span>.<span class="ruby-identifier">to_s</span>)
+        <span class="ruby-constant">Dir</span>.<span class="ruby-identifier">glob</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">type_directory</span>, <span class="ruby-string">&#39;*.pp&#39;</span>)).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">resource_name</span> = <span class="ruby-identifier">concatenate</span>([ <span class="ruby-identifier">name</span>, <span class="ruby-identifier">type</span>, <span class="ruby-constant">File</span>.<span class="ruby-identifier">basename</span>(<span class="ruby-identifier">file</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-string">&#39;.pp&#39;</span>, <span class="ruby-string">&#39;&#39;</span>) ])
+          <span class="ruby-identifier">import</span>(<span class="ruby-identifier">file</span>)
+          <span class="ruby-identifier">classes</span>[<span class="ruby-identifier">resource_name</span>] = <span class="ruby-identifier">parameters</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+  
+      <span class="ruby-identifier">type_gateway</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">directory</span>, <span class="ruby-node">&quot;#{type}.pp&quot;</span>)
+      <span class="ruby-identifier">resource_name</span> = <span class="ruby-identifier">concatenate</span>([ <span class="ruby-identifier">plugin_name</span>, <span class="ruby-identifier">type</span> ])
+    
+      <span class="ruby-identifier">add_search_path</span>(<span class="ruby-identifier">type</span>, <span class="ruby-identifier">resource_name</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">add_search_path</span>
+   
+      <span class="ruby-keyword">if</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">type_gateway</span>)
+        <span class="ruby-identifier">import</span>(<span class="ruby-identifier">type_gateway</span>)
+        <span class="ruby-identifier">classes</span>[<span class="ruby-identifier">resource_name</span>] = <span class="ruby-identifier">parameters</span>
+      <span class="ruby-keyword">end</span>
+  
+      <span class="ruby-identifier">type_directory</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">directory</span>, <span class="ruby-identifier">type</span>.<span class="ruby-identifier">to_s</span>)
+      
+      <span class="ruby-keyword">if</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">directory?</span>(<span class="ruby-identifier">type_directory</span>)
+        <span class="ruby-constant">Dir</span>.<span class="ruby-identifier">glob</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">type_directory</span>, <span class="ruby-string">&#39;*.pp&#39;</span>)).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">resource_name</span> = <span class="ruby-identifier">concatenate</span>([ <span class="ruby-identifier">plugin_name</span>, <span class="ruby-identifier">type</span>, <span class="ruby-constant">File</span>.<span class="ruby-identifier">basename</span>(<span class="ruby-identifier">file</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-string">&#39;.pp&#39;</span>, <span class="ruby-string">&#39;&#39;</span>) ])
+          <span class="ruby-identifier">import</span>(<span class="ruby-identifier">file</span>)
+          <span class="ruby-identifier">classes</span>[<span class="ruby-identifier">resource_name</span>] = <span class="ruby-identifier">parameters</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-identifier">classes</span>
+    <span class="ruby-keyword">end</span>
+  
+    <span class="ruby-identifier">@@puppet_lock</span>.<span class="ruby-identifier">synchronize</span> <span class="ruby-keyword">do</span>
+      <span class="ruby-keyword">begin</span>
+        <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-string">&quot;Starting catalog generation&quot;</span>)
+        
+        <span class="ruby-identifier">@@status</span>[<span class="ruby-identifier">id</span>] = <span class="ruby-identifier">code</span>.<span class="ruby-identifier">success</span>
+        
+        <span class="ruby-identifier">start_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+        <span class="ruby-identifier">node</span> = <span class="ruby-identifier">init_puppet</span>(<span class="ruby-identifier">profiles</span>)
+      
+        <span class="ruby-comment"># Include defaults</span>
+        <span class="ruby-identifier">classes</span> = <span class="ruby-identifier">include_location</span>.<span class="ruby-identifier">call</span>(<span class="ruby-value">:default</span>, {}, <span class="ruby-keyword">true</span>)
+    
+        <span class="ruby-comment"># Import needed profiles</span>
+        <span class="ruby-identifier">include_location</span>.<span class="ruby-identifier">call</span>(<span class="ruby-value">:profiles</span>, {}, <span class="ruby-keyword">false</span>)
+    
+        <span class="ruby-identifier">profiles</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">profile</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">classes</span>[<span class="ruby-identifier">profile</span>.<span class="ruby-identifier">to_s</span>] = { <span class="ruby-value">:require</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Anchor[profile_start]&#39;</span> }
+        <span class="ruby-keyword">end</span>
+        
+        <span class="ruby-comment"># Compile catalog</span>
+        <span class="ruby-identifier">node</span>.<span class="ruby-identifier">classes</span> = <span class="ruby-identifier">classes</span>
+        <span class="ruby-identifier">compiler</span>.<span class="ruby-identifier">compile</span>
+      
+        <span class="ruby-comment"># Start system configuration</span>
+        <span class="ruby-identifier">catalog</span> = <span class="ruby-identifier">compiler</span>.<span class="ruby-identifier">catalog</span>.<span class="ruby-identifier">to_ral</span>
+        <span class="ruby-identifier">catalog</span>.<span class="ruby-identifier">finalize</span>
+        <span class="ruby-identifier">catalog</span>.<span class="ruby-identifier">retrieval_duration</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">start_time</span>
+        
+        <span class="ruby-keyword">unless</span> <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:dry_run</span>, <span class="ruby-keyword">false</span>)
+          <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-string">&quot;\n&quot;</span>, { <span class="ruby-value">:prefix</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span> })
+          <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-string">&quot;Starting configuration run&quot;</span>)
+                      
+          <span class="ruby-identifier">configurer</span> = <span class="ruby-constant">Puppet</span><span class="ruby-operator">::</span><span class="ruby-constant">Configurer</span>.<span class="ruby-identifier">new</span>
+          <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span> <span class="ruby-identifier">configurer</span>.<span class="ruby-identifier">run</span>(<span class="ruby-value">:catalog</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">catalog</span>, <span class="ruby-value">:pluginsync</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>)
+            <span class="ruby-identifier">success</span> = <span class="ruby-keyword">false</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+      
+      <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">error</span>
+        <span class="ruby-identifier">raise</span> <span class="ruby-identifier">error</span>
+        <span class="ruby-constant">Puppet</span>.<span class="ruby-identifier">log_exception</span>(<span class="ruby-identifier">error</span>)
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">success</span> = <span class="ruby-keyword">false</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">@@status</span>[<span class="ruby-identifier">id</span>] <span class="ruby-operator">!=</span> <span class="ruby-identifier">code</span>.<span class="ruby-identifier">success</span>
+    <span class="ruby-identifier">success</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- provision-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- provision-method -->
+
+    
+      <div id="method-i-register" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">register</span><span
+            class="method-args">(options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="register-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 55</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">register</span>(<span class="ruby-identifier">options</span> = {})
+  <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Puppet</span>.<span class="ruby-identifier">register_plugins</span>(<span class="ruby-constant">Config</span>.<span class="ruby-identifier">ensure</span>(<span class="ruby-identifier">options</span>).<span class="ruby-identifier">defaults</span>({ <span class="ruby-value">:puppet_scope</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">scope</span> }))
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- register-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- register-method -->
+
+    
+      <div id="method-i-scope" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">scope</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="scope-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 68</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">scope</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">compiler</span>.<span class="ruby-identifier">topscope</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">compiler</span>
+  <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- scope-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- scope-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+     <section id="protected-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Protected Instance Methods</h3>
+
+    
+      <div id="method-i-get_node" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">get_node</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="get_node-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 114</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">get_node</span>
+  <span class="ruby-identifier">node_id</span> = <span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-identifier">node</span> = <span class="ruby-constant">Puppet</span><span class="ruby-operator">::</span><span class="ruby-constant">Node</span>.<span class="ruby-identifier">indirection</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">node_id</span>)
+       
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">facts</span> = <span class="ruby-constant">Puppet</span><span class="ruby-operator">::</span><span class="ruby-constant">Node</span><span class="ruby-operator">::</span><span class="ruby-constant">Facts</span>.<span class="ruby-identifier">indirection</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">node_id</span>)
+    <span class="ruby-identifier">facts</span>.<span class="ruby-identifier">name</span> = <span class="ruby-identifier">node_id</span>
+    <span class="ruby-identifier">node</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">facts</span>.<span class="ruby-identifier">values</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">node</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- get_node-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- get_node-method -->
+
+    
+      <div id="method-i-init_puppet" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">init_puppet</span><span
+            class="method-args">(profiles)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="init_puppet-source">
+            <pre><span class="ruby-comment"># File lib/CORL/provisioner/puppetnode.rb, line 76</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">init_puppet</span>(<span class="ruby-identifier">profiles</span>)
+  <span class="ruby-identifier">locations</span> = <span class="ruby-identifier">build_locations</span>
+  
+  <span class="ruby-constant">Puppet</span>.<span class="ruby-identifier">initialize_settings</span>
+  <span class="ruby-constant">Puppet</span><span class="ruby-operator">::</span><span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Log</span>.<span class="ruby-identifier">newdestination</span>(<span class="ruby-identifier">id</span>)
+  
+  <span class="ruby-comment"># TODO: Figure out how to store these damn settings in a specialized</span>
+  <span class="ruby-comment"># environment without phantom empty environment issues.</span>
+  
+  <span class="ruby-constant">Puppet</span>[<span class="ruby-value">:data_binding_terminus</span>] = <span class="ruby-string">&#39;corl&#39;</span>
+  <span class="ruby-constant">Puppet</span>[<span class="ruby-value">:default_file_terminus</span>] = <span class="ruby-value">:file_server</span>
+  <span class="ruby-constant">Puppet</span>[<span class="ruby-value">:node_name_value</span>]       = <span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">profiles</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-identifier">modulepath</span> = <span class="ruby-identifier">profiles</span>.<span class="ruby-identifier">collect</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">profile</span><span class="ruby-operator">|</span>
+      <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">build_directory</span>, <span class="ruby-identifier">locations</span>[<span class="ruby-value">:module</span>][<span class="ruby-identifier">profile</span>.<span class="ruby-identifier">to_sym</span>])
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-constant">Puppet</span>[<span class="ruby-value">:modulepath</span>] = <span class="ruby-identifier">array</span>(<span class="ruby-identifier">modulepath</span>).<span class="ruby-identifier">join</span>(<span class="ruby-constant">File</span><span class="ruby-operator">::</span><span class="ruby-constant">PATH_SEPARATOR</span>)
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">manifest</span> = <span class="ruby-identifier">gateway</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">manifest</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/^packages\/.*/</span>)
+      <span class="ruby-identifier">manifest</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">build_directory</span>, <span class="ruby-identifier">locations</span>[<span class="ruby-value">:build</span>], <span class="ruby-identifier">manifest</span>)
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">manifest</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">network</span>.<span class="ruby-identifier">directory</span>, <span class="ruby-identifier">directory</span>, <span class="ruby-identifier">manifest</span>)
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-constant">Puppet</span>[<span class="ruby-value">:manifest</span>] = <span class="ruby-identifier">manifest</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-identifier">node</span>      = <span class="ruby-identifier">get_node</span>
+  <span class="ruby-ivar">@compiler</span> = <span class="ruby-constant">Puppet</span><span class="ruby-operator">::</span><span class="ruby-constant">Parser</span><span class="ruby-operator">::</span><span class="ruby-constant">Compiler</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">node</span>)
+  <span class="ruby-identifier">register</span>
+  <span class="ruby-identifier">node</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- init_puppet-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- init_puppet-method -->
+
+    
+    </section><!-- protected-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.2.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

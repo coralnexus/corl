@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>class CORL::Node::Rackspace - corl 0.4.29</title>
+
+<link type="text/css" media="screen" href="../../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="../../index.html">Home</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/CORL/node/rackspace.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">Fog
+  
+</nav>
+
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-i-create">#create</a>
+    
+    <li><a href="#method-i-create_config">#create_config</a>
+    
+    <li><a href="#method-i-image_search_text">#image_search_text</a>
+    
+    <li><a href="#method-i-machine_config">#machine_config</a>
+    
+    <li><a href="#method-i-normalize">#normalize</a>
+    
+    <li><a href="#method-i-regions">#regions</a>
+    
+    <li><a href="#method-i-render_image">#render_image</a>
+    
+    <li><a href="#method-i-render_machine_type">#render_machine_type</a>
+    
+    <li><a href="#method-i-start">#start</a>
+    
+    <li><a href="#method-i-usable_image-3F">#usable_image?</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="../../README_rdoc.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="../../CORL.html">CORL</a>
+  
+    <li><a href="../../CORL/Action.html">CORL::Action</a>
+  
+    <li><a href="../../CORL/Action/Authorize.html">CORL::Action::Authorize</a>
+  
+    <li><a href="../../CORL/Action/Bootstrap.html">CORL::Action::Bootstrap</a>
+  
+    <li><a href="../../CORL/Action/Build.html">CORL::Action::Build</a>
+  
+    <li><a href="../../CORL/Action/Destroy.html">CORL::Action::Destroy</a>
+  
+    <li><a href="../../CORL/Action/Exec.html">CORL::Action::Exec</a>
+  
+    <li><a href="../../CORL/Action/Facts.html">CORL::Action::Facts</a>
+  
+    <li><a href="../../CORL/Action/Image.html">CORL::Action::Image</a>
+  
+    <li><a href="../../CORL/Action/Images.html">CORL::Action::Images</a>
+  
+    <li><a href="../../CORL/Action/Ip.html">CORL::Action::Ip</a>
+  
+    <li><a href="../../CORL/Action/Keypair.html">CORL::Action::Keypair</a>
+  
+    <li><a href="../../CORL/Action/Lookup.html">CORL::Action::Lookup</a>
+  
+    <li><a href="../../CORL/Action/Machines.html">CORL::Action::Machines</a>
+  
+    <li><a href="../../CORL/Action/Provision.html">CORL::Action::Provision</a>
+  
+    <li><a href="../../CORL/Action/Reboot.html">CORL::Action::Reboot</a>
+  
+    <li><a href="../../CORL/Action/Regions.html">CORL::Action::Regions</a>
+  
+    <li><a href="../../CORL/Action/Revoke.html">CORL::Action::Revoke</a>
+  
+    <li><a href="../../CORL/Action/Seed.html">CORL::Action::Seed</a>
+  
+    <li><a href="../../CORL/Action/Spawn.html">CORL::Action::Spawn</a>
+  
+    <li><a href="../../CORL/Action/Ssh.html">CORL::Action::Ssh</a>
+  
+    <li><a href="../../CORL/Action/Start.html">CORL::Action::Start</a>
+  
+    <li><a href="../../CORL/Action/Stop.html">CORL::Action::Stop</a>
+  
+    <li><a href="../../CORL/Action/Vagrantfile.html">CORL::Action::Vagrantfile</a>
+  
+    <li><a href="../../CORL/Configuration.html">CORL::Configuration</a>
+  
+    <li><a href="../../CORL/Configuration/File.html">CORL::Configuration::File</a>
+  
+    <li><a href="../../CORL/Errors.html">CORL::Errors</a>
+  
+    <li><a href="../../CORL/Event.html">CORL::Event</a>
+  
+    <li><a href="../../CORL/Event/Puppet.html">CORL::Event::Puppet</a>
+  
+    <li><a href="../../CORL/Facade.html">CORL::Facade</a>
+  
+    <li><a href="../../CORL/Machine.html">CORL::Machine</a>
+  
+    <li><a href="../../CORL/Machine/Aws.html">CORL::Machine::Aws</a>
+  
+    <li><a href="../../CORL/Machine/Fog.html">CORL::Machine::Fog</a>
+  
+    <li><a href="../../CORL/Machine/Physical.html">CORL::Machine::Physical</a>
+  
+    <li><a href="../../CORL/Machine/Rackspace.html">CORL::Machine::Rackspace</a>
+  
+    <li><a href="../../CORL/Machine/Vagrant.html">CORL::Machine::Vagrant</a>
+  
+    <li><a href="../../CORL/Mixin.html">CORL::Mixin</a>
+  
+    <li><a href="../../CORL/Mixin/Action.html">CORL::Mixin::Action</a>
+  
+    <li><a href="../../CORL/Mixin/Action/Keypair.html">CORL::Mixin::Action::Keypair</a>
+  
+    <li><a href="../../CORL/Mixin/Lookup.html">CORL::Mixin::Lookup</a>
+  
+    <li><a href="../../CORL/Mixin/Machine.html">CORL::Mixin::Machine</a>
+  
+    <li><a href="../../CORL/Mixin/Machine/SSH.html">CORL::Mixin::Machine::SSH</a>
+  
+    <li><a href="../../CORL/Mixin/Macro.html">CORL::Mixin::Macro</a>
+  
+    <li><a href="../../CORL/Mixin/Macro/NetworkSettings.html">CORL::Mixin::Macro::NetworkSettings</a>
+  
+    <li><a href="../../CORL/Network.html">CORL::Network</a>
+  
+    <li><a href="../../CORL/Network/Default.html">CORL::Network::Default</a>
+  
+    <li><a href="../../CORL/Node.html">CORL::Node</a>
+  
+    <li><a href="../../CORL/Node/Aws.html">CORL::Node::Aws</a>
+  
+    <li><a href="../../CORL/Node/Fog.html">CORL::Node::Fog</a>
+  
+    <li><a href="../../CORL/Node/Local.html">CORL::Node::Local</a>
+  
+    <li><a href="../../CORL/Node/Rackspace.html">CORL::Node::Rackspace</a>
+  
+    <li><a href="../../CORL/Node/Vagrant.html">CORL::Node::Vagrant</a>
+  
+    <li><a href="../../CORL/Plugin.html">CORL::Plugin</a>
+  
+    <li><a href="../../CORL/Plugin/CloudAction.html">CORL::Plugin::CloudAction</a>
+  
+    <li><a href="../../CORL/Provisioner.html">CORL::Provisioner</a>
+  
+    <li><a href="../../CORL/Provisioner/Puppetnode.html">CORL::Provisioner::Puppetnode</a>
+  
+    <li><a href="../../CORL/Template.html">CORL::Template</a>
+  
+    <li><a href="../../CORL/Template/Environment.html">CORL::Template::Environment</a>
+  
+    <li><a href="../../CORL/Util.html">CORL::Util</a>
+  
+    <li><a href="../../CORL/Util/Puppet.html">CORL::Util::Puppet</a>
+  
+    <li><a href="../../CORL/Util/Puppet/Resource.html">CORL::Util::Puppet::Resource</a>
+  
+    <li><a href="../../CORL/Util/Puppet/ResourceGroup.html">CORL::Util::Puppet::ResourceGroup</a>
+  
+    <li><a href="../../CORL/Vagrant.html">CORL::Vagrant</a>
+  
+    <li><a href="../../CORL/Vagrant/Config.html">CORL::Vagrant::Config</a>
+  
+    <li><a href="../../VagrantPlugins.html">VagrantPlugins</a>
+  
+    <li><a href="../../VagrantPlugins/CORL.html">VagrantPlugins::CORL</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action.html">VagrantPlugins::CORL::Action</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action/DeleteCache.html">VagrantPlugins::CORL::Action::DeleteCache</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action/InitKeys.html">VagrantPlugins::CORL::Action::InitKeys</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action/LinkNetwork.html">VagrantPlugins::CORL::Action::LinkNetwork</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/BaseAction.html">VagrantPlugins::CORL::BaseAction</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Command.html">VagrantPlugins::CORL::Command</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Command/Launcher.html">VagrantPlugins::CORL::Command::Launcher</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Config.html">VagrantPlugins::CORL::Config</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Config/CORL.html">VagrantPlugins::CORL::Config::CORL</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Plugin.html">VagrantPlugins::CORL::Plugin</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Provisioner.html">VagrantPlugins::CORL::Provisioner</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Provisioner/CORL.html">VagrantPlugins::CORL::Provisioner::CORL</a>
+  
+    <li><a href="../../Nucleon.html">Nucleon</a>
+  
+    <li><a href="../../Nucleon/Config.html">Nucleon::Config</a>
+  
+    <li><a href="../../Nucleon/Plugin.html">Nucleon::Plugin</a>
+  
+    <li><a href="../../Nucleon/Plugin/Base.html">Nucleon::Plugin::Base</a>
+  
+    <li><a href="../../Nucleon/Plugin/Configuration.html">Nucleon::Plugin::Configuration</a>
+  
+    <li><a href="../../Nucleon/Plugin/Machine.html">Nucleon::Plugin::Machine</a>
+  
+    <li><a href="../../Nucleon/Plugin/Network.html">Nucleon::Plugin::Network</a>
+  
+    <li><a href="../../Nucleon/Plugin/Node.html">Nucleon::Plugin::Node</a>
+  
+    <li><a href="../../Nucleon/Plugin/Provisioner.html">Nucleon::Plugin::Provisioner</a>
+  
+    <li><a href="../../Puppet.html">Puppet</a>
+  
+    <li><a href="../../Puppet/DataBinding.html">Puppet::DataBinding</a>
+  
+    <li><a href="../../Puppet/DataBinding/Corl.html">Puppet::DataBinding::Corl</a>
+  
+    <li><a href="../../Puppet/Indirector.html">Puppet::Indirector</a>
+  
+    <li><a href="../../Puppet/Indirector/Corl.html">Puppet::Indirector::Corl</a>
+  
+    <li><a href="../../Puppet/Parser.html">Puppet::Parser</a>
+  
+    <li><a href="../../Puppet/Parser/Functions.html">Puppet::Parser::Functions</a>
+  
+    <li><a href="../../Fog.html">Fog</a>
+  
+    <li><a href="../../Fog/Compute.html">Fog::Compute</a>
+  
+    <li><a href="../../Fog/Compute/AWS.html">Fog::Compute::AWS</a>
+  
+    <li><a href="../../Fog/Compute/AWS/Server.html">Fog::Compute::AWS::Server</a>
+  
+    <li><a href="../../Fog/Compute/RackspaceV2.html">Fog::Compute::RackspaceV2</a>
+  
+    <li><a href="../../Fog/Compute/RackspaceV2/Server.html">Fog::Compute::RackspaceV2::Server</a>
+  
+    <li><a href="../../Vagrant.html">Vagrant</a>
+  
+    <li><a href="../../Vagrant/Config.html">Vagrant::Config</a>
+  
+    <li><a href="../../Vagrant/Config/Loader.html">Vagrant::Config::Loader</a>
+  
+    <li><a href="../../Vagrant/Vagrantfile.html">Vagrant::Vagrantfile</a>
+  
+    <li><a href="../../Facter.html">Facter</a>
+  
+    <li><a href="../../Facter/Util.html">Facter::Util</a>
+  
+    <li><a href="../../Facter/Util/Loader.html">Facter::Util::Loader</a>
+  
+    <li><a href="../../Hiera.html">Hiera</a>
+  
+    <li><a href="../../Hiera/Backend.html">Hiera::Backend</a>
+  
+    <li><a href="../../Hiera/Corl_logger.html">Hiera::Corl_logger</a>
+  
+    <li><a href="../../Object.html">Object</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class CORL::Node::Rackspace</h1>
+
+  <div id="description" class="description">
+    
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-create" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">create</span><span
+            class="method-args">(options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="create-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 59</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>(<span class="ruby-identifier">options</span> = {})
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">op</span>, <span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">op</span> <span class="ruby-operator">==</span> <span class="ruby-value">:config</span>
+      <span class="ruby-identifier">config</span>.<span class="ruby-identifier">defaults</span>(<span class="ruby-identifier">create_config</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- create-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- create-method -->
+
+    
+      <div id="method-i-create_config" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">create_config</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="create_config-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 52</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">create_config</span>
+  { <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">hostname</span>, <span class="ruby-value">:flavor_id</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">machine_type</span>, <span class="ruby-value">:image_id</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">image</span> }  
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- create_config-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- create_config-method -->
+
+    
+      <div id="method-i-image_search_text" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">image_search_text</span><span
+            class="method-args">(image)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="image_search_text-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">image_search_text</span>(<span class="ruby-identifier">image</span>)
+  <span class="ruby-identifier">sprintf</span>(<span class="ruby-string">&quot;%s %s %s&quot;</span>, <span class="ruby-identifier">image_id</span>(<span class="ruby-identifier">image</span>), <span class="ruby-identifier">image</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">image</span>.<span class="ruby-identifier">state</span>)  
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- image_search_text-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- image_search_text-method -->
+
+    
+      <div id="method-i-machine_config" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">machine_config</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="machine_config-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 36</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">machine_config</span>
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">config</span>.<span class="ruby-identifier">import</span>({ 
+      <span class="ruby-value">:provider</span>         =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;rackspace&#39;</span>, 
+      <span class="ruby-value">:version</span>          =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:v2</span>,
+      <span class="ruby-value">:rackspace_region</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">region</span>
+    })
+  
+    <span class="ruby-identifier">config</span>[<span class="ruby-value">:rackspace_username</span>] = <span class="ruby-identifier">api_user</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">api_user</span>
+    <span class="ruby-identifier">config</span>[<span class="ruby-value">:rackspace_api_key</span>]  = <span class="ruby-identifier">api_key</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">api_key</span>
+    <span class="ruby-identifier">config</span>[<span class="ruby-value">:rackspace_auth_url</span>] = <span class="ruby-identifier">auth_url</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">auth_url</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- machine_config-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- machine_config-method -->
+
+    
+      <div id="method-i-normalize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">normalize</span><span
+            class="method-args">(reload)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="normalize-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">normalize</span>(<span class="ruby-identifier">reload</span>)
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-value">:rackspace</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- normalize-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- normalize-method -->
+
+    
+      <div id="method-i-regions" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">regions</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="regions-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 25</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">regions</span>
+  [ 
+    <span class="ruby-value">:dfw</span>, <span class="ruby-comment"># Dallas</span>
+    <span class="ruby-value">:ord</span>, <span class="ruby-comment"># Chicago</span>
+    <span class="ruby-value">:lon</span>  <span class="ruby-comment"># London (for UK accounts)</span>
+  ]
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- regions-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- regions-method -->
+
+    
+      <div id="method-i-render_image" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">render_image</span><span
+            class="method-args">(image)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="render_image-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 92</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">render_image</span>(<span class="ruby-identifier">image</span>)
+  <span class="ruby-identifier">sprintf</span>(<span class="ruby-string">&quot;[  %40s  ][ %10s ] %s&quot;</span>, <span class="ruby-identifier">image_id</span>(<span class="ruby-identifier">image</span>), <span class="ruby-identifier">image</span>.<span class="ruby-identifier">state</span>, <span class="ruby-identifier">image</span>.<span class="ruby-identifier">name</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- render_image-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- render_image-method -->
+
+    
+      <div id="method-i-render_machine_type" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">render_machine_type</span><span
+            class="method-args">(machine_type)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="render_machine_type-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 80</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">render_machine_type</span>(<span class="ruby-identifier">machine_type</span>)
+  <span class="ruby-identifier">sprintf</span>(<span class="ruby-string">&quot;[  %20s  ][ VCPUS: %2i ] %-30s ( RAM: %6iMB | DISK: %4iGB )&quot;</span>, 
+    <span class="ruby-identifier">machine_type_id</span>(<span class="ruby-identifier">machine_type</span>), 
+    <span class="ruby-identifier">machine_type</span>.<span class="ruby-identifier">vcpus</span>, 
+    <span class="ruby-identifier">machine_type</span>.<span class="ruby-identifier">name</span>, 
+    <span class="ruby-identifier">machine_type</span>.<span class="ruby-identifier">ram</span>, 
+    <span class="ruby-identifier">machine_type</span>.<span class="ruby-identifier">disk</span>
+  )
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- render_machine_type-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- render_machine_type-method -->
+
+    
+      <div id="method-i-start" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">start</span><span
+            class="method-args">(options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="start-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 69</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">start</span>(<span class="ruby-identifier">options</span> = {})
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">op</span>, <span class="ruby-identifier">config</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">op</span> <span class="ruby-operator">==</span> <span class="ruby-value">:config</span>
+      <span class="ruby-identifier">config</span>.<span class="ruby-identifier">defaults</span>(<span class="ruby-identifier">create_config</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- start-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- start-method -->
+
+    
+      <div id="method-i-usable_image-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">usable_image?</span><span
+            class="method-args">(image)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="usable_image-3F-source">
+            <pre><span class="ruby-comment"># File lib/CORL/node/rackspace.rb, line 18</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">usable_image?</span>(<span class="ruby-identifier">image</span>)
+  <span class="ruby-identifier">image</span>.<span class="ruby-identifier">state</span> <span class="ruby-operator">!=</span> <span class="ruby-string">&#39;DELETED&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- usable_image-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- usable_image-3F-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.2.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

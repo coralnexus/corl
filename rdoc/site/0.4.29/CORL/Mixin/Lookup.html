@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+<title>module CORL::Mixin::Lookup - corl 0.4.29</title>
+
+<link type="text/css" media="screen" href="../../rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="../../js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../js/darkfish.js"></script>
+
+
+<body id="top" class="module">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="../../index.html">Home</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>lib/core/mixin/lookup.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-i-config_initialized-3F">#config_initialized?</a>
+    
+    <li><a href="#method-i-debug_lookup">#debug_lookup</a>
+    
+    <li><a href="#method-i-fact">#fact</a>
+    
+    <li><a href="#method-i-facts">#facts</a>
+    
+    <li><a href="#method-i-hiera">#hiera</a>
+    
+    <li><a href="#method-i-hiera_configuration">#hiera_configuration</a>
+    
+    <li><a href="#method-i-hiera_facts">#hiera_facts</a>
+    
+    <li><a href="#method-i-hiera_override_dir">#hiera_override_dir</a>
+    
+    <li><a href="#method-i-lookup">#lookup</a>
+    
+    <li><a href="#method-i-lookup_array">#lookup_array</a>
+    
+    <li><a href="#method-i-lookup_hash">#lookup_hash</a>
+    
+    <li><a href="#method-i-normalize">#normalize</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="../../README_rdoc.html">README</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="../../CORL.html">CORL</a>
+  
+    <li><a href="../../CORL/Action.html">CORL::Action</a>
+  
+    <li><a href="../../CORL/Action/Authorize.html">CORL::Action::Authorize</a>
+  
+    <li><a href="../../CORL/Action/Bootstrap.html">CORL::Action::Bootstrap</a>
+  
+    <li><a href="../../CORL/Action/Build.html">CORL::Action::Build</a>
+  
+    <li><a href="../../CORL/Action/Destroy.html">CORL::Action::Destroy</a>
+  
+    <li><a href="../../CORL/Action/Exec.html">CORL::Action::Exec</a>
+  
+    <li><a href="../../CORL/Action/Facts.html">CORL::Action::Facts</a>
+  
+    <li><a href="../../CORL/Action/Image.html">CORL::Action::Image</a>
+  
+    <li><a href="../../CORL/Action/Images.html">CORL::Action::Images</a>
+  
+    <li><a href="../../CORL/Action/Ip.html">CORL::Action::Ip</a>
+  
+    <li><a href="../../CORL/Action/Keypair.html">CORL::Action::Keypair</a>
+  
+    <li><a href="../../CORL/Action/Lookup.html">CORL::Action::Lookup</a>
+  
+    <li><a href="../../CORL/Action/Machines.html">CORL::Action::Machines</a>
+  
+    <li><a href="../../CORL/Action/Provision.html">CORL::Action::Provision</a>
+  
+    <li><a href="../../CORL/Action/Reboot.html">CORL::Action::Reboot</a>
+  
+    <li><a href="../../CORL/Action/Regions.html">CORL::Action::Regions</a>
+  
+    <li><a href="../../CORL/Action/Revoke.html">CORL::Action::Revoke</a>
+  
+    <li><a href="../../CORL/Action/Seed.html">CORL::Action::Seed</a>
+  
+    <li><a href="../../CORL/Action/Spawn.html">CORL::Action::Spawn</a>
+  
+    <li><a href="../../CORL/Action/Ssh.html">CORL::Action::Ssh</a>
+  
+    <li><a href="../../CORL/Action/Start.html">CORL::Action::Start</a>
+  
+    <li><a href="../../CORL/Action/Stop.html">CORL::Action::Stop</a>
+  
+    <li><a href="../../CORL/Action/Vagrantfile.html">CORL::Action::Vagrantfile</a>
+  
+    <li><a href="../../CORL/Configuration.html">CORL::Configuration</a>
+  
+    <li><a href="../../CORL/Configuration/File.html">CORL::Configuration::File</a>
+  
+    <li><a href="../../CORL/Errors.html">CORL::Errors</a>
+  
+    <li><a href="../../CORL/Event.html">CORL::Event</a>
+  
+    <li><a href="../../CORL/Event/Puppet.html">CORL::Event::Puppet</a>
+  
+    <li><a href="../../CORL/Facade.html">CORL::Facade</a>
+  
+    <li><a href="../../CORL/Machine.html">CORL::Machine</a>
+  
+    <li><a href="../../CORL/Machine/Aws.html">CORL::Machine::Aws</a>
+  
+    <li><a href="../../CORL/Machine/Fog.html">CORL::Machine::Fog</a>
+  
+    <li><a href="../../CORL/Machine/Physical.html">CORL::Machine::Physical</a>
+  
+    <li><a href="../../CORL/Machine/Rackspace.html">CORL::Machine::Rackspace</a>
+  
+    <li><a href="../../CORL/Machine/Vagrant.html">CORL::Machine::Vagrant</a>
+  
+    <li><a href="../../CORL/Mixin.html">CORL::Mixin</a>
+  
+    <li><a href="../../CORL/Mixin/Action.html">CORL::Mixin::Action</a>
+  
+    <li><a href="../../CORL/Mixin/Action/Keypair.html">CORL::Mixin::Action::Keypair</a>
+  
+    <li><a href="../../CORL/Mixin/Lookup.html">CORL::Mixin::Lookup</a>
+  
+    <li><a href="../../CORL/Mixin/Machine.html">CORL::Mixin::Machine</a>
+  
+    <li><a href="../../CORL/Mixin/Machine/SSH.html">CORL::Mixin::Machine::SSH</a>
+  
+    <li><a href="../../CORL/Mixin/Macro.html">CORL::Mixin::Macro</a>
+  
+    <li><a href="../../CORL/Mixin/Macro/NetworkSettings.html">CORL::Mixin::Macro::NetworkSettings</a>
+  
+    <li><a href="../../CORL/Network.html">CORL::Network</a>
+  
+    <li><a href="../../CORL/Network/Default.html">CORL::Network::Default</a>
+  
+    <li><a href="../../CORL/Node.html">CORL::Node</a>
+  
+    <li><a href="../../CORL/Node/Aws.html">CORL::Node::Aws</a>
+  
+    <li><a href="../../CORL/Node/Fog.html">CORL::Node::Fog</a>
+  
+    <li><a href="../../CORL/Node/Local.html">CORL::Node::Local</a>
+  
+    <li><a href="../../CORL/Node/Rackspace.html">CORL::Node::Rackspace</a>
+  
+    <li><a href="../../CORL/Node/Vagrant.html">CORL::Node::Vagrant</a>
+  
+    <li><a href="../../CORL/Plugin.html">CORL::Plugin</a>
+  
+    <li><a href="../../CORL/Plugin/CloudAction.html">CORL::Plugin::CloudAction</a>
+  
+    <li><a href="../../CORL/Provisioner.html">CORL::Provisioner</a>
+  
+    <li><a href="../../CORL/Provisioner/Puppetnode.html">CORL::Provisioner::Puppetnode</a>
+  
+    <li><a href="../../CORL/Template.html">CORL::Template</a>
+  
+    <li><a href="../../CORL/Template/Environment.html">CORL::Template::Environment</a>
+  
+    <li><a href="../../CORL/Util.html">CORL::Util</a>
+  
+    <li><a href="../../CORL/Util/Puppet.html">CORL::Util::Puppet</a>
+  
+    <li><a href="../../CORL/Util/Puppet/Resource.html">CORL::Util::Puppet::Resource</a>
+  
+    <li><a href="../../CORL/Util/Puppet/ResourceGroup.html">CORL::Util::Puppet::ResourceGroup</a>
+  
+    <li><a href="../../CORL/Vagrant.html">CORL::Vagrant</a>
+  
+    <li><a href="../../CORL/Vagrant/Config.html">CORL::Vagrant::Config</a>
+  
+    <li><a href="../../VagrantPlugins.html">VagrantPlugins</a>
+  
+    <li><a href="../../VagrantPlugins/CORL.html">VagrantPlugins::CORL</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action.html">VagrantPlugins::CORL::Action</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action/DeleteCache.html">VagrantPlugins::CORL::Action::DeleteCache</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action/InitKeys.html">VagrantPlugins::CORL::Action::InitKeys</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Action/LinkNetwork.html">VagrantPlugins::CORL::Action::LinkNetwork</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/BaseAction.html">VagrantPlugins::CORL::BaseAction</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Command.html">VagrantPlugins::CORL::Command</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Command/Launcher.html">VagrantPlugins::CORL::Command::Launcher</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Config.html">VagrantPlugins::CORL::Config</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Config/CORL.html">VagrantPlugins::CORL::Config::CORL</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Plugin.html">VagrantPlugins::CORL::Plugin</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Provisioner.html">VagrantPlugins::CORL::Provisioner</a>
+  
+    <li><a href="../../VagrantPlugins/CORL/Provisioner/CORL.html">VagrantPlugins::CORL::Provisioner::CORL</a>
+  
+    <li><a href="../../Nucleon.html">Nucleon</a>
+  
+    <li><a href="../../Nucleon/Config.html">Nucleon::Config</a>
+  
+    <li><a href="../../Nucleon/Plugin.html">Nucleon::Plugin</a>
+  
+    <li><a href="../../Nucleon/Plugin/Base.html">Nucleon::Plugin::Base</a>
+  
+    <li><a href="../../Nucleon/Plugin/Configuration.html">Nucleon::Plugin::Configuration</a>
+  
+    <li><a href="../../Nucleon/Plugin/Machine.html">Nucleon::Plugin::Machine</a>
+  
+    <li><a href="../../Nucleon/Plugin/Network.html">Nucleon::Plugin::Network</a>
+  
+    <li><a href="../../Nucleon/Plugin/Node.html">Nucleon::Plugin::Node</a>
+  
+    <li><a href="../../Nucleon/Plugin/Provisioner.html">Nucleon::Plugin::Provisioner</a>
+  
+    <li><a href="../../Puppet.html">Puppet</a>
+  
+    <li><a href="../../Puppet/DataBinding.html">Puppet::DataBinding</a>
+  
+    <li><a href="../../Puppet/DataBinding/Corl.html">Puppet::DataBinding::Corl</a>
+  
+    <li><a href="../../Puppet/Indirector.html">Puppet::Indirector</a>
+  
+    <li><a href="../../Puppet/Indirector/Corl.html">Puppet::Indirector::Corl</a>
+  
+    <li><a href="../../Puppet/Parser.html">Puppet::Parser</a>
+  
+    <li><a href="../../Puppet/Parser/Functions.html">Puppet::Parser::Functions</a>
+  
+    <li><a href="../../Fog.html">Fog</a>
+  
+    <li><a href="../../Fog/Compute.html">Fog::Compute</a>
+  
+    <li><a href="../../Fog/Compute/AWS.html">Fog::Compute::AWS</a>
+  
+    <li><a href="../../Fog/Compute/AWS/Server.html">Fog::Compute::AWS::Server</a>
+  
+    <li><a href="../../Fog/Compute/RackspaceV2.html">Fog::Compute::RackspaceV2</a>
+  
+    <li><a href="../../Fog/Compute/RackspaceV2/Server.html">Fog::Compute::RackspaceV2::Server</a>
+  
+    <li><a href="../../Vagrant.html">Vagrant</a>
+  
+    <li><a href="../../Vagrant/Config.html">Vagrant::Config</a>
+  
+    <li><a href="../../Vagrant/Config/Loader.html">Vagrant::Config::Loader</a>
+  
+    <li><a href="../../Vagrant/Vagrantfile.html">Vagrant::Vagrantfile</a>
+  
+    <li><a href="../../Facter.html">Facter</a>
+  
+    <li><a href="../../Facter/Util.html">Facter::Util</a>
+  
+    <li><a href="../../Facter/Util/Loader.html">Facter::Util::Loader</a>
+  
+    <li><a href="../../Hiera.html">Hiera</a>
+  
+    <li><a href="../../Hiera/Backend.html">Hiera::Backend</a>
+  
+    <li><a href="../../Hiera/Corl_logger.html">Hiera::Corl_logger</a>
+  
+    <li><a href="../../Object.html">Object</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="module">module CORL::Mixin::Lookup</h1>
+
+  <div id="description" class="description">
+    
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-config_initialized-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">config_initialized?</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="config_initialized-3F-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 106</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">config_initialized?</span>
+  <span class="ruby-identifier">ready</span> = <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">hiera</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">admin?</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">network_path</span> = <span class="ruby-identifier">fact</span>(<span class="ruby-value">:corl_network</span>)
+        <span class="ruby-identifier">ready</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">directory?</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">network_path</span>, <span class="ruby-string">&#39;config&#39;</span>))
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">ready</span> = <span class="ruby-identifier">hiera_override_dir</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">directory?</span>(<span class="ruby-identifier">hiera_override_dir</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">ready</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- config_initialized-3F-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- config_initialized-3F-method -->
+
+    
+      <div id="method-i-debug_lookup" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">debug_lookup</span><span
+            class="method-args">(config, property, value, label)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="debug_lookup-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 288</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-identifier">label</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:debug</span>, <span class="ruby-keyword">false</span>)
+    <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">ui_group</span>(<span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Console</span>.<span class="ruby-identifier">cyan</span>(<span class="ruby-identifier">property</span>.<span class="ruby-identifier">to_s</span>)) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">ui</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">dump</span> = <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Console</span>.<span class="ruby-identifier">green</span>(<span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">to_json</span>(<span class="ruby-identifier">value</span>, <span class="ruby-keyword">true</span>))
+      
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">dump</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/\n+/</span>)
+        <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-node">&quot;#{label}:\n#{dump}&quot;</span>)  
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-node">&quot;#{label}: #{dump}&quot;</span>)  
+      <span class="ruby-keyword">end</span>        
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- debug_lookup-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- debug_lookup-method -->
+
+    
+      <div id="method-i-fact" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fact</span><span
+            class="method-args">(name)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="fact-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 21</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">fact</span>(<span class="ruby-identifier">name</span>)
+  <span class="ruby-constant">Facter</span>.<span class="ruby-identifier">value</span>(<span class="ruby-identifier">name</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- fact-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- fact-method -->
+
+    
+      <div id="method-i-facts" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">facts</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="facts-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">facts</span>
+  <span class="ruby-identifier">fact_map</span> = {}
+  
+  <span class="ruby-constant">Facter</span>.<span class="ruby-identifier">list</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">name</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">fact_map</span>[<span class="ruby-identifier">name</span>] = <span class="ruby-constant">Facter</span>.<span class="ruby-identifier">value</span>(<span class="ruby-identifier">name</span>)
+  <span class="ruby-keyword">end</span>
+      
+  <span class="ruby-identifier">fact_map</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- facts-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- facts-method -->
+
+    
+      <div id="method-i-hiera" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">hiera</span><span
+            class="method-args">(reset = false)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="hiera-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">hiera</span>(<span class="ruby-identifier">reset</span> = <span class="ruby-keyword">false</span>)
+  <span class="ruby-identifier">@@hiera</span> = <span class="ruby-constant">Hiera</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">:config</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">hiera_configuration</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">reset</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">@@hiera</span>.<span class="ruby-identifier">nil?</span>
+  <span class="ruby-identifier">@@hiera</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- hiera-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- hiera-method -->
+
+    
+      <div id="method-i-hiera_configuration" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">hiera_configuration</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="hiera_configuration-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 44</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">hiera_configuration</span>
+  <span class="ruby-constant">Kernel</span>.<span class="ruby-identifier">load</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">dirname</span>(<span class="ruby-keyword">__FILE__</span>), <span class="ruby-string">&#39;..&#39;</span>, <span class="ruby-string">&#39;mod&#39;</span>, <span class="ruby-string">&#39;hiera_backend.rb&#39;</span>)
+  
+  <span class="ruby-identifier">backends</span>    = <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">value</span>(<span class="ruby-value">:hiera_backends</span>, [ <span class="ruby-string">&quot;json&quot;</span>, <span class="ruby-string">&quot;yaml&quot;</span> ])
+  <span class="ruby-identifier">config_file</span> = <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">value</span>(<span class="ruby-value">:hiera_config_file</span>, <span class="ruby-constant">File</span>.<span class="ruby-identifier">join</span>(<span class="ruby-constant">Hiera</span><span class="ruby-operator">::</span><span class="ruby-constant">Util</span>.<span class="ruby-identifier">config_dir</span>, <span class="ruby-string">&#39;hiera.yaml&#39;</span>))
+  <span class="ruby-identifier">config</span>      = {}
+
+  <span class="ruby-keyword">if</span> <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">admin?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">config_file</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">exist?</span>(<span class="ruby-identifier">config_file</span>)
+    <span class="ruby-identifier">config</span> = <span class="ruby-constant">Hiera</span><span class="ruby-operator">::</span><span class="ruby-constant">Config</span>.<span class="ruby-identifier">load</span>(<span class="ruby-identifier">config_file</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">config</span>[<span class="ruby-value">:logger</span>] = <span class="ruby-value">:corl</span>
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">config</span>[<span class="ruby-value">:merge_behavior</span>]
+    <span class="ruby-identifier">config</span>[<span class="ruby-value">:merge_behavior</span>] = <span class="ruby-string">&quot;deeper&quot;</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">config</span>[<span class="ruby-value">:backends</span>]
+    <span class="ruby-identifier">config</span>[<span class="ruby-value">:backends</span>] = <span class="ruby-identifier">backends</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">override_dir</span> = <span class="ruby-identifier">hiera_override_dir</span>
+    <span class="ruby-identifier">backends</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">backend</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">config</span>[<span class="ruby-value">:backends</span>].<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">backend</span>)
+        <span class="ruby-identifier">backend</span> = <span class="ruby-identifier">backend</span>.<span class="ruby-identifier">to_sym</span>
+        <span class="ruby-identifier">config</span>[<span class="ruby-identifier">backend</span>] = {} <span class="ruby-keyword">unless</span> <span class="ruby-identifier">config</span>[<span class="ruby-identifier">backend</span>]
+        <span class="ruby-identifier">config</span>[<span class="ruby-identifier">backend</span>][<span class="ruby-value">:datadir</span>] = <span class="ruby-identifier">override_dir</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-identifier">hiera_config</span> = <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">config</span>(<span class="ruby-value">:hiera</span>, <span class="ruby-identifier">config</span>)
+  <span class="ruby-identifier">loaded_facts</span> = <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">prefix</span>(<span class="ruby-string">&#39;::&#39;</span>, <span class="ruby-identifier">hiera_facts</span>, <span class="ruby-string">&#39;&#39;</span>)
+  
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">hiera_config</span>[<span class="ruby-value">:hierarchy</span>]
+    <span class="ruby-identifier">hiera_config</span>[<span class="ruby-value">:hierarchy</span>].<span class="ruby-identifier">delete</span>(<span class="ruby-string">&#39;common&#39;</span>)
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">loaded_facts</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-identifier">hiera_config</span>[<span class="ruby-value">:hierarchy</span>].<span class="ruby-identifier">collect!</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">search</span><span class="ruby-operator">|</span> 
+      <span class="ruby-constant">Hiera</span><span class="ruby-operator">::</span><span class="ruby-constant">Interpolate</span>.<span class="ruby-identifier">interpolate</span>(<span class="ruby-identifier">search</span>, <span class="ruby-identifier">loaded_facts</span>, {})
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">hiera_config</span>[<span class="ruby-value">:hierarchy</span>]
+    <span class="ruby-identifier">hiera_config</span>[<span class="ruby-value">:hierarchy</span>] = [ <span class="ruby-string">&#39;common&#39;</span> ]
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">hiera_config</span>[<span class="ruby-value">:hierarchy</span>].<span class="ruby-identifier">include?</span>(<span class="ruby-string">&#39;common&#39;</span>)
+    <span class="ruby-identifier">hiera_config</span>[<span class="ruby-value">:hierarchy</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;common&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">hiera_config</span>.<span class="ruby-identifier">export</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- hiera_configuration-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- hiera_configuration-method -->
+
+    
+      <div id="method-i-hiera_facts" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">hiera_facts</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="hiera_facts-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 38</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">hiera_facts</span>
+  <span class="ruby-identifier">facts</span> <span class="ruby-comment"># Override if needed. (See node plugin)</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- hiera_facts-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- hiera_facts-method -->
+
+    
+      <div id="method-i-hiera_override_dir" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">hiera_override_dir</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="hiera_override_dir-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 32</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">hiera_override_dir</span>
+  <span class="ruby-keyword">nil</span> <span class="ruby-comment"># Override if needed. (See network and node plugins)</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- hiera_override_dir-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- hiera_override_dir-method -->
+
+    
+      <div id="method-i-lookup" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">lookup</span><span
+            class="method-args">(properties, default = nil, options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="lookup-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 122</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">properties</span>, <span class="ruby-identifier">default</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span> = {})
+  <span class="ruby-identifier">config</span>      = <span class="ruby-constant">Config</span>.<span class="ruby-identifier">ensure</span>(<span class="ruby-identifier">options</span>)
+  <span class="ruby-identifier">value</span>       = <span class="ruby-keyword">nil</span>
+  
+  <span class="ruby-identifier">provisioner</span> = <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:provisioner</span>, <span class="ruby-keyword">nil</span>)
+  
+  <span class="ruby-identifier">hiera_scope</span> = <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:hiera_scope</span>, {})
+  <span class="ruby-identifier">override</span>    = <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:override</span>, <span class="ruby-keyword">nil</span>)
+  <span class="ruby-identifier">context</span>     = <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:context</span>, <span class="ruby-value">:priority</span>)
+  <span class="ruby-identifier">debug</span>       = <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:debug</span>, <span class="ruby-keyword">false</span>)    
+  
+  <span class="ruby-identifier">return_property</span> = <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:return_property</span>, <span class="ruby-keyword">false</span>)
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">properties</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>)
+    <span class="ruby-identifier">properties</span> = [ <span class="ruby-identifier">properties</span> ].<span class="ruby-identifier">flatten</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">first_property</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">properties</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">property</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">property</span>       = <span class="ruby-identifier">property</span>.<span class="ruby-identifier">to_sym</span>
+    <span class="ruby-identifier">first_property</span> = <span class="ruby-identifier">property</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">first_property</span>
+    
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">debug</span>
+      <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-string">&quot;\n&quot;</span>, { <span class="ruby-value">:prefix</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span> })
+      <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">ui_group</span>(<span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Console</span>.<span class="ruby-identifier">purple</span>(<span class="ruby-identifier">property</span>)) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">ui</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-string">&quot;-----------------------------------------------------&quot;</span>)
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    
+    <span class="ruby-comment"># Try to load facts first (these can not be overridden)</span>
+    <span class="ruby-identifier">value</span> = <span class="ruby-identifier">fact</span>(<span class="ruby-identifier">property</span>)
+    <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Fact lookup&quot;</span>)
+    
+    <span class="ruby-keyword">unless</span> <span class="ruby-identifier">value</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">config_initialized?</span>
+        <span class="ruby-comment"># Try to find in Hiera data store</span>
+        <span class="ruby-keyword">unless</span> <span class="ruby-identifier">hiera_scope</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-string">&#39;[]&#39;</span>)
+          <span class="ruby-identifier">hiera_scope</span> = <span class="ruby-constant">Hiera</span><span class="ruby-operator">::</span><span class="ruby-constant">Scope</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">hiera_scope</span>)
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-identifier">value</span> = <span class="ruby-identifier">hiera</span>.<span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">property</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">hiera_scope</span>, <span class="ruby-identifier">override</span>, <span class="ruby-identifier">context</span>)
+        <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Hiera lookup&quot;</span>)
+      <span class="ruby-keyword">end</span> 
+  
+      <span class="ruby-keyword">if</span> <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">admin?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">provisioner</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">nil?</span>
+        <span class="ruby-comment"># Search the provisioner scope (only admins can provision a machine)</span>
+        <span class="ruby-identifier">value</span> = <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">provisioner</span>({ <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:lookup</span> }, <span class="ruby-identifier">provisioner</span>).<span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">property</span>, <span class="ruby-identifier">default</span>, <span class="ruby-identifier">config</span>)
+        <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Provisioner lookup&quot;</span>)
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-comment"># Resort to default</span>
+    <span class="ruby-identifier">value</span> = <span class="ruby-identifier">default</span>
+    <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">first_property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Default value&quot;</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">value</span> = <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">value</span>(<span class="ruby-identifier">value</span>, <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:undefined_value</span>, <span class="ruby-value">:undefined</span>))
+  
+  <span class="ruby-keyword">if</span> <span class="ruby-constant">Config</span>.<span class="ruby-identifier">get_property</span>(<span class="ruby-identifier">first_property</span>).<span class="ruby-identifier">nil?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">value</span>
+    <span class="ruby-constant">Config</span>.<span class="ruby-identifier">set_property</span>(<span class="ruby-identifier">first_property</span>, <span class="ruby-identifier">value</span>)
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">first_property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&#39;Internalized value&#39;</span>)
+  
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">return_property</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">value</span>, <span class="ruby-identifier">first_property</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-string">&quot;\n&quot;</span>, { <span class="ruby-value">:prefix</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span> }) <span class="ruby-keyword">if</span> <span class="ruby-identifier">debug</span>
+  <span class="ruby-identifier">value</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- lookup-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- lookup-method -->
+
+    
+      <div id="method-i-lookup_array" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">lookup_array</span><span
+            class="method-args">(properties, default = [], options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="lookup_array-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 193</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">lookup_array</span>(<span class="ruby-identifier">properties</span>, <span class="ruby-identifier">default</span> = [], <span class="ruby-identifier">options</span> = {})
+  <span class="ruby-identifier">config</span>          = <span class="ruby-constant">Config</span>.<span class="ruby-identifier">ensure</span>(<span class="ruby-identifier">options</span>) 
+  <span class="ruby-identifier">value</span>, <span class="ruby-identifier">property</span> = <span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">properties</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">config</span>.<span class="ruby-identifier">import</span>({ <span class="ruby-value">:return_property</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>, <span class="ruby-value">:context</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:array</span> }))
+   
+  <span class="ruby-keyword">if</span> <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">undef?</span>(<span class="ruby-identifier">value</span>)
+    <span class="ruby-identifier">value</span> = <span class="ruby-identifier">default</span>
+    <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Array default value&quot;</span>)
+      
+  <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span> <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">empty?</span>(<span class="ruby-identifier">default</span>)
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:merge</span>, <span class="ruby-keyword">false</span>)
+      <span class="ruby-identifier">value</span> = <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">merge</span>([<span class="ruby-identifier">default</span>, <span class="ruby-identifier">value</span>], <span class="ruby-identifier">config</span>)
+      <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Merged array value with default&quot;</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>)
+    <span class="ruby-identifier">value</span> = ( <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">empty?</span>(<span class="ruby-identifier">value</span>) <span class="ruby-operator">?</span> [] <span class="ruby-operator">:</span> [ <span class="ruby-identifier">value</span> ] )
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-identifier">value</span> = <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">value</span>(<span class="ruby-identifier">value</span>, <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:undefined_value</span>, <span class="ruby-value">:undefined</span>))
+  <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Final array value&quot;</span>)
+     
+  <span class="ruby-constant">Config</span>.<span class="ruby-identifier">set_property</span>(<span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>)
+  <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-string">&quot;\n&quot;</span>, { <span class="ruby-value">:prefix</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span> }) <span class="ruby-keyword">if</span> <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:debug</span>, <span class="ruby-keyword">false</span>)
+  <span class="ruby-identifier">value</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- lookup_array-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- lookup_array-method -->
+
+    
+      <div id="method-i-lookup_hash" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">lookup_hash</span><span
+            class="method-args">(properties, default = {}, options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="lookup_hash-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 222</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">lookup_hash</span>(<span class="ruby-identifier">properties</span>, <span class="ruby-identifier">default</span> = {}, <span class="ruby-identifier">options</span> = {})
+  <span class="ruby-identifier">config</span>          = <span class="ruby-constant">Config</span>.<span class="ruby-identifier">ensure</span>(<span class="ruby-identifier">options</span>) 
+  <span class="ruby-identifier">value</span>, <span class="ruby-identifier">property</span> = <span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">properties</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">config</span>.<span class="ruby-identifier">import</span>({ <span class="ruby-value">:return_property</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>, <span class="ruby-value">:context</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:hash</span> }))
+  
+  <span class="ruby-keyword">if</span> <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">undef?</span>(<span class="ruby-identifier">value</span>)
+    <span class="ruby-identifier">value</span> = <span class="ruby-identifier">default</span>
+    <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Hash default value&quot;</span>)
+      
+  <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span> <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">empty?</span>(<span class="ruby-identifier">default</span>)
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:merge</span>, <span class="ruby-keyword">false</span>)
+      <span class="ruby-identifier">value</span> = <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">merge</span>([<span class="ruby-identifier">default</span>, <span class="ruby-identifier">value</span>], <span class="ruby-identifier">config</span>)
+      <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Merged hash value with default&quot;</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">value</span> = ( <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">empty?</span>(<span class="ruby-identifier">value</span>) <span class="ruby-operator">?</span> {} <span class="ruby-operator">:</span> { <span class="ruby-value">:value</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">value</span> } )
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-identifier">value</span> = <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">value</span>(<span class="ruby-identifier">value</span>, <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:undefined_value</span>, <span class="ruby-value">:undefined</span>))
+  <span class="ruby-identifier">debug_lookup</span>(<span class="ruby-identifier">config</span>, <span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>, <span class="ruby-string">&quot;Final hash value&quot;</span>)
+  
+  <span class="ruby-constant">Config</span>.<span class="ruby-identifier">set_property</span>(<span class="ruby-identifier">property</span>, <span class="ruby-identifier">value</span>)
+  <span class="ruby-constant">CORL</span>.<span class="ruby-identifier">ui</span>.<span class="ruby-identifier">info</span>(<span class="ruby-string">&quot;\n&quot;</span>, { <span class="ruby-value">:prefix</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span> }) <span class="ruby-keyword">if</span> <span class="ruby-identifier">config</span>.<span class="ruby-identifier">get</span>(<span class="ruby-value">:debug</span>, <span class="ruby-keyword">false</span>)
+  <span class="ruby-identifier">value</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- lookup_hash-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- lookup_hash-method -->
+
+    
+      <div id="method-i-normalize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">normalize</span><span
+            class="method-args">(data, override = nil, options = {})</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="normalize-source">
+            <pre><span class="ruby-comment"># File lib/core/mixin/lookup.rb, line 251</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">normalize</span>(<span class="ruby-identifier">data</span>, <span class="ruby-identifier">override</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span> = {})
+  <span class="ruby-identifier">config</span>  = <span class="ruby-constant">Config</span>.<span class="ruby-identifier">ensure</span>(<span class="ruby-identifier">options</span>).<span class="ruby-identifier">import</span>({ <span class="ruby-value">:context</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:hash</span> })
+  <span class="ruby-identifier">results</span> = {}
+  
+  <span class="ruby-keyword">unless</span> <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">undef?</span>(<span class="ruby-identifier">override</span>)
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">data</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span>, <span class="ruby-constant">Symbol</span>
+      <span class="ruby-identifier">data</span> = [ <span class="ruby-identifier">data</span>, <span class="ruby-identifier">override</span> ] <span class="ruby-keyword">if</span> <span class="ruby-identifier">data</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">override</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Array</span>
+      <span class="ruby-identifier">data</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">override</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">data</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">override</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Hash</span>
+      <span class="ruby-identifier">data</span> = [ <span class="ruby-identifier">data</span>, <span class="ruby-identifier">override</span> ]
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">data</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span>, <span class="ruby-constant">Symbol</span>
+    <span class="ruby-identifier">results</span> = <span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">data</span>.<span class="ruby-identifier">to_s</span>, {}, <span class="ruby-identifier">config</span>)
+    
+  <span class="ruby-keyword">when</span> <span class="ruby-constant">Array</span>
+    <span class="ruby-identifier">data</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">item</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Symbol</span>)
+        <span class="ruby-identifier">item</span> = <span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">item</span>.<span class="ruby-identifier">to_s</span>, {}, <span class="ruby-identifier">config</span>)
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">unless</span> <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">undef?</span>(<span class="ruby-identifier">item</span>)
+        <span class="ruby-identifier">results</span> = <span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Data</span>.<span class="ruby-identifier">merge</span>([ <span class="ruby-identifier">results</span>, <span class="ruby-identifier">item</span> ], <span class="ruby-identifier">config</span>)
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">when</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">results</span> = <span class="ruby-identifier">data</span>
+  <span class="ruby-keyword">end</span>    
+  <span class="ruby-identifier">results</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- normalize-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- normalize-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.2.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+
