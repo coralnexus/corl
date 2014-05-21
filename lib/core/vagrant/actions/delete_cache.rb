@@ -10,7 +10,7 @@ class DeleteCache < BaseAction
       
       env[:ui].info I18n.t("corl.vagrant.actions.delete_cache.start")
       
-      # Keep the box (in case we want to start from a saved image)
+      # Check for saved image
       box     = node.cache_setting(:box)
       box_url = node.cache_setting(:box_url)
       
