@@ -14,14 +14,8 @@ class DeleteCache < BaseAction
       box     = node.cache_setting(:box)
       box_url = node.cache_setting(:box_url)
       
-      # Clear cache
-      node.clear_cache
-      
-      if box && box_url
-        # Re-add boxes if needed
-        node.set_cache_setting(:box, box)
-        node.set_cache_setting(:box_url, box_url)  
-      end
+      # Clear cache unless saved image
+      node.clear_cache unless box && box_url
     end
   end
 end
