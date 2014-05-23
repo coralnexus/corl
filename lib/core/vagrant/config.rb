@@ -160,6 +160,14 @@ module Config
     box     = node.cache_setting(:box)
     box_url = node.cache_setting(:box_url)
     
+    if box_url
+      box_file = box_url.gsub(/^file\:\/\//, '')      
+      unless File.exists?(box_file)
+        box_url = nil        
+        node.clear_cache
+      end
+    end
+    
     if box && box_url
       #dbg(box, 'VM box')
       machine.vm.box     = box
