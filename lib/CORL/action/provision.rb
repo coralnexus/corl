@@ -11,9 +11,16 @@ class Provision < Plugin::CloudAction
       codes :provision_failure
             
       register :dry_run, :bool, false
+      register :environment, :str, ''
     end
   end
   
+  #---
+  
+  def arguments
+    [ :environment ]
+  end
+
   #-----------------------------------------------------------------------------
   # Operations
   
@@ -24,9 +31,15 @@ class Provision < Plugin::CloudAction
       ensure_node(node) do        
         success = true
         
+        settings.delete(:environment) if settings[:environment] == ''
+        
+        if settings.has_key?(:environment)
+          node.create_fact(:corl_environment, settings[:environment])
+        end 
+        
         if CORL.admin?
           unless node.build_time && File.directory?(network.build_directory)
-            success = node.build
+            success = node.build(settings)
           end
         
           if success

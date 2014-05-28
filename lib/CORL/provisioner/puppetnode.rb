@@ -89,8 +89,10 @@ class Puppetnode < CORL.plugin_class(:provisioner)
     Puppet[:node_name_value]       = id.to_s
     
     unless profiles.empty?
-      modulepath = profiles.collect do |profile|
-        File.join(build_directory, locations[:module][profile.to_sym])
+      modulepath = []
+      profiles.each do |profile|
+        profile_dir = File.join(build_directory, locations[:module][profile.to_sym])
+        modulepath << profile_dir if File.directory?(profile_dir)
       end
       Puppet[:modulepath] = array(modulepath).join(File::PATH_SEPARATOR)
     end
@@ -129,19 +131,34 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   # Provisioner interface operations
   
   def build(options = {})
-    super do |locations, package_info|
+    super do |dependencies, locations, package_info, environment|
       success = true
       
       # Build modules
-      locations[:module] = {}
+      locations[:module]     = {}
+      dependencies[:profile] = {}
       
-      init_profile = lambda do |package_name, profile_name, profile_info|
+      init_profile = lambda do |package_name, profile_name, profile_info, profiles = nil|
         package_id = id(package_name)
         base_directory = File.join(locations[:build], 'modules', package_id.to_s, profile_name.to_s)
         profile_success = true
         
         ui.info("Building CORL profile #{blue(profile_name)} modules into #{green(base_directory)}")
         
+        profile_parents = []
+        profile_config  = Config.new(profile_info)
+            
+        while profile_config.has_key?(:extend) do
+          array(profile_config.delete(:extend)).each do |parent_profile|
+            profile_parents << profile_id(package_name, parent_profile)
+            profile_config.defaults(profiles[parent_profile.to_sym])
+          end
+        end
+        
+        profile_info = process_environment(profile_info, environment)
+        
+        dependencies[:profile][profile_id(package_name, profile_name)] = profile_parents
+                
         if profile_info.has_key?(:modules)
           profile_info[:modules].each do |module_name, module_reference|
             module_directory = File.join(base_directory, module_name.to_s)
@@ -159,28 +176,20 @@ class Puppetnode < CORL.plugin_class(:provisioner)
             unless module_project
               ui.warn("Puppet module #{cyan(module_name)} failed to initialize")
               profile_success = false
-              break
             end
           end
           locations[:module][profile_id(package_name, profile_name)] = base_directory if profile_success
-          profile_success
         end
+        profile_success
       end
       
       hash(package_info.get([ :provisioners, plugin_provider ])).each do |package_name, info|
         if info.has_key?(:profiles)
           info[:profiles].each do |profile_name, profile_info|
-            unless init_profile.call(package_name, profile_name, profile_info)
+            unless init_profile.call(package_name, profile_name, profile_info, info[:profiles])
               success = false
-              break
             end
           end
-        end
-      end
-      profiles.each do |profile_name, profile_info|
-        unless init_profile.call(plugin_name, profile_name, profile_info)
-          success = false
-          break
         end
       end
       success
@@ -214,7 +223,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
   #---
     
   def provision(profiles, options = {})
-    super do |config|
+    super do |processed_profiles, config|
       locations = build_locations
       success = true
     
@@ -269,7 +278,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           @@status[id] = code.success
           
           start_time = Time.now
-          node = init_puppet(profiles)
+          node = init_puppet(processed_profiles)
         
           # Include defaults
           classes = include_location.call(:default, {}, true)
@@ -277,7 +286,7 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           # Import needed profiles
           include_location.call(:profiles, {}, false)
       
-          profiles.each do |profile|
+          processed_profiles.each do |profile|
             classes[profile.to_s] = { :require => 'Anchor[profile_start]' }
           end
           

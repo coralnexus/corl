@@ -374,7 +374,7 @@ class Node < CORL.plugin_class(:base)
   # Machine operations
   
   def build(options = {})
-    config  = Config.ensure(options)
+    config  = Config.ensure(options).import({ :node => myself })
     success = true
     
     provisioners.each do |provider, collection|
@@ -383,7 +383,7 @@ class Node < CORL.plugin_class(:base)
       collection.each do |name, provisioner|
         ui.info("Building #{name} provisioner")
         
-        unless provisioner.build(options)
+        unless provisioner.build(config)
           success = false
           break
         end

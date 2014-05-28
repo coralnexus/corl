@@ -53,21 +53,40 @@ class Provisioner < CORL.plugin_class(:base)
     myself[:gateway] = gateway
   end
   
-  def gateway
-    myself[:gateway]
+  def gateway(index = :first, reset = false)
+    gateway = myself[:gateway]
+    
+    unless gateway
+      gateways = package_gateways(reset)
+      
+      unless gateways.empty?
+        if index == :first || index == 0
+          gateway  = gateways[0]
+        elsif index == :last
+          gateway = gateways.pop
+        elsif index.integer?
+          gateway  = gateways[index]      
+        end
+      end
+    end    
+    gateway
+  end
+  
+  def package_gateways(reset = false)
+    gateways = []
+    build_info(reset).each do |package_name, package_info|
+      gateways << package_info[:gateway] if package_info.has_key?(:gateway)
+    end
+    gateways
   end
   
   #---
   
-  def packages
-    hash(myself[:packages])
+  def packages(environment = nil)
+    process_environment(myself[:packages], environment)
   end
   
   #---
-  
-  def profiles
-    hash(myself[:profiles])
-  end
   
   def find_profiles(reset = false)
     allowed_profiles = []  
@@ -75,9 +94,6 @@ class Provisioner < CORL.plugin_class(:base)
       hash(package_info[:profiles]).each do |profile_name, profile_info|
         allowed_profiles << concatenate([ package_name, 'profile', profile_name ])
       end
-    end
-    profiles.each do |profile_name, profile_info|
-      allowed_profiles << concatenate([ plugin_name, 'profile', profile_name ])
     end
     allowed_profiles  
   end
@@ -100,6 +116,38 @@ class Provisioner < CORL.plugin_class(:base)
       end
     end
     found.empty? ? false : found
+  end
+   
+  #---
+  
+  def profile_dependencies(profiles)
+    dependencies  = build_dependencies[:profile]    
+    profile_index = {}
+    
+    search_profiles = lambda do |profile|
+      profile = profile.to_sym
+            
+      if dependencies.has_key?(profile)
+        dependencies[profile].each do |parent_profile|
+          search_profiles.call(parent_profile)
+        end
+      end
+      profile_index[profile] = true
+    end
+    
+    profiles.each do |profile|
+      search_profiles.call(profile)
+    end
+    
+    profile_index.keys
+  end
+    
+  #---
+  
+  def build_dependencies(reset = false)
+    dependencies = cache_setting(:build_dependencies, {}, :hash)
+    build if reset || dependencies.empty?
+    symbol_map(cache_setting(:build_dependencies, {}, :hash))
   end
      
   #---
@@ -136,10 +184,15 @@ class Provisioner < CORL.plugin_class(:base)
   #---
   
   def build(options = {})
-    config       = Config.ensure(options)
-    success      = true    
-    locations    = Config.new({ :build => id.to_s, :package => {} })
-    package_info = Config.new
+    config        = Config.ensure(options)
+    success       = true    
+    locations     = Config.new({ :build => id.to_s, :package => {} })
+    dependencies  = Config.new
+    package_info  = Config.new    
+    package_names = {}
+    
+    node          = config[:node]
+    environment   = Util::Data.ensure_value(config[:environment], node.lookup(:corl_environment))
     
     init_package = lambda do |name, reference|
       package_directory = File.join(locations[:build], 'packages', id(name).to_s)
@@ -148,28 +201,29 @@ class Provisioner < CORL.plugin_class(:base)
       ui.info("Building package #{blue(name)} at #{purple(reference)} into #{green(package_directory)}")
       
       full_package_directory = File.join(build_directory, package_directory)
-        
-      project = CORL.configuration(extended_config(:package, {
-        :directory => full_package_directory,
-        :url       => reference,
-        :create    => File.directory?(full_package_directory) ? false : true
-      }))
-      unless project
-        ui.warn("Project #{cyan(name)} failed to initialize")
-        package_success = false
-      end
       
-      if package_success
-        package_info.import(project.export)
-        locations[:package][name] = package_directory
+      unless package_names.has_key?(name)  
+        project = CORL.configuration(extended_config(:package, {
+          :directory => full_package_directory,
+          :url       => reference,
+          :create    => File.directory?(full_package_directory) ? false : true
+        }))
+        unless project
+          ui.warn("Project #{cyan(name)} failed to initialize")
+          package_success = false
+        end
       
-        if project.get([ :provisioners, plugin_provider ], false)
-          project.get_hash([ :provisioners, plugin_provider ]).each do |prov_name, info|
-            if info.has_key?(:packages)
-              info[:packages].each do |sub_name, sub_reference|
-                unless init_package.call(sub_name, sub_reference)
-                  package_success = false
-                  break
+        if package_success
+          package_info.import(project.export)
+          locations[:package][name] = package_directory
+      
+          if project.get([ :provisioners, plugin_provider ], false)
+            project.get_hash([ :provisioners, plugin_provider ]).each do |prov_name, info|
+              if info.has_key?(:packages)
+                process_environment(info[:packages], environment).each do |sub_name, sub_reference|
+                  unless init_package.call(sub_name, sub_reference)
+                    package_success = false
+                  end
                 end
               end
             end
@@ -184,24 +238,25 @@ class Provisioner < CORL.plugin_class(:base)
     FileUtils.mkdir_p(local_build_directory)
     
     # Build packages
-    packages.each do |name, reference|
+    packages(environment).each do |name, reference|
       unless init_package.call(name, reference)
         success = false
-        break
       end
     end
     
     if success
-      # Build provider specific components 
-      success = yield(locations, package_info) if block_given?
+      # Build provider specific components
+      success = yield(dependencies, locations, package_info, environment) if block_given?
     
       if success
         # Save the updates in the local project cache
+        set_cache_setting(:build_dependencies, dependencies.export)
         set_cache_setting(:build_locations, locations.export)
         set_cache_setting(:build_info, package_info.get([ :provisioners, plugin_provider ]))
         set_cache_setting(:build_profiles, find_profiles)
       end
     end
+        
     success
   end
   
@@ -211,12 +266,14 @@ class Provisioner < CORL.plugin_class(:base)
     # Implement in providers
     nil
   end
-   
+  
   #---
   
   def provision(profiles, options = {})
-    config  = Config.ensure(options)
-    success = yield(config) if block_given?
+    config   = Config.ensure(options)    
+    profiles = profile_dependencies(profiles)
+    
+    success = yield(profiles, config) if block_given?
     
     Config.save_properties(Config.get_options(:corl_log)) if success
     success
@@ -297,6 +354,28 @@ class Provisioner < CORL.plugin_class(:base)
       name = components.join(joiner)
     end
     name
+  end
+  
+  #---
+  
+  def process_environment(settings, environment = nil)
+    config      = Config.new(hash(settings))
+    env_config  = config.delete(:environment)
+    environment = environment.to_sym if environment
+    
+    if env_config    
+      if environment && env_config.has_key?(environment)
+        local_env_config = env_config[environment]
+        
+        while local_env_config && local_env_config.has_key?(:use) do
+          local_env_config = env_config[local_env_config[:use].to_sym]
+        end
+         
+        config.defaults(local_env_config) if local_env_config
+      end
+      config.defaults(env_config[:default]) if env_config.has_key?(:default)
+    end
+    config.export  
   end
 end
 end

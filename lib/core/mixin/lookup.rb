@@ -12,8 +12,16 @@ module Lookup
     Facter.list.each do |name|
       fact_map[name] = Facter.value(name)
     end
-        
     fact_map
+  end
+  
+  #---
+  
+  def create_fact(name, value, weight = 1000)
+    Facter.collection.add(name.to_sym, { 
+      :value  => value, 
+      :weight => weight 
+    })
   end
   
   #---
