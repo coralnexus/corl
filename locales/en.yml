@@ -52,6 +52,80 @@ en:
                 Encryption strength must be greater than %{required} bits (%{value} specified)
               no_password: |-
                 Password verification of private key was terminated (verification required to use encrypted SSH keys)             
+    action:
+      unknown: 
+        description: |-
+          This CORL action has no description available
+        help: |-
+          There is no extended help information available for this CORL action.
+      cloud:
+        machines:
+          description: |-
+            Return a list of machine types supported by a provider
+        regions:
+          description: |-
+            Retrieve known regions for a specified provider
+        images:
+          description: |-
+            Search the available images at a specified provider
+        vagrantfile: 
+          description: |-
+            Generate a scaffolding Vagrantfile
+      node:
+        spawn:
+          description: |-
+            Spawn new nodes in the network
+        bootstrap:
+          description: |-
+            Bootstrap existing nodes
+        seed:
+          description: |-
+            Seed nodes with a specified network project
+        build:
+          description: |-
+            Build packages on nodes
+        provision:
+          description: |-
+            Provision nodes
+        image:
+          description: |-
+            Create images of existing nodes
+        exec:
+          description: |-
+            Execute CLI commands across nodes
+        reboot:
+          description: |-
+            Reboot nodes
+        stop:
+          description: |-
+            Stop and save currently running nodes
+        start:
+          description: |-
+            Start an existing saved node
+        destroy:
+          description: |-
+            Destroy network nodes
+        ip:
+          description: |-
+            Return the public IP address for nodes
+        facts:
+          description: |-
+            Retrieve node facts
+        lookup:
+          description: |-
+            Lookup node configurations 
+        ssh:
+          description: |-
+            SSH into a node       
+        authorize: 
+          description: |-
+            Authorize a public key for node access
+        revoke:
+          description: |-
+            Revoke a public keys access to nodes
+        keypair:
+          description: |-
+            Generate a new SSH keypair           
     actions:
       images:
         options:
