@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "corl"
-  s.version = "0.4.30"
+  s.version = "0.5.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-05-21"
+  s.date = "2014-06-02"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -44,41 +44,17 @@ Gem::Specification.new do |s|
     "bootstrap/os/ubuntu/09_nucleon.sh",
     "bootstrap/os/ubuntu/10_corl.sh",
     "corl.gemspec",
-    "lib/CORL/action/authorize.rb",
-    "lib/CORL/action/bootstrap.rb",
-    "lib/CORL/action/build.rb",
-    "lib/CORL/action/destroy.rb",
-    "lib/CORL/action/exec.rb",
-    "lib/CORL/action/facts.rb",
-    "lib/CORL/action/image.rb",
-    "lib/CORL/action/images.rb",
-    "lib/CORL/action/ip.rb",
-    "lib/CORL/action/keypair.rb",
-    "lib/CORL/action/lookup.rb",
-    "lib/CORL/action/machines.rb",
-    "lib/CORL/action/provision.rb",
-    "lib/CORL/action/reboot.rb",
-    "lib/CORL/action/regions.rb",
-    "lib/CORL/action/revoke.rb",
-    "lib/CORL/action/seed.rb",
-    "lib/CORL/action/spawn.rb",
-    "lib/CORL/action/ssh.rb",
-    "lib/CORL/action/start.rb",
-    "lib/CORL/action/stop.rb",
-    "lib/CORL/action/vagrantfile.rb",
     "lib/CORL/configuration/file.rb",
-    "lib/CORL/event/puppet.rb",
-    "lib/CORL/machine/aws.rb",
+    "lib/CORL/machine/AWS.rb",
     "lib/CORL/machine/physical.rb",
     "lib/CORL/machine/rackspace.rb",
     "lib/CORL/machine/vagrant.rb",
-    "lib/CORL/network/default.rb",
-    "lib/CORL/node/aws.rb",
+    "lib/CORL/network/CORL.rb",
+    "lib/CORL/node/AWS.rb",
     "lib/CORL/node/local.rb",
     "lib/CORL/node/rackspace.rb",
     "lib/CORL/node/vagrant.rb",
     "lib/CORL/provisioner/puppetnode.rb",
-    "lib/CORL/template/environment.rb",
     "lib/core/errors.rb",
     "lib/core/facade.rb",
     "lib/core/mixin/action/keypair.rb",
@@ -89,7 +65,7 @@ Gem::Specification.new do |s|
     "lib/core/mod/fog_aws_server.rb",
     "lib/core/mod/fog_rackspace_server.rb",
     "lib/core/mod/hiera_backend.rb",
-    "lib/core/plugin/action.rb",
+    "lib/core/plugin/cloud_action.rb",
     "lib/core/plugin/configuration.rb",
     "lib/core/plugin/fog_machine.rb",
     "lib/core/plugin/fog_node.rb",
@@ -117,6 +93,30 @@ Gem::Specification.new do |s|
     "lib/facter/custom_facts.rb",
     "lib/facter/vagrant_exists.rb",
     "lib/hiera/corl_logger.rb",
+    "lib/nucleon/action/cloud/images.rb",
+    "lib/nucleon/action/cloud/machines.rb",
+    "lib/nucleon/action/cloud/regions.rb",
+    "lib/nucleon/action/cloud/vagrantfile.rb",
+    "lib/nucleon/action/node/IP.rb",
+    "lib/nucleon/action/node/SSH.rb",
+    "lib/nucleon/action/node/authorize.rb",
+    "lib/nucleon/action/node/bootstrap.rb",
+    "lib/nucleon/action/node/build.rb",
+    "lib/nucleon/action/node/destroy.rb",
+    "lib/nucleon/action/node/exec.rb",
+    "lib/nucleon/action/node/facts.rb",
+    "lib/nucleon/action/node/image.rb",
+    "lib/nucleon/action/node/keypair.rb",
+    "lib/nucleon/action/node/lookup.rb",
+    "lib/nucleon/action/node/provision.rb",
+    "lib/nucleon/action/node/reboot.rb",
+    "lib/nucleon/action/node/revoke.rb",
+    "lib/nucleon/action/node/seed.rb",
+    "lib/nucleon/action/node/spawn.rb",
+    "lib/nucleon/action/node/start.rb",
+    "lib/nucleon/action/node/stop.rb",
+    "lib/nucleon/event/puppet.rb",
+    "lib/nucleon/template/environment.rb",
     "lib/puppet/indirector/corl.rb",
     "lib/puppet/indirector/data_binding/corl.rb",
     "lib/puppet/parser/functions/corl_include.rb",
@@ -303,7 +303,7 @@ Gem::Specification.new do |s|
     s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<nucleon>, [">= 0.1.10", "~> 0.1"])
+      s.add_runtime_dependency(%q<nucleon>, [">= 0.2.0", "~> 0.2"])
       s.add_runtime_dependency(%q<fog>, ["~> 1.20"])
       s.add_runtime_dependency(%q<unf>, ["~> 0.1"])
       s.add_runtime_dependency(%q<facter>, ["~> 1.7"])
@@ -316,7 +316,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<yard>, ["~> 0.8"])
       s.add_development_dependency(%q<vagrant>, ["~> 1.5"])
     else
-      s.add_dependency(%q<nucleon>, [">= 0.1.10", "~> 0.1"])
+      s.add_dependency(%q<nucleon>, [">= 0.2.0", "~> 0.2"])
       s.add_dependency(%q<fog>, ["~> 1.20"])
       s.add_dependency(%q<unf>, ["~> 0.1"])
       s.add_dependency(%q<facter>, ["~> 1.7"])
@@ -330,7 +330,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<vagrant>, ["~> 1.5"])
     end
   else
-    s.add_dependency(%q<nucleon>, [">= 0.1.10", "~> 0.1"])
+    s.add_dependency(%q<nucleon>, [">= 0.2.0", "~> 0.2"])
     s.add_dependency(%q<fog>, ["~> 1.20"])
     s.add_dependency(%q<unf>, ["~> 0.1"])
     s.add_dependency(%q<facter>, ["~> 1.7"])
