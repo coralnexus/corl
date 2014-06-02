@@ -5,7 +5,7 @@ Facter.add(:corl_config_ready) do
       require 'corl'      
       configured = CORL::Config.config_initialized?
       
-    rescue Exception # Prevent abortions.
+    rescue # Prevent abortions.
     end
   
     configured ? true : nil

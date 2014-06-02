@@ -8,7 +8,7 @@ Facter.add(:vagrant_exists) do
       Facter::Util::Resolution::exec('id vagrant 2> /dev/null')
       vagrant_exists = true if $?.exitstatus == 0
       
-    rescue Exception # Prevent abortions.
+    rescue # Prevent abortions.
     end    
     vagrant_exists
   end
