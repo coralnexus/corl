@@ -24,8 +24,8 @@ class Launcher < ::Vagrant.plugin("2", :command)
 
   def execute
     # Set the base command so we can access in any actions executed
-    ::CORL::Vagrant.command = ::CORL.handle(self)   
-    ::CORL.executable(@argv - [ "--" ], "[ vagrant ] corl")
+    ::CORL::Vagrant.command = ::CORL.handle(self)
+    ::CORL.executable(ARGV - [ 'corl', '--' ], "[ vagrant ] corl")
   end
   
   #-----------------------------------------------------------------------------
