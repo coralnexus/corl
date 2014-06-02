@@ -1,9 +1,9 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: ca8e893e594ecee32468df26fd4cfb02655b4afe
-  branch: 0.1
+  revision: b1aa31328f2aa1a681134d8ff88ea1639c18432c
+  branch: 0.2
   specs:
-    nucleon (0.1.14)
+    nucleon (0.2.0)
       celluloid (~> 0.15)
       childprocess (~> 0.5)
       deep_merge (~> 1.0)
@@ -36,7 +36,7 @@ GIT
 PATH
   remote: .
   specs:
-    corl (0.4.29)
+    corl (0.4.30)
       facter (~> 1.7)
       fog (~> 1.20)
       hiera (~> 1.3)
@@ -217,7 +217,7 @@ DEPENDENCIES
   fog (~> 1.20)
   hiera (~> 1.3)
   jeweler (~> 2.0)
-  nucleon (~> 0.1, >= 0.1.10)!
+  nucleon (~> 0.2, >= 0.2.0)!
   puppet (~> 3.2, <= 3.4.3)
   rdoc (~> 3.12)
   rspec (~> 2.10)
