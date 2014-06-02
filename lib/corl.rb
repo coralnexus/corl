@@ -131,13 +131,13 @@ module CORL
 
   reload(true) do |op, manager|
     if op == :define
-      manager.define_namespace :CORL
-    
-      manager.define_type :configuration => :file,      # Core
-                          :network       => :default,   # Cluster
-                          :node          => :local,     # Cluster
-                          :machine       => :physical,  # Cluster
-                          :provisioner   => :puppetnode # Cluster
+      manager.define_types :CORL, {
+        :configuration => :file,      # Core
+        :network       => :corl,      # Cluster
+        :node          => :local,     # Cluster
+        :machine       => :physical,  # Cluster
+        :provisioner   => :puppetnode # Cluster
+      }
     end
   end
 end
