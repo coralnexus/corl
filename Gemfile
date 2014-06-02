@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem "nucleon", "~> 0.1", ">= 0.1.10", :github => 'coralnexus/nucleon', :branch => '0.1'
+gem "nucleon", "~> 0.2", ">= 0.2.0", :github => 'coralnexus/nucleon', :branch => '0.2'
 
 gem "fog", "~> 1.20"
 gem "unf", "~> 0.1"
