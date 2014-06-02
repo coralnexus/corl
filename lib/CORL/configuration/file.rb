@@ -84,7 +84,7 @@ class File < CORL.plugin_class(:CORL, :configuration)
   
   def separate    
     file_data        = Config.new
-    default_provider = CORL.type_default(:translator)
+    default_provider = CORL.type_default(:nucleon, :translator)
     
     split_config = lambda do |properties, local_router, parents = []|
       properties.each do |name, value|
