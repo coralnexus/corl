@@ -1,6 +1,7 @@
+
 module CORL
 module Provisioner
-class Puppetnode < CORL.plugin_class(:provisioner)
+class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
   
   @@puppet_lock = Mutex.new
   
@@ -310,8 +311,8 @@ class Puppetnode < CORL.plugin_class(:provisioner)
           end
         
         rescue Exception => error
-          raise error
           Puppet.log_exception(error)
+          raise error          
         end
       end
       success = false if @@status[id] != code.success

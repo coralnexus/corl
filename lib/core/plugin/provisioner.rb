@@ -1,7 +1,7 @@
 
-module Nucleon
+module CORL
 module Plugin
-class Provisioner < CORL.plugin_class(:base)
+class Provisioner < CORL.plugin_class(:nucleon, :base)
   
   include Parallel
   
@@ -282,9 +282,9 @@ class Provisioner < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def self.build_info(type, data)  
+  def self.build_info(namespace, plugin_type, data)  
     data = data.split(/\s*,\s*/) if data.is_a?(String)
-    super(type, data)
+    super(namespace, plugin_type, data)
   end
   
   #---

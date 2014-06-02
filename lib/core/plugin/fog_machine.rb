@@ -5,7 +5,7 @@ nucleon_require(File.dirname(__FILE__), :machine)
 
 module CORL
 module Machine
-class Fog < CORL.plugin_class(:machine)
+class Fog < CORL.plugin_class(:CORL, :machine)
   
   include Mixin::Machine::SSH
  

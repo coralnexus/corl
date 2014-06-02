@@ -1,7 +1,7 @@
 
-module Nucleon
+module CORL
 module Plugin
-class Network < CORL.plugin_class(:base)
+class Network < CORL.plugin_class(:nucleon, :base)
   
   init_plugin_collection(:add_node, :batch) 
   
@@ -39,8 +39,8 @@ class Network < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  plugin_collection :node
-  plugin_collection :provisioner
+  plugin_collection :CORL, :node
+  plugin_collection :CORL, :provisioner
   
   #---
   

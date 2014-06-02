@@ -1,7 +1,7 @@
 
 module CORL
 module Machine
-class Physical < CORL.plugin_class(:machine)
+class Physical < CORL.plugin_class(:CORL, :machine)
   
   #-----------------------------------------------------------------------------
   # Machine plugin interface

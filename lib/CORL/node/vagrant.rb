@@ -1,7 +1,7 @@
 
 module CORL
 module Node
-class Vagrant < CORL.plugin_class(:node)
+class Vagrant < CORL.plugin_class(:CORL, :node)
  
   #-----------------------------------------------------------------------------
   # Node plugin interface

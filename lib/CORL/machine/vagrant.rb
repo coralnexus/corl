@@ -1,7 +1,7 @@
 
 module CORL
 module Machine
-class Vagrant < CORL.plugin_class(:machine)
+class Vagrant < CORL.plugin_class(:CORL, :machine)
   
   include Mixin::Machine::SSH
   

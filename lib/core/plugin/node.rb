@@ -1,7 +1,7 @@
 
-module Nucleon
+module CORL
 module Plugin
-class Node < CORL.plugin_class(:base)
+class Node < CORL.plugin_class(:nucleon, :base)
   
   include Parallel
   external_block_exec :exec, :command, :action
@@ -471,7 +471,7 @@ class Node < CORL.plugin_class(:base)
   #---
   
   def create_machine(name, provider, options = {})
-    CORL.create_plugin(:machine, provider, extended_config(name, options).import({ :meta => { :parent => myself }}))
+    CORL.create_plugin(:CORL, :machine, provider, extended_config(name, options).import({ :meta => { :parent => myself }}))
   end
   
   #---
@@ -651,7 +651,7 @@ class Node < CORL.plugin_class(:base)
             end
             results = test if test
             
-          rescue Exception => error
+          rescue => error
             default_error.append_errors(error.message)   
           end
         else
@@ -1138,9 +1138,9 @@ class Node < CORL.plugin_class(:base)
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def self.build_info(type, data)  
+  def self.build_info(namespace, plugin_type, data)  
     data = data.split(/\s*,\s*/) if data.is_a?(String)
-    super(type, data)
+    super(namespace, plugin_type, data)
   end
   
   #---

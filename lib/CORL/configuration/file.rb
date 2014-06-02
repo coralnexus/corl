@@ -1,7 +1,7 @@
 
 module CORL
 module Configuration
-class File < CORL.plugin_class(:configuration)
+class File < CORL.plugin_class(:CORL, :configuration)
 
   #-----------------------------------------------------------------------------
   # Configuration plugin interface
@@ -234,7 +234,7 @@ class File < CORL.plugin_class(:configuration)
       begin
         FileUtils.mkdir_p(attach_path) unless Dir.exists?(attach_path)
       
-      rescue Exception => error
+      rescue => error
         alert(error.message)
         success = false
       end
@@ -258,7 +258,7 @@ class File < CORL.plugin_class(:configuration)
             FileUtils.mkdir_p(attach_path) unless Dir.exists?(attach_path)
             FileUtils.cp(file, new_file)
           
-          rescue Exception => error
+          rescue => error
             alert(error.message)
             success = false
           end  
@@ -318,7 +318,7 @@ class File < CORL.plugin_class(:configuration)
       logger.debug("Clearing configuration file information")      
       search.clear
     else
-      translators = CORL.loaded_plugins(:translator)
+      translators = CORL.loaded_plugins(:nucleon, :translator)
       file_bases  = [ "corl", extension_collect(:base) ].flatten
       
       project.localize do

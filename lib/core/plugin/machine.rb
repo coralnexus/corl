@@ -1,7 +1,7 @@
 
-module Nucleon
+module CORL
 module Plugin
-class Machine < CORL.plugin_class(:base)
+class Machine < CORL.plugin_class(:nucleon, :base)
 
   #-----------------------------------------------------------------------------
   # Machine plugin interface

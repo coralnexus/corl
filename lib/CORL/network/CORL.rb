@@ -1,26 +1,26 @@
 
 module CORL
-module Node
-class Local < CORL.plugin_class(:CORL, :node)
+module Network
+class CORL < CORL.plugin_class(:CORL, :network)
  
   #-----------------------------------------------------------------------------
-  # Node plugin interface
+  # Cloud plugin interface
    
   def normalize(reload)
     super
-    myself.machine = create_machine(:machine, :physical, machine_config)
   end
        
   #-----------------------------------------------------------------------------
   # Checks
-  
-  def local?
-    true
-  end  
-  
+    
+   
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
- 
+
+
+  #-----------------------------------------------------------------------------
+  # Operations
+     
 end
 end
 end
