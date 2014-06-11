@@ -34,8 +34,8 @@ class Spawn < CORL.plugin_class(:nucleon, :cloud_action)
         
       keypair_config
       
-      config.defaults(CORL.action_config(:bootstrap))
-      config.defaults(CORL.action_config(:seed))
+      config.defaults(CORL.action_config(:node_bootstrap))
+      config.defaults(CORL.action_config(:node_seed))
     end
   end
   
