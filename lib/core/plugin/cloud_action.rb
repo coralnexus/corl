@@ -55,7 +55,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
     
     register :parallel, :bool, true, 'corl.core.action.options.parallel'
     register :net_remote, :str, :edit, 'corl.core.action.options.net_remote'
-    register :net_provider, :str, :default, 'corl.core.action.options.net_provider' do |value|
+    register :net_provider, :str, :corl, 'corl.core.action.options.net_provider' do |value|
       value           = value.to_sym
       network_plugins = CORL.loaded_plugins(:CORL, :network)
       
