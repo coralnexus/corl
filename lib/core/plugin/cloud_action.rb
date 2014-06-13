@@ -42,8 +42,8 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
     
   def configure
     super do
-      node_config
       yield if block_given?
+      node_config
     end
   end
           
