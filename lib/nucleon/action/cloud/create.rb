@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Cloud
-class Create < Nucleon.plugin_class(:nucleon, :action)
+class Create < Nucleon.plugin_class(:nucleon, :cloud_action)
 
   include Mixin::Action::Project
  
@@ -33,7 +33,7 @@ class Create < Nucleon.plugin_class(:nucleon, :action)
   # Operations
    
   def execute
-    super do
+    super(false) do
       info('nucleon.action.cloud.create.start')
       
       project       = project_load(settings[:path], true, true)

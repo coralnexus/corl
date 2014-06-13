@@ -98,20 +98,24 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   #-----------------------------------------------------------------------------
   # Operations
   
-  def validate(node, network)
+  def validate(node = nil, network = nil)
     super(node, network)
   end
   
   #---
    
-  def execute
-    super(true, true) do
-      node_exec do |node, network|
-        hook_config = { :node => node, :network => network }
+  def execute(use_network = true, &code)
+    if use_network
+      super(true, true) do
+        node_exec do |node, network|
+          hook_config = { :node => node, :network => network }
         
-        yield(node, network) if block_given? && extension_check(:exec_init, hook_config)
-        myself.status = extension_set(:exec_exit, status, hook_config)
+          code.call(node, network) if code && extension_check(:exec_init, hook_config)
+          myself.status = extension_set(:exec_exit, status, hook_config)
+        end
       end
+    else
+      super(false, false, &code)
     end
   end
   
