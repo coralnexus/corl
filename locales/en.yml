@@ -61,7 +61,10 @@ en:
       cloud:
         create:
           description: |-
-            Create a new cloud project
+            Create a new network project
+        inspect:
+          description: |-
+            Inspect the network configuration
         machines:
           description: |-
             Return a list of machine types supported by a provider
