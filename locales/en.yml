@@ -59,6 +59,9 @@ en:
         help: |-
           There is no extended help information available for this CORL action.
       cloud:
+        create:
+          description: |-
+            Create a new cloud project
         machines:
           description: |-
             Return a list of machine types supported by a provider
