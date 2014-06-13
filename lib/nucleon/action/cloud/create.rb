@@ -26,7 +26,7 @@ class Create < Nucleon.plugin_class(:nucleon, :action)
   #---
   
   def arguments
-    [ :project_reference, :path ]
+    [ :project_reference ]
   end
  
   #-----------------------------------------------------------------------------
@@ -38,6 +38,11 @@ class Create < Nucleon.plugin_class(:nucleon, :action)
       
       project       = project_load(settings[:path], true, true)
       myself.status = code.project_failure unless project
+      
+      if project.remote(:origin) =~ /coralnexus\/network\-template/
+        project.delete_remote(:origin)
+        project.delete_remote(:edit)
+      end
     end
   end
 end
