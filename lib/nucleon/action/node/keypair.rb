@@ -21,6 +21,7 @@ class Keypair < CORL.plugin_class(:nucleon, :cloud_action)
       codes :key_failure
       
       register :json, :bool, true
+      register :both, :bool, false
       keypair_config
     end
   end
@@ -38,21 +39,40 @@ class Keypair < CORL.plugin_class(:nucleon, :cloud_action)
     super do |node, network|
       if keys = keypair
         ui.info("\n", { :prefix => false })
-        ui_group(Util::Console.cyan("#{keys.type.upcase} SSH keypair")) do |ui|
-          ui.info("-----------------------------------------------------")
-        
-          if settings[:json]
+        ui_group(Util::Console.cyan("#{keys.type.upcase} SSH keypair")) do |ui|          
+          render_json = lambda do 
             private_key = Util::Console.blue(Util::Data.to_json(keys.encrypted_key, true))
             ssh_key     = keys.ssh_key.gsub(/^ssh\-[a-z]+\s+/, '')           
             ssh_key     = Util::Console.green(Util::Data.to_json(ssh_key, true))
-          else
-            private_key = Util::Console.blue(keys.encrypted_key)
-            ssh_key     = Util::Console.green(keys.ssh_key)       
+            
+            ui.info("-----------------------------------------------------")
+            ui.info(yellow("SSH JSON string"))
+            ui.info("SSH private key:\n#{private_key}")
+            ui.info("SSH public key:\n#{ssh_key}")
+            ui.info("\n", { :prefix => false })  
           end
           
-          ui.info("SSH private key:\n#{private_key}")
-          ui.info("SSH public key:\n#{ssh_key}")
-          ui.info("\n", { :prefix => false }) 
+          render_file = lambda do
+            private_key = Util::Console.blue(keys.encrypted_key)
+            ssh_key     = Util::Console.green(keys.ssh_key)
+            
+            ui.info("-----------------------------------------------------")
+            ui.info(yellow("SSH file rendering"))
+            ui.info("SSH private key:\n#{private_key}")
+            ui.info("SSH public key:\n#{ssh_key}")
+            ui.info("\n", { :prefix => false })  
+          end
+        
+          if settings[:both]
+            render_json.call
+            render_file.call  
+          else
+            if settings[:json]
+              render_json.call
+            else
+              render_file.call      
+            end
+          end
         end          
       else
         myself.status = code.key_failure  
