@@ -144,6 +144,10 @@ class Node < CORL.plugin_class(:nucleon, :base)
   def hostname
     hostname = setting(:hostname)
     
+    unless hostname
+      hostname = plugin_name
+    end
+    
     if hostname.to_s != ui.resource.to_s 
       ui.resource = Util::Console.colorize(hostname, @class_color)
       logger      = hostname
