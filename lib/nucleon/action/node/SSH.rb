@@ -34,10 +34,9 @@ class SSH < CORL.plugin_class(:nucleon, :cloud_action)
           end
         end
         success
-      end
-      
-      config[:node_provider].default = :rackspace
+      end      
     end
+    config[:node_provider].default = :rackspace
   end
   
   #---
