@@ -97,7 +97,8 @@ class Node < CORL.plugin_class(:nucleon, :base)
       :hostname      => hostname.gsub(/\..*$/, ''),
       :corl_provider => plugin_provider.to_s
     })
-    Config.new(lookup_facts).defaults(default_configs).export
+    settings_facts = search(:facts)
+    Config.new(lookup_facts).defaults(settings_facts).defaults(default_configs).export
   end
   
   #---
