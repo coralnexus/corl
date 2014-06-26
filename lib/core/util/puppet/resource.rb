@@ -132,7 +132,7 @@ class Resource < Core
         config.set(:normalize_template, config.get("normalize_#{target}", true))
         config.set(:interpolate_template, config.get("interpolate_#{target}", true))
         
-        input_data       = resource[target]        
+        input_data       = resource[target]
         resource[target] = CORL.template(config, resource[name]).render(input_data)
         
         if config.get(:debug, false)

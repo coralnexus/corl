@@ -27,6 +27,7 @@ If no value is found in the defined sources, it returns an empty string ('')
       var_name = args[0]
       default  = ( args.size > 1 ? args[1] : '' )
       options  = ( args.size > 2 ? args[2] : {} )
+      node     = CORL::Provisioner::Puppetnode.node
     
       config = CORL::Config.init_flat(options, [ :param, :global_param, var_name ], {
         :provisioner     => :puppetnode,
@@ -37,7 +38,7 @@ If no value is found in the defined sources, it returns an empty string ('')
         :merge           => true,
         :undefined_value => :undef
       })
-      value = CORL::Config.lookup(var_name, default, config)
+      value = node.lookup(var_name, default, config)
     end
     return value
   end

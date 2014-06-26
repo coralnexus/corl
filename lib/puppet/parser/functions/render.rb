@@ -22,6 +22,7 @@ This function returns the string-ified form of a given value.
       contexts    = [ :data, :render, "template_#{provider}" ]
     
       default_options = {
+        :node            => CORL::Provisioner::Puppetnode.node,
         :provisioner     => :puppetnode,
         :hiera_scope     => self,
         :puppet_scope    => self,

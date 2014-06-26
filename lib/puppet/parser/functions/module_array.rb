@@ -19,6 +19,7 @@ If no value is found in the defined sources, it returns an empty array ([])
       options  = ( args.size > 2 ? args[2] : {} )
       
       module_name = parent_module_name
+      node        = CORL::Provisioner::Puppetnode.node
       
       if module_name
         module_var_name = "#{module_name}::#{var_name}"
@@ -33,7 +34,7 @@ If no value is found in the defined sources, it returns an empty array ([])
           :merge           => true,
           :undefined_value => :undef
         })
-        value = CORL::Config.lookup_array(module_var_name, default, config)
+        value = node.lookup_array(module_var_name, default, config)
       end
     end
     return value

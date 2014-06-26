@@ -42,6 +42,7 @@ If no resources are found, it returns without creating anything.
       contexts        = [ :resource, type_name ]
       
       default_options = {
+        :node            => CORL::Provisioner::Puppetnode.node,
         :provisioner     => :puppetnode,
         :hiera_scope     => self,
         :puppet_scope    => self,

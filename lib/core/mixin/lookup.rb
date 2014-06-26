@@ -7,27 +7,19 @@ module Lookup
   # Facter lookup
   
   def facts
-    fact_map = {}
-    
-    Facter.list.each do |name|
-      fact_map[name] = Facter.value(name)
-    end
-    fact_map
+    CORL.facts
   end
   
   #---
   
   def create_fact(name, value, weight = 1000)
-    Facter.collection.add(name.to_sym, { 
-      :value  => value, 
-      :weight => weight 
-    })
+    CORL.create_fact(name, value, weight)
   end
   
   #---
   
   def fact(name)
-    Facter.value(name)
+    CORL.fact(name)
   end
   
   #-----------------------------------------------------------------------------
@@ -128,8 +120,10 @@ module Lookup
   #---
     
   def lookup(properties, default = nil, options = {})
-    config      = Config.ensure(options)
+    config      = Config.new(Config.ensure(options).export)
     value       = nil
+    
+    node        = config.delete(:node, nil)
     
     provisioner = config.get(:provisioner, nil)
     
@@ -140,6 +134,8 @@ module Lookup
     
     return_property = config.get(:return_property, false)
     
+    return node.lookup(properties, default, config) if node
+        
     unless properties.is_a?(Array)
       properties = [ properties ].flatten
     end
@@ -166,11 +162,14 @@ module Lookup
           unless hiera_scope.respond_to?('[]')
             hiera_scope = Hiera::Scope.new(hiera_scope)
           end
-          value = hiera.lookup(property.to_s, nil, hiera_scope, override, context)
+          
+          hiera_scope = string_map(hiera_scope) if hiera_scope.is_a?(Hash)
+          value       = hiera.lookup(property.to_s, nil, hiera_scope, override, context)
+          
           debug_lookup(config, property, value, "Hiera lookup")
         end 
     
-        if CORL.admin? && provisioner && value.nil?
+        if provisioner && value.nil?
           # Search the provisioner scope (only admins can provision a machine)
           value = CORL.provisioner({ :name => :lookup }, provisioner).lookup(property, default, config)
           debug_lookup(config, property, value, "Provisioner lookup")

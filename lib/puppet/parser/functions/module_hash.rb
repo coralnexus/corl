@@ -19,10 +19,11 @@ If no value is found in the defined sources, it returns an empty hash ({})
       options  = ( args.size > 2 ? args[2] : {} )
     
       module_name = parent_module_name
+      node        = CORL::Provisioner::Puppetnode.node
       
       if module_name
         module_var_name = "#{module_name}::#{var_name}"
-      
+        
         config = CORL::Config.init(options, [ :param, :module_hash, var_name ], module_name, {
           :provisioner     => :puppetnode,
           :hiera_scope     => self,
@@ -33,7 +34,7 @@ If no value is found in the defined sources, it returns an empty hash ({})
           :merge           => true,
           :undefined_value => :undef
         })
-        value = CORL::Config.lookup_hash(module_var_name, default, config)
+        value = node.lookup_hash(module_var_name, default, config)
       end
     end
     return value
