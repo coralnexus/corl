@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-06-02"
+  s.date = "2014-06-26"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -44,6 +44,8 @@ Gem::Specification.new do |s|
     "bootstrap/os/ubuntu/09_nucleon.sh",
     "bootstrap/os/ubuntu/10_corl.sh",
     "corl.gemspec",
+    "lib/CORL/builder/identity.rb",
+    "lib/CORL/builder/package.rb",
     "lib/CORL/configuration/file.rb",
     "lib/CORL/machine/AWS.rb",
     "lib/CORL/machine/physical.rb",
@@ -55,9 +57,11 @@ Gem::Specification.new do |s|
     "lib/CORL/node/rackspace.rb",
     "lib/CORL/node/vagrant.rb",
     "lib/CORL/provisioner/puppetnode.rb",
+    "lib/core/build.rb",
     "lib/core/errors.rb",
     "lib/core/facade.rb",
     "lib/core/mixin/action/keypair.rb",
+    "lib/core/mixin/builder.rb",
     "lib/core/mixin/lookup.rb",
     "lib/core/mixin/machine/ssh.rb",
     "lib/core/mixin/macro/network_settings.rb",
@@ -65,6 +69,7 @@ Gem::Specification.new do |s|
     "lib/core/mod/fog_aws_server.rb",
     "lib/core/mod/fog_rackspace_server.rb",
     "lib/core/mod/hiera_backend.rb",
+    "lib/core/plugin/builder.rb",
     "lib/core/plugin/cloud_action.rb",
     "lib/core/plugin/configuration.rb",
     "lib/core/plugin/fog_machine.rb",
@@ -93,7 +98,10 @@ Gem::Specification.new do |s|
     "lib/facter/custom_facts.rb",
     "lib/facter/vagrant_exists.rb",
     "lib/hiera/corl_logger.rb",
+    "lib/nucleon/action/cloud/create.rb",
+    "lib/nucleon/action/cloud/hiera.rb",
     "lib/nucleon/action/cloud/images.rb",
+    "lib/nucleon/action/cloud/inspect.rb",
     "lib/nucleon/action/cloud/machines.rb",
     "lib/nucleon/action/cloud/regions.rb",
     "lib/nucleon/action/cloud/vagrantfile.rb",
