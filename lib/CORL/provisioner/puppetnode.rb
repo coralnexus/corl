@@ -13,6 +13,16 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
     @@status
   end
   
+  #---
+  
+  def self.network
+    @@network
+  end
+  
+  def self.node
+    @@node
+  end
+  
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
    
@@ -75,7 +85,7 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
   # Puppet initialization
     
   def init_puppet(profiles)
-    locations = build_locations
+    locations = symbol_map(build_locations)
     
     Puppet.initialize_settings
     Puppet::Util::Log.newdestination(id)
@@ -89,10 +99,12 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
     Puppet[:default_file_terminus] = :file_server
     Puppet[:node_name_value]       = id.to_s
     
+    Puppet[:trusted_node_data]     = true
+    
     unless profiles.empty?
       modulepath = []
       profiles.each do |profile|
-        profile_dir = File.join(build_directory, locations[:module][profile.to_sym])
+        profile_dir = File.join(network.directory, locations[:puppet_module][profile.to_sym])
         modulepath << profile_dir if File.directory?(profile_dir)
       end
       Puppet[:modulepath] = array(modulepath).join(File::PATH_SEPARATOR)
@@ -100,101 +112,67 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
     
     if manifest = gateway
       if manifest.match(/^packages\/.*/)
-        manifest = File.join(build_directory, locations[:build], manifest)
+        manifest = File.join(network.build_directory, manifest)
       else
         manifest = File.join(network.directory, directory, manifest)
       end
       Puppet[:manifest] = manifest
     end
     
-    node      = get_node
+    node      = Puppet::Node.indirection.find(id.to_s)
+    node.merge(string_map(@@node.hiera_facts))
+    
     @compiler = Puppet::Parser::Compiler.new(node)
+    
     register
     node
   end
   protected :init_puppet
   
-  #---
-   
-  def get_node
-    node_id = id.to_s
-    node = Puppet::Node.indirection.find(node_id)
-         
-    if facts = Puppet::Node::Facts.indirection.find(node_id)
-      facts.name = node_id
-      node.merge(facts.values)
-    end
-    node
-  end
-  protected :get_node
-  
   #-----------------------------------------------------------------------------
   # Provisioner interface operations
   
-  def build(options = {})
-    super do |dependencies, locations, package_info, environment|
-      success = true
-      
-      # Build modules
-      locations[:module]     = {}
-      dependencies[:profile] = {}
-      
-      init_profile = lambda do |package_name, profile_name, profile_info, profiles = nil|
-        package_id = id(package_name)
-        base_directory = File.join(locations[:build], 'modules', package_id.to_s, profile_name.to_s)
-        profile_success = true
+  def build_profile(name, info, package, environment, profiles)
+    super do |processed_info|
+      package_id = id(package)
+      directory  = File.join(internal_path(build_directory), package_id.to_s, name.to_s)
+      success    = true
         
-        ui.info("Building CORL profile #{blue(profile_name)} modules into #{green(base_directory)}")
+      ui.info("Building CORL profile #{blue(name)} modules into #{green(directory)}")
+    
+      if processed_info.has_key?(:modules)
+        status  = parallel(:build_module, hash(processed_info[:modules]), directory, name, environment)
+        success = status.values.include?(false) ? false : true
         
-        profile_parents = []
-        profile_config  = Config.new(profile_info)
-            
-        while profile_config.has_key?(:extend) do
-          array(profile_config.delete(:extend)).each do |parent_profile|
-            profile_parents << profile_id(package_name, parent_profile)
-            profile_config.defaults(profiles[parent_profile.to_sym])
-          end
-        end
-        
-        profile_info = process_environment(profile_info, environment)
-        
-        dependencies[:profile][profile_id(package_name, profile_name)] = profile_parents
-                
-        if profile_info.has_key?(:modules)
-          profile_info[:modules].each do |module_name, module_reference|
-            module_directory = File.join(base_directory, module_name.to_s)
-            
-            ui.info("Building Puppet module #{blue(module_name)} at #{purple(module_reference)} into #{green(module_directory)}")
-            
-            full_module_directory = File.join(build_directory, module_directory)
-                
-            module_project = CORL.project(extended_config(:puppet_module, {
-              :directory => full_module_directory,
-              :url => module_reference,
-              :create => File.directory?(full_module_directory) ? false : true,
-              :pull => true
-            }))
-            unless module_project
-              ui.warn("Puppet module #{cyan(module_name)} failed to initialize")
-              profile_success = false
-            end
-          end
-          locations[:module][profile_id(package_name, profile_name)] = base_directory if profile_success
-        end
-        profile_success
+        build_config.set_location(:puppet_module, profile_id(package, name), directory) if success
       end
-      
-      hash(package_info.get([ :provisioners, plugin_provider ])).each do |package_name, info|
-        if info.has_key?(:profiles)
-          info[:profiles].each do |profile_name, profile_info|
-            unless init_profile.call(package_name, profile_name, profile_info, info[:profiles])
-              success = false
-            end
-          end
-        end
-      end
+      ui.success("Build of profile #{blue(name)} finished") if success
       success
     end
+  end
+  
+  def build_module(name, project_reference, directory, profile, environment)
+    module_directory      = File.join(directory, name.to_s)
+    full_module_directory = File.join(network.directory, module_directory)
+    module_project        = nil
+    success               = true
+            
+    ui.info("Building #{blue(profile)} Puppet module #{blue(name)} at #{purple(project_reference)} into #{green(module_directory)}")
+    
+    module_project = build_config.manage(:project, extended_config(:puppet_module, {
+      :directory     => full_module_directory,
+      :url           => project_reference,
+      :create        => File.directory?(full_module_directory) ? false : true,
+      :pull          => true,
+      :internal_ip   => CORL.public_ip, # Needed for seeding Vagrant VMs
+      :manage_ignore => false
+    }))
+    unless module_project
+      ui.warn("Puppet module #{cyan(name)} failed to initialize")
+      success = false
+    end
+    ui.success("Build of #{blue(profile)} #{blue(name)} finished") if success
+    success
   end
   
   #---
@@ -223,7 +201,7 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
    
   #---
     
-  def provision(profiles, options = {})
+  def provision(node, profiles, options = {})
     super do |processed_profiles, config|
       locations = build_locations
       success = true
@@ -232,9 +210,9 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
         classes = {}
             
         locations[:package].each do |name, package_directory|
-          type_gateway = File.join(build_directory, package_directory, "#{type}.pp")
-          resource_name = concatenate([ name, type ])
-        
+          type_gateway = File.join(network.directory, package_directory, "#{type}.pp")
+          resource_name = resource([ name, type ])
+          
           add_search_path(type, resource_name) if add_search_path
         
           if File.exists?(type_gateway)
@@ -242,16 +220,16 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
             classes[resource_name] = parameters
           end
         
-          type_directory = File.join(build_directory, package_directory, type.to_s)
+          type_directory = File.join(network.directory, package_directory, type.to_s)
           Dir.glob(File.join(type_directory, '*.pp')).each do |file|
-            resource_name = concatenate([ name, type, File.basename(file).gsub('.pp', '') ])
+            resource_name = resource([ name, type, File.basename(file).gsub('.pp', '') ])
             import(file)
             classes[resource_name] = parameters
           end
         end
     
         type_gateway = File.join(directory, "#{type}.pp")
-        resource_name = concatenate([ plugin_name, type ])
+        resource_name = resource([ plugin_name, type ])
       
         add_search_path(type, resource_name) if add_search_path
      
@@ -264,7 +242,7 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
         
         if File.directory?(type_directory)
           Dir.glob(File.join(type_directory, '*.pp')).each do |file|
-            resource_name = concatenate([ plugin_name, type, File.basename(file).gsub('.pp', '') ])
+            resource_name = resource([ plugin_name, type, File.basename(file).gsub('.pp', '') ])
             import(file)
             classes[resource_name] = parameters
           end
@@ -277,6 +255,8 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
           ui.info("Starting catalog generation")
           
           @@status[id] = code.success
+          @@network    = network    
+          @@node       = node
           
           start_time = Time.now
           node = init_puppet(processed_profiles)
@@ -294,7 +274,7 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
           # Compile catalog
           node.classes = classes
           compiler.compile
-        
+          
           # Start system configuration
           catalog = compiler.catalog.to_ral
           catalog.finalize
@@ -304,10 +284,10 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
             ui.info("\n", { :prefix => false })
             ui.info("Starting configuration run")
                         
-            configurer = Puppet::Configurer.new
-            if ! configurer.run(:catalog => catalog, :pluginsync => false)
-              success = false
-            end
+            #configurer = Puppet::Configurer.new
+            #if ! configurer.run(:catalog => catalog, :pluginsync => false)
+            #  success = false
+            #end
           end
         
         rescue Exception => error
@@ -318,19 +298,6 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
       success = false if @@status[id] != code.success
       success
     end
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Utilities
-  
-  def profile_id(package_name, profile_name)
-    concatenate([ package_name, 'profile', profile_name ], false)
-  end
-   
-  #---
-  
-  def concatenate(components, capitalize = false)
-    super(components, capitalize, '::')
   end
 end
 end

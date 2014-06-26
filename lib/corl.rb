@@ -102,6 +102,7 @@ end
 nucleon_require(core_dir, :facade)
 
 # Include CORL core plugins
+nucleon_require(core_dir, :build)
 nucleon_require(core_dir, :plugin)
 
 # Include Vagrant plugins (only include if running inside Vagrant)
@@ -136,6 +137,7 @@ module CORL
         :network       => :corl,      # Cluster
         :node          => :local,     # Cluster
         :machine       => :physical,  # Cluster
+        :builder       => :package,   # Cluster
         :provisioner   => :puppetnode # Cluster
       }
     end

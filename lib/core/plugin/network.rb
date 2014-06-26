@@ -16,7 +16,10 @@ class Network < CORL.plugin_class(:nucleon, :base)
     
     config.delete(:directory) # TODO: Figure out what to do with this??
     
-    ignore('build')
+    unless reload
+      @build = Build.new
+      ignore([ 'build', File.join('config', 'identities') ])
+    end
   end
   
   #---
@@ -40,12 +43,20 @@ class Network < CORL.plugin_class(:nucleon, :base)
   # Property accessors / modifiers
   
   plugin_collection :CORL, :node
+  plugin_collection :CORL, :builder, :single_instance => true
   plugin_collection :CORL, :provisioner
   
   #---
   
   def hiera_override_dir
     File.join(directory, 'config')
+  end
+  
+  #---
+
+  def hiera(reset = false)
+    @hiera = Hiera.new(:config => hiera_configuration) if reset || @hiera.nil?
+    @hiera
   end
   
   #---
@@ -193,6 +204,12 @@ class Network < CORL.plugin_class(:nucleon, :base)
   def test_node(provider, options = {})
     config = Config.ensure(options).import({ :meta => { :parent => myself } })
     CORL.node(:test, config.export, provider)
+  end
+  
+  #---
+  
+  def build
+    @build
   end
   
   #-----------------------------------------------------------------------------

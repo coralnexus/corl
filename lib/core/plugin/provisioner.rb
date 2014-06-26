@@ -5,11 +5,15 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
   
   include Parallel
   
+  extend Mixin::Builder::Global
+  include Mixin::Builder::Instance
+  
   #-----------------------------------------------------------------------------
   # Provisioner plugin interface
   
   def normalize(reload)
     super
+    build_config.register(:dependency, :dependencies) if build_config
     yield if block_given?
   end
   
@@ -26,13 +30,6 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
 
   #---
   
-  def id(name = nil)
-    name = plugin_name if name.nil?
-    name.to_s.gsub('::', '_').to_sym
-  end
-  
-  #---
-  
   def directory=directory
     myself[:directory] = directory
   end
@@ -44,7 +41,7 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
   #---
   
   def build_directory
-    File.join(network.build_directory, plugin_provider.to_s)
+    File.join(network.build_directory, 'provisioners', plugin_provider.to_s)
   end
   
   #---
@@ -75,15 +72,9 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
   def package_gateways(reset = false)
     gateways = []
     build_info(reset).each do |package_name, package_info|
-      gateways << package_info[:gateway] if package_info.has_key?(:gateway)
+      gateways << File.join('packages', id(package_name).to_s, package_info[:gateway]) if package_info.has_key?(:gateway)
     end
     gateways
-  end
-  
-  #---
-  
-  def packages(environment = nil)
-    process_environment(myself[:packages], environment)
   end
   
   #---
@@ -92,7 +83,7 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
     allowed_profiles = []  
     build_info(reset).each do |package_name, package_info|
       hash(package_info[:profiles]).each do |profile_name, profile_info|
-        allowed_profiles << concatenate([ package_name, 'profile', profile_name ])
+        allowed_profiles << resource([ package_name, 'profile', profile_name ])
       end
     end
     allowed_profiles  
@@ -183,80 +174,64 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
   
   #---
   
-  def build(options = {})
-    config        = Config.ensure(options)
-    success       = true    
-    locations     = Config.new({ :build => id.to_s, :package => {} })
-    dependencies  = Config.new
-    package_info  = Config.new    
-    package_names = {}
-    
-    node          = config[:node]
+  def build(node, options = {})
+    config        = Config.ensure(options)    
     environment   = Util::Data.ensure_value(config[:environment], node.lookup(:corl_environment))
+    provider_info = network.build.config.get_hash([ :provisioners, plugin_provider ])
+    combined_info = Config.new
     
-    init_package = lambda do |name, reference|
-      package_directory = File.join(locations[:build], 'packages', id(name).to_s)
-      package_success   = true
+    provider_info.each do |package, info|
+      package_info = Config.new(info)
+      profiles     = {}
       
-      ui.info("Building package #{blue(name)} at #{purple(reference)} into #{green(package_directory)}")
-      
-      full_package_directory = File.join(build_directory, package_directory)
-      
-      unless package_names.has_key?(name)  
-        project = CORL.configuration(extended_config(:package, {
-          :directory => full_package_directory,
-          :url       => reference,
-          :create    => File.directory?(full_package_directory) ? false : true
-        }))
-        unless project
-          ui.warn("Project #{cyan(name)} failed to initialize")
-          package_success = false
-        end
-      
-        if package_success
-          package_info.import(project.export)
-          locations[:package][name] = package_directory
-      
-          if project.get([ :provisioners, plugin_provider ], false)
-            project.get_hash([ :provisioners, plugin_provider ]).each do |prov_name, info|
-              if info.has_key?(:packages)
-                process_environment(info[:packages], environment).each do |sub_name, sub_reference|
-                  unless init_package.call(sub_name, sub_reference)
-                    package_success = false
-                  end
-                end
-              end
-            end
-          end
-        end
+      hash(package_info[:profiles]).each do |name, profile_info|
+        profiles[profile_id(package, name)] = profile_info
       end
-      package_success
+      
+      package_info[:profiles] = profiles
+      combined_info.import(package_info)  
     end
     
-    local_build_directory = File.join(build_directory, locations[:build])   
+    FileUtils.mkdir_p(build_directory)   
     
-    FileUtils.mkdir_p(local_build_directory)
+    status  = parallel(:build_provider, provider_info, environment, combined_info)
+    success = status.values.include?(false) ? false : true
     
-    # Build packages
-    packages(environment).each do |name, reference|
-      unless init_package.call(name, reference)
-        success = false
-      end
+    if success    
+      # Save the updates in the local project cache
+      set_cache_setting(:build_dependencies, network.build.dependencies.export)
+      set_cache_setting(:build_locations, network.build.locations.export)
+      set_cache_setting(:build_info, provider_info)
+      set_cache_setting(:build_profiles, find_profiles)
     end
-    
-    if success
-      # Build provider specific components
-      success = yield(dependencies, locations, package_info, environment) if block_given?
-    
-      if success
-        # Save the updates in the local project cache
-        set_cache_setting(:build_dependencies, dependencies.export)
-        set_cache_setting(:build_locations, locations.export)
-        set_cache_setting(:build_info, package_info.get([ :provisioners, plugin_provider ]))
-        set_cache_setting(:build_profiles, find_profiles)
+    success    
+  end
+  
+  #---
+  
+  def build_provider(package, info, environment, combined_info)
+    profiles = hash(info[:profiles])
+    status = parallel(:build_profile, profiles, id(package), environment, hash(combined_info[:profiles]))
+    status.values.include?(false) ? false : true
+  end
+  
+  def build_profile(name, info, package, environment, profiles)
+    parents = []
+    config  = Config.new(info)
+    success = true
+           
+    while config.has_key?(:extend) do
+      array(config.delete(:extend)).each do |parent|
+        parent = profile_id(package, parent) unless parent.match('::')
+        
+        parents << parent
+        config.defaults(profiles[parent.to_sym])
       end
     end
         
+    build_config.set_dependency(:profile, profile_id(package, name), parents)
+    
+    success = yield(process_environment(config, environment)) if block_given?
     success
   end
   
@@ -269,7 +244,7 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
   
   #---
   
-  def provision(profiles, options = {})
+  def provision(node, profiles, options = {})
     config   = Config.ensure(options)    
     profiles = profile_dependencies(profiles)
     
@@ -334,48 +309,13 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
   #---
   
   def translate_reference(reference)
-    myself.class.translate_reference(reference)
+    self.class.translate_reference(reference)
   end
-  
+    
   #---
   
-  def concatenate(components, capitalize = false, joiner = '::')
-    if components.is_a?(Array)
-      components = components.collect do |str|
-        str.to_s.split('__')  
-      end.flatten
-    else
-      components = [ components.to_s.split('__') ].flatten
-    end
-    
-    if capitalize
-      name = components.collect {|str| str.capitalize }.join(joiner)
-    else
-      name = components.join(joiner)
-    end
-    name
-  end
-  
-  #---
-  
-  def process_environment(settings, environment = nil)
-    config      = Config.new(hash(settings))
-    env_config  = config.delete(:environment)
-    environment = environment.to_sym if environment
-    
-    if env_config    
-      if environment && env_config.has_key?(environment)
-        local_env_config = env_config[environment]
-        
-        while local_env_config && local_env_config.has_key?(:use) do
-          local_env_config = env_config[local_env_config[:use].to_sym]
-        end
-         
-        config.defaults(local_env_config) if local_env_config
-      end
-      config.defaults(env_config[:default]) if env_config.has_key?(:default)
-    end
-    config.export  
+  def profile_id(package, profile)
+    concatenate([ package, 'profile', profile ], false)
   end
 end
 end

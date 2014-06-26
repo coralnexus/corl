@@ -102,6 +102,13 @@ class Node < CORL.plugin_class(:nucleon, :base)
   end
   
   #---
+
+  def hiera(reset = false)
+    @hiera = Hiera.new(:config => hiera_configuration) if reset || @hiera.nil?
+    @hiera
+  end
+  
+  #---
   
   def machine
     @machine
@@ -322,7 +329,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
     provisioner_info = {}
         
     # Compose needed provisioners and profiles
-    profiles.each do |profile|        
+    profiles.each do |profile|
       if info = Plugin::Provisioner.translate_reference(profile)
         provider = info[:provider]
             
@@ -379,33 +386,52 @@ class Node < CORL.plugin_class(:nucleon, :base)
   # Machine operations
   
   def build(options = {})
-    config  = Config.ensure(options).import({ :node => myself })
+    config  = Config.ensure(options)
     success = true
     
-    provisioners.each do |provider, collection|
-      ui.info("Building #{provider} provisioner collection")
-          
-      collection.each do |name, provisioner|
-        ui.info("Building #{name} provisioner")
+    # TODO: Figure out what's going on with the parallel implementation here.
+    ENV['NUCLEON_NO_PARALLEL'] = 'true'
+    
+    status  = parallel(:build_provider, network.builders, config)
+    success = false if status.values.include?(false)
+    
+    if success
+      status  = parallel(:build_provisioners, provisioners, config)
+      success = false if status.values.include?(false)
+    
+      if success
+        myself.build_time = Time.now.to_s if success
         
-        unless provisioner.build(config)
-          success = false
-          break
+        if config.delete(:save, true)
+          ui.success("Saving successful build")    
+         
+          success = save(extended_config(:build, {
+            :message => config.get(:message, "Built #{plugin_provider} node: #{plugin_name}"),
+            :remote  => config.get(:remote, :edit)  
+          }))
         end
       end
     end
     
-    myself.build_time = Time.now.to_s if success
+    ENV['NUCLEON_NO_PARALLEL'] = nil
     
-    if success && config.delete(:save, true)
-      ui.success("Saving successful build")    
-    
-      success = save(extended_config(:build, {
-        :message => config.get(:message, "Built #{plugin_provider} node: #{plugin_name}"),
-        :remote  => config.get(:remote, :edit)  
-      }))
-    end
     success
+  end
+  
+  def build_provider(provider, plugin, config)
+    ui.info("Building #{provider} components")
+    plugin.build(myself, config)
+  end
+  
+  def build_provisioners(provider, collection, config)
+    ui.info("Building #{provider} provisioner collection")
+    status = parallel(:build_provisioner, collection, provider, config)
+    status.values.include?(false) ? false : true  
+  end
+  
+  def build_provisioner(name, plugin, provider, config)
+    ui.info("Building #{provider} #{name} provisioner components")
+    plugin.build(myself, config) 
   end
   
   #---
@@ -812,7 +838,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
       end
       return default
     end
-    options[:hiera_scope] = Util::Data.prefix('::', lookup_facts, '')
+    options[:hiera_scope] = Util::Data.prefix('::', hiera_facts, '')
     lookup(property, default, options)  
   end
   

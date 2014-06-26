@@ -59,7 +59,7 @@ class Provision < CORL.plugin_class(:nucleon, :cloud_action)
           
               collection.each do |name, provisioner|
                 if supported_profiles = provisioner.supported_profiles(profiles)
-                  profile_success = provisioner.provision(supported_profiles, settings)
+                  profile_success = provisioner.provision(node, supported_profiles, settings)
                   success         = false unless profile_success
                 end
               end

@@ -1,6 +1,36 @@
 
 module CORL
 module Facade
+
+  #-----------------------------------------------------------------------------
+  # Facter lookup
+  
+  @@facts = {}
+  
+  def facts(reset = false)
+    if reset || @@facts.empty?
+      @@facts = {} if reset
+      Facter.list.each do |name|
+        @@facts[name] = Facter.value(name)
+      end
+    end
+    @@facts
+  end
+  
+  #---
+  
+  def create_fact(name, value, weight = 1000)
+    Facter.collection.add(name.to_sym, { 
+      :value  => value, 
+      :weight => weight 
+    })
+  end
+  
+  #---
+  
+  def fact(name)
+    Facter.value(name)
+  end
   
   #-----------------------------------------------------------------------------
   # Local identification
@@ -63,6 +93,16 @@ module Facade
   
   def nodes(data, build_hash = false, keep_array = false)
     plugins(:CORL, :node, data, build_hash, keep_array)
+  end
+  
+  #---
+  
+  def builder(options, provider = nil)
+    plugin(:CORL, :builder, provider, options)
+  end
+  
+  def builder(data, build_hash = false, keep_array = false)
+    plugins(:CORL, :builder, data, build_hash, keep_array)
   end
   
   #---
