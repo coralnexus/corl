@@ -284,10 +284,10 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
             ui.info("\n", { :prefix => false })
             ui.info("Starting configuration run")
                         
-            #configurer = Puppet::Configurer.new
-            #if ! configurer.run(:catalog => catalog, :pluginsync => false)
-            #  success = false
-            #end
+            configurer = Puppet::Configurer.new
+            if ! configurer.run(:catalog => catalog, :pluginsync => false)
+              success = false
+            end
           end
         
         rescue Exception => error
