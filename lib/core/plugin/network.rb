@@ -11,7 +11,7 @@ class Network < CORL.plugin_class(:nucleon, :base)
   def normalize(reload)
     super
     
-    logger.info("Initializing sub configuration from source with: #{myself._export.inspect}")
+    logger.info("Initializing network: reloading? #{reload}")
     myself.config = CORL.configuration(Config.new(myself._export).import({ :autosave => false, :create => false })) unless reload
     
     config.delete(:directory) # TODO: Figure out what to do with this??
@@ -291,6 +291,8 @@ class Network < CORL.plugin_class(:nucleon, :base)
       success = node.create do |op, data|
         block_given? ? yield("create_#{op}".to_sym, data) : data
       end
+      
+      remote_name = nil if remote_name && ! remote(remote_name)
       
       if success && node.save({ :remote => remote_name, :message => "Created machine #{name} on #{provider}" })
         success = init_node(node, config.defaults({ :bootstrap => true, :seed => true })) do |op, data|
