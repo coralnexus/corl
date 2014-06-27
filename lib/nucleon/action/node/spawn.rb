@@ -59,6 +59,7 @@ class Spawn < CORL.plugin_class(:nucleon, :cloud_action)
           hostnames     = []
           results       = []
           node_provider = settings.delete(:node_provider)
+          is_parallel   = CORL.parallel? && settings[:parallel]
           
           if CORL.vagrant? && ! CORL.loaded_plugins(:CORL, :node).keys.include?(node_provider.to_sym)
             settings[:machine_type] = node_provider
@@ -80,13 +81,13 @@ class Spawn < CORL.plugin_class(:nucleon, :cloud_action)
               hostname             = hostname[:hostname]  
             end
             
-            if settings[:parallel]
-              results << network.future.add_node(node_provider, hostname, settings)
+            if is_parallel
+              results << network.future.add_node(node_provider, hostname, settings.export)
             else
-              results << network.add_node(node_provider, hostname, settings)    
+              results << network.add_node(node_provider, hostname, settings.export)    
             end
           end
-          results       = results.map { |future| future.value } if settings[:parallel]                  
+          results       = results.map { |future| future.value } if is_parallel                
           myself.status = code.batch_error if results.include?(false)
         else
           myself.status = code.key_failure  
