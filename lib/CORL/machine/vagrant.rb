@@ -140,7 +140,7 @@ class Vagrant < CORL.plugin_class(:CORL, :machine)
   def reload(options = {})
     super do |config|
       success = run(:reload, config)
-      success = init_ssh_session(true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
+      success = init_ssh_session(true, config.get(:tries, 12), config.get(:sleep_time, 5)) if success
     end
   end
 

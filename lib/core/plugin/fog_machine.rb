@@ -184,7 +184,7 @@ class Fog < CORL.plugin_class(:CORL, :machine)
   def reload(options = {}, &code)
     super do |config|
       success = code ? code.call(config) : true            
-      success = init_ssh_session(true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
+      success = init_ssh_session(true, config.get(:tries, 12), config.get(:sleep_time, 5)) if success
     end
   end
 
@@ -195,7 +195,7 @@ class Fog < CORL.plugin_class(:CORL, :machine)
       image_name = sprintf("%s (%s)", node.plugin_name, Time.now.to_s)
       
       success = code ? code.call(image_name, config, success) : true 
-      success = init_ssh_session(true, config.get(:tries, 5), config.get(:sleep_time, 5)) if success
+      success = init_ssh_session(true, config.get(:tries, 12), config.get(:sleep_time, 5)) if success
     end
   end
   
