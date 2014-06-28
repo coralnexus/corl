@@ -77,6 +77,10 @@ class Network < CORL.plugin_class(:nucleon, :base)
     File.join(directory, 'build')
   end
   
+  def key_cache_directory
+    File.join(build_directory, 'keys')
+  end
+  
   #---
   
   def cache
@@ -264,7 +268,7 @@ class Network < CORL.plugin_class(:nucleon, :base)
   def add_node(provider, name, options = {})
     config = Config.ensure(options)
     
-    keypair = config.delete(:keypair, nil)
+    keypair = config.get(:keypair, nil)
     return false unless keypair && keypair.is_a?(Util::SSH::Keypair)
         
     remote_name = config.delete(:remote, :edit)
@@ -287,6 +291,8 @@ class Network < CORL.plugin_class(:nucleon, :base)
     yield(:preprocess, hook_config) if block_given?
     
     if ! node.local? && node.attach_keys(keypair) && extension_check(:add_node, hook_config)
+      node.keypair = keypair
+      
       # Create new node / machine
       success = node.create do |op, data|
         block_given? ? yield("create_#{op}".to_sym, data) : data
@@ -354,7 +360,7 @@ class Network < CORL.plugin_class(:nucleon, :base)
         
         if success && seed_project
           # Seed machine with remote project reference
-          result = node.seed({
+          result = node.node_seed({
             :project_reference => seed_project,
             :project_branch    => seed_branch
           }) do |op, data|
@@ -368,7 +374,7 @@ class Network < CORL.plugin_class(:nucleon, :base)
       
       if success && provision
         # Run configured provisioners on machine
-        result = node.provision(config) do |op, data|
+        result = node.node_provision(config) do |op, data|
           yield("provision_#{op}".to_sym, data)  
         end
         success = result.status == code.success
