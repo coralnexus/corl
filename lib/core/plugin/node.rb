@@ -110,6 +110,16 @@ class Node < CORL.plugin_class(:nucleon, :base)
   
   #---
   
+  def keypair
+    @keypair
+  end
+  
+  def keypair=keypair
+    @keypair = keypair
+  end
+  
+  #---
+  
   def machine
     @machine
   end
@@ -455,6 +465,9 @@ class Node < CORL.plugin_class(:nucleon, :base)
       if private_key && public_key
         FileUtils.chmod(0600, private_key)
         FileUtils.chmod(0644, public_key)
+        
+        myself.keypair = Util::SSH.generate({ :private_key => keypair.private_key })
+        myself.keypair.store(network.key_cache_directory, plugin_name)
       
         save_config[:files] = [ private_key, public_key ]
     
@@ -757,7 +770,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
     
     encoded_config = Util::CLI.encode(Util::Data.clean(config.export))
     action_config  = extended_config(:action, {
-      :command => provider, 
+      :command => provider.to_s.gsub('_', ' '), 
       :data    => { :encoded => encoded_config }
     })
     
