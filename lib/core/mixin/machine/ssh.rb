@@ -6,13 +6,25 @@ module SSH
   #-----------------------------------------------------------------------------
   # SSH Operations
        
-  def init_ssh_session(reset = false, tries = 5, sleep_secs = 5)
+  def init_ssh_session(reset = false, tries = 12, sleep_secs = 5)
     ssh_wait_for_ready
     
-    success = true
-        
+    success     = true
+    
+    public_ip   = node.public_ip
+    user        = node.user
+    ssh_port    = node.ssh_port
+    private_key = node.private_key
+    
+    ssh_config  = Config.new({ 
+      :keypair  => node.keypair,
+      :key_dir  => node.network.key_cache_directory,
+      :key_name => node.plugin_name 
+    })
+    
     begin
-      Util::SSH.session(node.public_ip, node.user, node.ssh_port, node.private_key, reset)
+      Util::SSH.session(public_ip, user, ssh_port, private_key, reset, ssh_config)
+      node.keypair = ssh_config[:keypair]
             
     rescue Net::SSH::HostKeyMismatch => error
       error.remember_host!

@@ -128,8 +128,27 @@ module Config
     machine.ssh.guest_port = node.ssh_port
         
     if node.cache_setting(:use_private_key, false)
-      #dbg(node.private_key, 'ssh private key')
-      machine.ssh.private_key_path = node.private_key
+      key_dir     = node.network.key_cache_directory
+      key_name    = node.plugin_name
+      
+      ssh_config  = ::CORL::Config.new({ 
+        :keypair  => node.keypair,
+        :key_dir  => key_dir,
+        :key_name => key_name 
+      })
+      
+      if keypair = Util::SSH.unlock_private_key(node.private_key, ssh_config)
+        if keypair.is_a?(String)
+          machine.ssh.private_key_path = keypair
+        else
+          node.keypair                 = keypair                   
+          machine.ssh.private_key_path = keypair.private_key_file(key_dir, key_name)
+        end
+      end
+      unless keypair && File.exists?(machine.ssh.private_key_path)
+        machine.ssh.private_key_path = node.private_key
+      end
+      #dbg(machine.ssh.private_key_path, 'ssh private key')
     end
     
     Util::Data.hash(node.ssh).each do |name, data|
