@@ -5,6 +5,12 @@ class Configuration < CORL.plugin_class(:nucleon, :base)
     
   include Mixin::SubConfig
 
+  #---
+  
+  def self.register_ids
+    [ :name, :directory ]
+  end
+   
   #-----------------------------------------------------------------------------
   # Configuration plugin interface
   
