@@ -55,7 +55,7 @@ class Destroy < CORL.plugin_class(:nucleon, :cloud_action)
     super do |local_node, network|
       ensure_network(network) do
         batch_success = network.batch(settings[:destroy_nodes], settings[:node_provider], settings[:parallel]) do |node|
-          info('corl.actions.stop.start', { :provider => node.plugin_provider, :name => node.plugin_name })
+          info('corl.actions.destroy.start', { :provider => node.plugin_provider, :name => node.plugin_name })
           node.destroy
         end
         myself.status = code.batch_error unless batch_success
