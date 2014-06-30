@@ -49,7 +49,6 @@ I18n.load_path << File.expand_path(File.join('..', 'locales', 'en.yml'), lib_dir
 # Include CORL libraries
 
 # Monkey patches (depreciate as fast as possible)
-nucleon_require(mod_dir, :facter_loader)
 
 #---
 
