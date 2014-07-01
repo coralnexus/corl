@@ -96,7 +96,7 @@ module SSH
     config  = Config.ensure(options)
     results = nil
     
-    if commands
+    if commands && commands = commands.clone
       if init_ssh_session
         results = Util::SSH.exec(node.public_ip, node.user, commands) do |type, command, data|
           code.call(type, command, data) if code  
