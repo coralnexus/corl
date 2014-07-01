@@ -131,9 +131,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
       # Execute action on remote nodes 
       success = network.batch(settings[:nodes], settings[:node_provider], settings[:parallel]) do |node|
         exec_config = Config.new(settings)
-        exec_config.delete(:parallel)
         exec_config.delete(:nodes)
-        exec_config.delete(:node_provider)
               
         result = node.action(plugin_provider, exec_config) do |op, data|
           execute_remote(node, network, op, data)
