@@ -227,10 +227,15 @@ class Vagrant < CORL.plugin_class(:CORL, :node)
       if data.include?('stdin: is not a tty') || data.include?('unable to re-open stdin')
         data = ''  
       end
+    elsif type == :output
+      # Hide redundant Facter output
+      if data =~ /^Already evaluated [a-z]+ at [^,]+, reevaluating anyways$/
+        data = ''
+      end  
     end
     data  
   end
-   
+  
   #-----------------------------------------------------------------------------
   # Machine type utilities
   
