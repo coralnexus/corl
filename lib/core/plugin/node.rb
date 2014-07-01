@@ -85,27 +85,43 @@ class Node < CORL.plugin_class(:nucleon, :base)
   
   #---
   
+  def fact_var
+    @facts
+  end
+  
+  def fact_var=facts
+    @facts = facts
+  end
+ 
+  #---
+  
+  def facts(reset = false, clone = true)
+    if reset || fact_var.nil?
+      default_configs = extended_config(:hiera_default_facts, {
+        :fqdn          => hostname, 
+        :hostname      => hostname.gsub(/\..*$/, ''),
+        :corl_provider => plugin_provider.to_s
+      })
+      self.fact_var = Config.new(lookup_facts).defaults(default_configs).export
+    end
+    return fact_var.clone if clone
+    fact_var
+  end
+  
+  #---
+  
+  def hiera_var
+    @hiera
+  end
+  
+  def hiera_var=hiera
+    @hiera = hiera
+  end
+  
+  #---
+  
   def hiera_override_dir
     network.hiera_override_dir
-  end
-  
-  #---
-  
-  def hiera_facts
-    default_configs = extended_config(:hiera_default_facts, {
-      :fqdn          => hostname, 
-      :hostname      => hostname.gsub(/\..*$/, ''),
-      :corl_provider => plugin_provider.to_s
-    })
-    settings_facts = search(:facts)
-    Config.new(lookup_facts).defaults(settings_facts).defaults(default_configs).export
-  end
-  
-  #---
-
-  def hiera(reset = false)
-    @hiera = Hiera.new(:config => hiera_configuration) if reset || @hiera.nil?
-    @hiera
   end
   
   #---
@@ -836,7 +852,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
         return Util::Data.symbol_map(Util::Data.parse_json(result.output))
       end
     end
-    local? ? facts : custom_facts
+    local? ? Util::Data.merge([ CORL.facts, custom_facts ]) : custom_facts
   end
   
   #---
@@ -845,13 +861,13 @@ class Node < CORL.plugin_class(:nucleon, :base)
     if ! local? && bootstrap_script
       config = Config.ensure(options).import({ :property => property })
       result = run.lookup(config)
-    
+      
       if result.status == code.success
         return Util::Data.value(Util::Data.parse_json(result.output), default)
       end
       return default
     end
-    options[:hiera_scope] = Util::Data.prefix('::', hiera_facts, '')
+    options[:hiera_scope] = Util::Data.prefix('::', facts, '')
     lookup(property, default, options)  
   end
   
