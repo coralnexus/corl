@@ -49,16 +49,16 @@ class Provision < CORL.plugin_class(:nucleon, :cloud_action)
           unless node.build_time && File.directory?(network.build_directory)
             success = node.build(settings)
           end
-        
+          
           if success
             provisioner_info = node.provisioner_info   
-        
+            
             node.provisioners.each do |provider, collection|
               provider_info = provisioner_info[provider]
               profiles      = provider_info[:profiles]
-          
+              
               collection.each do |name, provisioner|
-                if supported_profiles = provisioner.supported_profiles(profiles)
+                if supported_profiles = provisioner.supported_profiles(node, profiles)
                   profile_success = provisioner.provision(node, supported_profiles, settings)
                   success         = false unless profile_success
                 end
