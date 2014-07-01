@@ -42,7 +42,7 @@ class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
     super do |node, network|
       ensure_node(node) do
         property = settings.delete(:property)
-        value    = lookup(property, nil, settings)
+        value    = node.lookup(property, nil, settings)
       
         ui.info(Util::Data.to_json(value, true), { :prefix => false })
         myself.result = value
