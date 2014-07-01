@@ -49,3 +49,5 @@ pkg
 .buildpath
 .cache
 .project_cache
+build
+config/identities
