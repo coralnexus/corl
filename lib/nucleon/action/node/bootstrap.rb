@@ -80,7 +80,7 @@ class Bootstrap < CORL.plugin_class(:nucleon, :cloud_action)
           render_options = { :id => node.id, :hostname => node.hostname }
           
           info('corl.actions.bootstrap.start', render_options)
-          success = node.bootstrap(network.home, extended_config(:bootstrap, settings))
+          success = node.bootstrap(network.home, extended_config(:bootstrap, settings.clone))
           if success
             info('corl.actions.bootstrap.success', render_options)
           else
