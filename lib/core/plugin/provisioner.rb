@@ -69,9 +69,9 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
     gateway
   end
   
-  def package_gateways(reset = false)
+  def package_gateways(node, reset = false)
     gateways = []
-    build_info(reset).each do |package_name, package_info|
+    build_info(node, reset).each do |package_name, package_info|
       gateways << File.join('packages', id(package_name).to_s, package_info[:gateway]) if package_info.has_key?(:gateway)
     end
     gateways
@@ -79,9 +79,9 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
   
   #---
   
-  def find_profiles(reset = false)
+  def find_profiles(node, reset = false)
     allowed_profiles = []  
-    build_info(reset).each do |package_name, package_info|
+    build_info(node, reset).each do |package_name, package_info|
       hash(package_info[:profiles]).each do |profile_name, profile_info|
         allowed_profiles << resource([ package_name, 'profile', profile_name ])
       end
@@ -92,9 +92,9 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
   
   #---
   
-  def supported_profiles(profile_names = nil)
+  def supported_profiles(node, profile_names = nil)
     found    = []    
-    profiles = build_profiles
+    profiles = build_profiles(node)
     
     if profile_names.nil?
       found = profiles  
@@ -111,8 +111,8 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
    
   #---
   
-  def profile_dependencies(profiles)
-    dependencies  = build_dependencies[:profile]    
+  def profile_dependencies(node, profiles)
+    dependencies  = build_dependencies(node)[:profile]    
     profile_index = {}
     
     search_profiles = lambda do |profile|
@@ -135,33 +135,33 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
     
   #---
   
-  def build_dependencies(reset = false)
+  def build_dependencies(node, reset = false)
     dependencies = cache_setting(:build_dependencies, {}, :hash)
-    build if reset || dependencies.empty?
+    build(node) if reset || dependencies.empty?
     symbol_map(cache_setting(:build_dependencies, {}, :hash))
   end
      
   #---
   
-  def build_locations(reset = false)
+  def build_locations(node, reset = false)
     locations = cache_setting(:build_locations, {}, :hash)
-    build if reset || locations.empty?
+    build(node) if reset || locations.empty?
     symbol_map(cache_setting(:build_locations, {}, :hash))
   end
   
   #---
   
-  def build_info(reset = false)
+  def build_info(node, reset = false)
     info = cache_setting(:build_info, {}, :hash)
-    build if reset || info.empty?
+    build(node) if reset || info.empty?
     symbol_map(cache_setting(:build_info, {}, :hash))
   end
   
   #---
   
-  def build_profiles(reset = false)
+  def build_profiles(node, reset = false)
     profiles = cache_setting(:build_profiles, [], :array)
-    build if reset || profiles.empty?
+    build(node) if reset || profiles.empty?
     cache_setting(:build_profiles, [], :array)
   end
   
@@ -202,7 +202,7 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
       set_cache_setting(:build_dependencies, network.build.dependencies.export)
       set_cache_setting(:build_locations, network.build.locations.export)
       set_cache_setting(:build_info, provider_info)
-      set_cache_setting(:build_profiles, find_profiles)
+      set_cache_setting(:build_profiles, find_profiles(node))
     end
     success    
   end
@@ -246,7 +246,8 @@ class Provisioner < CORL.plugin_class(:nucleon, :base)
   
   def provision(node, profiles, options = {})
     config   = Config.ensure(options)    
-    profiles = profile_dependencies(profiles)
+    profiles = profile_dependencies(node, profiles)
+    success  = true
     
     success = yield(profiles, config) if block_given?
     
