@@ -48,3 +48,4 @@ pkg
 .project
 .buildpath
 .cache
+.project_cache
