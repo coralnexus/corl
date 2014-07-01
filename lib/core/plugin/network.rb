@@ -48,17 +48,20 @@ class Network < CORL.plugin_class(:nucleon, :base)
   
   #---
   
-  def hiera_override_dir
-    File.join(directory, 'config')
-  end
-  
-  #---
-
-  def hiera(reset = false)
-    @hiera = Hiera.new(:config => hiera_configuration) if reset || @hiera.nil?
+  def hiera_var
     @hiera
   end
   
+  def hiera_var=hiera
+    @hiera = hiera
+  end
+  
+  #---
+  
+  def hiera_override_dir
+    File.join(directory, 'config')
+  end
+   
   #---
   
   def home
@@ -77,10 +80,11 @@ class Network < CORL.plugin_class(:nucleon, :base)
     File.join(directory, 'build')
   end
   
+  #---
+  
   def key_cache_directory
     File.join(build_directory, 'keys')
   end
-  
   #---
   
   def cache
