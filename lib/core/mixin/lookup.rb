@@ -6,26 +6,50 @@ module Lookup
   #-----------------------------------------------------------------------------
   # Facter lookup
   
-  def facts
-    CORL.facts
+  @@facts = nil
+  
+  def fact_var
+    @@facts
+  end
+  
+  def fact_var=facts
+    @@facts = facts
   end
   
   #---
   
-  def create_fact(name, value, weight = 1000)
-    CORL.create_fact(name, value, weight)
+  def facts(reset = false, clone = true) # Override if needed. (See node plugin)
+    self.fact_var = CORL.facts if reset || fact_var.nil?
+    return fact_var.clone if clone
+    fact_var
   end
   
   #---
   
-  def fact(name)
-    CORL.fact(name)
+  def create_fact(name, value, reset = false)
+    facts(reset, false)
+    fact_var[name.to_sym] = value
+  end
+  
+  #---
+  
+  def fact(name, reset = false)
+    facts(reset, false)
+    fact_var[name.to_sym]
   end
   
   #-----------------------------------------------------------------------------
   # Hiera configuration
   
   @@hiera = nil
+  
+  def hiera_var
+    @@hiera
+  end
+  
+  def hiera_var=hiera
+    @@hiera = hiera
+  end
   
   #---
   
@@ -35,13 +59,13 @@ module Lookup
   
   #---
   
-  def hiera_facts
-    facts # Override if needed. (See node plugin)
+  def hiera_lookup_prefix
+    '::'
   end
   
   #---
   
-  def hiera_configuration
+  def hiera_configuration(local_facts = {})
     Kernel.load File.join(File.dirname(__FILE__), '..', 'mod', 'hiera_backend.rb')
     
     backends    = CORL.value(:hiera_backends, [ "json", "yaml" ])
@@ -72,7 +96,7 @@ module Lookup
     end
     
     hiera_config = CORL.config(:hiera, config)
-    loaded_facts = Util::Data.prefix('::', hiera_facts, '')
+    loaded_facts = Util::Data.prefix(hiera_lookup_prefix, local_facts, '')
     
     if hiera_config[:hierarchy]
       hiera_config[:hierarchy].delete('common')
@@ -96,8 +120,8 @@ module Lookup
   #---
 
   def hiera(reset = false)
-    @@hiera = Hiera.new(:config => hiera_configuration) if reset || @@hiera.nil?
-    @@hiera
+    self.hiera_var = Hiera.new(:config => hiera_configuration(facts(reset))) if reset || hiera_var.nil?
+    hiera_var
   end
   
   #-----------------------------------------------------------------------------
@@ -139,7 +163,7 @@ module Lookup
     unless properties.is_a?(Array)
       properties = [ properties ].flatten
     end
-
+    
     first_property = nil
     properties.each do |property|
       property       = property.to_sym
