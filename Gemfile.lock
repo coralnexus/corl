@@ -36,7 +36,7 @@ GIT
 PATH
   remote: .
   specs:
-    corl (0.5.0)
+    corl (0.5.1)
       facter (~> 2.1)
       fog (~> 1.20)
       hiera (~> 1.3)
