@@ -147,7 +147,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
       if validate(node, network)
         yield(node, network) if block_given?
       else
-        puts "\n" + I18n.t('corl.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
+        puts "\n" + I18n.t('nucleon.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
         myself.status = code.validation_failed 
       end
     end
