@@ -143,7 +143,7 @@ module Lookup
   
   #---
     
-  def lookup(properties, default = nil, options = {})
+  def lookup_base(properties, default = nil, options = {})
     config      = Config.new(Config.ensure(options).export)
     value       = nil
     
@@ -217,6 +217,12 @@ module Lookup
     end
     CORL.ui.info("\n", { :prefix => false }) if debug
     value
+  end
+  
+  #---
+  
+  def lookup(properties, default = nil, options = {})
+    lookup_base(properties, default, options)
   end
     
   #---
