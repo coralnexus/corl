@@ -220,6 +220,22 @@ class Network < CORL.plugin_class(:nucleon, :base)
     @build
   end
   
+  #---
+  
+  def create_builder(name, provider, options = {})
+    CORL.create_plugin(:CORL, :builder, provider, extended_config(name, options).import({ :meta => { :parent => myself }}))
+  end
+  
+  #---
+  
+  def identity_builder(options = {})
+    create_builder(:network_identity_builder, :identity, options)
+  end
+  
+  def package_builder(name, options = {})
+    create_builder(:network_package_builder, :package, options)
+  end
+  
   #-----------------------------------------------------------------------------
   # Operations
   
@@ -407,6 +423,8 @@ class Network < CORL.plugin_class(:nucleon, :base)
   
   def batch(node_references, default_provider = nil, parallel = true, &code)
     success = true
+    
+    node_references = array(node_references.clone)
     
     if has_nodes? && ! node_references.empty?
       # Execute action on selected nodes      
