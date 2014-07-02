@@ -10,8 +10,10 @@ module Facade
   def facts(reset = false)
     if reset || @@facts.empty?
       @@facts = {} if reset
-      Facter.list.each do |name|
-        @@facts[name] = Facter.value(name)
+      silence do
+        Facter.list.each do |name|
+          @@facts[name] = Facter.value(name)
+        end
       end
     end
     @@facts
@@ -29,7 +31,9 @@ module Facade
   #---
   
   def fact(name)
-    Facter.value(name)
+    silence do
+      Facter.value(name)
+    end
   end
   
   #-----------------------------------------------------------------------------
