@@ -56,6 +56,9 @@ class Identity < CORL.plugin_class(:CORL, :builder)
       end
            
       if success
+        # Make thid project private.
+        FileUtils.chmod_R('go-wrx', full_directory)
+          
         set_identity(provider_id, full_directory)
         build_config.set_location(plugin_provider, name, directory)
       end
