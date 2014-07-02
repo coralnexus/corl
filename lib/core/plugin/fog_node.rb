@@ -210,6 +210,13 @@ class Fog < CORL.plugin_class(:CORL, :node)
       yield(op, config) if block_given?
     end
   end
+  
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def filter_output(type, data)
+    super
+  end
 end
 end
 end

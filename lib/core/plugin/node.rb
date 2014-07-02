@@ -846,7 +846,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
   
   def lookup_facts
     if ! local? && bootstrap_script
-      result = run.facts
+      result = run.facts({ :quiet => true })
       
       if result.status == code.success
         return Util::Data.symbol_map(Util::Data.parse_json(result.output))
@@ -859,7 +859,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
   
   def lookup_config(property, default = nil, options = {})
     if ! local? && bootstrap_script
-      config = Config.ensure(options).import({ :property => property })
+      config = Config.ensure(options).import({ :property => property, :quiet => true })
       result = run.lookup(config)
       
       if result.status == code.success
@@ -1276,6 +1276,12 @@ class Node < CORL.plugin_class(:nucleon, :base)
   #---
   
   def filter_output(type, data)
+    if type == :output
+      # Hide redundant Facter output
+      if data =~ /^Already evaluated [a-z]+ at [^,]+, reevaluating anyways$/
+        data = ''
+      end  
+    end
     data  
   end
    
