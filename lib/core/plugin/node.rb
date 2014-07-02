@@ -85,47 +85,6 @@ class Node < CORL.plugin_class(:nucleon, :base)
   
   #---
   
-  def fact_var
-    @facts
-  end
-  
-  def fact_var=facts
-    @facts = facts
-  end
- 
-  #---
-  
-  def facts(reset = false, clone = true)
-    if reset || fact_var.nil?
-      default_configs = extended_config(:hiera_default_facts, {
-        :fqdn          => hostname, 
-        :hostname      => hostname.gsub(/\..*$/, ''),
-        :corl_provider => plugin_provider.to_s
-      })
-      self.fact_var = Config.new(lookup_facts).defaults(default_configs).export
-    end
-    return fact_var.clone if clone
-    fact_var
-  end
-  
-  #---
-  
-  def hiera_var
-    @hiera
-  end
-  
-  def hiera_var=hiera
-    @hiera = hiera
-  end
-  
-  #---
-  
-  def hiera_override_dir
-    network.hiera_override_dir
-  end
-  
-  #---
-  
   def keypair
     @keypair
   end
@@ -407,7 +366,77 @@ class Node < CORL.plugin_class(:nucleon, :base)
     yield(config) if block_given?
     config
   end
-    
+  
+  #-----------------------------------------------------------------------------
+  # Machine information
+  
+  def fact_var
+    @facts
+  end
+  
+  def fact_var=facts
+    @facts = facts
+  end
+ 
+  #---
+  
+  def facts(reset = false, clone = true)
+    if reset || fact_var.nil?
+      default_facts = extended_config(:hiera_default_facts, {
+        :fqdn          => hostname, 
+        :hostname      => hostname.gsub(/\..*$/, ''),
+        :corl_provider => plugin_provider.to_s
+      })
+      
+      unless local?
+        result = run.facts({ :quiet => true })
+      
+        if result.status == code.success
+          node_facts = Util::Data.symbol_map(Util::Data.parse_json(result.output))
+        end
+      end
+      unless node_facts
+        node_facts = local? ? Util::Data.merge([ CORL.facts, custom_facts ]) : custom_facts
+      end
+      
+      self.fact_var = Config.new(node_facts).defaults(default_facts).export
+    end
+    return fact_var.clone if clone
+    fact_var
+  end
+  
+  #---
+  
+  def hiera_var
+    @hiera
+  end
+  
+  def hiera_var=hiera
+    @hiera = hiera
+  end
+  
+  #---
+  
+  def hiera_override_dir
+    network.hiera_override_dir
+  end
+  
+  #---
+  
+  def lookup(property, default = nil, options = {})
+    unless local?
+      config = Config.ensure(options).import({ :property => property, :quiet => true })
+      result = run.lookup(config)
+      
+      if result.status == code.success
+        return Util::Data.value(Util::Data.parse_json(result.output), default)
+      end
+      return default
+    end
+    options[:hiera_scope] = Util::Data.prefix('::', facts, '')
+    lookup_base(property, default, options)  
+  end
+      
   #-----------------------------------------------------------------------------
   # Machine operations
   
@@ -849,49 +878,6 @@ class Node < CORL.plugin_class(:nucleon, :base)
       logger.warn("Node #{plugin_name} does not have an attached machine or is not running so cannot launch terminal")
     end
     status == code.success
-  end
-  
-  #---
-  
-  def lookup_facts
-    if ! local? && bootstrap_script
-      result = run.facts({ :quiet => true })
-      
-      if result.status == code.success
-        return Util::Data.symbol_map(Util::Data.parse_json(result.output))
-      end
-    end
-    local? ? Util::Data.merge([ CORL.facts, custom_facts ]) : custom_facts
-  end
-  
-  #---
-  
-  def lookup_config(property, default = nil, options = {})
-    if ! local? && bootstrap_script
-      config = Config.ensure(options).import({ :property => property, :quiet => true })
-      result = run.lookup(config)
-      
-      if result.status == code.success
-        return Util::Data.value(Util::Data.parse_json(result.output), default)
-      end
-      return default
-    end
-    options[:hiera_scope] = Util::Data.prefix('::', facts, '')
-    lookup(property, default, options)  
-  end
-  
-  #---
-  
-  def lookup_array(property, default = [], options = {})
-    config = Config.ensure(options).import({ :context => :array })
-    lookup_config(property, default, config)  
-  end
-  
-  #---
-  
-  def lookup_hash(property, default = {}, options = {})
-    config = Config.ensure(options).import({ :context => :hash })
-    lookup_config(property, default, config)  
   end
   
   #---
