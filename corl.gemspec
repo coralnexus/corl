@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-07-01"
+  s.date = "2014-07-02"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -61,6 +61,7 @@ Gem::Specification.new do |s|
     "lib/core/errors.rb",
     "lib/core/facade.rb",
     "lib/core/mixin/action/keypair.rb",
+    "lib/core/mixin/action/registration.rb",
     "lib/core/mixin/builder.rb",
     "lib/core/mixin/lookup.rb",
     "lib/core/mixin/machine/ssh.rb",
@@ -112,6 +113,7 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/node/destroy.rb",
     "lib/nucleon/action/node/exec.rb",
     "lib/nucleon/action/node/facts.rb",
+    "lib/nucleon/action/node/identity.rb",
     "lib/nucleon/action/node/image.rb",
     "lib/nucleon/action/node/keypair.rb",
     "lib/nucleon/action/node/lookup.rb",
