@@ -698,16 +698,20 @@ class Node < CORL.plugin_class(:nucleon, :base)
         end
         
         if commands = config.get(:commands, nil)
+          quiet = config.get(:quiet, false)
+          
           begin
             test = active_machine.exec(commands, config.export) do |type, command, data|
-              unless local?
-                if type == :error
-                  alert(filter_output(type, data))
-                else
-                  render(filter_output(type, data))
+              unless quiet
+                unless local?
+                  if type == :error
+                    alert(filter_output(type, data))
+                  else
+                    render(filter_output(type, data))
+                  end
                 end
-              end
-              yield(:progress, { :type => type, :command => command, :data => data }) if block_given?   
+                yield(:progress, { :type => type, :command => command, :data => data }) if block_given?
+              end   
             end
             results = test if test
             
@@ -750,11 +754,13 @@ class Node < CORL.plugin_class(:nucleon, :base)
   #---
   
   def command(command, options = {})
-    config   = Config.ensure(options)
-    as_admin = config.delete(:as_admin, false)
+    config         = Config.ensure(options)
+    as_admin       = config.delete(:as_admin, false)
+    remove_command = false
     
     unless command.is_a?(CORL::Plugin::Command)
-      command = CORL.command(Config.new({ :command => command }).import(config), :bash)
+      command        = CORL.command(Config.new({ :command => command }).import(config), :bash)
+      remove_command = true
     end
     
     admin_command = ''
@@ -763,11 +769,13 @@ class Node < CORL.plugin_class(:nucleon, :base)
       admin_command = extension_set(:admin_command, admin_command, config)
     end
     
-    results = exec({ :commands => [ "#{admin_command} #{command.to_s}".strip ] }) do |op, data|
+    config[:commands] = [ "#{admin_command} #{command.to_s}".strip ]
+    
+    results = exec(config) do |op, data|
       yield(op, data) if block_given?  
     end
     
-    CORL.remove_plugin(command)    
+    CORL.remove_plugin(command) if remove_command    
     results.first 
   end
   
@@ -790,7 +798,8 @@ class Node < CORL.plugin_class(:nucleon, :base)
       :data    => { :encoded => encoded_config }
     })
     
-    result = command(:corl, { :subcommand => action_config, :as_admin => true }) do |op, data|
+    quiet  = config.get(:quiet, false)    
+    result = command(:corl, { :subcommand => action_config, :as_admin => true, :quiet => quiet }) do |op, data|
       yield(op, data) if block_given?  
     end
     
