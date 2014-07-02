@@ -173,6 +173,9 @@ en:
             Hostnames of machines to create on provider infrastructure
         start: |-
           Spawning new machines on %{node_provider}
+      identity:
+        start: |-
+          Setting identity on %{provider} machine %{name}
       ssh:
         options:
         errors:
