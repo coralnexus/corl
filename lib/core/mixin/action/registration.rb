@@ -8,7 +8,7 @@ module Registration
   # Options
     
   def register_node(name, default = nil)
-    name = "#{name}_node"
+    name = name.to_sym
     
     register name, :str, default do |value|
       validate_plugins(:CORL, :node, name, value)
@@ -18,7 +18,7 @@ module Registration
   #---
     
   def register_nodes(name, default = nil)
-    name = "#{name}_nodes"
+    name = name.to_sym
     
     register name, :array, default do |values|
       validate_plugins(:CORL, :node, name, values)
