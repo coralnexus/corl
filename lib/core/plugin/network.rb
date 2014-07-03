@@ -76,6 +76,12 @@ class Network < CORL.plugin_class(:nucleon, :base)
   
   #---
   
+  def key_directory
+    File.join(directory, 'keys')
+  end
+  
+  #---
+  
   def build_directory
     File.join(directory, 'build')
   end
@@ -85,6 +91,13 @@ class Network < CORL.plugin_class(:nucleon, :base)
   def key_cache_directory
     File.join(build_directory, 'keys')
   end
+  
+  #---
+  
+  def config_directory
+    File.join(directory, 'config')
+  end
+  
   #---
   
   def cache
