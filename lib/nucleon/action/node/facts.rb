@@ -11,13 +11,6 @@ class Facts < CORL.plugin_class(:nucleon, :cloud_action)
     super(:node, :facts, 570)
   end
   
-  #----
-  
-  def prepare
-    CORL.quiet = true
-    super    
-  end
- 
   #-----------------------------------------------------------------------------
   # Settings
 
@@ -29,7 +22,7 @@ class Facts < CORL.plugin_class(:nucleon, :cloud_action)
       ensure_node(node) do
         facter_facts = node.facts
         
-        puts Util::Data.to_json(facter_facts, true)        
+        $stderr.puts Util::Data.to_json(facter_facts, true)        
         myself.result = facter_facts
       end
     end
