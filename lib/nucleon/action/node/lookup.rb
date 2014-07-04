@@ -4,6 +4,8 @@ module Action
 module Node
 class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
   
+  include Mixin::Action::Registration
+  
   #-----------------------------------------------------------------------------
   # Info
   
@@ -26,6 +28,8 @@ class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
         end
         success
       end
+      
+      register_translator :format, :json
     end
   end
   
@@ -41,16 +45,18 @@ class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |node, network|
       ensure_node(node) do
+        translator = CORL.translator({}, settings[:format])
+        
         if settings[:properties].empty?
           myself.result = node.hiera_configuration(node.facts)
-          $stderr.puts Util::Data.to_json(result, true)
+          $stderr.puts translator.generate(result)
         else
           properties = {}
           
           settings.delete(:properties).each do |property|
             properties[property] = node.lookup(property, nil, settings)
           end
-          $stderr.puts Util::Data.to_json(properties, true)
+          $stderr.puts translator.generate(properties)
           myself.result = properties 
         end        
       end
