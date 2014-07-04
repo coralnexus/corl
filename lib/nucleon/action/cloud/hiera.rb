@@ -38,20 +38,14 @@ class Hiera < CORL.plugin_class(:nucleon, :cloud_action)
     super do |node, network|
       ensure_node(node) do
         if settings[:properties].empty?
-          ui.info("\n" + CORL.render_object(node.hiera_configuration) + "\n\n", { :prefix => false })
+          $stderr.puts Util::Data.to_json(node.hiera_configuration(node.facts), true)
         else
           settings.delete(:properties).each do |property|
-            value = Util::Data.to_json(node.lookup(property, nil, settings), true)
-            
             ui_group(property) do
-              if value.match(/\n/)      
-                ui.info("\n\n#{value}\n\n")
-              else
-                ui.info(value)  
-              end
+              $stderr.puts Util::Data.to_json(node.lookup(property, nil, settings), true)
             end
           end  
-        end        
+        end      
       end
     end
   end
