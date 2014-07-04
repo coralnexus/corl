@@ -894,9 +894,6 @@ class Node < CORL.plugin_class(:nucleon, :base)
         
         if local? && local_machine
           active_machine = local_machine
-          
-          config[:info_prefix]  = "[#{hostname}] "
-          config[:error_prefix] = "[#{hostname}] "
         else
           active_machine = machine
         end
