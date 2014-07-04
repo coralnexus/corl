@@ -16,7 +16,7 @@ class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
   
   def configure
     super do
-      register :property, :str, nil
+      register :properties, :array, []
       register :context, :str, :priority do |value|
         success = true
         options = [ :priority, :array, :hash ]
@@ -32,7 +32,7 @@ class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
   #---
   
   def arguments
-    [ :property ]
+    [ :properties ]
   end
 
   #-----------------------------------------------------------------------------
@@ -41,11 +41,18 @@ class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |node, network|
       ensure_node(node) do
-        property = settings.delete(:property)
-        value    = node.lookup(property, nil, settings)
-      
-        $stderr.puts Util::Data.to_json(value, true)
-        myself.result = value
+        if settings[:properties].empty?
+          myself.result = node.hiera_configuration(node.facts)
+          $stderr.puts Util::Data.to_json(result, true)
+        else
+          properties = {}
+          
+          settings.delete(:properties).each do |property|
+            properties[property] = node.lookup(property, nil, settings)
+          end
+          $stderr.puts Util::Data.to_json(properties, true)
+          myself.result = properties 
+        end        
       end
     end
   end
