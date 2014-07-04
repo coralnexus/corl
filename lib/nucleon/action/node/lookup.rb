@@ -11,13 +11,6 @@ class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
     super(:node, :lookup, 565)
   end
 
-  #----
-  
-  def prepare
-    CORL.quiet = true
-    super    
-  end
- 
   #-----------------------------------------------------------------------------
   # Settings
   
@@ -51,7 +44,7 @@ class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
         property = settings.delete(:property)
         value    = node.lookup(property, nil, settings)
       
-        puts Util::Data.to_json(value, true)
+        $stderr.puts Util::Data.to_json(value, true)
         myself.result = value
       end
     end
