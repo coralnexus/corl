@@ -389,10 +389,10 @@ class Node < CORL.plugin_class(:nucleon, :base)
       })
       
       unless local?
-        result = run.facts({ :quiet => true })
+        result = run.node_facts({ :quiet => true })
       
         if result.status == code.success
-          node_facts = Util::Data.symbol_map(Util::Data.parse_json(result.output))
+          node_facts = Util::Data.symbol_map(Util::Data.parse_json(result.errors))
         end
       end
       unless node_facts
@@ -426,15 +426,54 @@ class Node < CORL.plugin_class(:nucleon, :base)
   def lookup(property, default = nil, options = {})
     unless local?
       config = Config.ensure(options).import({ :property => property, :quiet => true })
-      result = run.lookup(config)
+      result = run.node_lookup(config)
       
       if result.status == code.success
-        return Util::Data.value(Util::Data.parse_json(result.output), default)
+        return Util::Data.value(Util::Data.parse_json(result.errors), default)
       end
       return default
     end
     options[:hiera_scope] = Util::Data.prefix('::', facts, '')
     lookup_base(property, default, options)  
+  end
+  
+  #---
+  
+  def remote_cache_setting(keys, default = nil, format = false)
+    cache_id = keys.flatten.join('.')   
+    result   = run.node_cache({ :name => cache_id })
+      
+    if result.status == code.success
+      value = Util::Data.value(Util::Data.parse_json(result.errors), default)
+    else
+      value = default
+    end 
+    filter(value, format)
+  end
+  
+  #---
+
+  def set_remote_cache_setting(keys, value)
+    run.node_cache({ 
+      :name  => keys.flatten.join('.'), 
+      :value => Util::Data.to_json(value, false), 
+      :json  => true 
+    }).status == code.success
+  end
+  
+  #---
+
+  def delete_remote_cache_setting(keys)
+    run.node_cache({ 
+      :name   => keys.flatten.join('.'), 
+      :delete => true 
+    }).status == code.success
+  end
+  
+  #---
+
+  def clear_remote_cache
+    run.node_cache({ :clear => true }).status == code.success
   end
       
   #-----------------------------------------------------------------------------
@@ -445,6 +484,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
     success = true
     
     # TODO: Figure out what's going on with the parallel implementation here.
+    parallel_original          = ENV['NUCLEON_NO_PARALLEL']
     ENV['NUCLEON_NO_PARALLEL'] = 'true'
     
     status  = parallel(:build_provider, network.builders, config)
@@ -468,8 +508,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
       end
     end
     
-    ENV['NUCLEON_NO_PARALLEL'] = nil
-    
+    ENV['NUCLEON_NO_PARALLEL'] = parallel_original  
     success
   end
   
