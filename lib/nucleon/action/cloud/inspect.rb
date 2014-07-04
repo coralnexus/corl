@@ -37,7 +37,7 @@ class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
         else
           data = network.config.get(settings[:elements])
         end
-        ui.info("\n\n" + CORL.render_object(data) + "\n\n")
+        $stderr.puts Util::Data.to_json(data, true)
       end
     end
   end
