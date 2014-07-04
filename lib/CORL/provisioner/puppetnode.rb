@@ -142,7 +142,7 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
       directory  = File.join(internal_path(build_directory), package_id.to_s, name.to_s)
       success    = true
         
-      ui.info("Building CORL profile #{blue(name)} modules into #{green(directory)}")
+      info("Building CORL profile #{blue(name)} modules into #{green(directory)}", { :i18n => false })
     
       if processed_info.has_key?(:modules)
         status  = parallel(:build_module, hash(processed_info[:modules]), directory, name, environment)
@@ -150,7 +150,7 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
         
         build_config.set_location(:puppet_module, profile_id(package, name), directory) if success
       end
-      ui.success("Build of profile #{blue(name)} finished") if success
+      success("Build of profile #{blue(name)} finished", { :i18n => false }) if success
       success
     end
   end
@@ -161,7 +161,7 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
     module_project        = nil
     success               = true
             
-    ui.info("Building #{blue(profile)} Puppet module #{blue(name)} at #{purple(project_reference)} into #{green(module_directory)}")
+    info("Building #{blue(profile)} Puppet module #{blue(name)} at #{purple(project_reference)} into #{green(module_directory)}", { :i18n => false })
     
     module_project = build_config.manage(:project, extended_config(:puppet_module, {
       :directory     => full_module_directory,
@@ -172,10 +172,10 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
       :manage_ignore => false
     }))
     unless module_project
-      ui.warn("Puppet module #{cyan(name)} failed to initialize")
+      warn("Puppet module #{cyan(name)} failed to initialize", { :i18n => false })
       success = false
     end
-    ui.success("Build of #{blue(profile)} #{blue(name)} finished") if success
+    success("Build of #{blue(profile)} #{blue(name)} finished", { :i18n => false }) if success
     success
   end
   
@@ -256,7 +256,7 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
       
       @@puppet_lock.synchronize do
         begin
-          ui.info("Starting catalog generation")
+          info("Starting catalog generation", { :i18n => false })
           
           @@status[id] = code.success
           @@network    = network    
@@ -292,8 +292,8 @@ class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
             catalog.retrieval_duration = Time.now - start_time
             
             unless config.get(:dry_run, false)
-              ui.info("\n", { :prefix => false })
-              ui.info("Starting configuration run")
+              info("\n", { :prefix => false, :i18n => false })
+              info("Starting configuration run", { :i18n => false })
               
               # Configure the machine
               configurer = Puppet::Configurer.new

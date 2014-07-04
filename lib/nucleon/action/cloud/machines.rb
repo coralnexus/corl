@@ -42,7 +42,7 @@ class Machines < CORL.plugin_class(:nucleon, :cloud_action)
         if node = network.test_node(settings[:node_provider])
           if machine_types = node.machine_types
             machine_types.each do |machine_type|
-              render(node.render_machine_type(machine_type), { :prefix => false })
+              info(node.render_machine_type(machine_type), { :prefix => false, :i18n => false })
             end
           
             myself.result = machine_types

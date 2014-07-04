@@ -85,9 +85,9 @@ module Keypair
       else
         key_options = {}
         if settings[:require_password]
-          password = ui.password('SSH')
-          if password
-            key_options[:passphrase] = password
+          key_password = password('SSH')
+          if key_password
+            key_options[:passphrase] = key_password
           else
             warn('corl.core.mixin.action.keypair.errors.no_password')
             return nil

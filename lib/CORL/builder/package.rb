@@ -37,7 +37,7 @@ class Package < CORL.plugin_class(:CORL, :builder)
     directory   = File.join(internal_path(build_directory), provider_id.to_s)
     success     = true
       
-    ui.info("Building package #{blue(name)} at #{purple(project_reference)} into #{green(directory)}")
+    info("Building package #{blue(name)} at #{purple(project_reference)} into #{green(directory)}", { :i18n => false })
       
     full_directory = File.join(network.directory, directory)
       
@@ -49,7 +49,7 @@ class Package < CORL.plugin_class(:CORL, :builder)
         :manage_ignore => false
       }))
       unless project
-        ui.warn("Package #{cyan(name)} failed to initialize")
+        warn("Package #{cyan(name)} failed to initialize", { :i18n => false })
         success = false
       end
            
@@ -67,7 +67,7 @@ class Package < CORL.plugin_class(:CORL, :builder)
         end
       end
     end
-    ui.success("Build of package #{blue(name)} finished") if success
+    success("Build of package #{blue(name)} finished", { :i18n => false }) if success
     success
   end
 end

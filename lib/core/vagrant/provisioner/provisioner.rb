@@ -50,7 +50,7 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
           :dry_run           => config.dry_run
         }).export))
         
-        node.ui.warn("CORL provisioner failed") unless success
+        node.warn("CORL provisioner failed", { :i18n => false }) unless success
       end
     end
   end

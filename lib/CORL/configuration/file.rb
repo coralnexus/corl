@@ -235,7 +235,7 @@ class File < CORL.plugin_class(:CORL, :configuration)
         FileUtils.mkdir_p(attach_path) unless Dir.exists?(attach_path)
       
       rescue => error
-        alert(error.message)
+        warn(error.message, { :i18n => false })
         success = false
       end
       
@@ -259,7 +259,7 @@ class File < CORL.plugin_class(:CORL, :configuration)
             FileUtils.cp(file, new_file)
           
           rescue => error
-            alert(error.message)
+            warn(error.message, { :i18n => false })
             success = false
           end  
         end

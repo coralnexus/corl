@@ -177,7 +177,7 @@ class Vagrant < CORL.plugin_class(:CORL, :machine)
         end
         
       rescue => error
-        ui.error(error.message)
+        error(error.message, { :i18n => false })
         success = false
       end
       
@@ -306,8 +306,8 @@ class Vagrant < CORL.plugin_class(:CORL, :machine)
         server.send(:action, action.to_sym, params)
         
       rescue => error
-        ui.error(error)
-        ui.error(Util::Data.to_yaml(error.backtrace))
+        error(error, { :i18n => false })
+        error(Util::Data.to_yaml(error.backtrace), { :i18n => false })
         success = false
       end      
     end

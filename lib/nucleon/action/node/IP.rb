@@ -20,7 +20,7 @@ class IP < CORL.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |node, network|
       ensure_node(node) do
-        ui.info(CORL.public_ip)
+        render(CORL.public_ip)
       end
     end
   end

@@ -37,7 +37,7 @@ class Identity < CORL.plugin_class(:CORL, :builder)
     directory   = File.join(internal_path(build_directory), provider_id.to_s)
     success     = true
       
-    ui.info("Building identity #{blue(name)} at #{purple(project_reference)} into #{green(directory)}")
+    info("Building identity #{blue(name)} at #{purple(project_reference)} into #{green(directory)}", { :i18n => false })
       
     full_directory = File.join(network.directory, directory)
       
@@ -51,7 +51,7 @@ class Identity < CORL.plugin_class(:CORL, :builder)
         :manage_ignore => false
       }))
       unless project
-        ui.warn("Identity #{cyan(name)} failed to initialize")
+        warn("Identity #{cyan(name)} failed to initialize", { :i18n => false })
         success = false
       end
            
@@ -63,7 +63,7 @@ class Identity < CORL.plugin_class(:CORL, :builder)
         build_config.set_location(plugin_provider, name, directory)
       end
     end
-    ui.success("Build of identity #{blue(name)} finished") if success
+    success("Build of identity #{blue(name)} finished", { :i18n => false }) if success
     success
   end
 end

@@ -47,7 +47,7 @@ class Images < CORL.plugin_class(:nucleon, :cloud_action)
         if node = network.test_node(settings[:node_provider], { :region => settings[:region] })
           if images = node.images(settings[:search], settings)
             images.each do |image|
-              render(node.render_image(image), { :prefix => false })
+              info(node.render_image(image), { :prefix => false, :i18n => false })
             end
           
             myself.result = images

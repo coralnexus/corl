@@ -30,7 +30,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
         end
         if result
           result = result.first
-          alert(result.errors) unless result.errors.empty?
+          warn(result.errors, { :i18n => false }) unless result.errors.empty?
         end
         result
       end
@@ -498,7 +498,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
         myself.build_time = Time.now.to_s if success
         
         if config.delete(:save, true)
-          ui.success("Saving successful build")    
+          success("Saving successful build", { :i18n => false })    
          
           success = save(extended_config(:build, {
             :message => config.get(:message, "Built #{plugin_provider} node: #{plugin_name}"),
@@ -513,18 +513,18 @@ class Node < CORL.plugin_class(:nucleon, :base)
   end
   
   def build_provider(provider, plugin, config)
-    ui.info("Building #{provider} components")
+    info("Building #{provider} components", { :i18n => false })
     plugin.build(myself, config)
   end
   
   def build_provisioners(provider, collection, config)
-    ui.info("Building #{provider} provisioner collection")
+    info("Building #{provider} provisioner collection", { :i18n => false })
     status = parallel(:build_provisioner, collection, provider, config)
     status.values.include?(false) ? false : true  
   end
   
   def build_provisioner(name, plugin, provider, config)
-    ui.info("Building #{provider} #{name} provisioner components")
+    info("Building #{provider} #{name} provisioner components", { :i18n => false })
     plugin.build(myself, config) 
   end
   
@@ -645,18 +645,18 @@ class Node < CORL.plugin_class(:nucleon, :base)
       if extension_check(:download, hook_config)
         logger.info("Downloading from #{plugin_name}")
       
-        render("Starting download of #{remote_path} to #{local_path}") 
+        info("Starting download of #{remote_path} to #{local_path}", { :i18n => false }) 
         yield(:config, hook_config) if block_given?
         
         active_machine = local? ? local_machine : machine
         
         success = active_machine.download(remote_path, local_path, config.export) do |name, received, total|
-          render("#{name}: Sent #{received} of #{total}")
+          info("#{name}: Sent #{received} of #{total}", { :i18n => false })
           yield(:progress, { :name => name, :received => received, :total => total })
         end
         
         if success && block_given?
-          render("Successfully finished download of #{remote_path} to #{local_path}")
+          info("Successfully finished download of #{remote_path} to #{local_path}", { :i18n => false })
           process_success = yield(:process, hook_config)
           success         = process_success if process_success == false        
         end
@@ -683,18 +683,18 @@ class Node < CORL.plugin_class(:nucleon, :base)
       if extension_check(:upload, hook_config)
         logger.info("Uploading to #{plugin_name}")
       
-        render("Starting upload of #{local_path} to #{remote_path}") 
+        info("Starting upload of #{local_path} to #{remote_path}", { :i18n => false }) 
         yield(:config, hook_config) if block_given?
         
         active_machine = local? ? local_machine : machine
         
         success = active_machine.upload(local_path, remote_path, config.export) do |name, sent, total|
-          render("#{name}: Sent #{sent} of #{total}")
+          info("#{name}: Sent #{sent} of #{total}", { :i18n => false })
           yield(:progress, { :name => name, :sent => sent, :total => total })  
         end
         
         if success && block_given?
-          render("Successfully finished upload of #{local_path} to #{remote_path}")
+          info("Successfully finished upload of #{local_path} to #{remote_path}", { :i18n => false })
           process_success = yield(:process, hook_config)
           success         = process_success if process_success == false        
         end
@@ -770,9 +770,9 @@ class Node < CORL.plugin_class(:nucleon, :base)
               unless quiet
                 unless local?
                   if type == :error
-                    alert(filter_output(type, data))
+                    warn(filter_output(type, data), { :i18n => false })
                   else
-                    render(filter_output(type, data))
+                    info(filter_output(type, data), { :i18n => false })
                   end
                 end
                 yield(:progress, { :type => type, :command => command, :data => data }) if block_given?

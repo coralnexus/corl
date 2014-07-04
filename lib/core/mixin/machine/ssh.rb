@@ -44,7 +44,7 @@ module SSH
       end
       
     rescue => error
-      ui.warn(error)
+      warn(error, { :i18n => false })
       success = false
     end
     success
@@ -64,7 +64,7 @@ module SSH
         success = true
       end  
     rescue => error
-      ui.error(error.message)
+      error(error.message, { :i18n => false })
     end
     
     success
@@ -84,7 +84,7 @@ module SSH
         success = true
       end  
     rescue => error
-      ui.error(error.message)
+      error(error.message, { :i18n => false })
     end
     
     success  

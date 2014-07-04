@@ -64,7 +64,7 @@ class Seed < CORL.plugin_class(:nucleon, :cloud_action)
           network_path = lookup(:corl_network)
           backup_path  = File.join(Dir.tmpdir(), 'corl')
           
-          render("Generating network SSH deploy keys")
+          info("Generating network SSH deploy keys", { :i18n => false })
           
           if keys = Util::SSH.generate.store
             if @project_info
@@ -73,11 +73,11 @@ class Seed < CORL.plugin_class(:nucleon, :cloud_action)
               project_info = Config.new({ :provider => :git })
             end
             
-            render("Backing up current network configuration")
+            info("Backing up current network configuration", { :i18n => false })
             FileUtils.rm_rf(backup_path)
             FileUtils.mv(network_path, backup_path)
             
-            render("Seeding network configuration from #{settings[:project_reference]}")
+            info("Seeding network configuration from #{settings[:project_reference]}", { :i18n => false })
             project = CORL.project(extended_config(:project, {
               :directory   => network_path,
               :reference   => project_info.get(:reference, nil),
@@ -90,15 +90,15 @@ class Seed < CORL.plugin_class(:nucleon, :cloud_action)
             }), project_info[:provider])
         
             if project
-              render("Finalizing network path and removing temporary backup")
+              info("Finalizing network path and removing temporary backup", { :i18n => false })
               FileUtils.chmod_R(0600, network_path)
               FileUtils.rm_rf(backup_path)
               
-              render("Reinitializing network")
+              info("Reinitializing network", { :i18n => false })
               if network = init_network
                 if network.load
                   if node = network.local_node(true)
-                    render("Updating node network configurations")
+                    info("Updating node network configurations", { :i18n => false })
                     myself.status = code.node_save_failure unless node.save  
                   else
                     myself.status = code.node_load_failure
