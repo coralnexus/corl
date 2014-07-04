@@ -75,6 +75,10 @@ module Lookup
     if CORL.admin? && config_file && File.exist?(config_file)
       config = Hiera::Config.load(config_file)
     end
+        
+    # Need some way to tell if we have installed our own Hiera configuration.
+    config = {} if config[:merge_behavior] == :native
+    
     config[:logger] = :corl
     
     unless config[:merge_behavior]
