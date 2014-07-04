@@ -18,9 +18,11 @@ class Identity < CORL.plugin_class(:nucleon, :cloud_action)
   
   def configure
     super do
+      codes :identity_upload_failure
+      
       register :name, :str
       register_project :identity
-      register_nodes :identity      
+      register_nodes :identity_nodes      
     end
   end
   
@@ -31,7 +33,7 @@ class Identity < CORL.plugin_class(:nucleon, :cloud_action)
   end
   
   def arguments
-    [ :name, :identity_project, :identity_nodes ]
+    [ :name, :identity_nodes ]
   end
 
   #-----------------------------------------------------------------------------
@@ -40,15 +42,30 @@ class Identity < CORL.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |local_node, network|
       ensure_network(network) do
-        batch_success = false
+        builder = network.identity_builder({ settings[:name] => settings[:identity] })
         
-        batch_success = network.batch(settings[:identity_nodes], settings[:node_provider], settings[:parallel]) do |node|
-          info('corl.actions.identity.start', { :provider => node.plugin_provider, :name => node.plugin_name })
-                    
-          success = network.identity_builder.build(node, { settings[:name] => settings[:identity_project] })
-          success        
+        if builder.build(local_node)
+          identity_directory = File.join(builder.build_directory, settings[:name])
+          
+          success = network.batch(settings[:identity_nodes], settings[:node_provider], settings[:parallel]) do |node|
+            info('corl.actions.identity.start', { :provider => node.plugin_provider, :name => node.plugin_name })
+            
+            remote_network_directory  = node.lookup(:corl_network)
+            
+            remote_config_directory        = File.join(remote_network_directory, network.config_directory.sub(/#{network.directory}#{File::SEPARATOR}/, ''))            
+            remote_identity_base_directory = File.join(remote_network_directory, builder.build_directory.sub(/#{network.directory}#{File::SEPARATOR}/, ''))
+            remote_identity_directory      = File.join(remote_identity_base_directory, settings[:name])
+            
+            node.cli.mkdir('-p', remote_identity_base_directory)
+            node.cli.rm('-Rf', remote_identity_directory)
+            
+            if success = node.send_files(identity_directory, remote_identity_directory, nil, '0700')
+              dbg('we were successful!')   
+            end        
+            success        
+          end
         end
-        myself.status = code.batch_error unless batch_success
+        myself.status = code.batch_error unless success
       end
     end
   end
