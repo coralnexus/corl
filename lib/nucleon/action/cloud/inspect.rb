@@ -4,6 +4,8 @@ module Action
 module Cloud
 class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
   
+  include Mixin::Action::Registration
+  
   #-----------------------------------------------------------------------------
   # Info
   
@@ -17,6 +19,7 @@ class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
   def configure
     super do
       register :elements, :array, []
+      register_translator :format, :json
     end
   end
   
@@ -37,7 +40,9 @@ class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
         else
           data = network.config.get(settings[:elements])
         end
-        $stderr.puts Util::Data.to_json(data, true)
+        
+        translator = CORL.translator({}, settings[:format])
+        $stderr.puts translator.generate(data)
       end
     end
   end
