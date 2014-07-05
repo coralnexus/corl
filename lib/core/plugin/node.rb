@@ -401,7 +401,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
       })
       
       unless local?
-        result = run.node_fact({ :quiet => true })
+        result = run.node_facts({ :quiet => true })
       
         if result.status == code.success
           node_facts = Util::Data.symbol_map(Util::Data.parse_json(result.errors))
