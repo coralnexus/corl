@@ -18,7 +18,9 @@ class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
  
   def configure
     super do
-      register :elements, :array, []
+      codes :configuration_parse_failed
+      
+      register_array :elements
       register_translator :format, :json
     end
   end
@@ -40,9 +42,11 @@ class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
         else
           data = network.config.get(settings[:elements])
         end
-        
-        translator = CORL.translator({}, settings[:format])
-        $stderr.puts translator.generate(data)
+        if network.config.status == code.success
+          render data, :format => settings[:format]
+        else
+          myself.status = code.configuration_parse_failed
+        end
       end
     end
   end
