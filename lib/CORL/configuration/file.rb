@@ -40,6 +40,8 @@ class File < CORL.plugin_class(:CORL, :configuration)
     super do |method_config, properties|      
       success = true
       
+      myself.status = code.success
+      
       generate_routes = lambda do |config_name, file_properties, parents = []|
         file_properties.each do |name, value|
           keys = [ parents, name ].flatten
