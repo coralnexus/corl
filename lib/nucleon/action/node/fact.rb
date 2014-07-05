@@ -9,23 +9,26 @@ class Fact < CORL.plugin_class(:nucleon, :cloud_action)
   #-----------------------------------------------------------------------------
   # Info
   
-  def self.describe
-    super(:node, :fact, 570)
+  def self.describe(action = :fact, weight = 570)
+    super(:node, action, weight)
   end
   
   #-----------------------------------------------------------------------------
   # Settings
 
-  def configure
-    super do
+  def configure(aggregate = false)
+    super() do
       codes :fact_save_failed
       
-      register_str :name
-      register_str :value
+      unless aggregate
+        register_str :name, nil
+        register_str :value
       
-      register_bool :delete      
+        register_bool :delete      
       
-      register_translator :input_format
+        register_translator :input_format
+      end
+      
       register_translator :format, :json
     end
   end
@@ -42,12 +45,12 @@ class Fact < CORL.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |node, network|
       ensure_node(node) do
-        if settings[:name].empty?
+        if ! settings[:name] || settings[:name].empty?
           render_node_facts(node)
         else
           if settings.delete(:delete, false)
             delete_node_fact(node, settings[:name], sanitize_remote(network, settings[:net_remote]))                
-          elsif ! settings[:value].empty?
+          elsif settings[:value] && ! settings[:value].empty?
             set_node_fact(node, settings[:name], settings[:value], sanitize_remote(network, settings[:net_remote]))
           else
             render_node_fact(node, settings[:name])
