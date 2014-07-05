@@ -298,6 +298,18 @@ class Node < CORL.plugin_class(:nucleon, :base)
     search(:facts, {}, :hash)
   end
   
+  def ensure_custom_facts(facts)
+    hash(facts).each do |name, value|
+      set_setting([ :facts, name ], value)
+    end
+  end
+  
+  def remove_custom_facts(*facts)
+    facts.each do |name|
+      delete_setting([ :facts, name ])
+    end  
+  end
+  
   #---
   
   def profiles=profiles
@@ -389,7 +401,7 @@ class Node < CORL.plugin_class(:nucleon, :base)
       })
       
       unless local?
-        result = run.node_facts({ :quiet => true })
+        result = run.node_fact({ :quiet => true })
       
         if result.status == code.success
           node_facts = Util::Data.symbol_map(Util::Data.parse_json(result.errors))
@@ -403,6 +415,25 @@ class Node < CORL.plugin_class(:nucleon, :base)
     end
     return fact_var.clone if clone
     fact_var
+  end
+  
+  #---
+  
+  def create_facts_post(data, names)
+    fact_values = {}
+    names.each do |name|
+      name              = name.to_sym
+      fact_values[name] = data[name]
+    end
+    ensure_custom_facts(fact_values)
+    data
+  end
+  
+  #---
+  
+  def delete_facts_post(data, old_data)
+    remove_custom_facts(*old_data.keys)
+    data
   end
   
   #---
