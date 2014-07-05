@@ -18,10 +18,10 @@ class Fact < CORL.plugin_class(:nucleon, :cloud_action)
 
   def configure
     super do
-      register :name, :str, ''
-      register :value, :str, ''
+      register_str :name
+      register_str :value
       
-      register :delete, :bool, false      
+      register_bool :delete      
       
       register_translator :input_format
       register_translator :format, :json
@@ -40,28 +40,31 @@ class Fact < CORL.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |node, network|
       ensure_node(node) do
-        input_translator  = CORL.translator({}, settings[:input_format]) if settings[:input_format]
-        output_translator = CORL.translator({}, settings[:format])
-        
         delete_setting = settings.delete(:delete, false)
+        input_format   = settings.delete(:input_format)
+        format         = settings.delete(:format)
         
         if settings[:name].empty?
           myself.result = node.facts        
-          $stderr.puts output_translator.generate(result)
+          render result, :format => format
         else
           if delete_setting
-            node.delete_fact(settings[:name])
+            node.delete_facts(settings[:name])
+            node.save(settings)
                 
           elsif ! settings[:value].empty?
-            settings[:value] = Util::Data.value(input_translator.parse(settings[:value])) if settings[:input_format]
+            settings[:value] = Util::Data.value(render(settings[:value], { 
+              :format => input_format, 
+              :silent => true 
+            })) if input_format
             
-            dbg(settings[:value], 'value')
-            myself.result    = settings[:value]           
-            node.create_fact(settings[:name], result)
+            myself.result = settings[:value]           
+            node.create_facts({ settings[:name] => result })
+            node.save(settings)
               
           else
             myself.result = node.fact(settings[:name])
-            $stderr.puts output_translator.generate(result)
+            render result, :format => format
           end
         end
       end
