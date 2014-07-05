@@ -26,9 +26,37 @@ module Lookup
   
   #---
   
-  def create_fact(name, value, reset = false)
+  def create_facts(data, reset = false)
     facts(reset, false)
-    fact_var[name.to_sym] = value
+    
+    data = hash(data)    
+    data.each do |name, value|
+      fact_var[name.to_sym] = value
+    end
+    create_facts_post(fact_var.clone, data.keys)
+  end
+  
+  def create_facts_post(data, names)
+    data
+  end
+  
+  #---
+  
+  def delete_facts(names, reset = false)
+    facts(reset, false)
+    
+    names = [ names ] unless names.is_a?(Array)
+    data  = {}
+    
+    names.each do |name|
+      name       = name.to_sym
+      data[name] = fact_var.delete(name)
+    end
+    delete_facts_post(fact_var.clone, data)
+  end
+  
+  def delete_facts_post(data, old_data)
+    data  
   end
   
   #---
@@ -77,6 +105,7 @@ module Lookup
     end
         
     # Need some way to tell if we have installed our own Hiera configuration.
+    # TODO: Figure something else out.  This is bad.
     config = {} if config[:merge_behavior] == :native
     
     config[:logger] = :corl
