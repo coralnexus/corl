@@ -113,13 +113,6 @@ class Fact < CORL.plugin_class(:nucleon, :cloud_action)
       myself.status = code.fact_save_failed  
     end  
   end
-  
-  #-----------------------------------------------------------------------------
-  # Utilities
-  
-  def sanitize_remote(network, remote)
-    remote && network.remote(remote) ? remote : nil
-  end
 end
 end
 end
