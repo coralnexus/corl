@@ -37,7 +37,8 @@ class File < CORL.plugin_class(:CORL, :configuration)
   # Configuration loading / saving
     
   def load(options = {})
-    super do |method_config, properties|
+    super do |method_config, properties|      
+      success = true
       
       generate_routes = lambda do |config_name, file_properties, parents = []|
         file_properties.each do |name, value|
@@ -62,15 +63,26 @@ class File < CORL.plugin_class(:CORL, :configuration)
           raw    = Util::Disk.read(file)    
         
           if parser && raw && ! raw.empty?
-            logger.debug("Source configuration file contents: #{raw}")            
-            parse_properties = parser.parse(raw)
+            logger.debug("Source configuration file contents: #{raw}")
             
-            generate_routes.call(config_name, parse_properties)
-            properties.import(parse_properties)
+            begin            
+              parse_properties = parser.parse(raw)
+              
+              generate_routes.call(config_name, parse_properties)
+              properties.import(parse_properties)
+            
+            rescue => error
+              ui_group(file) do
+                error(error.message.sub(/^[^\:]+\:\s+/, ''), { :i18n => false })
+              end
+              myself.status = 255
+              success       = false
+            end            
           end
           CORL.remove_plugin(parser) if parser         
         end
       end
+      success
     end
   end
    

@@ -165,15 +165,14 @@ class Configuration < CORL.plugin_class(:nucleon, :base)
         config.clear if method_config.get(:override, false)
       
         properties = Config.new
-        yield(method_config, properties) if block_given?
+        success    = yield(method_config, properties) if block_given?
           
-        unless properties.export.empty?
+        if success && ! properties.export.empty?
           logger.debug("Source configuration parsed properties: #{properties}")
         
           extension(:load_process, { :properties => properties, :config => method_config })               
           config.import(properties, method_config)
         end
-        success = true
       end
     else
       logger.warn("Loading of source configuration failed")
