@@ -198,6 +198,13 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
       myself.status = code.node_failure
     end
   end
+    
+  #-----------------------------------------------------------------------------
+  # Utilities
+  
+  def sanitize_remote(network, remote)
+    remote && network.remote(remote) ? remote : nil
+  end
 end
 end
 end
