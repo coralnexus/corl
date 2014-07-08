@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-07-02"
+  s.date = "2014-07-08"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -98,21 +98,26 @@ Gem::Specification.new do |s|
     "lib/facter/custom_facts.rb",
     "lib/facter/vagrant_exists.rb",
     "lib/hiera/corl_logger.rb",
+    "lib/nucleon/action/cloud/config.rb",
     "lib/nucleon/action/cloud/create.rb",
-    "lib/nucleon/action/cloud/hiera.rb",
     "lib/nucleon/action/cloud/images.rb",
     "lib/nucleon/action/cloud/inspect.rb",
     "lib/nucleon/action/cloud/machines.rb",
     "lib/nucleon/action/cloud/regions.rb",
+    "lib/nucleon/action/cloud/settings.rb",
     "lib/nucleon/action/cloud/vagrantfile.rb",
     "lib/nucleon/action/node/IP.rb",
     "lib/nucleon/action/node/SSH.rb",
     "lib/nucleon/action/node/authorize.rb",
     "lib/nucleon/action/node/bootstrap.rb",
     "lib/nucleon/action/node/build.rb",
+    "lib/nucleon/action/node/cache.rb",
     "lib/nucleon/action/node/destroy.rb",
     "lib/nucleon/action/node/exec.rb",
+    "lib/nucleon/action/node/fact.rb",
     "lib/nucleon/action/node/facts.rb",
+    "lib/nucleon/action/node/group.rb",
+    "lib/nucleon/action/node/groups.rb",
     "lib/nucleon/action/node/identity.rb",
     "lib/nucleon/action/node/image.rb",
     "lib/nucleon/action/node/keypair.rb",
@@ -123,6 +128,7 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/node/seed.rb",
     "lib/nucleon/action/node/spawn.rb",
     "lib/nucleon/action/node/start.rb",
+    "lib/nucleon/action/node/status.rb",
     "lib/nucleon/action/node/stop.rb",
     "lib/nucleon/event/puppet.rb",
     "lib/nucleon/template/environment.rb",
