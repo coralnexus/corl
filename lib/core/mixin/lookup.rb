@@ -147,6 +147,11 @@ module Lookup
     unless hiera_config[:hierarchy].include?('common')
       hiera_config[:hierarchy] << 'common'
     end
+    
+    hiera_config[:hierarchy].each_with_index do |path, index|
+      hiera_config[:hierarchy][index] = path.gsub('//', '/')
+    end
+    
     hiera_config.export
   end
   
