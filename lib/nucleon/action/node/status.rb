@@ -63,7 +63,7 @@ class Status < CORL.plugin_class(:nucleon, :cloud_action)
           when :stopped, :aborted
             state = red(state.to_s)
           end
-          info(state + " #{ssh_enabled}".rstrip, { :i18n => false, :prefix_text => purple(node.plugin_name) })
+          info(state + " #{ssh_enabled}".rstrip, { :i18n => false, :prefix_text => yellow(node.plugin_provider) + ' ' + purple(node.plugin_name) })
           true
         end
         myself.status = code.batch_error unless batch_success
