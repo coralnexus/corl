@@ -57,11 +57,13 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
         end
         
         if config_info[:property].nil?
-          render_config_properties(network, config_info)  
+          render_config_properties(network, config_info)
+           
         elsif settings.delete(:delete, false)
-          delete_config_property(network, config_info, sanitize_remote(network, settings[:net_remote]))                
+          delete_config_property(network, config_info, sanitize_remote(network, settings[:net_remote]))
+                          
         elsif ! settings[:value].empty?
-          set_config_property(network, config_info, settings[:value], settings[:append], sanitize_remote(network, settings[:net_remote]))
+          set_config_property(network, config_info, settings[:value], sanitize_remote(network, settings[:net_remote]))
         else
           render_config_property(network, config_info)
         end
@@ -121,7 +123,7 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
   
   #---
   
-  def set_config_property(network, config_info, values, append = false, remote = nil)
+  def set_config_property(network, config_info, values, remote = nil)
     name         = parse_property_name(config_info[:property])    
     remote_text  = remote_message(remote)
     
@@ -136,7 +138,7 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
       values[index] = Util::Data.value(values[index])
     end
     
-    if append
+    if settings[:append]
       if prev_value = config_info[:value]
         prev_value = array(prev_value)
         
