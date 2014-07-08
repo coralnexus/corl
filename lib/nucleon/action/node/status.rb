@@ -56,7 +56,7 @@ class Status < CORL.plugin_class(:nucleon, :cloud_action)
               if result.status == code.success
                 ssh_enabled = '[ ' + green('connected') + ' ]'
               else
-                ssh_enabled = '[ ' + green('connection failed') + ' ]'      
+                ssh_enabled = '[ ' + red('connection failed') + ' ]'      
               end
             end
             
