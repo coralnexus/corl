@@ -19,6 +19,8 @@ class Status < CORL.plugin_class(:nucleon, :cloud_action)
   def configure
     super do
       register_nodes :status_nodes, []
+      
+      register_bool :basic
     end
   end
   
@@ -48,12 +50,14 @@ class Status < CORL.plugin_class(:nucleon, :cloud_action)
           when :running, :active
             state = green(state.to_s)
             
-            result = node.cli.test :true
+            unless settings[:basic]
+              result = node.cli.test :true
             
-            if result.status == code.success
-              ssh_enabled = '[ ' + green('connected') + ' ]'
-            else
-              ssh_enabled = '[ ' + green('connection failed') + ' ]'      
+              if result.status == code.success
+                ssh_enabled = '[ ' + green('connected') + ' ]'
+              else
+                ssh_enabled = '[ ' + green('connection failed') + ' ]'      
+              end
             end
             
           when :stopped, :aborted
