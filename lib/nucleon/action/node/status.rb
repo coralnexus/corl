@@ -18,7 +18,7 @@ class Status < CORL.plugin_class(:nucleon, :cloud_action)
   
   def configure
     super do
-      register_nodes :status_nodes
+      register_nodes :status_nodes, []
     end
   end
   
@@ -38,6 +38,8 @@ class Status < CORL.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |local_node, network|
       ensure_network(network) do
+        settings[:status_nodes] = [ 'all' ] if settings[:status_nodes].empty?
+        
         batch_success = network.batch(settings[:status_nodes], settings[:node_provider], settings[:parallel]) do |node|
           state       = node.state(true).to_sym
           ssh_enabled = ''
@@ -49,15 +51,15 @@ class Status < CORL.plugin_class(:nucleon, :cloud_action)
             result = node.cli.test :true
             
             if result.status == code.success
-              ssh_enabled = ' [SSH connected]'
+              ssh_enabled = '[ ' + green('connected') + ' ]'
             else
-              ssh_enabled = " [SSH failed with status #{result.status}]"      
+              ssh_enabled = '[ ' + green('connection failed') + ' ]'      
             end
             
           when :stopped, :aborted
             state = red(state.to_s)
-          end 
-          info(state + "#{ssh_enabled}", { :i18n => false, :prefix_text => purple(node.plugin_name) })
+          end
+          info(state + " #{ssh_enabled}".rstrip, { :i18n => false, :prefix_text => purple(node.plugin_name) })
           true
         end
         myself.status = code.batch_error unless batch_success
