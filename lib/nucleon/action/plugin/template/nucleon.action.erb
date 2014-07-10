@@ -1,0 +1,56 @@
+
+module Nucleon
+module Action
+<% plugin_groups.each do |group| -%>
+module <%= Nucleon.class_name(group) %>
+<% end -%>
+class <%= Nucleon.class_name(plugin_class) -%> < CORL.plugin_class(:nucleon, :cloud_action)
+  
+  #-----------------------------------------------------------------------------
+  # Info
+  
+  def self.describe
+    super([ <%= plugin_groups.collect {|group| ':' + group.downcase.to_s }.join(', ') -%> ], <%= ':' + plugin_class.downcase.to_s -%>, <%= action_weight ? action_weight : 0 -%>)
+  end
+ 
+  #-----------------------------------------------------------------------------
+  # Settings
+  
+  def configure
+    super do
+    
+    end
+  end
+  
+  #---
+  
+  def ignore
+    []
+  end
+  
+  def arguments
+    []
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Operations
+   
+  def execute
+    super do |node, network|
+      <% if node_context -%>
+      ensure_node(node) do
+        
+      end
+      <% else -%>
+      ensure_network(network) do
+      
+      end
+      <% end -%>
+    end
+  end
+end
+<% plugin_groups.each do |group| -%>
+end
+<% end -%>
+end
+end
