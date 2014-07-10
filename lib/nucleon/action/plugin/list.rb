@@ -10,7 +10,7 @@ class List < CORL.plugin_class(:nucleon, :cloud_action)
   # Info
   
   def self.describe
-    describe_base(:plugin, :list, 15)
+    super(:plugin, :list, 15)
   end
   
   #-----------------------------------------------------------------------------
