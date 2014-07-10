@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adrian Webb"]
-  s.date = "2014-07-08"
+  s.date = "2014-07-10"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -130,6 +130,10 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/node/start.rb",
     "lib/nucleon/action/node/status.rb",
     "lib/nucleon/action/node/stop.rb",
+    "lib/nucleon/action/plugin/create.rb",
+    "lib/nucleon/action/plugin/list.rb",
+    "lib/nucleon/action/plugin/template/nucleon.action.erb",
+    "lib/nucleon/action/plugins.rb",
     "lib/nucleon/event/puppet.rb",
     "lib/nucleon/template/environment.rb",
     "lib/puppet/indirector/corl.rb",
