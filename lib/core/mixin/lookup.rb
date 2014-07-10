@@ -266,7 +266,7 @@ module Lookup
   #---
   
   def lookup_array(properties, default = [], options = {})
-    config          = Config.ensure(options) 
+    config          = Config.ensure(options).defaults({ :basic => false }) 
     value, property = lookup(properties, nil, config.import({ :return_property => true, :context => :array }))
      
     if Util::Data.undef?(value)
@@ -295,7 +295,7 @@ module Lookup
   #---
   
   def lookup_hash(properties, default = {}, options = {})
-    config          = Config.ensure(options) 
+    config          = Config.ensure(options).defaults({ :basic => false }) 
     value, property = lookup(properties, nil, config.import({ :return_property => true, :context => :hash }))
     
     if Util::Data.undef?(value)
@@ -324,7 +324,7 @@ module Lookup
   #---
 
   def normalize(data, override = nil, options = {})
-    config  = Config.ensure(options).import({ :context => :hash })
+    config  = Config.ensure(options).import({ :context => :hash }).defaults({ :basic => false })
     results = {}
     
     unless Util::Data.undef?(override)
