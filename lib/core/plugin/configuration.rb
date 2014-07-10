@@ -113,7 +113,7 @@ class Configuration < CORL.plugin_class(:nucleon, :base)
   #-----------------------------------------------------------------------------
     
   def set(keys, value = '', options = {})
-    super(keys, value)
+    super(keys, value, true)
     save(options) if initialized? && autosave
   end
    
