@@ -3,8 +3,6 @@ module Nucleon
 module Action
 module Plugin
 class List < CORL.plugin_class(:nucleon, :cloud_action)
-  
-  include Mixin::Action::Registration
    
   #-----------------------------------------------------------------------------
   # Info
@@ -23,10 +21,6 @@ class List < CORL.plugin_class(:nucleon, :cloud_action)
   end
   
   #---
-  
-  def ignore
-    node_ignore
-  end
   
   def arguments
     []
