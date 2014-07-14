@@ -32,10 +32,28 @@ module Plugin
 class CloudAction < CORL.plugin_class(:nucleon, :action)
   
   #-----------------------------------------------------------------------------
+  # Constuctor / Destructor
+  
+  def normalize(reload)
+    super
+    @network = init_network(extension_set(:network_provider, :corl)) unless reload 
+  end
+  
+  #-----------------------------------------------------------------------------
   # Property accessor / modifiers
   
   def self.namespace
     :corl
+  end
+  
+  #---
+  
+  def network=network
+    @network = network
+  end
+  
+  def network
+    @network
   end
   
   #---
@@ -122,7 +140,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   #---
         
   def node_exec
-    network = init_network
+    self.network = init_network(settings[:net_provider]) unless settings[:net_provider].to_sym == network.plugin_provider
     
     #
     # A fork in the road...
@@ -155,7 +173,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   
   #---
   
-  def init_network(path = nil)
+  def init_network(provider, path = nil)
     # Get network configuration path
     if CORL.admin?
       network_path = lookup(:corl_network)
@@ -166,7 +184,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
     
     # Load network if it exists
     network_config = extended_config(:network, { :directory => network_path })
-    network        = CORL.network(network_path, network_config, settings[:net_provider])
+    network        = CORL.network(network_path, network_config, provider)
     network  
   end
   
