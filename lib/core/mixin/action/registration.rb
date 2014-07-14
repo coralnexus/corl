@@ -5,7 +5,7 @@ module Action
 module Registration
         
   #-----------------------------------------------------------------------------
-  # Options
+  # Registration definitions
     
   def register_node(name, default = nil)
     name = name.to_sym
