@@ -58,22 +58,6 @@ en:
           This CORL action has no description available
         help: |-
           There is no extended help information available for this CORL action.
-      plugins:
-        help: |-
-          List all of the currently loaded plugins and providers.
-          
-          Nucleon plugin providers are defined via a path search from specified base directories of the format below:
-          
-          >> {base_dir}/lib/{namespace}/{plugin_type}/{provider}.rb
-          
-          By default, base paths are searched from:
-            * Ruby Gems on the system
-            * Managed projects (including networks and packages)
-            * Component projects (such as Puppet modules)
-            * Current directory and parents
-            
-          More base paths from across the system can be added by implementing the "register_plugins" hook within an 
-          extension plugin provider in your project.
       plugin:
         list:
           help: |-
@@ -91,6 +75,13 @@ en:
             
             More base paths from across the system can be added by implementing the "register_plugins" hook within an 
             extension plugin provider in your project.
+          info:
+            namespace: |-
+              Namespace: %{namespace}
+            plugin_type: |-
+              Plugin type: %{type}
+            providers: |-
+              Providers:
         create:
           help: |-
             Create a new plugin provider of a specified type.

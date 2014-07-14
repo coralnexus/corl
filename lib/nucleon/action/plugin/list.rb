@@ -30,22 +30,22 @@ class List < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |node, network|
+    super do |node|
       ensure_network(network) do
         last_namespace   = nil
         last_plugin_type = nil
         
         Nucleon.loaded_plugins.each do |namespace, plugins|
-          info("------------------------------------------------------", { :i18n => false, :prefix => false })
-          info(" Namespace: #{purple(namespace)}", { :i18n => false, :prefix => false })
+          info('------------------------------------------------------', { :i18n => false, :prefix => false })
+          prefixed_message(:info, ' ', 'info.namespace', { :namespace => purple(namespace), :prefix => false })
           info("\n", { :i18n => false, :prefix => false })
           
           provider_info = {}
           max_width     = 10
                     
           plugins.each do |type, providers|
-            info("    Plugin type: #{blue(type)}", { :i18n => false, :prefix => false })
-            info("      Providers:", { :i18n => false, :prefix => false }) 
+            prefixed_message(:info, '    ', 'info.plugin_type', { :type => blue(type), :prefix => false })
+            prefixed_message(:info, '      ', 'info.providers', { :prefix => false })
             
             providers.keys.each do |name|
               width     = name.to_s.size
