@@ -4,8 +4,6 @@ module Action
 module Node
 class Cache < CORL.plugin_class(:nucleon, :cloud_action)
   
-  include Mixin::Action::Registration
-  
   #-----------------------------------------------------------------------------
   # Info
   
@@ -41,7 +39,7 @@ class Cache < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |node, network|
+    super do |node|
       ensure_node(node) do
         if settings.delete(:clear, false)
           clear_node_cache(node)

@@ -36,7 +36,7 @@ class Keypair < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
  
   def execute
-    super do |node, network|
+    super do |node|
       if keys = keypair
         ui.info("\n", { :prefix => false })
         ui_group(Util::Console.cyan("#{keys.type.upcase} SSH keypair")) do |ui|          

@@ -52,8 +52,8 @@ class Reboot < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |local_node, network|
-      ensure_network(network) do
+    super do |local_node|
+      ensure_network do
         batch_success = network.batch(settings[:reboot_nodes], settings[:node_provider], settings[:parallel]) do |node|
           info('corl.actions.reboot.start', { :provider => node.plugin_provider, :name => node.plugin_name })
           node.reload  

@@ -53,8 +53,8 @@ class Spawn < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
  
   def execute
-    super do |node, network|
-      ensure_network(network) do
+    super do |node|
+      ensure_network do
         if keypair && keypair_clean
           hostnames     = []
           results       = []

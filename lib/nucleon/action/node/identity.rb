@@ -3,9 +3,7 @@ module Nucleon
 module Action
 module Node
 class Identity < CORL.plugin_class(:nucleon, :cloud_action)
-  
-  include Mixin::Action::Registration
-  
+ 
   #-----------------------------------------------------------------------------
   # Info
   
@@ -40,8 +38,8 @@ class Identity < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |local_node, network|
-      ensure_network(network) do
+    super do |local_node|
+      ensure_network do
         builder = network.identity_builder({ settings[:name] => settings[:identity] })
         
         if builder.build(local_node)

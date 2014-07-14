@@ -35,10 +35,10 @@ class Regions < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
   
   def execute
-    super do |local_node, network|
+    super do |local_node|
       info('corl.actions.regions.start')
       
-      ensure_network(network) do
+      ensure_network do
         if node = network.test_node(settings[:node_provider])
           if regions = node.regions
             regions.each do |region|

@@ -26,10 +26,10 @@ class Vagrantfile < CORL.plugin_class(:nucleon, :cloud_action)
   # Action operations
    
   def execute
-    super do |node, network|
+    super do |node|
       info('corl.actions.vagrantfile.start')
       
-      ensure_network(network) do
+      ensure_network do
         generated_vagrantfile_name = File.join(CORL.lib_path, 'core', 'vagrant', 'Vagrantfile')        
         project_vagrantfile_name   = File.join(network.directory, 'Vagrantfile')
         success                    = true

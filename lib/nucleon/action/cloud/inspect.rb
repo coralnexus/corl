@@ -4,8 +4,6 @@ module Action
 module Cloud
 class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
   
-  include Mixin::Action::Registration
-  
   #-----------------------------------------------------------------------------
   # Info
   
@@ -35,8 +33,8 @@ class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |node, network|
-      ensure_network(network) do
+    super do |node|
+      ensure_network do
         if settings[:elements].empty?
           data = network.config.export
         else

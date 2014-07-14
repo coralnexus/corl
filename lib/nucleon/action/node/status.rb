@@ -4,8 +4,6 @@ module Action
 module Node
 class Status < CORL.plugin_class(:nucleon, :cloud_action)
   
-  include Mixin::Action::Registration
-  
   #-----------------------------------------------------------------------------
   # Info
   
@@ -38,8 +36,8 @@ class Status < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |local_node, network|
-      ensure_network(network) do
+    super do |local_node|
+      ensure_network do
         settings[:status_nodes] = [ 'all' ] if settings[:status_nodes].empty?
         
         batch_success = network.batch(settings[:status_nodes], settings[:node_provider], settings[:parallel]) do |node|

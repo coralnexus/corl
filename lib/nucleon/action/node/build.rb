@@ -30,7 +30,7 @@ class Build < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |node, network|
+    super do |node|
       info('corl.actions.build.start') 
       ensure_node(node) do
         settings.delete(:environment) if settings[:environment] == ''

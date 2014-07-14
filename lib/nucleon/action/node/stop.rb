@@ -52,8 +52,8 @@ class Stop < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |local_node, network|
-      ensure_network(network) do
+    super do |local_node|
+      ensure_network do
         batch_success = network.batch(settings[:stop_nodes], settings[:node_provider], settings[:parallel]) do |node|
           info('corl.actions.stop.start', { :provider => node.plugin_provider, :name => node.plugin_name })
           node.stop  

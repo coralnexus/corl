@@ -53,8 +53,8 @@ class SSH < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
     
   def execute
-    super do |local_node, network|
-      ensure_network(network) do
+    super do |local_node|
+      ensure_network do
         batch_success = network.batch(settings[:ssh_nodes], settings[:node_provider], false) do |node|
           render_options = { :id => node.id, :hostname => node.hostname }
           

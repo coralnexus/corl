@@ -33,7 +33,7 @@ class Provision < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
   
   def execute
-    super do |node, network|
+    super do |node|
       info('corl.actions.provision.start')
       
       ensure_node(node) do        

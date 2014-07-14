@@ -40,10 +40,10 @@ class Images < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
  
   def execute
-    super do |local_node, network|
+    super do |local_node|
       info('corl.actions.images.start')
       
-      ensure_network(network) do
+      ensure_network do
         if node = network.test_node(settings[:node_provider], { :region => settings[:region] })
           if images = node.images(settings[:search], settings)
             images.each do |image|

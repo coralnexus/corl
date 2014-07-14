@@ -30,7 +30,7 @@ class Exec < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |node, network|
+    super do |node|
       ensure_node(node) do
         if settings[:command].length > 1
           settings[:command].collect! do |value|

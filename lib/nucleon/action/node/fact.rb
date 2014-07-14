@@ -4,13 +4,11 @@ module Action
 module Node
 class Fact < CORL.plugin_class(:nucleon, :cloud_action)
   
-  include Mixin::Action::Registration
-  
   #-----------------------------------------------------------------------------
   # Info
   
   def self.describe(action = :fact, weight = 570)
-    super(:node, action, weight)
+    describe_base(:node, action, weight, nil, nil, :node_fact)
   end
   
   #-----------------------------------------------------------------------------
@@ -43,7 +41,7 @@ class Fact < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |node, network|
+    super do |node|
       ensure_node(node) do
         if ! settings[:name] || settings[:name].empty?
           render_node_facts(node)
@@ -112,6 +110,13 @@ class Fact < CORL.plugin_class(:nucleon, :cloud_action)
       error("New fact #{name} could not be saved", { :i18n => false })
       myself.status = code.fact_save_failed  
     end  
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Output
+  
+  def render_provider
+    :node_fact
   end
 end
 end

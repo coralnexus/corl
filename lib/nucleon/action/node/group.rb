@@ -4,13 +4,11 @@ module Action
 module Node
 class Group < CORL.plugin_class(:nucleon, :cloud_action)
   
-  include Mixin::Action::Registration
-  
   #-----------------------------------------------------------------------------
   # Info
   
   def self.describe(action = :group, weight = 670)
-    super(:node, action, weight)
+    describe_base(:node, action, weight, nil, nil, :node_group)
   end
   
   #-----------------------------------------------------------------------------
@@ -41,7 +39,7 @@ class Group < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |node, network|
+    super do |node|
       ensure_node(node) do
         if ! settings[:name] || settings[:name].empty?
           render_node_groups(node)
@@ -108,6 +106,13 @@ class Group < CORL.plugin_class(:nucleon, :cloud_action)
       error("New group #{name} could not be saved", { :i18n => false })
       myself.status = code.group_save_failed  
     end  
+  end
+  
+  #-----------------------------------------------------------------------------
+  # Output
+  
+  def render_provider
+    :node_group
   end
 end
 end

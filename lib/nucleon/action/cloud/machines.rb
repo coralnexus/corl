@@ -35,10 +35,10 @@ class Machines < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
   
   def execute
-    super do |local_node, network|
+    super do |local_node|
       info('corl.actions.machines.start')
       
-      ensure_network(network) do
+      ensure_network do
         if node = network.test_node(settings[:node_provider])
           if machine_types = node.machine_types
             machine_types.each do |machine_type|

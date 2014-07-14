@@ -4,8 +4,6 @@ module Action
 module Cloud
 class Config < CORL.plugin_class(:nucleon, :cloud_action)
   
-  include Mixin::Action::Registration
-  
   #-----------------------------------------------------------------------------
   # Info
   
@@ -48,8 +46,8 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
   # Operations
    
   def execute
-    super do |node, network|
-      ensure_network(network) do
+    super do |node|
+      ensure_network do
         config_info = parse_config_reference(network, settings[:name])
         
         unless config_info
