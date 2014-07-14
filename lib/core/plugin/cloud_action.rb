@@ -152,7 +152,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
         exec_config.delete(:nodes)
               
         result = node.action(plugin_provider, exec_config) do |op, data|
-          execute_remote(node, network, op, data)
+          execute_remote(node, op, data)
         end
         result.status == code.success 
       end
@@ -163,7 +163,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
       node = network.local_node if network
       
       if validate(node, network)
-        yield(node, network) if block_given?
+        yield(node) if block_given?
       else
         puts "\n" + I18n.t('nucleon.core.exec.help.usage') + ': ' + help + "\n" unless quiet?
         myself.status = code.validation_failed 
@@ -190,7 +190,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   
   #---
   
-  def execute_remote(node, network, op, data)
+  def execute_remote(node, op, data)
     # Implement in sub classes if needed
     data 
   end
