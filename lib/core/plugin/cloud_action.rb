@@ -197,7 +197,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   
   #---
   
-  def ensure_network(network, &block)
+  def ensure_network(&block)
     codes :network_failure
     
     if network
