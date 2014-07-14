@@ -109,7 +109,22 @@ en:
             interpolate: |-
               Interpolate all properties from given arguments before rendering (default %{default_value})
             template_path: |-
-              Path on the system to search for plugin provider templates of the format {namespace}.{plugin_type}.erb (default %{default_value})      
+              Path on the system to search for plugin provider templates of the format {namespace}.{plugin_type}.erb (default %{default_value})
+          errors:
+            parse_failed: |-
+              Template file %{file} for %{plugin_namespace}.%{plugin_type} could not be parsed
+            no_template: |-
+              No template file exists for %{file}
+            provider_exists: |-
+              Plugin already exists at %{file}
+            save_failed: |-
+              Plugin can not be saved to %{file}
+          info:
+            plugin_file: |-
+              Plugin: %{file}
+          success:
+            saved: |-
+              Plugin successfully saved to %{file}
       cloud:
         create:
           description: |-

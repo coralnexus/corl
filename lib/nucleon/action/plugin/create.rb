@@ -10,7 +10,6 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
   # Info
   
   def self.describe
-    Nucleon.dump_enabled = true
     super(:plugin, :create, 10)
   end
   
@@ -95,7 +94,7 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
           template_contents = Util::Disk.read(template)
           
           unless template_contents
-            error("Template file #{template} for #{@plugin_namespace}.#{@plugin_type} could not be parsed", { :i18n => false })
+            error('errors.parse_failed', { :file => template })
             myself.status = code.template_file_parse_failed
             next      
           end
@@ -103,7 +102,7 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
         end
         
         unless template
-          error("No template file exists for #{template_path}#{File::SEPARATOR}#{@plugin_namespace}.#{@plugin_type}.erb", { :i18n => false })
+          error('errors.no_template', { :file => "#{template_path}#{File::SEPARATOR}#{@plugin_namespace}.#{@plugin_type}.erb" })
           myself.status = code.no_template_file
           next    
         end
@@ -113,7 +112,7 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
         plugin_file = nil
         
         if File.exists?(save_file)
-          error("Plugin already exists at #{save_file}", { :i18n => false })
+          error('errors.provider_exists', { :file => save_file })
           myself.status = code.plugin_already_exists
           next  
         end
@@ -146,13 +145,13 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
           FileUtils.mkdir_p(save_directory)
           
           if Util::Disk.write(save_file, plugin_file)
-            success("Plugin successfully saved to #{save_file}", { :i18n => false })  
+            success('success.saved', { :file => save_file })
           else
-            error("Plugin can not be saved to #{save_file}", { :i18n => false })
+            error('errors.save_failed', { :file => save_file })
             myself.status = code.plugin_save_failed 
           end
         else
-          info("Plugin: #{blue(save_file)}", { :i18n => false })
+          info('info.plugin_file', { :file => blue(save_file) })
           # Render template ONLY (testing)
           if settings.delete(:interpolate)
             puts green(plugin_file)  
