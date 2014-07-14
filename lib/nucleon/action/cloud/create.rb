@@ -34,7 +34,7 @@ class Create < Nucleon.plugin_class(:nucleon, :cloud_action)
    
   def execute
     super(false) do
-      info('nucleon.action.cloud.create.start')
+      info('start')
       
       project       = project_load(settings[:path], true, true)
       myself.status = code.project_failure unless project

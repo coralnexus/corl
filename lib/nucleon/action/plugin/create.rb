@@ -48,7 +48,7 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
       register_array :name, nil
       
       register_bool :save
-      register_bool :interpolate
+      register_bool :interpolate, true
       
       register_directory :template_path
     end
@@ -92,7 +92,7 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
           template_contents = Util::Disk.read(template)
           
           unless template_contents
-            error('errors.parse_failed', { :file => template })
+            error('parse_failed', { :file => template })
             myself.status = code.template_file_parse_failed
             next      
           end
@@ -100,7 +100,7 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
         end
         
         unless template
-          error('errors.no_template', { :file => "#{template_path}#{File::SEPARATOR}#{@plugin_namespace}.#{@plugin_type}.erb" })
+          error('no_template', { :file => "#{template_path}#{File::SEPARATOR}#{@plugin_namespace}.#{@plugin_type}.erb" })
           myself.status = code.no_template_file
           next    
         end
@@ -110,7 +110,7 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
         plugin_file = nil
         
         if File.exists?(save_file)
-          error('errors.provider_exists', { :file => save_file })
+          error('provider_exists', { :file => save_file })
           myself.status = code.plugin_already_exists
           next  
         end
@@ -143,13 +143,13 @@ class Create < CORL.plugin_class(:nucleon, :cloud_action)
           FileUtils.mkdir_p(save_directory)
           
           if Util::Disk.write(save_file, plugin_file)
-            success('success.saved', { :file => save_file })
+            success('saved', { :file => save_file })
           else
-            error('errors.save_failed', { :file => save_file })
+            error('save_failed', { :file => save_file })
             myself.status = code.plugin_save_failed 
           end
         else
-          info('info.plugin_file', { :file => blue(save_file) })
+          info('plugin_file', { :file => blue(save_file) })
           # Render template ONLY (testing)
           if settings.delete(:interpolate)
             puts green(plugin_file)  

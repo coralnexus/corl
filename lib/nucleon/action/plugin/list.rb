@@ -37,15 +37,15 @@ class List < CORL.plugin_class(:nucleon, :cloud_action)
         
         Nucleon.loaded_plugins.each do |namespace, plugins|
           info('------------------------------------------------------', { :i18n => false, :prefix => false })
-          prefixed_message(:info, ' ', 'info.namespace', { :namespace => purple(namespace), :prefix => false })
+          prefixed_message(:info, ' ', 'namespace', { :namespace => purple(namespace), :prefix => false })
           info("\n", { :i18n => false, :prefix => false })
           
           provider_info = {}
           max_width     = 10
                     
           plugins.each do |type, providers|
-            prefixed_message(:info, '    ', 'info.plugin_type', { :type => blue(type), :prefix => false })
-            prefixed_message(:info, '      ', 'info.providers', { :prefix => false })
+            prefixed_message(:info, '    ', 'plugin_type', { :type => blue(type), :prefix => false })
+            prefixed_message(:info, '      ', 'providers', { :prefix => false })
             
             providers.keys.each do |name|
               width     = name.to_s.size

@@ -60,6 +60,8 @@ en:
           There is no extended help information available for this CORL action.
       plugin:
         list:
+          description: |-
+            List all of the currently loaded plugins and providers
           help: |-
             List all of the currently loaded plugins and providers.
           
@@ -83,6 +85,8 @@ en:
             providers: |-
               Providers:
         create:
+          description: |-
+            Create a new plugin within the current project
           help: |-
             Create a new plugin provider of a specified type.
             
@@ -101,7 +105,7 @@ en:
               Interpolate all properties from given arguments before rendering (default %{default_value})
             template_path: |-
               Path on the system to search for plugin provider templates of the format {namespace}.{plugin_type}.erb (default %{default_value})
-          errors:
+          error:
             parse_failed: |-
               Template file %{file} for %{plugin_namespace}.%{plugin_type} could not be parsed
             no_template: |-
@@ -120,6 +124,22 @@ en:
         create:
           description: |-
             Create a new network project
+          help: |-
+            Create a new network project with an optional existing project reference.
+            
+            Network projects are started from template projects that contain default nodes, configurations, etc...
+            
+            Project references take the form:
+              
+              {project provider}:::{provider id}[{project revision}]
+              
+              github:::coralnexus/network-template[master]  (the default network template)
+              
+            If the --path option is not specified the create action attempts to create the project in the current
+            directory.  If files or directories exist, the project creation will fail.
+          info:
+            start: |-
+              Creating network from %{project_reference} at %{path}
         inspect:
           description: |-
             Inspect the network configuration
