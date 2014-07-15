@@ -25,6 +25,10 @@ class Create < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #---
   
+  def ignore
+    node_ignore
+  end
+  
   def arguments
     [ :project_reference ]
   end

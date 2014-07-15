@@ -35,7 +35,7 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
   #---
   
   def ignore
-    [ :nodes ]
+    node_ignore
   end
    
   def arguments

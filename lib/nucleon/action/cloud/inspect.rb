@@ -24,6 +24,10 @@ class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
   end
   
   #---
+  
+  def ignore
+    node_ignore
+  end
    
   def arguments
     [ :elements ]
