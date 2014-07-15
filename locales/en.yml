@@ -165,7 +165,10 @@ en:
               * Configurations of the above types loaded from included packages
               
             The results can be viewed in multiple formats dependending on the Nucleon translator plugins currently
-            loaded into the project.  To see which ones are loaded, run:  `corl plugins`               
+            loaded into the project.  To see which ones are loaded, run:  `corl plugins`
+          options:
+            format: |-
+              Translator provider to use to render configuration output (default %{default_value})                
         machines:
           description: |-
             Return a list of machine types supported by a provider
