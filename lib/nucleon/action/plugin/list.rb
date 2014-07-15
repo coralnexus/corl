@@ -31,7 +31,7 @@ class List < CORL.plugin_class(:nucleon, :cloud_action)
    
   def execute
     super do |node|
-      ensure_network(network) do
+      ensure_network do
         last_namespace   = nil
         last_plugin_type = nil
         
