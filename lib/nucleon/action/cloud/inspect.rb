@@ -8,7 +8,7 @@ class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
   # Info
   
   def self.describe
-    super(:cloud, :inspect, 950)
+    super(:cloud, :inspect, 955)
   end
  
   #-----------------------------------------------------------------------------

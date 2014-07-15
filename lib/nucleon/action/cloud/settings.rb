@@ -8,7 +8,7 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
   # Info
   
   def self.describe
-    super(:cloud, :settings, 951)
+    super(:cloud, :settings, 950)
   end
  
   #-----------------------------------------------------------------------------
