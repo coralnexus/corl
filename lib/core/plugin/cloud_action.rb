@@ -110,7 +110,7 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   #---
          
   def node_ignore
-    [ :parallel, :net_remote, :net_provider, :node_provider, :nodes ]
+    [ :parallel, :node_provider, :nodes ]
   end
   
   #-----------------------------------------------------------------------------
