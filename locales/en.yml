@@ -70,6 +70,7 @@ en:
             >> {base_dir}/lib/{namespace}/{plugin_type}/{provider}.rb
           
             By default, base paths are searched from:
+              
               * Ruby Gems on the system
               * Managed projects (including networks and packages)
               * Component projects (such as Puppet modules)
@@ -143,6 +144,28 @@ en:
         inspect:
           description: |-
             Inspect the network configuration
+          help: |-
+            Inspect any defined network configuration.  It is not intended to access or
+            set the node configurations defined in the config directory, which you can use the `node lookup` and 
+            `cloud config` actions.
+            
+            Nested configurations can be accessed by specifying the nested keys in sequence in the arguments.
+            
+            corl inspect                           # Returns all loaded configurations for network
+            corl inspect nodes                     # Returns all node definitions 
+            corl inspect nodes rackspace           # Returns all Rackspace node definitions
+            corl inspect settings web_server facts # Returns all facts defined for settings group `web_server`
+            corl inspect provisioners              # Returns all provisioner settings defined for network
+            
+            The configurations include:
+              
+              * General network settings
+              * Node definitions
+              * Provisioner settings
+              * Configurations of the above types loaded from included packages
+              
+            The results can be viewed in multiple formats dependending on the Nucleon translator plugins currently
+            loaded into the project.  To see which ones are loaded, run:  `corl plugins`               
         machines:
           description: |-
             Return a list of machine types supported by a provider
