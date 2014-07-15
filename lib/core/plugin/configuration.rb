@@ -164,7 +164,7 @@ class Configuration < CORL.plugin_class(:nucleon, :base)
       
         config.clear if method_config.get(:override, false)
       
-        properties = Config.new
+        properties = Config.new({}, {}, true, false)
         success    = yield(method_config, properties) if block_given?
           
         if success && ! properties.export.empty?

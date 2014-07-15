@@ -62,8 +62,8 @@ class File < CORL.plugin_class(:CORL, :configuration)
           logger.info("Loading #{provider} translated source configuration from #{file}")
           
           parser = CORL.translator(method_config, provider)
-          raw    = Util::Disk.read(file)    
-        
+          raw    = Util::Disk.read(file)
+          
           if parser && raw && ! raw.empty?
             logger.debug("Source configuration file contents: #{raw}")
             
@@ -134,15 +134,9 @@ class File < CORL.plugin_class(:CORL, :configuration)
             config_name = select_largest(local_router)
             file_data.set([ config_name, keys ].flatten, value)  
           else
-            # Router is non existent
-            if config_name = select_largest(router.export)
-              # Pick largest router from top level
-              file_data.set([ config_name, keys ].flatten, value)
-            else
-              # Resort to sane defaults
-              config_name = "corl.#{default_provider}"
-              file_data.set([ config_name, keys ].flatten, value)
-            end      
+            # Router is non existent.  Resort to easily found default
+            config_name = "corl.#{default_provider}"
+            file_data.set([ config_name, keys ].flatten, value)      
           end
         end        
       end
@@ -333,7 +327,7 @@ class File < CORL.plugin_class(:CORL, :configuration)
       search.clear
     else
       translators = CORL.loaded_plugins(:nucleon, :translator)
-      file_bases  = [ "corl", extension_collect(:base) ].flatten
+      file_bases  = [ :corl, extension_set(:base, []) ].flatten.uniq
       
       project.localize do
         translators.each do |provider, info|
