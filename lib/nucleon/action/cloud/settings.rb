@@ -8,7 +8,6 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
   # Info
   
   def self.describe
-    Nucleon.dump_enabled = true
     super(:cloud, :settings, 951)
   end
  
