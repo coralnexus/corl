@@ -196,8 +196,13 @@ en:
             
             Name example:
               
-              corl cloud settings vagrant facts[corl_identity] adrian_test              
+              corl cloud settings vagrant facts[corl_identity] adrian_test
+              
+            The results can be viewed in multiple formats dependending on the Nucleon translator plugins currently
+            loaded into the project.  To see which ones are loaded, run:  `corl plugins`              
           options:
+            array: |-
+              Force setting of configuration to array, event if single argument given (default %{default_value}) 
             delete: |-
               Delete the group setting from the network (default %{default_value})
             append: |-
@@ -221,6 +226,97 @@ en:
               Group %{group} setting `%{name}` updated (%{remote_text})
             delete: |-
               Group %{group} setting `%{name}` deleted (%{remote_text})
+        config:
+          description: |-
+            Display and manage node configurations
+          help: |-
+            Display and manage node configurations and save to the network.  
+            
+            This system currently uses Hiera as the configuration search implementation so all 
+            node configurations are stored in JSON or YAML in directories under the network
+            `config` directory.  The system searches through these directories based on Hiera
+            search rules.
+            
+            Example configuration search path under config directory:
+              
+              identities/%{::corl_identity}/nodes/%{::corl_provider}/%{::fqdn}
+              identities/%{::corl_identity}/stages/%{::corl_stage}
+              identities/%{::corl_identity}/environments/%{::corl_environment}
+              identities/%{::corl_identity}/types/%{::corl_type}
+              identities/%{::corl_identity}/identity
+              nodes/%{::corl_provider}/%{::fqdn}/%{::corl_stage}
+              nodes/%{::corl_provider}/%{::fqdn}
+              environments/%{::corl_environment}/%{::corl_stage}
+              environments/%{::corl_environment}
+              stages/%{::corl_stage}
+              types/%{::corl_type}
+              
+            This search path can be changed to whatever you would like.  Simply add or alter an
+            existing `hiera_config` extension provider hook in your network project and set the 
+            config[:hierarchy] property to an array containing an ordered search path like the above.  
+            As you can see above, node facts can be interpolated into the paths to allow for dynamic 
+            configuration searches.  You can check the current Hiera configurations at any time by 
+            running; `corl node lookup` (without arguments).
+            
+            This action makes it easy for humans and machines to automate configurations to this system 
+            It is capable of creating directories and files to house the configurations and takes care 
+            of version control like other cloud actions, such as `corl cloud settings`.
+            
+            Configurations are referenced with a specific format:
+              
+              {directory}/{subdirectory}/{file base(no ext)}@{property}[{hash key}]
+              
+            Examples:
+              
+              common@php::apache::memory_limit
+              identity/test@users::user[admin][shell]
+              servers/development/dev.loc@facts[corl_environment]
+            
+            Currently supported operations:
+              
+              * If name is given as file without property, it will return all configurations in the file
+              * If name contains file and property with --delete option, configuration is deleted from network
+              * If name contains file and property but no values given, it will return the current configuration
+              * If name contains file and property and values given, configuration name is set to values collected
+              
+            Currently internal array access is not supported but you can append to a scalar value or array with 
+            the --append option.
+            
+            The given values can be parsed and the results can be viewed in multiple formats dependending on the 
+            Nucleon translator plugins currently loaded into the project.  To see which ones are loaded, 
+            run:  `corl plugins`            
+          options:
+            array: |-
+              Force setting of configuration to array, event if single argument given (default %{default_value}) 
+            delete: |-
+              Delete the configuration from the network (default %{default_value})
+            append: |-
+              Append the value to existing configuration scalar value or array (default %{default_value})
+            input_format: |-
+              Translator provider to parse value with before save (default %{default_value})
+            format: |-
+              Translator provider to use to render configuration output (default %{default_value})
+          info:
+            subconfigurations: |-
+              Sub configurations available:
+            no_config_file: |-
+              Configuration file `%{config_file} does not exist
+          error:
+            update: |-
+              Node configuration `%{name}` update could not be saved
+            delete: |-
+              Node configuration `%{name}` deletion could not be saved
+            file_read: |-
+              Failed to read configuration file: %{config_file}
+            file_save: |-
+              Configuration file `%{config_file}` could not be saved
+            translator_load: |-
+              Translator provider for %{translator} could not be loaded
+          success:
+            update: |-
+              Node configuration `%{name}` updated (%{remote_text})
+            delete: |-
+              Node configuration `%{name}` deleted (%{remote_text})
         machines:
           description: |-
             Return a list of machine types supported by a provider

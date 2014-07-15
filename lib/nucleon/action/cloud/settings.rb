@@ -23,6 +23,7 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
       register_str :name
       register_array :value
       
+      register_bool :array
       register_bool :delete
       register_bool :append
       register_bool :groups
@@ -61,10 +62,10 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
           name = settings[:name].gsub(/\]$/, '').split(/\]?\[/)
           
           if settings.get(:delete, false)
-            delete_settings(name, settings[:net_remote])
+            delete_settings(name)
                  
           elsif ! settings[:value].empty?
-            set_settings(name, settings[:value], settings[:net_remote])
+            set_settings(name, settings[:value])
                 
           else
             render_settings([ settings[:group], name ])  
@@ -101,16 +102,16 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
    
   #---
   
-  def delete_settings(property, remote = nil)
+  def delete_settings(property)
     group       = settings[:group]
     name        = parse_property_name(property)    
-    remote_text = remote_message(remote)
+    remote_text = remote_message(settings[:net_remote])
     
     render_options = { :group => blue(group), :name => blue(name), :remote_text => yellow(remote_text) }
     
     network.config.delete([ :settings, group, property ])
     
-    if network.save({ :remote => remote, :message => "Deleting #{group} setting #{name}", :allow_empty => true })
+    if network.save({ :remote => settings[:net_remote], :message => "Deleting #{group} setting #{name}", :allow_empty => true })
       success('delete', render_options)
     else
       error('delete', render_options)
@@ -120,10 +121,10 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
   
   #---
   
-  def set_settings(property, values, remote = nil)
+  def set_settings(property, values)
     group        = settings[:group]
     name         = parse_property_name(property)    
-    remote_text  = remote_message(remote)
+    remote_text  = remote_message(settings[:net_remote])
     
     render_options = { :group => blue(group), :name => blue(name), :remote_text => yellow(remote_text) }
     
@@ -147,7 +148,9 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
         values = prev_value
       end
     else
-      if values.size == 1
+      if settings[:array]
+        values = array(values)
+      elsif values.size == 1
         values = values[0]
       end    
     end
@@ -155,31 +158,12 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
     myself.result = values    
     network.config.set([ :settings, group, property ], result)
     
-    if network.save({ :remote => remote, :message => "Updating #{group} setting #{name}", :allow_empty => true })
+    if network.save({ :remote => settings[:net_remote], :message => "Updating #{group} setting #{name}", :allow_empty => true })
       success('update', render_options)
     else
       error('update', render_options)
       myself.status = code.settings_save_failed    
     end
-  end
-  
-  #-----------------------------------------------------------------------------
-  # Utilities
-
-  def parse_property_name(property)
-    property = property.clone
-    
-    if property.size > 1
-      property.shift.to_s + '[' + property.join('][') + ']'
-    else
-      property.shift.to_s
-    end
-  end
-  
-  #---
-  
-  def remote_message(remote)
-    remote ? "#{remote}" : "LOCAL ONLY"
   end
 end
 end
