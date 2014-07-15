@@ -125,10 +125,10 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   def execute(use_network = true, &code)
     if use_network
       super(true, true) do
-        node_exec do |node, network|
+        node_exec do |node|
           hook_config = { :node => node, :network => network }
         
-          code.call(node, network) if code && extension_check(:exec_init, hook_config)
+          code.call(node) if code && extension_check(:exec_init, hook_config)
           myself.status = extension_set(:exec_exit, status, hook_config)
         end
       end
@@ -161,6 +161,8 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
       # Execute statement locally
       node = nil
       node = network.local_node if network
+      
+      settings[:net_remote] = sanitize_remote(settings[:net_remote]) if settings.has_key?(:net_remote)
       
       if validate(node, network)
         yield(node) if block_given?
@@ -220,8 +222,8 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def sanitize_remote(network, remote)
-    remote && network.remote(remote) ? remote : nil
+  def sanitize_remote(remote)
+    remote && ( ! network || network.remote(remote) ) ? remote : nil
   end
 end
 end
