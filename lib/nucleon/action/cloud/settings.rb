@@ -8,6 +8,7 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
   # Info
   
   def self.describe
+    Nucleon.dump_enabled = true
     super(:cloud, :settings, 951)
   end
  
@@ -49,25 +50,25 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
     super do |node|
       ensure_network do
         if settings[:groups]
-          render_groups(network)
+          render_groups
           
         elsif settings[:group].empty?
-          render_settings(network)
+          render_settings
           
         elsif settings[:name].empty?
-          render_settings(network, settings[:group])
+          render_settings(settings[:group])
           
         else
           name = settings[:name].gsub(/\]$/, '').split(/\]?\[/)
           
           if settings.get(:delete, false)
-            delete_settings(network, name, sanitize_remote(network, settings[:net_remote]))
+            delete_settings(name, settings[:net_remote])
                  
           elsif ! settings[:value].empty?
-            set_settings(network, name, settings[:value], sanitize_remote(network, settings[:net_remote]))
+            set_settings(name, settings[:value], settings[:net_remote])
                 
           else
-            render_settings(network, [ settings[:group], name ])  
+            render_settings([ settings[:group], name ])  
           end          
         end
       end
@@ -75,12 +76,12 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
   end
   
   #-----------------------------------------------------------------------------
-  # Sub operations
+  # Settings operations
   
-  def render_groups(network)
+  def render_groups
     groups = network.config.get(:settings).keys
     
-    info("Currently defined groups:", { :i18n => false })
+    info('groups')
     groups.each do |group|
       info("-> #{green(group)}", { :i18n => false })
     end
@@ -88,7 +89,7 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
   
   #---
   
-  def render_settings(network, elements = [])
+  def render_settings(elements = [])
     format = settings[:format]
     
     if elements.size > 0
@@ -101,27 +102,31 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
    
   #---
   
-  def delete_settings(network, property, remote = nil)
+  def delete_settings(property, remote = nil)
     group       = settings[:group]
     name        = parse_property_name(property)    
     remote_text = remote_message(remote)
     
+    render_options = { :group => blue(group), :name => blue(name), :remote_text => yellow(remote_text) }
+    
     network.config.delete([ :settings, group, property ])
     
     if network.save({ :remote => remote, :message => "Deleting #{group} setting #{name}", :allow_empty => true })
-      success("Group #{blue(group)} setting `#{blue(name)}` deleted (#{yellow(remote_text)})", { :i18n => false })
+      success('delete', render_options)
     else
-      error("Group #{blue(group)} setting `#{blue(name)}` deletion could not be saved", { :i18n => false })
+      error('delete', render_options)
       myself.status = code.settings_delete_failed    
     end
   end
   
   #---
   
-  def set_settings(network, property, values, remote = nil)
+  def set_settings(property, values, remote = nil)
     group        = settings[:group]
     name         = parse_property_name(property)    
     remote_text  = remote_message(remote)
+    
+    render_options = { :group => blue(group), :name => blue(name), :remote_text => yellow(remote_text) }
     
     input_format = settings[:input_format]
     
@@ -152,9 +157,9 @@ class Settings < CORL.plugin_class(:nucleon, :cloud_action)
     network.config.set([ :settings, group, property ], result)
     
     if network.save({ :remote => remote, :message => "Updating #{group} setting #{name}", :allow_empty => true })
-      success("Group #{blue(group)} setting `#{blue(name)}` updated (#{yellow(remote_text)})", { :i18n => false })
+      success('update', render_options)
     else
-      error("Group #{blue(group)} setting `#{blue(name)}` update could not be saved", { :i18n => false })
+      error('update', render_options)
       myself.status = code.settings_save_failed    
     end
   end
