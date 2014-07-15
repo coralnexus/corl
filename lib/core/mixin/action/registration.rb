@@ -7,21 +7,21 @@ module Registration
   #-----------------------------------------------------------------------------
   # Registration definitions
     
-  def register_node(name, default = nil)
+  def register_node(name, default = nil, locale = nil, &code)
     name = name.to_sym
     
-    register name, :str, default do |value|
-      validate_plugins(:CORL, :node, name, value)
+    register name, :str, default, locale do |value|
+      validate_plugins(:CORL, :node, name, value) && ( ! code || code.call(value) )
     end
   end
   
   #---
     
-  def register_nodes(name, default = nil)
+  def register_nodes(name, default = nil, locale = nil, &code)
     name = name.to_sym
     
-    register name, :array, default do |values|
-      validate_plugins(:CORL, :node, name, values)
+    register name, :array, default, locale do |values|
+      validate_plugins(:CORL, :node, name, values) && ( ! code || code.call(values) )
     end
   end
 end
