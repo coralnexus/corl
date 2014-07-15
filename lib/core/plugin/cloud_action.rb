@@ -225,6 +225,24 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   def sanitize_remote(remote)
     remote && ( ! network || network.remote(remote) ) ? remote : nil
   end
+  
+  #---
+  
+  def remote_message(remote)
+    remote ? "#{remote}" : "LOCAL ONLY"
+  end
+  
+  #---
+
+  def parse_property_name(property)
+    property = property.clone
+    
+    if property.size > 1
+      property.shift.to_s + '[' + property.join('][') + ']'
+    else
+      property.shift.to_s
+    end
+  end
 end
 end
 end
