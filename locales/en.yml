@@ -168,7 +168,59 @@ en:
             loaded into the project.  To see which ones are loaded, run:  `corl plugins`
           options:
             format: |-
-              Translator provider to use to render configuration output (default %{default_value})                
+              Translator provider to use to render configuration output (default %{default_value})
+        settings:
+          description: |-
+            Display and manage network settings
+          help: |-
+            Display and manage network settings and save to the network.
+            
+            Settings groups control what configurations and facts are used for which nodes.  Nodes in the network are assigned
+            to groups, through the `corl node group` action, which contain custom facts and other specialized settings that 
+            help control the build, management, and provisioning of the nodes.
+            
+            This action makes it easier to automate management of the CORL network settings structure without having
+            to worry about editing configuration files in different places.
+            
+            Currently supported operations:
+              
+              * If called with the --groups option, it will return all of the currently defined settings groups in the network
+              * If called with no arguments, it will return settings for all groups
+              * If a settings group is given but no name, it returns all settings for group
+              * If group and name are given but no value, it returns group settings for property name
+              * If group, name, and --delete option are given, the group setting is deleted
+              * If group, name, and value are given, the group setting with the name is set to the given value
+              
+            Nested settings (hashes) can be accessed with typical hash syntax.  Currently internal array access is not 
+            supported, but you can append to existing scalar values and arrays with the --apend option.
+            
+            Name example:
+              
+              corl cloud settings vagrant facts[corl_identity] adrian_test              
+          options:
+            delete: |-
+              Delete the group setting from the network (default %{default_value})
+            append: |-
+              Append the value to existing group setting scalar value or array (default %{default_value})
+            groups: |-
+              Return just the settings group names instead of the values (default %{default_value})
+            input_format: |-
+              Translator provider to parse value with before save (default %{default_value})
+            format: |-
+              Translator provider to use to render settings output (default %{default_value})
+          info:
+            groups: |-
+              Currently defined groups:
+          error:
+            update: |-
+              Group %{group} setting `%{name}` update could not be saved
+            delete: |-
+              Group %{group} setting `%{name}` deletion could not be saved
+          success:
+            update: |-
+              Group %{group} setting `%{name}` updated (%{remote_text})
+            delete: |-
+              Group %{group} setting `%{name}` deleted (%{remote_text})
         machines:
           description: |-
             Return a list of machine types supported by a provider
