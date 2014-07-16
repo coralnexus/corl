@@ -353,6 +353,13 @@ en:
         machines:
           description: |-
             Return a list of machine types supported by a provider
+          help: |-
+            List available machine types from a specific node provider, e.g, aws, rackspace, etc...
+            
+            In the future we intend to find a way to reliably display the pricing of each machine to make it easy to
+            compare across providers when planning a cloud architecture.
+            
+            To see all currently loaded node providers, run: `corl plugins`
           success:
             results: |-
               Total of %{machines} machine types found                      
