@@ -7,22 +7,50 @@ module Registration
   #-----------------------------------------------------------------------------
   # Registration definitions
     
-  def register_node(name, default = nil, locale = nil, &code)
-    name = name.to_sym
+  def register_network_provider(name, default = nil, locale = nil, &code)
+    register_plugin_provider(:CORL, :network, name.to_sym, default, locale, &code)
+  end
+  
+  #---
     
-    register name, :str, default, locale do |value|
-      validate_plugins(:CORL, :node, name, value) && ( ! code || code.call(value) )
-    end
+  def register_network_providers(name, default = nil, locale = nil, &code)
+    register_plugin_providers(:CORL, :network, name.to_sym, default, locale, &code)
+  end
+  
+  #---
+    
+  def register_network(name, default = nil, locale = nil, &code)
+    register_plugin(:CORL, :network, name.to_sym, default, locale, &code)
+  end
+  
+  #---
+    
+  def register_networks(name, default = nil, locale = nil, &code)
+    register_plugins(:CORL, :network, name.to_sym, default, locale, &code) 
+  end
+  
+  #---
+   
+  def register_node_provider(name, default = nil, locale = nil, &code)
+    register_plugin_provider(:CORL, :node, name.to_sym, default, locale, &code)
+  end
+  
+  #---
+    
+  def register_node_providers(name, default = nil, locale = nil, &code)
+    register_plugin_providers(:CORL, :node, name.to_sym, default, locale, &code)
+  end
+  
+  #---
+    
+  def register_node(name, default = nil, locale = nil, &code)
+    register_plugin(:CORL, :node, name.to_sym, default, locale, &code)
   end
   
   #---
     
   def register_nodes(name, default = nil, locale = nil, &code)
-    name = name.to_sym
-    
-    register name, :array, default, locale do |values|
-      validate_plugins(:CORL, :node, name, values) && ( ! code || code.call(values) )
-    end
+    register_plugins(:CORL, :node, name.to_sym, default, locale, &code) 
   end
 end
 end
