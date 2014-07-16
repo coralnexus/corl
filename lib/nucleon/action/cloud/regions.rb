@@ -48,7 +48,7 @@ class Regions < CORL.plugin_class(:nucleon, :cloud_action)
             max_length  = regions.collect {|value| value.length }.sort.pop
             
             regions.each do |region|
-              info(sprintf("-> %-#{max_length + 10}s  %s", purple(region), yellow(region_info[region.to_sym])), { :i18n => false })
+              prefixed_message(:info, '  ', sprintf("%-#{max_length + 10}s  %s", purple(region), yellow(region_info[region.to_sym])), { :i18n => false, :prefix => false })
             end
           
             myself.result = regions
