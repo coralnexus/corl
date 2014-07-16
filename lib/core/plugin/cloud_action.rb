@@ -69,11 +69,13 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   # Settings
   
   def node_config
-    register_bool :parallel, true, 'corl.core.action.options.parallel'
     register_str :net_remote, :edit, 'corl.core.action.options.net_remote'
     register_network_provider :net_provider, :corl, [ 'corl.core.action.options.net_provider', 'corl.core.action.errors.network_provider' ]
+    
     register_node_provider :node_provider, :local, [ 'corl.core.action.options.node_provider', 'corl.core.action.errors.node_provider' ]    
     register_nodes :nodes, [], [ 'corl.core.action.options.nodes', 'corl.core.action.errors.nodes' ]
+    
+    register_bool :parallel, true, 'corl.core.action.options.parallel'
   end
   
   #---
