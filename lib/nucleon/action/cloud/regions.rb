@@ -18,8 +18,11 @@ class Regions < CORL.plugin_class(:nucleon, :cloud_action)
     super do
       codes :node_load_failure,
             :region_load_failure
-    end
-    
+    end    
+  end
+  
+  def node_config
+    super
     config[:node_provider].default = nil
   end
   
