@@ -366,6 +366,9 @@ en:
         images:
           description: |-
             Search the available images at a specified provider
+          success:
+            results: |-
+              Total of %{images} images found  
       node:
         spawn:
           description: |-
