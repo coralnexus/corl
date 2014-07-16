@@ -366,6 +366,23 @@ en:
         images:
           description: |-
             Search the available images at a specified provider
+          help: |-
+            List or search through available images from a specific node provider, e.g, aws, rackspace, etc...
+            
+            Images are usually isolated to a particular region of the cloud provider so you will want to know which
+            region you are targeting.  Run `corl cloud regions {provider}` to find the available regions for your 
+            provider.  Loaded node providers can be found by running `corl plugins`.
+            
+            You may specify search terms to query the images (useful for services such as AWS) to reduce the options.
+            This makes it fairly easy to find the images you are looking for right from the command line.  The search 
+            can be tightened with two options; --match_case, or --require_all.
+          options:
+            region: |-
+              Node provider region id to search for machine images (default %{default_value})
+            match_case: |-
+              Match case on any search terms given when searching for images (default %{default_value})
+            require_all: |-
+              Require all search terms to be present in image descriptions to be included (default %{default_value}) 
           success:
             results: |-
               Total of %{images} images found  
@@ -425,28 +442,6 @@ en:
           description: |-
             Generate a new SSH keypair           
     actions:
-      images:
-        options:
-          match_case: |-
-            Match case on any search terms given when searching for images (default %{default_value})
-          require_all: |-
-            Require all search terms to be present in image descriptions to be included (default %{default_value})
-          provider: |-
-            Node provider to retrieve images for
-          search: |-
-            Optional array of search terms to filter image results
-        start: |-
-          Retrieving a list of defined images from %{node_provider}
-        results: |-
-          Total of %{images} images found
-      machines:
-        options:
-          node_provider: |-
-            Node provider to retrieve machine types
-        start: |-
-          Retrieving a list of available machines from %{node_provider}
-        results: |-
-          Total of %{machines} machine types found
       spawn:
         options:
           parallel: |-
