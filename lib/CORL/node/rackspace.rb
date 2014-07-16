@@ -76,12 +76,12 @@ class Rackspace < Fog
   # Utilities
   
   def render_machine_type(machine_type)
-    sprintf("[  %20s  ][ VCPUS: %2i ] %-30s ( RAM: %6iMB | DISK: %4iGB )", 
-      machine_type_id(machine_type), 
-      machine_type.vcpus, 
-      machine_type.name, 
-      machine_type.ram, 
-      machine_type.disk
+    sprintf("%-30s  %-35s  [ VCPUS: %-5s ] ( RAM: %6sMB | DISK: %4sGB )", 
+      purple(machine_type_id(machine_type)),
+      yellow(machine_type.name), 
+      blue(machine_type.vcpus.to_s),       
+      blue(machine_type.ram.to_s), 
+      blue(machine_type.disk.to_s)
     )
   end
   

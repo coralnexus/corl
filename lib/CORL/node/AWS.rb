@@ -41,7 +41,7 @@ class AWS < Fog
     super do |config|
       config.import({ 
         :provider => 'AWS',
-        :region   => region
+        :region   => region.to_s
       })
     
       config[:aws_access_key_id]     = api_user if api_user
@@ -80,13 +80,13 @@ class AWS < Fog
   # Utilities
   
   def render_machine_type(machine_type)
-    sprintf("[  %20s  ][ VCPUS: %5.1f ] %-40s ( RAM: %6iMB | DISK: %8iGB )  ( BITS: %2i )", 
-      machine_type_id(machine_type), 
-      machine_type.cores, 
-      machine_type.name, 
-      machine_type.ram, 
-      machine_type.disk, 
-      machine_type.bits
+    sprintf("%-25s   %-50s  [ VCPUS: %-5s ] ( RAM: %6sMB | DISK: %8sGB )  ( BITS: %5s )", 
+      purple(machine_type_id(machine_type)),
+      yellow(machine_type.name), 
+      blue(machine_type.cores.to_s),       
+      blue(machine_type.ram.to_s), 
+      blue(machine_type.disk.to_s), 
+      blue(machine_type.bits.to_s)
     )
   end
   
