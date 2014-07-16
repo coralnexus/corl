@@ -317,18 +317,39 @@ en:
               Node configuration `%{name}` updated (%{remote_text})
             delete: |-
               Node configuration `%{name}` deleted (%{remote_text})
-        machines:
-          description: |-
-            Return a list of machine types supported by a provider
-        regions:
-          description: |-
-            Retrieve known regions for a specified provider
-        images:
-          description: |-
-            Search the available images at a specified provider
         vagrantfile: 
           description: |-
             Generate a scaffolding Vagrantfile
+          help: |-
+            Generate a Vagrantfile capable of providing CORLized virtual machines and either render to console or 
+            save to new Vagrantfile in network.
+            
+            CORL integrates with Vagrant to provide easy access to local virtual machines or even remote development 
+            machines with the right Vagrant plugins.  Since Vagrant searches for it's settings by default in Ruby 
+            based Vagrantfiles we provide an integration layer that configures Vagrant when it is loaded.  
+            
+            This way we can have our machine translated configurations with the power of Vagrant development in a 
+            system that can easily integrate with our staging, qa, and production environments.
+          options:
+            save: |-
+              Save the rendered Vagrantfile to the network (default %{default_value})
+          error:
+            update: |-
+              %{file} update could not be saved to network 
+            file_save: |-
+              File %{file} could not be saved to disk
+          success:
+            update: |-
+              %{file} update saved to network (%{remote_text})
+        regions:
+          description: |-
+            Retrieve known regions for a specified provider
+        machines:
+          description: |-
+            Return a list of machine types supported by a provider        
+        images:
+          description: |-
+            Search the available images at a specified provider
       node:
         spawn:
           description: |-
