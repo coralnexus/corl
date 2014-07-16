@@ -344,6 +344,12 @@ en:
         regions:
           description: |-
             Retrieve known regions for a specified provider
+          help: |-
+            List supported regions for a specific node provider, e.g., aws, rackspace, etc...
+            
+            The region IDs returned from this action should be used whenever a region option or argument is presented.
+            
+            In the future this will have more information associated with each region ID.
         machines:
           description: |-
             Return a list of machine types supported by a provider        

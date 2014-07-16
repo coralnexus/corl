@@ -41,17 +41,17 @@ class Regions < CORL.plugin_class(:nucleon, :cloud_action)
   
   def execute
     super do |local_node|
-      info('start')
-      
       ensure_network do
         if node = network.test_node(settings[:node_provider])
           if regions = node.regions
+            region_info = node.region_info            
+            max_length  = regions.collect {|value| value.length }.sort.pop
+            
             regions.each do |region|
-              info(sprintf("-> %s", purple(region)), { :i18n => false })
+              info(sprintf("-> %-#{max_length + 10}s  %s", purple(region), yellow(region_info[region.to_sym])), { :i18n => false })
             end
           
             myself.result = regions
-            success('corl.actions.regions.results', { :regions => regions.length }) if regions.length > 1
           else
             myself.status = code.region_load_failure
           end
