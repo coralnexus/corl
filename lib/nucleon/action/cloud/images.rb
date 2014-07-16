@@ -26,6 +26,11 @@ class Images < CORL.plugin_class(:nucleon, :cloud_action)
     end
   end
   
+  def node_config
+    super
+    config[:node_provider].default = nil
+  end
+  
   #---
   
   def ignore
@@ -41,17 +46,15 @@ class Images < CORL.plugin_class(:nucleon, :cloud_action)
  
   def execute
     super do |local_node|
-      info('corl.actions.images.start')
-      
       ensure_network do
         if node = network.test_node(settings[:node_provider], { :region => settings[:region] })
           if images = node.images(settings[:search], settings)
             images.each do |image|
-              info(node.render_image(image), { :prefix => false, :i18n => false })
+              prefixed_message(:info, '  ', node.render_image(image), { :i18n => false, :prefix => false })
             end
           
             myself.result = images
-            success('corl.actions.images.results', { :images => images.length }) if images.length > 1
+            success('results', { :images => images.length }) if images.length > 1
           else
             myself.status = code.image_load_failure
           end
