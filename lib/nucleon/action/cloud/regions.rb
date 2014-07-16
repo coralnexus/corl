@@ -47,7 +47,7 @@ class Regions < CORL.plugin_class(:nucleon, :cloud_action)
         if node = network.test_node(settings[:node_provider])
           if regions = node.regions
             regions.each do |region|
-              info(sprintf("> %s", region), { :prefix => false, :i18n => false })
+              info(sprintf("-> %s", purple(region)), { :i18n => false })
             end
           
             myself.result = regions
