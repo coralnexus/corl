@@ -69,42 +69,11 @@ class CloudAction < CORL.plugin_class(:nucleon, :action)
   # Settings
   
   def node_config
-    node_plugins = CORL.loaded_plugins(:CORL, :node)
-    
-    register :parallel, :bool, true, 'corl.core.action.options.parallel'
-    register :net_remote, :str, :edit, 'corl.core.action.options.net_remote'
-    register :net_provider, :str, :corl, 'corl.core.action.options.net_provider' do |value|
-      value           = value.to_sym
-      network_plugins = CORL.loaded_plugins(:CORL, :network)
-      
-      unless network_plugins.keys.include?(value)
-        warn('corl.core.action.errors.network_provider', { :value => value, :choices => network_plugins.keys.join(", ") })
-        next false 
-      end
-      true
-    end
-    register :node_provider, :str, :local, 'corl.core.action.options.node_provider' do |value|
-      value          = value.to_sym      
-      node_providers = node_plugins.keys
-      
-      unless CORL.vagrant? || node_providers.include?(value)
-        warn('corl.core.action.errors.node_provider', { :value => value, :choices => node_providers.join(", ") })
-        next false
-      end
-      true  
-    end
-    register :nodes, :array, [], 'corl.core.action.options.nodes' do |values|
-      success = true
-      values.each do |value|
-        if info = CORL.plugin_class(:CORL, :node).translate_reference(value)
-          if ! node_plugins.keys.include?(info[:provider].to_sym) || info[:name].empty?
-            warn('corl.core.action.errors.nodes', { :value => value, :provider => info[:provider],  :name => info[:name] })
-            success = false
-          end
-        end
-      end
-      success
-    end
+    register_bool :parallel, true, 'corl.core.action.options.parallel'
+    register_str :net_remote, :edit, 'corl.core.action.options.net_remote'
+    register_network_provider :net_provider, :corl, [ 'corl.core.action.options.net_provider', 'corl.core.action.errors.network_provider' ]
+    register_node_provider :node_provider, :local, [ 'corl.core.action.options.node_provider', 'corl.core.action.errors.node_provider' ]    
+    register_nodes :nodes, [], [ 'corl.core.action.options.nodes', 'corl.core.action.errors.nodes' ]
   end
   
   #---
