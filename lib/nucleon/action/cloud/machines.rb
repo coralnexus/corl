@@ -36,17 +36,15 @@ class Machines < CORL.plugin_class(:nucleon, :cloud_action)
   
   def execute
     super do |local_node|
-      info('corl.actions.machines.start')
-      
       ensure_network do
         if node = network.test_node(settings[:node_provider])
           if machine_types = node.machine_types
             machine_types.each do |machine_type|
-              info(node.render_machine_type(machine_type), { :prefix => false, :i18n => false })
+              prefixed_message(:info, '  ', node.render_machine_type(machine_type), { :i18n => false, :prefix => false })
             end
           
             myself.result = machine_types
-            success('corl.actions.machines.results', { :machines => machine_types.length }) if machine_types.length > 1
+            success('results', { :machines => machine_types.length }) if machine_types.length > 1
           else
             myself.status = code.machine_load_failure
           end
