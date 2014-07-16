@@ -19,6 +19,8 @@ class Regions < CORL.plugin_class(:nucleon, :cloud_action)
       codes :node_load_failure,
             :region_load_failure
     end
+    
+    config[:node_provider].default = nil
   end
   
   #---
@@ -36,7 +38,7 @@ class Regions < CORL.plugin_class(:nucleon, :cloud_action)
   
   def execute
     super do |local_node|
-      info('corl.actions.regions.start')
+      info('start')
       
       ensure_network do
         if node = network.test_node(settings[:node_provider])
