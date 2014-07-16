@@ -21,6 +21,11 @@ class Machines < CORL.plugin_class(:nucleon, :cloud_action)
     end
   end
   
+  def node_config
+    super
+    config[:node_provider].default = nil
+  end
+  
   #---
   
   def ignore
