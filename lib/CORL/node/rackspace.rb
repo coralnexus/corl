@@ -8,6 +8,12 @@ class Rackspace < Fog
   
   def normalize(reload)
     super do
+      region_info.import({
+        :dfw => 'Dallas',
+        :ord => 'Chicago',
+        :lon => 'London (for UK accounts)'  
+      })
+      # Return machine provider
       :rackspace
     end
   end
@@ -22,14 +28,6 @@ class Rackspace < Fog
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
   
-  def regions
-    [ 
-      :dfw, # Dallas
-      :ord, # Chicago
-      :lon  # London (for UK accounts)
-    ]
-  end
- 
   #-----------------------------------------------------------------------------
   # Settings groups
     

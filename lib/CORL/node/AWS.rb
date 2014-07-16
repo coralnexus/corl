@@ -8,6 +8,18 @@ class AWS < Fog
   
   def normalize(reload)
     super do
+      region_info.import({
+        'us-east-1'      => 'US East       -- North Virginia', 
+        'us-west-1'      => 'US West       -- North California', 
+        'us-west-2'      => 'US West       -- Oregon',
+        'eu-west-1'      => 'EU            -- Ireland',
+        'ap-northeast-1' => 'Asia Pacific  -- Tokyo', 
+        'ap-southeast-1' => 'Asia Pacific  -- Singapore', 
+        'ap-southeast-2' => 'Asia Pacific  -- Sydney',       
+        'sa-east-1'      => 'South America -- São Paulo'
+      })
+      
+      # Return machine provider      
       :aws
     end
   end
@@ -21,20 +33,7 @@ class AWS < Fog
   
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
-  
-  def regions
-    [
-      'us-east-1', 
-      'us-west-1', 
-      'us-west-2',
-      'eu-west-1',
-      'ap-northeast-1', 
-      'ap-southeast-1', 
-      'ap-southeast-2',       
-      'sa-east-1'
-    ]
-  end
-  
+    
   #-----------------------------------------------------------------------------
   # Settings groups
     

@@ -13,9 +13,11 @@ class Fog < CORL.plugin_class(:CORL, :node)
   def normalize(reload)
     super
     
-    myself.region  = region 
+    @region_info = Config.new({}, {}, true, false) unless reload
+    
+    myself.region = region 
       
-    unless reload
+    unless reload     
       machine_provider = :fog
       machine_provider = yield if block_given?
                         
@@ -69,8 +71,12 @@ class Fog < CORL.plugin_class(:CORL, :node)
   
   #---
   
+  def region_info
+    @region_info  
+  end
+  
   def regions
-    []
+    @region_info.keys
   end
   
   def region=region
