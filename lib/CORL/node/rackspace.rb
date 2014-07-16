@@ -88,7 +88,7 @@ class Rackspace < Fog
   #---
   
   def render_image(image)
-    sprintf("[  %40s  ][ %10s ] %s", image_id(image), image.state, image.name)
+    sprintf("%-47s [ %-10s ]   %s", purple(image_id(image)), blue(image.state), yellow(image.name))
   end
   
   #---
