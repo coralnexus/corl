@@ -93,8 +93,11 @@ class AWS < Fog
   #---
   
   def render_image(image)
+    description = image.name
+    description = image.description if image.description && ! image.description.empty?
+    
     location = image.location.split('/').first
-    sprintf("%-23s [ %-10s | %-6s ]   %s ( %s )", purple(image_id(image)), blue(image.state), image.architecture, yellow(image.name), cyan(location))
+    sprintf("%-23s [ %-10s | %-6s ]   %s ( %s )", purple(image_id(image)), blue(image.state), image.architecture, yellow(description), cyan(location))
   end
   
   #---
