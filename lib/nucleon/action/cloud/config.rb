@@ -28,6 +28,7 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
       register_bool :append
       
       register_translator :input_format
+      register_translator :save_format
       register_translator :format, :json
     end
   end
@@ -54,12 +55,12 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
           myself.status = code.configuration_parse_failed
         end
         
-        if config_info[:property].nil?
+        if settings.delete(:delete, false)
+          delete_config_property(config_info)
+          
+        elsif config_info[:property].nil?
           render_config_properties(config_info)
            
-        elsif settings.delete(:delete, false)
-          delete_config_property(config_info)
-                          
         elsif ! settings[:value].empty?
           set_config_property(config_info, settings[:value])
         else
@@ -98,28 +99,44 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
   #---
   
   def delete_config_property(config_info)
-    name        = parse_property_name(config_info[:property])    
-    remote_text = remote_message(settings[:net_remote])
-    config_file = config_info[:file].sub(network.directory + File::SEPARATOR, '')
+    remote_text    = remote_message(settings[:net_remote])
+    config_file    = config_info[:file].sub(network.directory + File::SEPARATOR, '')    
+    render_options = { :config_file => blue(config_file), :remote_text => yellow(remote_text) }
+    success        = false
     
-    render_options = { :config_file => blue(config_file), :name => blue(name), :remote_text => yellow(remote_text) }
+    if config_info[:property]
+      name = parse_property_name(config_info[:property])    
+      render_options.merge({ :name => blue(name) })
     
-    config_info[:config].delete(config_info[:property])
+      config_info[:config].delete(config_info[:property])
     
-    if File.exists?(config_info[:file])    
-      if Util::Disk.write(config_info[:file], config_info[:translator].generate(config_info[:config].export))
-        if network.save({ :files => config_file, :remote => settings[:net_remote], :message => "Deleting configuration #{name} from #{config_file}", :allow_empty => true })
-          success('delete', render_options)
+      if File.exists?(config_info[:file])    
+        if Util::Disk.write(config_info[:file], config_info[:translator].generate(config_info[:config].export))
+          success = true
         else
-          error('delete', render_options)
-          myself.status = code.configuration_save_failed    
+          error('file_save', render_options)
+          myself.status = code.configuration_save_failed  
         end
       else
-        error('file_save', render_options)
-        myself.status = code.configuration_save_failed  
+        info('no_config_file', render_options)    
       end
     else
-      info('no_config_file', render_options)    
+      if File.exists?(config_info[:file])
+        if FileUtils.rm(config_info[:file])
+          success = true
+        else
+          error('file_remove', render_options)  
+        end
+      end    
+    end
+    
+    if success
+      if network.save({ :files => config_file, :remote => settings[:net_remote], :message => "Deleting configuration #{name} from #{config_file}", :allow_empty => true })
+        success('delete', render_options)
+      else
+        error('delete', render_options)
+        myself.status = code.configuration_save_failed    
+      end
     end
   end
   
@@ -135,11 +152,11 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
     config_file  = config_info[:file].sub(network.directory + File::SEPARATOR, '')
     input_format = settings[:input_format]
     
-    values.each_with_index do |value, index|    
-      values[index] = render(value, { 
-        :format => input_format, 
-        :silent => true 
-      }) if input_format
+    values.each_with_index do |value, index|
+      if input_format
+        translator    = CORL.translator({}, input_format) 
+        values[index] = translator.parse(value)
+      end
       values[index] = Util::Data.value(values[index])
     end
     
@@ -182,6 +199,9 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
   # Utilities
   
   def parse_config_reference(node, name)
+    # @TODO: Break this method up, URGENTLY, before it gets too hideous
+    # Oh wait, it's already too hideous
+    
     info        = {}
     data        = {}
     config      = CORL::Config.new({}, {}, true, false)    
@@ -223,15 +243,21 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
       end
     end
     
-    if translator.empty?
-      translator  = nil
-      config_file = nil
+    file_exists = translator.empty? ? false : true
+    
+    if settings[:save_format]
+      translator = CORL.translator({}, settings[:save_format])    
     else
-      translator  = translator.size > 1 ? translator.shift : translator[0]
-      config_file = File.join(config_path, "#{config_file_name}." + translator.plugin_name.to_s)
+      if translator.empty?
+        translator = CORL.translator({}, CORL.type_default(:nucleon, :translator))
+      else
+        translator = translator.size > 1 ? translator.shift : translator[0]
+      end
     end
+    
+    config_file = File.join(config_path, "#{config_file_name}." + translator.plugin_name.to_s)
       
-    unless config_file
+    unless file_exists
       hiera_search_path = node.hiera_configuration[:hierarchy]
       config_files      = []
       
