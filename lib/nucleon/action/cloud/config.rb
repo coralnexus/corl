@@ -48,7 +48,7 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |node|
       ensure_network do
-        config_info = parse_config_reference(settings[:name])
+        config_info = parse_config_reference(node, settings[:name])
         
         unless config_info
           myself.status = code.configuration_parse_failed
@@ -73,11 +73,13 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
   # Sub operations
   
   def render_config_properties(config_info)
-    if file_labels = config_info[:files]
-      info('subconfigurations')
+    if file_labels = config_info[:rendered_files]
+      info('subconfigurations', { :prefix => false })
+      info("\n", { :i18n => false })
       file_labels.each do |label|
-        info("-> #{yellow(label)}", { :i18n => false })
-      end  
+        prefixed_message(:info, '  ', label, { :i18n => false, :prefix => false })
+      end
+      info("\n", { :i18n => false })  
     else
       format        = settings[:format]
       myself.result = config_info[:config].export
@@ -179,7 +181,7 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
   #-----------------------------------------------------------------------------
   # Utilities
   
-  def parse_config_reference(name)
+  def parse_config_reference(node, name)
     info        = {}
     data        = {}
     config      = CORL::Config.new({}, {}, true, false)    
@@ -222,34 +224,74 @@ class Config < CORL.plugin_class(:nucleon, :cloud_action)
     end
     
     if translator.empty?
-      translator = nil
+      translator  = nil
+      config_file = nil
     else
       translator  = translator.size > 1 ? translator.shift : translator[0]
       config_file = File.join(config_path, "#{config_file_name}." + translator.plugin_name.to_s)
     end
-    
-    if ! config_file && File.directory?(config_dir)
-      config_files = Dir.glob("#{config_dir}/**/*").select do |file|
-        is_config = false
+      
+    unless config_file
+      hiera_search_path = node.hiera_configuration[:hierarchy]
+      config_files      = []
+      
+      if File.directory?(config_dir)
+        config_files = Dir.glob("#{config_dir}/**/*").select do |file|
+          is_config = false
           
-        translators.each do |translator_name|
-          is_config = true if file.match(/\.#{translator_name}/)
+          translators.each do |translator_name|
+            is_config = true if file.match(/\.#{translator_name}/)
+          end
+          is_config
         end
-        is_config
+      
+        config_files.collect! do |file|
+          file.sub(/#{network.config_directory + File::SEPARATOR}/, '')
+        end
       end
-      config_files.each_with_index do |file, index|
-        config_files[index] = file.sub(/#{network.config_directory + File::SEPARATOR}/, '')
-        config_files[index] = config_files[index].sub(/\.([a-z0-9]+)$/, ' [ ' + blue('\1') + ' ]') 
+      
+      ordered_config_files  = []
+      rendered_config_files = []
+      
+      hiera_search_path.each do |search_path|
+        search_components = search_path.split(File::SEPARATOR)
+        
+        rendered_config_files << "SEARCH: #{search_path}"
+         
+        config_files.each do |file|
+          file_ext                 = File.extname(file)
+          file_components          = file.sub(/\..*$/, '').split(File::SEPARATOR)
+          rendered_file_components = []
+          file_match               = true
+          
+          search_components.each_with_index do |search_item, index|
+            if search_item.strip =~ /^%{:?:?([^}]+)}$/ && index < file_components.size
+              rendered_file_components << cyan(file_components[index])
+            elsif search_item != file_components[index]
+              file_match = false
+            else
+              rendered_file_components << yellow(search_item)
+            end
+          end
+          
+          rendered_file = "        #{rendered_file_components.join(File::SEPARATOR)} [ #{blue(file_ext.sub('.', ''))} ]"
+          
+          if file_match && ! ordered_config_files.include?(file)
+            ordered_config_files << file
+            rendered_config_files << rendered_file
+          end
+        end
       end
     end
       
     {
-      :translator => translator,
-      :file       => config_file,
-      :files      => config_files,
-      :property   => property,
-      :config     => config,
-      :value      => property ? Util::Data.value(config.get(property)) : nil
+      :translator     => translator,
+      :file           => config_file,
+      :files          => ordered_config_files,
+      :rendered_files => rendered_config_files,
+      :property       => property,
+      :config         => config,
+      :value          => property ? Util::Data.value(config.get(property)) : nil
     }
   end
 end
