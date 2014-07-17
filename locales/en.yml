@@ -294,6 +294,8 @@ en:
               Append the value to existing configuration scalar value or array (default %{default_value})
             input_format: |-
               Translator provider to parse value with before save (default %{default_value})
+            save_format: |-
+              Translator provider to render configurations to file (default %{default_value})
             format: |-
               Translator provider to use to render configuration output (default %{default_value})
           info:
@@ -310,6 +312,8 @@ en:
               Failed to read configuration file: %{config_file}
             file_save: |-
               Configuration file `%{config_file}` could not be saved
+            file_remove: |-
+              Configuration file `%{config_file}` could not be removed
             translator_load: |-
               Translator provider for %{translator} could not be loaded
           success:
