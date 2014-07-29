@@ -1,7 +1,7 @@
 
 module CORL
 module Configuration
-class File < CORL.plugin_class(:CORL, :configuration)
+class File < Nucleon.plugin_class(:CORL, :configuration)
 
   #-----------------------------------------------------------------------------
   # Configuration plugin interface

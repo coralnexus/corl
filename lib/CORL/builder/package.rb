@@ -1,7 +1,7 @@
 
 module CORL
 module Builder
-class Package < CORL.plugin_class(:CORL, :builder)
+class Package < Nucleon.plugin_class(:CORL, :builder)
   
   #-----------------------------------------------------------------------------
   # Package plugin interface

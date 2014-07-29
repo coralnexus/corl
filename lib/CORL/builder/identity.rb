@@ -1,7 +1,7 @@
 
 module CORL
 module Builder
-class Identity < CORL.plugin_class(:CORL, :builder)
+class Identity < Nucleon.plugin_class(:CORL, :builder)
    
   #-----------------------------------------------------------------------------
   # Identity plugin interface

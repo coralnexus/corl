@@ -1,7 +1,7 @@
 
 module CORL
 module Plugin
-class Node < CORL.plugin_class(:nucleon, :base)
+class Node < Nucleon.plugin_class(:nucleon, :base)
   
   include Parallel
   external_block_exec :exec, :command, :action

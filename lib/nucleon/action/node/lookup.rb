@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Lookup < CORL.plugin_class(:nucleon, :cloud_action)
+class Lookup < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

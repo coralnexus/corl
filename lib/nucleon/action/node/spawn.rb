@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Spawn < CORL.plugin_class(:nucleon, :cloud_action)
+class Spawn < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   include Mixin::Action::Keypair
   

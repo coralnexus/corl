@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Build < CORL.plugin_class(:nucleon, :cloud_action)
+class Build < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

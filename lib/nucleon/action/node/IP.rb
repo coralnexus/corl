@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class IP < CORL.plugin_class(:nucleon, :cloud_action)
+class IP < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

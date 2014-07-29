@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Identity < CORL.plugin_class(:nucleon, :cloud_action)
+class Identity < Nucleon.plugin_class(:nucleon, :cloud_action)
  
   #-----------------------------------------------------------------------------
   # Info

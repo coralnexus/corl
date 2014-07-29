@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Image < CORL.plugin_class(:nucleon, :cloud_action)
+class Image < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

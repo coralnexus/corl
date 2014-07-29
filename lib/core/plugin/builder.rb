@@ -1,7 +1,7 @@
 
 module CORL
 module Plugin
-class Builder < CORL.plugin_class(:nucleon, :base)
+class Builder < Nucleon.plugin_class(:nucleon, :base)
   
   include Parallel
   

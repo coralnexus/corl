@@ -1,7 +1,7 @@
 
 module Nucleon
 module Extension
-class CorlConfig < CORL.plugin_class(:nucleon, :extension)
+class CorlConfig < Nucleon.plugin_class(:nucleon, :extension)
   
   def configuration_file_base(config)
     plugin      = config[:plugin]

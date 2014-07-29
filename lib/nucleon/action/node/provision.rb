@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Provision < CORL.plugin_class(:nucleon, :cloud_action)
+class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

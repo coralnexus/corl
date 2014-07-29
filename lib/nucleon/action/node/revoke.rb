@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Revoke < CORL.plugin_class(:nucleon, :cloud_action)
+class Revoke < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

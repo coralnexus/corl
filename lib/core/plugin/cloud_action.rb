@@ -29,7 +29,7 @@ end
 
 module Nucleon
 module Plugin
-class CloudAction < CORL.plugin_class(:nucleon, :action)
+class CloudAction < Nucleon.plugin_class(:nucleon, :action)
   
   #-----------------------------------------------------------------------------
   # Constuctor / Destructor

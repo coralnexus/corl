@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Destroy < CORL.plugin_class(:nucleon, :cloud_action)
+class Destroy < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

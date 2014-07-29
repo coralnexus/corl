@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Stop < CORL.plugin_class(:nucleon, :cloud_action)
+class Stop < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

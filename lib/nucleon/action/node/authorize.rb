@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Authorize < CORL.plugin_class(:nucleon, :cloud_action)
+class Authorize < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

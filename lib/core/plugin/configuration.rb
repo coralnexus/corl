@@ -1,7 +1,7 @@
 
 module CORL
 module Plugin
-class Configuration < CORL.plugin_class(:nucleon, :base)
+class Configuration < Nucleon.plugin_class(:nucleon, :base)
     
   include Mixin::SubConfig
 

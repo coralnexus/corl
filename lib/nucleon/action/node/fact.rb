@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Fact < CORL.plugin_class(:nucleon, :cloud_action)
+class Fact < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

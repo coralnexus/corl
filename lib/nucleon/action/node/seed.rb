@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Seed < CORL.plugin_class(:nucleon, :cloud_action)
+class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

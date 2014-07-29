@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Exec < CORL.plugin_class(:nucleon, :cloud_action)
+class Exec < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

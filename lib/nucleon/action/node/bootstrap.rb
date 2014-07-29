@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Bootstrap < CORL.plugin_class(:nucleon, :cloud_action)
+class Bootstrap < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

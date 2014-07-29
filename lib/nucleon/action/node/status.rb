@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Status < CORL.plugin_class(:nucleon, :cloud_action)
+class Status < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

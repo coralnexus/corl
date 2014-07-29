@@ -1,7 +1,7 @@
 
 module CORL
 module Network
-class CORL < CORL.plugin_class(:CORL, :network)
+class CORL < Nucleon.plugin_class(:CORL, :network)
  
   #-----------------------------------------------------------------------------
   # Cloud plugin interface

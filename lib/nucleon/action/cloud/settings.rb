@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Cloud
-class Settings < CORL.plugin_class(:nucleon, :cloud_action)
+class Settings < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

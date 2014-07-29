@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Reboot < CORL.plugin_class(:nucleon, :cloud_action)
+class Reboot < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

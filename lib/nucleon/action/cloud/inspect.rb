@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Cloud
-class Inspect < CORL.plugin_class(:nucleon, :cloud_action)
+class Inspect < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

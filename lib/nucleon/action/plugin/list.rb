@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Plugin
-class List < CORL.plugin_class(:nucleon, :cloud_action)
+class List < Nucleon.plugin_class(:nucleon, :cloud_action)
    
   #-----------------------------------------------------------------------------
   # Info

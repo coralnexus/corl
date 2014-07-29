@@ -1,7 +1,7 @@
 
 module Nucleon
 module Event
-class Puppet < CORL.plugin_class(:nucleon, :event)
+class Puppet < Nucleon.plugin_class(:nucleon, :event)
   
   #-----------------------------------------------------------------------------
   # Puppet event interface

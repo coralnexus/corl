@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Cloud
-class Machines < CORL.plugin_class(:nucleon, :cloud_action)
+class Machines < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

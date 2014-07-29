@@ -1,7 +1,7 @@
 
 module CORL
 module Node
-class Local < CORL.plugin_class(:CORL, :node)
+class Local < Nucleon.plugin_class(:CORL, :node)
  
   #-----------------------------------------------------------------------------
   # Node plugin interface

@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class SSH < CORL.plugin_class(:nucleon, :cloud_action)
+class SSH < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

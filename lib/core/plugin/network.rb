@@ -1,7 +1,7 @@
 
 module CORL
 module Plugin
-class Network < CORL.plugin_class(:nucleon, :base)
+class Network < Nucleon.plugin_class(:nucleon, :base)
   
   init_plugin_collection(:add_node, :batch) 
   

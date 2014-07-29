@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Cloud
-class Regions < CORL.plugin_class(:nucleon, :cloud_action)
+class Regions < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

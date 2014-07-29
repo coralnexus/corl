@@ -5,7 +5,7 @@ nucleon_require(File.dirname(__FILE__), :node)
 
 module CORL
 module Node
-class Fog < CORL.plugin_class(:CORL, :node)
+class Fog < Nucleon.plugin_class(:CORL, :node)
  
   #-----------------------------------------------------------------------------
   # Node plugin interface

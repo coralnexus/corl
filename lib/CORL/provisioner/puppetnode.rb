@@ -1,7 +1,7 @@
 
 module CORL
 module Provisioner
-class Puppetnode < CORL.plugin_class(:CORL, :provisioner)
+class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
   
   @@puppet_lock = Mutex.new
   

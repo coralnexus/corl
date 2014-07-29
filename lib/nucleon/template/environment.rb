@@ -1,7 +1,7 @@
 
 module Nucleon
 module Template
-class Environment < CORL.plugin_class(:nucleon, :template)
+class Environment < Nucleon.plugin_class(:nucleon, :template)
   
   #-----------------------------------------------------------------------------
   # Renderers  

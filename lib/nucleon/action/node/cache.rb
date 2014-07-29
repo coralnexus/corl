@@ -2,7 +2,7 @@
 module Nucleon
 module Action
 module Node
-class Cache < CORL.plugin_class(:nucleon, :cloud_action)
+class Cache < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   #-----------------------------------------------------------------------------
   # Info

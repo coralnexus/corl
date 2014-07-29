@@ -1,7 +1,7 @@
 
 module CORL
 module Plugin
-class Provisioner < CORL.plugin_class(:nucleon, :base)
+class Provisioner < Nucleon.plugin_class(:nucleon, :base)
   
   include Parallel
   
