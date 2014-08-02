@@ -16,29 +16,16 @@ class Bootstrap < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   def configure
     super do
-      register :auth_files, :array, [] do |values|
-        success = true
-        values.each do |value|
-          unless File.exists?(value)
-            warn('corl.actions.bootstrap.errors.auth_files', { :value => value })
-            success = false
-          end
-        end
-        success
-      end
-      register :home_env_var, :str, 'HOME'
-      register :home, :str, nil    
-      register :bootstrap_path, :str, File.join(CORL.lib_path, '..', 'bootstrap') do |value|
-        unless File.directory?(value)
-          warn('corl.actions.bootstrap.errors.bootstrap_path', { :value => value })
-          next false
-        end
-        true
-      end
-      register :bootstrap_glob, :str, '**/*.sh'
-      register :bootstrap_init, :str, 'bootstrap.sh'
+      register_directory :bootstrap_path, File.join(CORL.lib_path, '..', 'bootstrap')
+      register_files :auth_files
       
-      register :bootstrap_nodes, :array, nil do |values|
+      register_str :home_env_var, 'HOME'
+      register_str :home, nil    
+            
+      register_str :bootstrap_glob, '**/*.sh'
+      register_str :bootstrap_init, 'bootstrap.sh'
+      
+      register_array :bootstrap_nodes, nil do |values|
         if values.nil?
           warn('corl.actions.bootstrap.errors.bootstrap_nodes_empty')
           next false 

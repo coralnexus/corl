@@ -24,25 +24,8 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
             :node_save_failure
       #---
       
-      register :project_branch, :str, 'master'
-      register :project_reference, :str, nil do |value|
-        next true if value.nil?
-        
-        value           = value.to_sym
-        project_plugins = CORL.loaded_plugins(:nucleon, :project)
-        
-        if @project_info = CORL.plugin_class(:nucleon, :project).translate_reference(value, true)
-          provider = @project_info[:provider]
-        else
-          provider = value
-        end
-        
-        unless project_plugins.keys.include?(provider.to_sym)
-          warn('corl.actions.seed.errors.project_reference', { :value => value, :provider => provider, :choices => project_plugins.keys.join(', ') })
-          next false
-        end
-        true
-      end      
+      register_project :project_reference
+      register_str :project_branch, 'master'      
     end
   end
   

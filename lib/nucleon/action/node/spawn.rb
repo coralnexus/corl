@@ -21,17 +21,18 @@ class Spawn < Nucleon.plugin_class(:nucleon, :cloud_action)
       codes :key_failure,
             :node_create_failure
       
-      register :bootstrap, :bool, true
-      register :seed, :bool, true
-      register :provision, :bool, true
+      register_bool :bootstrap, true
+      register_bool :seed, true
+      register_bool :provision, true
       
-      register :groups, :array, []      
-      register :region, :str, nil
-      register :machine_type, :str, nil
-      register :image, :str, nil
-      register :user, :str, nil     
-      register :hostnames, :array, nil
-        
+      register_array :hostnames, nil
+      register_array :groups
+           
+      register_str :region, nil
+      register_str :machine_type, nil
+      register_str :image, nil
+      register_str :user, nil     
+              
       keypair_config
       
       config.defaults(CORL.action_config(:node_bootstrap))
