@@ -129,7 +129,7 @@ module CORL
   
   #---  
 
-  reload(true) do |op, manager|
+  reload(true, :corl) do |op, manager|
     if op == :define
       manager.define_types :CORL, {
         :configuration => :file,      # Core
