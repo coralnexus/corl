@@ -1,12 +1,14 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: b1aa31328f2aa1a681134d8ff88ea1639c18432c
+  revision: 2c89c3aa92950bec4f6d364ff7a5b528190677b8
   branch: 0.2
   specs:
-    nucleon (0.2.0)
+    nucleon (0.2.2)
       celluloid (~> 0.15)
       childprocess (~> 0.5)
       deep_merge (~> 1.0)
+      erubis (~> 2.7)
+      highline (~> 1.6)
       i18n (~> 0.6)
       log4r (~> 1.1)
       multi_json (~> 1.7)
@@ -178,7 +180,7 @@ GEM
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.6)
     rubyntlm (0.1.1)
-    rugged (0.19.0)
+    rugged (0.21.0)
     savon (0.9.5)
       akami (~> 1.0)
       builder (>= 2.1.2)
@@ -220,7 +222,7 @@ DEPENDENCIES
   fog (~> 1.20)
   hiera (~> 1.3)
   jeweler (~> 2.0)
-  nucleon (~> 0.2, >= 0.2.0)!
+  nucleon (~> 0.2, >= 0.2.2)!
   puppet (~> 3.6)
   rdoc (~> 3.12)
   rspec (~> 2.10)
