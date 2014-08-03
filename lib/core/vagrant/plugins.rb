@@ -7,7 +7,7 @@ module VagrantPlugins
 module CORL
 class Plugin < ::Vagrant.plugin('2')
   
-  name '[C]oral [O]rchestration and [R]esearch [L]ibrary'
+  name '[C]luster [O]rchestration and [R]esearch [L]ibrary'
   description 'The `corl` plugin provides an easy way to develop and test CORL networks locally from within Vagrant.'
   
   @@directory       = File.dirname(__FILE__) 
