@@ -61,7 +61,6 @@ class Vagrantfile < CORL.plugin_class(:nucleon, :cloud_action)
             end
           
             if success
-              dbg(settings[:net_remote])
               if network.save({ :files => 'Vagrantfile', :remote => settings[:net_remote], :message => "Saving new Vagrantfile.", :allow_empty => true })
                 success('update', { :file => blue('Vagrantfile'), :remote_text => yellow(remote_message(settings[:net_remote])) })
               else
