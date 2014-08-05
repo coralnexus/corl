@@ -89,7 +89,7 @@ module Keypair
           if key_password
             key_options[:passphrase] = key_password
           else
-            warn('corl.core.mixin.action.keypair.errors.no_password')
+            warn('no_password')
             return nil
           end
         end
