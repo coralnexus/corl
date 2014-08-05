@@ -141,6 +141,18 @@ en:
           info:
             start: |-
               Creating network from %{project_reference} at %{path}
+        remote:
+          description: |-
+            Update the network project remote
+          help: |-
+            Update network project remotes to reference an external project.
+            
+            If trying to specify a private project, be sure you can reach the project provider from your 
+            computer first.  You might need to include your regular private key or create a deploy key
+            for project access.
+          info:
+            start: |-
+              Updating network project remote to %{project_reference}
         inspect:
           description: |-
             Inspect the network configuration
