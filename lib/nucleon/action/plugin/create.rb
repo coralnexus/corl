@@ -69,7 +69,7 @@ class Create < Nucleon.plugin_class(:nucleon, :cloud_action)
    
   def execute
     super do |node|
-      ensure_network(network) do
+      ensure_network do
         require 'erubis'
         
         type = settings[:type].to_sym
