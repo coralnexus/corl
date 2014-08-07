@@ -1,4 +1,8 @@
 
+nucleon_require(File.join(File.dirname(__FILE__), 'plugin'), :list)
+
+#---
+
 module Nucleon
 module Action
 class Plugins < Plugin::List
