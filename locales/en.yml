@@ -406,12 +406,105 @@ en:
         spawn:
           description: |-
             Spawn new nodes in the network
+          help: |-
+            Create new network nodes from a given provider based on a specified provider image and machine type.
+            Nodes are created in node provider (aws, rackspace, etc...) regions.
+            
+            In the case that you are creating a Vagrant node hostnames should be specified with the hostname[ipaddress] syntax
+            to map the Vagrant machine to a localized IP of your choice.  It is also possible to use a single range to specify
+            a pattern for multiple nodes to create, such as test[1-10].example.com.  Only one range is currently supported.
+            
+            * To check which providers are implemented, run `corl plugins` and reference the CORL node plugin type providers
+            * To check the regions available for a specific provider, run `corl cloud regions {provider}`
+            * To check what machine types are available for a provider, run `corl cloud machines {provider}`
+            * To search images available in a provider region, run `corl cloud images {provider} --region={region} [ {search terms}... ]`
+            
+            To provision node directly after creation specify the --provision flag.
+            
+            The most common options you will use include: (see options section for more info on each)
+              --region
+              --machine_type
+              --groups
+              --user
+            
+            The spawn process consists of:
+              
+            > Run locally:
+            * Configurations are added to network for new node
+            * Node machine is created on provider
+            * CORL is bootstrapped onto the new node and basic connectivity is established
+            > Run remotely:
+            * Network project is seeded onto the bootstrapped node
+            > Optional with --provision flag:
+            * Packages and components are built on the node according to settings groups and defined node profiles
+            * Node is provisioned with node configurations according to settings groups and defined node profiles
+          options:
+            parallel: |-
+              Enable or disable parallelism of node creation (default %{default_value})
+            bootstrap: |-
+              Run the bootstrap process after creating the node (default %{default_value})
+            provision: |-
+              Provision the node after the bootstrap process completes (default %{default_value})
+            region: |-
+              Machine provider region in which to create the machines (defaults to first defined in provider)
+            machine_type: |-
+              Provider ID of machine type to create (defaults to first defined in provider - usually smallest)
+            provider: |-
+              Create machines with this node provider
+            image: |-
+              Provider ID of operating system image on which to initialize the new machines           
+            hostnames: |-
+              Hostnames of machines to create on provider infrastructure
+            groups: |-
+              Initial settings groups this node belongs to (default %{default_value})
+            user: |-
+              Initial machine user for node used for communication (default %{default_value})
+        info:
+          start: |-
+            Spawning new machines on %{node_provider}
         bootstrap:
           description: |-
             Bootstrap existing nodes
+          options:
+            bootstrap_path: |-
+              Bootstrap script top level local directory (default %{default_value})
+            bootstrap_init: |-
+              Gateway bootstrap script within the bootstrap project directory (default %{default_value})
+            bootstrap_glob: |-
+              Path glob to use in searching bootstrap scripts for remote execution (default %{default_value})
+            auth_files: |-
+              Any additional authorization or state files to pass to the node during bootstrap (relative to local home)
+            home_env_var: |-
+              Home directory environment variable on remote server (default %{default_value})
+            home: |-
+              Specified home directory on remote server (default %{default_value})
+            bootstrap_nodes: |-
+              Node references to bootstrap
+          warn:
+            bootstrap_nodes_empty: |-
+              Nodes must be specified in order to run the bootstrap action
+            bootstrap_nodes: |-
+              Provider %{node_provider} node %{name} is not a valid node to bootstrap (%{value} given)
+          error:
+            failure: |-
+              Machine %{hostname} (%{id}) bootstrap failed with status %{status}
+          info:
+            start: |-
+              Starting bootstrap of machine %{hostname} (%{id})  
+          success:
+            complete: |-
+              Machine %{hostname} (%{id}) successfully bootstrapped
         seed:
           description: |-
             Seed nodes with a specified network project
+          options:
+            project_branch: |-
+              Project branch to seed project (default %{default_value})
+            project_reference: |-
+              Reference to seed project (default %{default_value})
+          info:
+            start: |-
+              Now seeding CORL node
         build:
           description: |-
             Build packages on nodes
@@ -458,24 +551,6 @@ en:
           description: |-
             Generate a new SSH keypair           
     actions:
-      spawn:
-        options:
-          parallel: |-
-            Enable or disable parallelism of node creation (default %{default_value})
-          seed: |-
-            CORL project reference with cloud project to seed new machines with (default %{default_value})
-          region: |-
-            Machine provider region in which to create the machines (defaults to first defined in provider)
-          machine_type: |-
-            Provider ID of machine type to create (defaults to first defined in provider - usually smallest)
-          provider: |-
-            Create machines with this node provider
-          image: |-
-            Provider ID of operating system image on which to initialize the new machines           
-          hostnames: |-
-            Hostnames of machines to create on provider infrastructure
-        start: |-
-          Spawning new machines on %{node_provider}
       identity:
         start: |-
           Setting identity on %{provider} machine %{name}
@@ -492,37 +567,6 @@ en:
           Machine %{hostname} (%{id}) successfully ended terminal session
         failure: |-
           Machine %{hostname} (%{id}) terminal session failed with status %{status}
-      bootstrap:
-        options:
-          bootstrap_path: |-
-            Bootstrap script top level local directory (default %{default_value})
-          bootstrap_init: |-
-            Gateway bootstrap script within the bootstrap project directory (default %{default_value})
-          bootstrap_glob: |-
-            Path glob to use in searching bootstrap scripts for remote execution (default %{default_value})
-          auth_files: |-
-            Any additional authorization or state files to pass to the node during bootstrap (relative to local home)
-          home_env_var: |-
-            Home directory environment variable on remote server (default %{default_value})
-          home: |-
-            Specified home directory on remote server (default %{default_value})
-          bootstrap_nodes: |-
-            Node references to bootstrap
-        errors:
-          bootstrap_path: |-
-            Bootstrap path must be an existing directory
-          auth_files: |-
-            Authorization file %{value} does not exist on the local system
-          bootstrap_nodes_empty: |-
-            Nodes must be specified in order to run the bootstrap action
-          bootstrap_nodes: |-
-            Provider %{node_provider} node %{name} is not a valid node to bootstrap (%{value} given)
-        start: |-
-          Starting bootstrap of machine %{hostname} (%{id})
-        success: |-
-          Machine %{hostname} (%{id}) successfully bootstrapped
-        failure: |-
-          Machine %{hostname} (%{id}) bootstrap failed with status %{status}
       exec:
         options:
           command: |-
@@ -534,17 +578,6 @@ en:
         errors:
           context: |-
             Lookup evaluation context %{value} is not valid >> Possible contexts: %{choices}
-      seed:
-        options:
-          project_branch: |-
-            Project branch to seed project (default %{default_value})
-          project_reference: |-
-            Reference to seed project (default %{default_value})
-        errors:
-          project_reference: |-
-            Project reference %{value} failed to parse or provider %{provider} isn't loaded >> Possible providers: %{choices}
-        start: |-
-          Now seeding CORL node
       image:
         start: |-
           Starting image of %{provider} machine %{name} 
