@@ -459,9 +459,9 @@ en:
               Initial settings groups this node belongs to (default %{default_value})
             user: |-
               Initial machine user for node used for communication (default %{default_value})
-        info:
-          start: |-
-            Spawning new machines on %{node_provider}
+          info:
+            start: |-
+              Spawning new machines on %{node_provider}
         bootstrap:
           description: |-
             Bootstrap existing nodes
