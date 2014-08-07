@@ -40,7 +40,7 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
    
   def execute
     super do |node|
-      info('corl.actions.seed.start')
+      info('start')
       
       ensure_node(node) do
         admin_exec do

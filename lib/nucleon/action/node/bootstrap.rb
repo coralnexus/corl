@@ -27,7 +27,7 @@ class Bootstrap < Nucleon.plugin_class(:nucleon, :cloud_action)
       
       register_array :bootstrap_nodes, nil do |values|
         if values.nil?
-          warn('corl.actions.bootstrap.errors.bootstrap_nodes_empty')
+          warn('bootstrap_nodes_empty')
           next false 
         end
         
@@ -37,7 +37,7 @@ class Bootstrap < Nucleon.plugin_class(:nucleon, :cloud_action)
         values.each do |value|
           if info = CORL.plugin_class(:CORL, :node).translate_reference(value)
             if ! node_plugins.keys.include?(info[:provider].to_sym) || info[:name].empty?
-              warn('corl.actions.bootstrap.errors.bootstrap_nodes', { :value => value, :node_provider => info[:provider],  :name => info[:name] })
+              warn('bootstrap_nodes', { :value => value, :node_provider => info[:provider],  :name => info[:name] })
               success = false
             end
           end
@@ -66,13 +66,13 @@ class Bootstrap < Nucleon.plugin_class(:nucleon, :cloud_action)
         batch_success = network.batch(settings[:bootstrap_nodes], settings[:node_provider], settings[:parallel]) do |node|
           render_options = { :id => node.id, :hostname => node.hostname }
           
-          info('corl.actions.bootstrap.start', render_options)
+          info('start', render_options)
           success = node.bootstrap(network.home, extended_config(:bootstrap, settings.clone))
           if success
-            info('corl.actions.bootstrap.success', render_options)
+            success('complete', render_options)
           else
             render_options[:status] = node.status
-            error('corl.actions.bootstrap.failure', render_options)
+            error('failure', render_options)
           end
           success
         end

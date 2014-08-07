@@ -18,7 +18,7 @@ class Identity < Nucleon.plugin_class(:nucleon, :cloud_action)
     super do
       codes :identity_upload_failure
       
-      register :name, :str
+      register_str :name
       register_project :identity
       register_nodes :identity_nodes      
     end
@@ -46,7 +46,7 @@ class Identity < Nucleon.plugin_class(:nucleon, :cloud_action)
           identity_directory = File.join(builder.build_directory, settings[:name])
           
           success = network.batch(settings[:identity_nodes], settings[:node_provider], settings[:parallel]) do |node|
-            info('corl.actions.identity.start', { :provider => node.plugin_provider, :name => node.plugin_name })
+            info('start', { :provider => node.plugin_provider, :name => node.plugin_name })
             
             remote_network_directory  = node.lookup(:corl_network)
             

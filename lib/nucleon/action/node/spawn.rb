@@ -22,8 +22,7 @@ class Spawn < Nucleon.plugin_class(:nucleon, :cloud_action)
             :node_create_failure
       
       register_bool :bootstrap, true
-      register_bool :seed, true
-      register_bool :provision, true
+      register_bool :provision, false
       
       register_array :hostnames, nil
       register_array :groups
@@ -38,6 +37,11 @@ class Spawn < Nucleon.plugin_class(:nucleon, :cloud_action)
       config.defaults(CORL.action_config(:node_bootstrap))
       config.defaults(CORL.action_config(:node_seed))
     end
+  end
+  
+  def node_config
+    super
+    config[:node_provider].default = nil
   end
   
   #---
@@ -56,6 +60,11 @@ class Spawn < Nucleon.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |node|
       ensure_network do
+        settings[:seed] = true
+        
+        Nucleon.dump_enabled=true
+        dbg(settings.export)
+        
         if keypair && keypair_clean
           hostnames     = []
           results       = []
@@ -71,7 +80,7 @@ class Spawn < Nucleon.plugin_class(:nucleon, :cloud_action)
             settings[:user] = :root  
           end
           
-          info('corl.actions.spawn.start', { :node_provider => node_provider }) 
+          info('start', { :node_provider => node_provider }) 
           
           settings.delete(:hostnames).each do |hostname|
             hostnames << extract_hostnames(hostname)
