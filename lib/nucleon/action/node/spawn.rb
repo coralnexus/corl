@@ -62,9 +62,6 @@ class Spawn < Nucleon.plugin_class(:nucleon, :cloud_action)
       ensure_network do
         settings[:seed] = true
         
-        Nucleon.dump_enabled=true
-        dbg(settings.export)
-        
         if keypair && keypair_clean
           hostnames     = []
           results       = []
