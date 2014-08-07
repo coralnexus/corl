@@ -372,7 +372,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
   
   def machine_config
     name   = setting(:id)
-    name   = setting(:hostname) if name.nil? || name.empty?
+    name   = nil if name.nil? || name.empty?
     config = Config.new({ :name => name })
     
     yield(config) if block_given?

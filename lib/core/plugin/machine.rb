@@ -7,6 +7,8 @@ class Machine < Nucleon.plugin_class(:nucleon, :base)
   # Machine plugin interface
   
   def normalize(reload)
+    super
+    myself.plugin_name = '' if myself.plugin_provider == myself.plugin_name.to_sym
   end
        
   #-----------------------------------------------------------------------------
