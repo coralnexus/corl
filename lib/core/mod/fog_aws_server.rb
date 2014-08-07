@@ -25,15 +25,13 @@ class Server
     rescue Net::SSH::HostKeyMismatch => error
       error.remember_host!
       sleep 0.2
-      reset = true
       retry
       
-    rescue Net::SSH::ConnectionTimeout, Net::SSH::Disconnect => error     
+    rescue Errno::ECONNREFUSED, Net::SSH::ConnectionTimeout, Net::SSH::Disconnect => error   
       if tries > 1
         sleep(sleep_secs)
         
         tries -= 1
-        reset  = true
         retry
       end
     end
