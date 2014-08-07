@@ -8,6 +8,14 @@ module Machine
 class Fog < Nucleon.plugin_class(:CORL, :machine)
   
   include Mixin::Machine::SSH
+
+  #-----------------------------------------------------------------------------
+  # Machine plugin interface
+  
+  def normalize(reload)
+    super
+    myself.plugin_name = '' if myself.plugin_provider == myself.plugin_name.to_sym
+  end
  
   #-----------------------------------------------------------------------------
   # Checks

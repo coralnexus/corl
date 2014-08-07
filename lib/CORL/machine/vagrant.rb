@@ -8,7 +8,15 @@ class Vagrant < Nucleon.plugin_class(:CORL, :machine)
   #---
   
   @@lock = Mutex.new
-    
+
+  #-----------------------------------------------------------------------------
+  # Machine plugin interface
+  
+  def normalize(reload)
+    super
+    myself.plugin_name = node.plugin_name if node
+  end
+     
   #-----------------------------------------------------------------------------
   # Checks
   
@@ -281,7 +289,7 @@ class Vagrant < Nucleon.plugin_class(:CORL, :machine)
     if server
       load
       success = run(:up, options)
-        
+      
       # Make sure provisioner changes (key changes) are accounted for
       # TODO: Is there a better way?
       load if success
@@ -306,7 +314,7 @@ class Vagrant < Nucleon.plugin_class(:CORL, :machine)
         server.send(:action, action.to_sym, params)
         
       rescue => error
-        error(error, { :i18n => false })
+        error(error.message, { :i18n => false })
         error(Util::Data.to_yaml(error.backtrace), { :i18n => false })
         success = false
       end      
