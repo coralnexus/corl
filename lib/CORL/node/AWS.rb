@@ -16,7 +16,7 @@ class AWS < Fog
         'ap-northeast-1' => 'Asia Pacific  -- Tokyo', 
         'ap-southeast-1' => 'Asia Pacific  -- Singapore', 
         'ap-southeast-2' => 'Asia Pacific  -- Sydney',       
-        'sa-east-1'      => 'South America -- São Paulo'
+        'sa-east-1'      => 'South America -- Sao Paulo'
       })
       
       # Return machine provider      
