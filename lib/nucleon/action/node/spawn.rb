@@ -60,8 +60,6 @@ class Spawn < Nucleon.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |node|
       ensure_network do
-        settings[:seed] = true
-        
         if keypair && keypair_clean
           hostnames     = []
           results       = []
