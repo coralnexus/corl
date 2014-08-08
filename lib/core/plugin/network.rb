@@ -353,6 +353,13 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
     
     seed_requested      = config.has_key?(:seed)
     seed                = config.delete(:seed, false)
+    seed_project        = config.get(:project_reference, nil)
+    
+    if seed_project.nil?
+      project_provider = myself.config.project.plugin_provider
+      project_remote   = myself.config.remote(:edit)      
+      seed_project     = "#{project_provider}:::#{project_remote}"
+    end
     
     unless node.cache_setting(:initialized)
       bootstrap = true unless bootstrap_requested
@@ -370,9 +377,8 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
         
     if success
       if seed
-        seed_project = config.get(:project_reference, nil)
         save_config  = { :commit => true, :remote => remote_name, :push => true }
-                         
+        
         if seed_project && remote_name
           # Reset project remote
           seed_info = Plugin::Project.translate_reference(seed_project)
