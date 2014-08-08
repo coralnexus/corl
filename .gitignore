@@ -51,3 +51,4 @@ pkg
 .project_cache
 build
 config/identities
+.corl
