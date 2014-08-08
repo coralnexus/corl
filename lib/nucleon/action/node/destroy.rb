@@ -16,25 +16,9 @@ class Destroy < Nucleon.plugin_class(:nucleon, :cloud_action)
   
   def configure
     super do
-      register :destroy_nodes, :array, nil do |values|
-        if values.nil?
-          warn('corl.actions.destroy.errors.destroy_nodes_empty')
-          next false 
-        end
-        
-        node_plugins = CORL.loaded_plugins(:CORL, :node)
-        success      = true
-        
-        values.each do |value|
-          if info = CORL.plugin_class(:CORL, :node).translate_reference(value)
-            if ! node_plugins.keys.include?(info[:provider].to_sym) || info[:name].empty?
-              warn('corl.actions.destroy.errors.destroy_nodes', { :value => value, :node_provider => info[:provider],  :name => info[:name] })
-              success = false
-            end
-          end
-        end
-        success
-      end
+      register_bool :force, false
+      
+      register_nodes :destroy_nodes
     end
   end
   
@@ -54,11 +38,26 @@ class Destroy < Nucleon.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |local_node|
       ensure_network do
-        batch_success = network.batch(settings[:destroy_nodes], settings[:node_provider], settings[:parallel]) do |node|
-          info('corl.actions.destroy.start', { :provider => node.plugin_provider, :name => node.plugin_name })
-          node.destroy
+        if settings[:force]
+          answer = 'YES'
+        else
+          message = render_message('prompt', { :operation => :ask }) + "\n\n"
+        
+          array(settings[:destroy_nodes]).each do |hostname|
+            message << "  #{hostname}\n"
+          end
+        
+          message << "\n" + render_message('yes_query', { :operation => :ask, :yes => 'YES' }) + ' '
+          answer = ask(message)
         end
-        myself.status = code.batch_error unless batch_success
+        
+        if answer.upcase == 'YES'
+          batch_success = network.batch(settings[:destroy_nodes], settings[:node_provider], settings[:parallel]) do |node|
+            info('start', { :provider => node.plugin_provider, :name => node.plugin_name })
+            node.destroy
+          end
+          myself.status = code.batch_error unless batch_success
+        end
       end
     end
   end
