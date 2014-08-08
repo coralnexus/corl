@@ -505,6 +505,10 @@ en:
         seed:
           description: |-
             Seed nodes with a specified network project
+          help: |-
+            Seed nodes with a specified network project.  
+            
+            Projects are specified as project references of the form {provider}:::{reference/url}.
           options:
             project_branch: |-
               Project branch to seed project (default %{default_value})
