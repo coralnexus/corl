@@ -41,7 +41,8 @@ class Status < Nucleon.plugin_class(:nucleon, :cloud_action)
         settings[:status_nodes] = [ 'all' ] if settings[:status_nodes].empty?
         
         batch_success = network.batch(settings[:status_nodes], settings[:node_provider], settings[:parallel]) do |node|
-          state       = node.state(true).to_sym
+          state       = node.state(true)
+          state       = state.nil? ? :aborted : state.to_sym
           ssh_enabled = ''
           
           case state
@@ -61,10 +62,11 @@ class Status < Nucleon.plugin_class(:nucleon, :cloud_action)
           when :stopped, :aborted
             state = red(state.to_s)
           end
-          info(state + " #{ssh_enabled}".rstrip, { :i18n => false, :prefix_text => yellow(node.plugin_provider) + ' ' + purple(node.plugin_name) })
+          info(state.to_s + " #{ssh_enabled}".rstrip, { :i18n => false, :prefix_text => yellow(node.plugin_provider) + ' ' + purple(node.plugin_name) })
           true
         end
-        myself.status = code.batch_error unless batch_success
+        success = network.save({ :push => true, :remote => :edit, :message => "Updating node status information.", :allow_empty => true })
+        myself.status = code.batch_error unless batch_success && success
       end
     end
   end
