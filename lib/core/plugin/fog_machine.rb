@@ -79,7 +79,7 @@ class Fog < Nucleon.plugin_class(:CORL, :machine)
   
   def state
     return translate_state(server.state) if server
-    nil
+    translate_state(:aborted)
   end
    
   #---
