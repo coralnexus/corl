@@ -1210,46 +1210,45 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
   #---
 
-  def destroy(options = {})    
+  def destroy(options = {})
+    config  = Config.ensure(options)    
     success = true
-    
-    if machine && machine.created?
-      config = Config.ensure(options)
+         
+    if extension_check(:destroy, { :config => config })
+      logger.info("Destroying node: #{plugin_name}")
       
-      if extension_check(:destroy, { :config => config })
-        logger.info("Destroying node: #{plugin_name}")
-      
-        yield(:config, config) if block_given?
+      yield(:config, config) if block_given?
         
+      if machine && machine.created?
         # Shut down machine      
         success = machine.destroy(config.export)
-        
         myself.machine = nil
-        
-        # Remove SSH keys
-        if success && delete_keys
-          # Remove node information
-          network.delete_node(plugin_provider, plugin_name, false)
-          
-          network.save({
-            :commit => true, 
-            :remote => config.get(:remote, :edit), 
-            :push   => true 
-          })
-        end      
-        
-        if success && block_given?
-          process_success = yield(:process, config)
-          success         = process_success if process_success == false        
-        end
-        
-        if success
-          extension(:destroy_success, { :config => config })
-          clear_cache
-        end
+      else
+        logger.warn("Node #{plugin_name} does not have an attached machine or is not created so cannot be destroyed")
       end
-    else
-      logger.warn("Node #{plugin_name} does not have an attached machine or is not created so cannot be destroyed")
+        
+      # Remove SSH keys
+      if success && delete_keys
+        # Remove node information
+        network.delete_node(plugin_provider, plugin_name, false)
+          
+        network.save({
+          :commit  => true, 
+          :remote  => config.get(:remote, :edit), 
+          :message => config.get(:message, "Destroying node #{plugin_name}"),
+          :push    => true 
+        })
+      end      
+        
+      if success && block_given?
+        process_success = yield(:process, config)
+        success         = process_success if process_success == false        
+      end
+        
+      if success
+        extension(:destroy_success, { :config => config })
+        clear_cache
+      end
     end
     success    
   end
