@@ -529,6 +529,30 @@ en:
         destroy:
           description: |-
             Destroy network nodes
+          help: |-
+            Destroy network nodes and remove all associated network references.
+            
+            Nodes are referenced either by a settings group name or the given node hostname of a provider.  Providers
+            may be omitted in the case of groups, attached to the hostname via {provider}:::{hostname}, or the
+            --node_provider can be set to find named node.
+            
+            To help reduce addicental destruction of network nodes, users are prompted before completing operation unless
+            --force option is given.  Be careful when using the --force flag.
+            
+            If you just want to stop this node, consider using the `corl node stop` action instead of destroy.  It will
+            leave your network settings in place (node definition), save an image of your node (if possible), and then
+            shut down the machine.  That way the node can easily be restarted with `corl node start` when needed.
+          options:
+            force: |-
+              Force the destruction of the specified nodes without a prompt (default %{default_value})
+          ask:
+            prompt: |-
+              Are you sure you want to destroy the following nodes?  This action can not be undone!
+            yes_query: |-
+              Type %{yes} or press enter to cancel: 
+          info:  
+            start: |-
+              Destroying %{provider} machine %{name}  
         ip:
           description: |-
             Return the public IP address for nodes
@@ -590,9 +614,6 @@ en:
       reboot:
         start: |-
           Rebooting %{provider} machine %{name}
-      destroy:
-        start: |-
-          Destroying %{provider} machine %{name}        
       build:
         start: |-
           Building provisioner project
