@@ -21,6 +21,7 @@ class Configuration < Nucleon.plugin_class(:nucleon, :base)
     init_subconfig(true) unless reload
     
     logger.info("Setting source configuration project")
+    
     @project = CORL.project(extended_config(:project, {
       :directory     => _delete(:directory, Dir.pwd),
       :url           => _delete(:url),
@@ -29,7 +30,7 @@ class Configuration < Nucleon.plugin_class(:nucleon, :base)
       :pull          => true,
       :internal_ip   => CORL.public_ip, # Needed for seeding Vagrant VMs
       :manage_ignore => _delete(:manage_ignore, true)
-    }), _delete(:project_provider))
+    }), _delete(:project_provider, nil))
         
     _init(:autoload, true)
     _init(:autosave, false)
