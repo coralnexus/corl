@@ -523,7 +523,7 @@ en:
               Finalizing network path and removing temporary backup
             reinitializing: |-
               Reinitializing network
-            updating:|-
+            updating: |-
               Updating node network configurations
         build:
           description: |-
