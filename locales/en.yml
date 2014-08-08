@@ -465,6 +465,14 @@ en:
         bootstrap:
           description: |-
             Bootstrap existing nodes
+          help: |-
+            Boostrap the CORL system onto existing network nodes.  This is useful for CORL related development, 
+            as we can easily install updates from the source branch.
+            
+            It is possible to specify your own bootstrap scripts with the --bootstrap_path, --bootstrap_init and 
+            --bootstrap_glob options.  It is also possible to specify authentication files that authorize the node
+            for network services.  By default .fog and .netrc files are transmitted to nodes to allow the node
+            to initialize security for the system and connect to the necessary cloud services to run CORL actions.
           options:
             bootstrap_path: |-
               Bootstrap script top level local directory (default %{default_value})
