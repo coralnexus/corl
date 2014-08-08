@@ -48,6 +48,13 @@ class Remote < CORL.plugin_class(:nucleon, :cloud_action)
         settings[:push] = true
                   
         if project = project_load(network.directory, false, false)
+          provider = settings[:project_provider]
+          
+          if settings[:project_reference].match(/^\s*([a-zA-Z0-9_-]+):::(.*)\s*$/)
+            provider = $1
+          end
+          
+          Nucleon::Plugin::Project.store_provider(project.directory, provider)
           myself.status = code.push_failure unless push(project)
         else
           myself.status = code.project_failure
