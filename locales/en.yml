@@ -513,6 +513,18 @@ en:
           info:
             start: |-
               Now seeding CORL node
+            deploy_keys: |-
+              Generating network SSH deploy keys
+            backup: |-
+              Backing up current network configuration
+            seeding: |-
+              Seeding network configuration from %{project_reference}
+            finalizing: |-
+              Finalizing network path and removing temporary backup
+            reinitializing: |-
+              Reinitializing network
+            updating:|-
+              Updating node network configurations
         build:
           description: |-
             Build packages on nodes

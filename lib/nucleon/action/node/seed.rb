@@ -47,7 +47,7 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
           network_path = lookup(:corl_network)
           backup_path  = File.join(Dir.tmpdir(), 'corl')
           
-          info("Generating network SSH deploy keys", { :i18n => false })
+          info('deploy_keys')
           
           if keys = Util::SSH.generate.store
             if @project_info
@@ -56,11 +56,11 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
               project_info = Config.new({ :provider => :git })
             end
             
-            info("Backing up current network configuration", { :i18n => false })
+            info('backup')
             FileUtils.rm_rf(backup_path)
             FileUtils.mv(network_path, backup_path)
             
-            info("Seeding network configuration from #{settings[:project_reference]}", { :i18n => false })
+            info('seeding')
             project = CORL.project(extended_config(:project, {
               :directory   => network_path,
               :reference   => project_info.get(:reference, nil),
@@ -73,15 +73,15 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
             }), project_info[:provider])
         
             if project
-              info("Finalizing network path and removing temporary backup", { :i18n => false })
+              info('finalizing')
               FileUtils.chmod_R(0600, network_path)
               FileUtils.rm_rf(backup_path)
               
-              info("Reinitializing network", { :i18n => false })
+              info('reinitializing')
               if network = init_network
                 if network.load
                   if node = network.local_node(true)
-                    info("Updating node network configurations", { :i18n => false })
+                    info('updating')
                     myself.status = code.node_save_failure unless node.save  
                   else
                     myself.status = code.node_load_failure
