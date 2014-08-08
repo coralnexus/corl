@@ -511,6 +511,18 @@ en:
         provision:
           description: |-
             Provision nodes
+        status:
+          description: |-
+            Check and save the current status of nodes in the network
+          help: |-
+            Check and save the current status of nodes in the network.
+            
+            When given the --basic flag only the connection to the underlying cloud provider is checked for that 
+            node.  This will tell you if the node is still in existence.  Without the --basic flag this action 
+            will also check the SSH connection and report if it was successfull or if it failed.
+          options:
+            basic: |-
+              Check only basic server connection from cloud service provider (default %{default_value})
         image:
           description: |-
             Create images of existing nodes
