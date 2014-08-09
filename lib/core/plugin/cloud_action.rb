@@ -36,7 +36,7 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
   
   def normalize(reload)
     super
-    @network = init_network(extension_set(:network_provider, :corl)) unless reload 
+    init_network unless reload 
   end
   
   #-----------------------------------------------------------------------------
@@ -111,7 +111,7 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
   #---
         
   def node_exec
-    self.network = init_network(settings[:net_provider]) unless settings[:net_provider].to_sym == network.plugin_provider
+    init_network(settings[:net_provider]) unless settings[:net_provider].to_sym == network.plugin_provider
     
     #
     # A fork in the road...
@@ -146,7 +146,9 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
   
   #---
   
-  def init_network(provider, path = nil)
+  def init_network(provider = nil, path = nil)
+    provider = extension_set(:network_provider, :corl) unless provider
+    
     # Get network configuration path
     if CORL.admin?
       network_path = lookup(:corl_network)
@@ -157,8 +159,7 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
     
     # Load network if it exists
     network_config = extended_config(:network, { :directory => network_path })
-    network        = CORL.network(network_path, network_config, provider)
-    network  
+    @network       = CORL.network(network_path, network_config, provider)
   end
   
   #---
