@@ -42,9 +42,11 @@ class Plugin < ::Vagrant.plugin('2')
     hook.after Vagrant::Action::Builtin::WaitForCommunicator, Action::InitKeys
   end
   
-  action_hook 'link-network', :machine_action_up do |hook|
-    nucleon_require(@@action_dir, :link_network)
-    hook.after Action::InitKeys, Action::LinkNetwork
+  if ENV['CORL_LINK_NETWORK']
+    action_hook 'link-network', :machine_action_up do |hook|
+      nucleon_require(@@action_dir, :link_network)
+      hook.after Action::InitKeys, Action::LinkNetwork
+    end
   end
   
   action_hook 'delete-cache', :machine_action_destroy do |hook|
