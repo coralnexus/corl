@@ -10,7 +10,7 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
   def self.describe
     super(:node, :seed, 625)
   end
- 
+  
   #-----------------------------------------------------------------------------
   # Settings
   
@@ -18,7 +18,6 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
     super do
       codes :key_store_failure,
             :project_failure,
-            :network_init_failure,
             :network_load_failure,
             :node_load_failure,
             :node_save_failure
@@ -49,12 +48,16 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
           
           info('deploy_keys')
           
+          project_class = CORL.plugin_class(:nucleon, :project)
+          
           if keys = Util::SSH.generate.store
-            if @project_info
+            if @project_info = project_class.translate_reference(settings[:project_reference], true)
               project_info = Config.new(@project_info)
             else
               project_info = Config.new({ :provider => :git })
             end
+            
+            project_class.clear_provider(network_path)
             
             info('backup')
             FileUtils.rm_rf(backup_path)
@@ -69,28 +72,27 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
               :create      => true,
               :pull        => true,
               :keys        => keys,
-              :internal_ip => CORL.public_ip # Needed for seeding Vagrant VMs
+              :internal_ip => CORL.public_ip, # Needed for seeding Vagrant VMs,
+              :new         => true
             }), project_info[:provider])
-        
+            
             if project
               info('finalizing')
               FileUtils.chmod_R(0600, network_path)
               FileUtils.rm_rf(backup_path)
               
               info('reinitializing')
-              if network = init_network
-                if network.load
-                  if node = network.local_node(true)
-                    info('updating')
-                    myself.status = code.node_save_failure unless node.save  
-                  else
-                    myself.status = code.node_load_failure
-                  end                  
+              init_network
+              
+              if network.load
+                if node = network.local_node(true)
+                  info('updating')
+                  myself.status = code.node_save_failure unless node.save  
                 else
-                  myself.status = code.network_load_failure    
-                end
+                  myself.status = code.node_load_failure
+                end                  
               else
-                myself.status = code.network_init_failure
+                myself.status = code.network_load_failure    
               end     
             else
               myself.status = code.project_failure  
