@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: eed8e18ed4be473eb9821703ee0049cee7eca3c3
+  revision: fb03350091423aa4dddf41b8373a10b3b0eb2fd3
   branch: 0.2
   specs:
     nucleon (0.2.3)
