@@ -672,22 +672,23 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     if machine && machine.running?
       config      = Config.ensure(options)
       hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config })
+      quiet       = config.get(:quiet, false)
       
       if extension_check(:download, hook_config)
         logger.info("Downloading from #{plugin_name}")
       
-        info("Starting download of #{remote_path} to #{local_path}", { :i18n => false }) 
+        info("Starting download of #{remote_path} to #{local_path}", { :i18n => false }) unless quiet
         yield(:config, hook_config) if block_given?
         
         active_machine = local? ? local_machine : machine
         
         success = active_machine.download(remote_path, local_path, config.export) do |name, received, total|
-          info("#{name}: Sent #{received} of #{total}", { :i18n => false })
+          info("#{name}: Sent #{received} of #{total}", { :i18n => false }) unless quiet
           yield(:progress, { :name => name, :received => received, :total => total })
         end
         
         if success && block_given?
-          info("Successfully finished download of #{remote_path} to #{local_path}", { :i18n => false })
+          info("Successfully finished download of #{remote_path} to #{local_path}", { :i18n => false }) unless quiet
           process_success = yield(:process, hook_config)
           success         = process_success if process_success == false        
         end
@@ -710,22 +711,23 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     if machine && machine.running?
       config      = Config.ensure(options)
       hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config })
+      quiet       = config.get(:quiet, false)
       
       if extension_check(:upload, hook_config)
         logger.info("Uploading to #{plugin_name}")
       
-        info("Starting upload of #{local_path} to #{remote_path}", { :i18n => false }) 
+        info("Starting upload of #{local_path} to #{remote_path}", { :i18n => false }) unless quiet
         yield(:config, hook_config) if block_given?
         
         active_machine = local? ? local_machine : machine
         
         success = active_machine.upload(local_path, remote_path, config.export) do |name, sent, total|
-          info("#{name}: Sent #{sent} of #{total}", { :i18n => false })
+          info("#{name}: Sent #{sent} of #{total}", { :i18n => false }) unless quiet
           yield(:progress, { :name => name, :sent => sent, :total => total })  
         end
         
         if success && block_given?
-          info("Successfully finished upload of #{local_path} to #{remote_path}", { :i18n => false })
+          info("Successfully finished upload of #{local_path} to #{remote_path}", { :i18n => false }) unless quiet
           process_success = yield(:process, hook_config)
           success         = process_success if process_success == false        
         end
@@ -742,15 +744,15 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
   
   #---
   
-  def send_files(local_path, remote_path, files = nil, permission = '0644', &code)
+  def send_files(local_path, remote_path, files = nil, permission = '0644', options = {}, &code)
     local_path = File.expand_path(local_path)
     return false unless File.directory?(local_path)
     
     success = true
     
     send_file = lambda do |local_file, remote_file|
-      send_success = upload(local_file, remote_file) do |op, options|
-        code.call(op, options) if code
+      send_success = upload(local_file, remote_file, options) do |op, upload_options|
+        code.call(op, upload_options) if code
       end
       send_success = cli_check(:chmod, permission, remote_file) if send_success
       send_success  
@@ -975,7 +977,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
         auth_files.each do |file|
           package_files << file.gsub(local_path + '/', '')
         end
-        send_success = send_files(local_path, user_home, package_files, '0600') do |op, data|
+        send_success = send_files(local_path, user_home, package_files, '0600', { :quiet => true }) do |op, data|
           yield("send_#{op}".to_sym, data) if block_given?
           data
         end
@@ -996,7 +998,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
           remote_bootstrap_path = File.join(user_home, bootstrap_name)
           
           cli.rm('-Rf', remote_bootstrap_path)
-          send_success = send_files(bootstrap_path, remote_bootstrap_path, nil, '0700') do |op, data|
+          send_success = send_files(bootstrap_path, remote_bootstrap_path, nil, '0700', { :quiet => true }) do |op, data|
             yield("send_#{op}".to_sym, data) if block_given?
             data
           end
@@ -1315,8 +1317,9 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
   # CLI utilities
   
   def cli_capture(cli_command, *args)
-    result = cli.send(cli_command, args)
-             
+    result = exec({ :commands => [ [ cli_command, args ].flatten.join(' ') ], :quiet => true })
+    result = result.first
+                    
     if result.status == code.success && ! result.output.empty? 
       result.output
     else
