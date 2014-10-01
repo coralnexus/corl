@@ -39,9 +39,10 @@ Jeweler::Tasks.new do |gem|
   gem.rdoc_options << '--title' << 'Coral Orchestration and Research Library' <<
                       '--main' << 'README.rdoc' <<
                       '--line-numbers'
-                      
-  gem.files.include Dir.glob('bootstrap/**/*') 
   
+  gem.files.exclude Dir.glob('rdoc/site/**/*')                   
+  gem.files.include Dir.glob('bootstrap/**/*')
+    
   # Dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
