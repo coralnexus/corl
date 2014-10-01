@@ -87,12 +87,6 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
               if network.load
                 if node = network.local_node(true)
                   info('updating')
-                  # TODO: Remove (need versioned because we need to check right after bootstrap)
-                  # If local node exists and node provider is not local, remove local
-                  Nucleon.dump_enabled=true
-                  dbg(network.export, 'network')
-                  dbg(node.export, 'node')
-
                   myself.status = code.node_save_failure unless node.save
                 else
                   myself.status = code.node_load_failure
