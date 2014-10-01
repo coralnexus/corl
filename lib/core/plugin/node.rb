@@ -1100,7 +1100,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
         success = save(config) if success
 
         if success
-          if config.get(:bootstrap, true) && bootstrap_script
+          if config.get(:bootstrap, false) && bootstrap_script
             result = command("HOSTNAME='#{hostname}' #{bootstrap_script}", { :as_admin => true }) do |op, data|
               yield("bootstrap_#{op}".to_sym, data) if block_given?
               data
