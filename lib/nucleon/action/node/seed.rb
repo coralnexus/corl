@@ -86,8 +86,8 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
 
               if network.load
                 if node = network.local_node(true)
-                  info('updating')
-                  myself.status = code.node_save_failure unless node.save
+                  #info('updating')
+                  #myself.status = code.node_save_failure unless node.save
                 else
                   myself.status = code.node_load_failure
                 end
