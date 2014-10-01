@@ -29,7 +29,7 @@ class CORL < ::Vagrant.plugin("2", :config)
     @project_reference = UNSET_VALUE
     @project_branch    = UNSET_VALUE
     
-    @provision         = UNSET_VALUE
+    @provision         = false
     @dry_run           = false
   end
   
@@ -52,8 +52,6 @@ class CORL < ::Vagrant.plugin("2", :config)
     @seed              = nil if @seed == UNSET_VALUE
     @project_reference = nil if @project_reference == UNSET_VALUE
     @project_branch    = nil if @project_branch == UNSET_VALUE
-    
-    @provision         = nil if @provision == UNSET_VALUE
   end
   
   #-----------------------------------------------------------------------------
