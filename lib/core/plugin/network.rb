@@ -12,7 +12,7 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
     super
 
     logger.info("Initializing network: reloading? #{reload}")
-    myself.config = CORL.configuration(Config.new(myself._export).import({ :autosave => false, :create => false })) unless reload
+    myself.config = CORL.configuration(Config.new(myself._export).import({ :autosave => false, :create => false, :new => true })) unless reload
 
     config.delete(:directory) # TODO: Figure out what to do with this??
 
@@ -197,7 +197,6 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
       provider = matches.keys[0]
       return node(provider, matches[provider], require_new)
     end
-
     nil
   end
 
