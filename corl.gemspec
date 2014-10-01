@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2014-08-12"
+  s.date = "2014-10-01"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -71,6 +71,7 @@ Gem::Specification.new do |s|
     "lib/core/mod/fog_aws_server.rb",
     "lib/core/mod/fog_rackspace_server.rb",
     "lib/core/mod/hiera_backend.rb",
+    "lib/core/plugin/agent.rb",
     "lib/core/plugin/builder.rb",
     "lib/core/plugin/cloud_action.rb",
     "lib/core/plugin/configuration.rb",
