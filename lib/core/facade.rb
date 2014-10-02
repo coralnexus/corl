@@ -105,7 +105,7 @@ module Facade
     plugin(:CORL, :builder, provider, options)
   end
   
-  def builder(data, build_hash = false, keep_array = false)
+  def builders(data, build_hash = false, keep_array = false)
     plugins(:CORL, :builder, data, build_hash, keep_array)
   end
   
