@@ -1,0 +1,11 @@
+== CORL tasks to complete before 1.0 release
+
+* Default action arguments and options for networks
+* Error handling improvements
+* Full code documentation
+* Full coverage unit tests
+* Performance improvements
+* Google node and machine providers
+* Localization improvements
+* Logging consolidation (eliminate redundant log entries)
+* Fix bugs :-(
