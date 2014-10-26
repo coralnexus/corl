@@ -4,6 +4,7 @@
 * Error handling improvements
 * Full code documentation
 * Full coverage unit tests
+* Test on Windows, Mac, Linux (Debian, Ubuntu, CentOS, Redhat, Suse)
 * Performance improvements
 * Google node and machine providers
 * Localization improvements
