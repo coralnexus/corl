@@ -33,16 +33,28 @@ Jeweler::Tasks.new do |gem|
   gem.email                 = "adrian.webb@coralnexus.com"
   gem.authors               = ["Adrian Webb"]
   gem.summary               = %Q{Coral Orchestration and Research Library}
-  gem.description           = %Q{Framework that provides a simple foundation for growing organically in the cloud} 
+  gem.description           = %Q{Framework that provides a simple foundation for growing organically in the cloud}
   gem.required_ruby_version = '>= 1.9.1'
   gem.has_rdoc              = true
   gem.rdoc_options << '--title' << 'Coral Orchestration and Research Library' <<
                       '--main' << 'README.rdoc' <<
                       '--line-numbers'
-  
-  gem.files.exclude Dir.glob('rdoc/site/**/*')                   
-  gem.files.include Dir.glob('bootstrap/**/*')
-    
+
+  gem.files = [
+    Dir.glob('bootstrap/**/*'),
+    Dir.glob('bin/*'),
+    Dir.glob('lib/**/*.rb'),
+    Dir.glob('spec/**/*.rb'),
+    Dir.glob('locales/**/*.yml'),
+    Dir.glob('**/*.rdoc'),
+    Dir.glob('**/*.txt'),
+    Dir.glob('Gemfile*'),
+    Dir.glob('*.gemspec'),
+    Dir.glob('.git*'),
+    'VERSION',
+    'Rakefile'
+  ]
+
   # Dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
@@ -52,7 +64,7 @@ Jeweler::RubygemsDotOrgTasks.new
 
 RSpec::Core::RakeTask.new(:spec, :tag) do |spec, task_args|
   options = []
-  options << "--tag #{task_args[:tag]}" if task_args.is_a?(Array) && ! task_args[:tag].to_s.empty?  
+  options << "--tag #{task_args[:tag]}" if task_args.is_a?(Array) && ! task_args[:tag].to_s.empty?
   spec.rspec_opts = options.join(' ')
 end
 
@@ -72,14 +84,14 @@ end
 
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = File.join('rdoc', 'site', version)
-  
+
   rdoc.title    = doc_title
-  rdoc.main     = 'README.rdoc' 
-  
+  rdoc.main     = 'README.rdoc'
+
   rdoc.options << '--line-numbers'
   rdoc.options << '--all'
   rdoc.options << '-w' << '2'
-  
+
   rdoc.rdoc_files.include('*.rdoc')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
