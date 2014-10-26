@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2014-10-01"
+  s.date = "2014-10-26"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
     "README.rdoc"
   ]
   s.files = [
-    ".document",
+    ".gitignore",
     ".gitmodules",
     "Gemfile",
     "Gemfile.lock",
@@ -84,7 +84,6 @@ Gem::Specification.new do |s|
     "lib/core/util/puppet.rb",
     "lib/core/util/puppet/resource.rb",
     "lib/core/util/puppet/resource_group.rb",
-    "lib/core/vagrant/Vagrantfile",
     "lib/core/vagrant/action.rb",
     "lib/core/vagrant/actions/delete_cache.rb",
     "lib/core/vagrant/actions/init_keys.rb",
@@ -136,7 +135,6 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/node/stop.rb",
     "lib/nucleon/action/plugin/create.rb",
     "lib/nucleon/action/plugin/list.rb",
-    "lib/nucleon/action/plugin/template/nucleon.action.erb",
     "lib/nucleon/action/plugins.rb",
     "lib/nucleon/event/puppet.rb",
     "lib/nucleon/extension/corl_config.rb",
@@ -164,8 +162,6 @@ Gem::Specification.new do |s|
     "lib/puppet/parser/functions/render.rb",
     "lib/puppet/parser/functions/value.rb",
     "locales/en.yml",
-    "spec/corl_mock_input.rb",
-    "spec/corl_test_kernel.rb",
     "spec/spec_helper.rb"
   ]
   s.homepage = "http://github.com/coralnexus/corl"
