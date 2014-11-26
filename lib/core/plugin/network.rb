@@ -451,9 +451,8 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
   #---
 
   def batch(node_references, default_provider = nil, parallel = true, &code)
-    success = true
-
     node_references = array(node_references.clone)
+    success         = true
 
     if has_nodes? && ! node_references.empty?
       # Execute action on selected nodes
