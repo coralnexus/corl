@@ -18,7 +18,7 @@ begin
 
   internal_exec = ( CORL.admin? || ARGV.include?('--version') || ARGV.include?('-h') || ARGV.include?('--help') )
 
-  if false && ! internal_exec && nucleon_locate(:vagrant)
+  if ! internal_exec && nucleon_locate(:vagrant)
     system(*[ 'vagrant', 'corl', ARGV ].flatten)
     exit($?.exitstatus)
   else
