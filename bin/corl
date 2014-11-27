@@ -16,14 +16,7 @@ begin
 
   # Execute
 
-  internal_exec = ( CORL.admin? || ARGV.include?('--version') || ARGV.include?('-h') || ARGV.include?('--help') )
-
-  if ! internal_exec && nucleon_locate(:vagrant)
-    system(*[ 'vagrant', 'corl', ARGV ].flatten)
-    exit($?.exitstatus)
-  else
-    exit(CORL.executable(ARGV, :corl))
-  end
+  exit(CORL.executable(ARGV, :corl))
 
 rescue Interrupt
   exit(CORL.interrupt_handler)
