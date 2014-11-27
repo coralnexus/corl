@@ -35,8 +35,9 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
   # Constuctor / Destructor
 
   def normalize(reload)
-    super
-    init_network unless reload
+    super do
+      init_network
+    end
   end
 
   #-----------------------------------------------------------------------------
