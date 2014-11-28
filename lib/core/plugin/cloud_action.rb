@@ -112,7 +112,7 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
   #---
 
   def node_exec
-    init_network(settings[:net_provider]) unless settings[:net_provider].to_sym == network.plugin_provider
+    init_network(settings[:net_provider]) unless network && settings[:net_provider].to_sym == network.plugin_provider
 
     #
     # A fork in the road...
