@@ -42,28 +42,30 @@ class Status < Nucleon.plugin_class(:nucleon, :cloud_action)
         settings[:status_nodes] = [ 'all' ] if settings[:status_nodes].empty?
 
         batch_success = network.batch(settings[:status_nodes], settings[:node_provider], settings[:parallel]) do |node|
-          state       = node.state(true)
-          state       = state.nil? ? :aborted : state.to_sym
-          ssh_enabled = ''
+          unless node.is_a?(Nucleon.provider_class(:CORL, :node, :local))
+            state       = node.state(true)
+            state       = state.nil? ? :aborted : state.to_sym
+            ssh_enabled = ''
 
-          case state
-          when :running, :active
-            state = green(state.to_s)
+            case state
+            when :running, :active
+              state = green(state.to_s)
 
-            unless settings[:basic]
-              result = node.cli.test :true
+              unless settings[:basic]
+                result = node.cli.test :true
 
-              if result.status == code.success
-                ssh_enabled = '[ ' + green('connected') + ' ]'
-              else
-                ssh_enabled = '[ ' + red('connection failed') + ' ]'
+                if result.status == code.success
+                  ssh_enabled = '[ ' + green('SSH connected') + ' ]'
+                else
+                  ssh_enabled = '[ ' + red('SSH connection failed') + ' ]'
+                end
               end
-            end
 
-          when :stopped, :aborted
-            state = red(state.to_s)
+            when :stopped, :aborted
+              state = red(state.to_s)
+            end
+            info(state.to_s + " #{ssh_enabled}".rstrip, { :i18n => false, :prefix_text => yellow(node.plugin_provider) + ' ' + purple(node.plugin_name) })
           end
-          info(state.to_s + " #{ssh_enabled}".rstrip, { :i18n => false, :prefix_text => yellow(node.plugin_provider) + ' ' + purple(node.plugin_name) })
           true
         end
         if batch_success
