@@ -470,7 +470,6 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
           proc_success = code.call(node)
           if proc_success == false
             success = false
-            break
           end
         end
       end
