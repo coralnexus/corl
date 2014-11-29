@@ -51,9 +51,9 @@ en:
               key_bits: |-
                 Encryption strength must be greater than %{required} bits (%{value} specified)
               no_password: |-
-                Password verification of private key was terminated (verification required to use encrypted SSH keys)             
+                Password verification of private key was terminated (verification required to use encrypted SSH keys)
     action:
-      unknown: 
+      unknown:
         description: |-
           This CORL action has no description available
         help: |-
@@ -64,19 +64,19 @@ en:
             List all of the currently loaded plugins and providers
           help: |-
             List all of the currently loaded plugins and providers.
-          
+
             Nucleon plugin providers are defined via a path search from specified base directories of the format below:
-          
+
             >> {base_dir}/lib/{namespace}/{plugin_type}/{provider}.rb
-          
+
             By default, base paths are searched from:
-              
+
               * Ruby Gems on the system
               * Managed projects (including networks and packages)
               * Component projects (such as Puppet modules)
               * Current directory and parents
-            
-            More base paths from across the system can be added by implementing the "register_plugins" hook within an 
+
+            More base paths from across the system can be added by implementing the "register_plugins" hook within an
             extension plugin provider in your project.
           info:
             namespace: |-
@@ -90,10 +90,10 @@ en:
             Create a new plugin within the current project
           help: |-
             Create a new plugin provider of a specified type.
-            
-            So far the only type with an implemented template is the Action plugin type.  
+
+            So far the only type with an implemented template is the Action plugin type.
             More coming soon.
-            
+
             If you want to save an interpolated template to a project provider, use the --save option.
           options:
             type: |-
@@ -127,15 +127,15 @@ en:
             Create a new network project
           help: |-
             Create a new network project with an optional existing project reference.
-            
+
             Network projects are started from template projects that contain default nodes, configurations, etc...
-            
+
             Project references take the form:
-              
+
               {project provider}:::{provider id}[{project revision}]
-              
+
               github:::coralnexus/network-template[master]  (the default network template)
-              
+
             If the --path option is not specified the create action attempts to create the project in the current
             directory.  If files or directories exist, the project creation will fail.
           info:
@@ -146,8 +146,8 @@ en:
             Update the network project remote
           help: |-
             Update network project remotes to reference an external project.
-            
-            If trying to specify a private project, be sure you can reach the project provider from your 
+
+            If trying to specify a private project, be sure you can reach the project provider from your
             computer first.  You might need to include your regular private key or create a deploy key
             for project access.
           info:
@@ -158,24 +158,24 @@ en:
             Inspect the network configuration
           help: |-
             Inspect any defined network configuration.  It is not intended to access or
-            set the node configurations defined in the config directory, which you can use the `node lookup` and 
+            set the node configurations defined in the config directory, which you can use the `node lookup` and
             `cloud config` actions.
-            
+
             Nested configurations can be accessed by specifying the nested keys in sequence in the arguments.
-            
+
             corl inspect                           # Returns all loaded configurations for network
-            corl inspect nodes                     # Returns all node definitions 
+            corl inspect nodes                     # Returns all node definitions
             corl inspect nodes rackspace           # Returns all Rackspace node definitions
             corl inspect settings web_server facts # Returns all facts defined for settings group `web_server`
             corl inspect provisioners              # Returns all provisioner settings defined for network
-            
+
             The configurations include:
-              
+
               * General network settings
               * Node definitions
               * Provisioner settings
               * Configurations of the above types loaded from included packages
-              
+
             The results can be viewed in multiple formats dependending on the Nucleon translator plugins currently
             loaded into the project.  To see which ones are loaded, run:  `corl plugins`
           options:
@@ -186,35 +186,35 @@ en:
             Display and manage network settings
           help: |-
             Display and manage network settings and save to the network.
-            
+
             Settings groups control what configurations and facts are used for which nodes.  Nodes in the network are assigned
-            to groups, through the `corl node group` action, which contain custom facts and other specialized settings that 
+            to groups, through the `corl node group` action, which contain custom facts and other specialized settings that
             help control the build, management, and provisioning of the nodes.
-            
+
             This action makes it easier to automate management of the CORL network settings structure without having
             to worry about editing configuration files in different places.
-            
+
             Currently supported operations:
-              
+
               * If called with the --groups option, it will return all of the currently defined settings groups in the network
               * If called with no arguments, it will return settings for all groups
               * If a settings group is given but no name, it returns all settings for group
               * If group and name are given but no value, it returns group settings for property name
               * If group, name, and --delete option are given, the group setting is deleted
               * If group, name, and value are given, the group setting with the name is set to the given value
-              
-            Nested settings (hashes) can be accessed with typical hash syntax.  Currently internal array access is not 
+
+            Nested settings (hashes) can be accessed with typical hash syntax.  Currently internal array access is not
             supported, but you can append to existing scalar values and arrays with the --apend option.
-            
+
             Name example:
-              
+
               corl cloud settings vagrant facts[corl_identity] adrian_test
-              
+
             The results can be viewed in multiple formats dependending on the Nucleon translator plugins currently
-            loaded into the project.  To see which ones are loaded, run:  `corl plugins`              
+            loaded into the project.  To see which ones are loaded, run:  `corl plugins`
           options:
             array: |-
-              Force setting of configuration to array, event if single argument given (default %{default_value}) 
+              Force setting of configuration to array, event if single argument given (default %{default_value})
             delete: |-
               Delete the group setting from the network (default %{default_value})
             append: |-
@@ -242,15 +242,15 @@ en:
           description: |-
             Display and manage node configurations
           help: |-
-            Display and manage node configurations and save to the network.  
-            
-            This system currently uses Hiera as the configuration search implementation so all 
+            Display and manage node configurations and save to the network.
+
+            This system currently uses Hiera as the configuration search implementation so all
             node configurations are stored in JSON or YAML in directories under the network
             `config` directory.  The system searches through these directories based on Hiera
             search rules.
-            
+
             Example configuration search path under config directory:
-              
+
               identities/%{::corl_identity}/nodes/%{::corl_provider}/%{::fqdn}
               identities/%{::corl_identity}/stages/%{::corl_stage}
               identities/%{::corl_identity}/environments/%{::corl_environment}
@@ -262,44 +262,44 @@ en:
               environments/%{::corl_environment}
               stages/%{::corl_stage}
               types/%{::corl_type}
-              
+
             This search path can be changed to whatever you would like.  Simply add or alter an
-            existing `hiera_config` extension provider hook in your network project and set the 
-            config[:hierarchy] property to an array containing an ordered search path like the above.  
-            As you can see above, node facts can be interpolated into the paths to allow for dynamic 
-            configuration searches.  You can check the current Hiera configurations at any time by 
+            existing `hiera_config` extension provider hook in your network project and set the
+            config[:hierarchy] property to an array containing an ordered search path like the above.
+            As you can see above, node facts can be interpolated into the paths to allow for dynamic
+            configuration searches.  You can check the current Hiera configurations at any time by
             running; `corl node lookup` (without arguments).
-            
-            This action makes it easy for humans and machines to automate configurations to this system 
-            It is capable of creating directories and files to house the configurations and takes care 
+
+            This action makes it easy for humans and machines to automate configurations to this system
+            It is capable of creating directories and files to house the configurations and takes care
             of version control like other cloud actions, such as `corl cloud settings`.
-            
+
             Configurations are referenced with a specific format:
-              
+
               {directory}/{subdirectory}/{file base(no ext)}@{property}[{hash key}]
-              
+
             Examples:
-              
+
               common@php::apache::memory_limit
               identity/test@users::user[admin][shell]
               servers/development/dev.loc@facts[corl_environment]
-            
+
             Currently supported operations:
-              
+
               * If name is given as file without property, it will return all configurations in the file
               * If name contains file and property with --delete option, configuration is deleted from network
               * If name contains file and property but no values given, it will return the current configuration
               * If name contains file and property and values given, configuration name is set to values collected
-              
-            Currently internal array access is not supported but you can append to a scalar value or array with 
+
+            Currently internal array access is not supported but you can append to a scalar value or array with
             the --append option.
-            
-            The given values can be parsed and the results can be viewed in multiple formats dependending on the 
-            Nucleon translator plugins currently loaded into the project.  To see which ones are loaded, 
-            run:  `corl plugins`            
+
+            The given values can be parsed and the results can be viewed in multiple formats dependending on the
+            Nucleon translator plugins currently loaded into the project.  To see which ones are loaded,
+            run:  `corl plugins`
           options:
             array: |-
-              Force setting of configuration to array, event if single argument given (default %{default_value}) 
+              Force setting of configuration to array, event if single argument given (default %{default_value})
             delete: |-
               Delete the configuration from the network (default %{default_value})
             append: |-
@@ -333,25 +333,25 @@ en:
               Node configuration `%{name}` updated (%{remote_text})
             delete: |-
               Node configuration `%{name}` deleted (%{remote_text})
-        vagrantfile: 
+        vagrantfile:
           description: |-
             Generate a scaffolding Vagrantfile
           help: |-
-            Generate a Vagrantfile capable of providing CORLized virtual machines and either render to console or 
+            Generate a Vagrantfile capable of providing CORLized virtual machines and either render to console or
             save to new Vagrantfile in network.
-            
-            CORL integrates with Vagrant to provide easy access to local virtual machines or even remote development 
-            machines with the right Vagrant plugins.  Since Vagrant searches for it's settings by default in Ruby 
-            based Vagrantfiles we provide an integration layer that configures Vagrant when it is loaded.  
-            
-            This way we can have our machine translated configurations with the power of Vagrant development in a 
+
+            CORL integrates with Vagrant to provide easy access to local virtual machines or even remote development
+            machines with the right Vagrant plugins.  Since Vagrant searches for it's settings by default in Ruby
+            based Vagrantfiles we provide an integration layer that configures Vagrant when it is loaded.
+
+            This way we can have our machine translated configurations with the power of Vagrant development in a
             system that can easily integrate with our staging, qa, and production environments.
           options:
             save: |-
               Save the rendered Vagrantfile to the network (default %{default_value})
           error:
             update: |-
-              %{file} update could not be saved to network 
+              %{file} update could not be saved to network
             file_save: |-
               File %{file} could not be saved to disk
           success:
@@ -362,35 +362,35 @@ en:
             Retrieve known regions for a specified provider
           help: |-
             List supported regions for a specific node provider, e.g., aws, rackspace, etc...
-            
+
             The region IDs returned from this action should be used whenever a region option or argument is presented.
-            
+
             In the future this will have more information associated with each region ID.
         machines:
           description: |-
             Return a list of machine types supported by a provider
           help: |-
             List available machine types from a specific node provider, e.g, aws, rackspace, etc...
-            
+
             In the future we intend to find a way to reliably display the pricing of each machine to make it easy to
             compare across providers when planning a cloud architecture.
-            
+
             To see all currently loaded node providers, run: `corl plugins`
           success:
             results: |-
-              Total of %{machines} machine types found                      
+              Total of %{machines} machine types found
         images:
           description: |-
             Search the available images at a specified provider
           help: |-
             List or search through available images from a specific node provider, e.g, aws, rackspace, etc...
-            
+
             Images are usually isolated to a particular region of the cloud provider so you will want to know which
-            region you are targeting.  Run `corl cloud regions {provider}` to find the available regions for your 
+            region you are targeting.  Run `corl cloud regions {provider}` to find the available regions for your
             provider.  Loaded node providers can be found by running `corl plugins`.
-            
+
             You may specify search terms to query the images (useful for services such as AWS) to reduce the options.
-            This makes it fairly easy to find the images you are looking for right from the command line.  The search 
+            This makes it fairly easy to find the images you are looking for right from the command line.  The search
             can be tightened with two options; --match_case, or --require_all.
           options:
             region: |-
@@ -398,10 +398,10 @@ en:
             match_case: |-
               Match case on any search terms given when searching for images (default %{default_value})
             require_all: |-
-              Require all search terms to be present in image descriptions to be included (default %{default_value}) 
+              Require all search terms to be present in image descriptions to be included (default %{default_value})
           success:
             results: |-
-              Total of %{images} images found  
+              Total of %{images} images found
       node:
         spawn:
           description: |-
@@ -409,26 +409,26 @@ en:
           help: |-
             Create new network nodes from a given provider based on a specified provider image and machine type.
             Nodes are created in node provider (aws, rackspace, etc...) regions.
-            
+
             In the case that you are creating a Vagrant node hostnames should be specified with the hostname[ipaddress] syntax
             to map the Vagrant machine to a localized IP of your choice.  It is also possible to use a single range to specify
             a pattern for multiple nodes to create, such as test[1-10].example.com.  Only one range is currently supported.
-            
+
             * To check which providers are implemented, run `corl plugins` and reference the CORL node plugin type providers
             * To check the regions available for a specific provider, run `corl cloud regions {provider}`
             * To check what machine types are available for a provider, run `corl cloud machines {provider}`
             * To search images available in a provider region, run `corl cloud images {provider} --region={region} [ {search terms}... ]`
-            
+
             To provision node directly after creation specify the --provision flag.
-            
+
             The most common options you will use include: (see options section for more info on each)
               --region
               --machine_type
               --groups
               --user
-            
+
             The spawn process consists of:
-              
+
             > Run locally:
             * Configurations are added to network for new node
             * Node machine is created on provider
@@ -452,7 +452,7 @@ en:
             provider: |-
               Create machines with this node provider
             image: |-
-              Provider ID of operating system image on which to initialize the new machines           
+              Provider ID of operating system image on which to initialize the new machines
             hostnames: |-
               Hostnames of machines to create on provider infrastructure
             groups: |-
@@ -466,10 +466,10 @@ en:
           description: |-
             Bootstrap existing nodes
           help: |-
-            Boostrap the CORL system onto existing network nodes.  This is useful for CORL related development, 
+            Boostrap the CORL system onto existing network nodes.  This is useful for CORL related development,
             as we can easily install updates from the source branch.
-            
-            It is possible to specify your own bootstrap scripts with the --bootstrap_path, --bootstrap_init and 
+
+            It is possible to specify your own bootstrap scripts with the --bootstrap_path, --bootstrap_init and
             --bootstrap_glob options.  It is also possible to specify authentication files that authorize the node
             for network services.  By default .fog and .netrc files are transmitted to nodes to allow the node
             to initialize security for the system and connect to the necessary cloud services to run CORL actions.
@@ -480,6 +480,8 @@ en:
               Gateway bootstrap script within the bootstrap project directory (default %{default_value})
             bootstrap_glob: |-
               Path glob to use in searching bootstrap scripts for remote execution (default %{default_value})
+            bootstrap_scripts: |-
+              Bootstrap script names to execute on target nodes
             auth_files: |-
               Any additional authorization or state files to pass to the node during bootstrap (relative to local home)
             home_env_var: |-
@@ -498,7 +500,7 @@ en:
               Machine %{hostname} (%{id}) bootstrap failed with status %{status}
           info:
             start: |-
-              Starting bootstrap of machine %{hostname} (%{id})  
+              Starting bootstrap of machine %{hostname} (%{id})
           success:
             complete: |-
               Machine %{hostname} (%{id}) successfully bootstrapped
@@ -506,8 +508,8 @@ en:
           description: |-
             Seed nodes with a specified network project
           help: |-
-            Seed nodes with a specified network project.  
-            
+            Seed nodes with a specified network project.
+
             Projects are specified as project references of the form {provider}:::{reference/url}.
           options:
             project_branch: |-
@@ -540,9 +542,9 @@ en:
             Check and save the current status of nodes in the network
           help: |-
             Check and save the current status of nodes in the network.
-            
-            When given the --basic flag only the connection to the underlying cloud provider is checked for that 
-            node.  This will tell you if the node is still in existence.  Without the --basic flag this action 
+
+            When given the --basic flag only the connection to the underlying cloud provider is checked for that
+            node.  This will tell you if the node is still in existence.  Without the --basic flag this action
             will also check the SSH connection and report if it was successfull or if it failed.
           options:
             basic: |-
@@ -567,14 +569,14 @@ en:
             Destroy network nodes
           help: |-
             Destroy network nodes and remove all associated network references.
-            
+
             Nodes are referenced either by a settings group name or the given node hostname of a provider.  Providers
             may be omitted in the case of groups, attached to the hostname via {provider}:::{hostname}, or the
             --node_provider can be set to find named node.
-            
+
             To help reduce addicental destruction of network nodes, users are prompted before completing operation unless
             --force option is given.  Be careful when using the --force flag.
-            
+
             If you just want to stop this node, consider using the `corl node stop` action instead of destroy.  It will
             leave your network settings in place (node definition), save an image of your node (if possible), and then
             shut down the machine.  That way the node can easily be restarted with `corl node start` when needed.
@@ -585,10 +587,10 @@ en:
             prompt: |-
               Are you sure you want to destroy the following nodes?  This action can not be undone!
             yes_query: |-
-              Type %{yes} or press enter to cancel: 
-          info:  
+              Type %{yes} or press enter to cancel:
+          info:
             start: |-
-              Destroying %{provider} machine %{name}  
+              Destroying %{provider} machine %{name}
         ip:
           description: |-
             Return the public IP address for nodes
@@ -597,11 +599,11 @@ en:
             Retrieve node facts
         lookup:
           description: |-
-            Lookup node configurations 
+            Lookup node configurations
         ssh:
           description: |-
-            SSH into a node       
-        authorize: 
+            SSH into a node
+        authorize:
           description: |-
             Authorize a public key for node access
         revoke:
@@ -609,7 +611,7 @@ en:
             Revoke a public keys access to nodes
         keypair:
           description: |-
-            Generate a new SSH keypair           
+            Generate a new SSH keypair
     actions:
       identity:
         start: |-
@@ -640,10 +642,10 @@ en:
             Lookup evaluation context %{value} is not valid >> Possible contexts: %{choices}
       image:
         start: |-
-          Starting image of %{provider} machine %{name} 
+          Starting image of %{provider} machine %{name}
       start:
         start: |-
-          Starting %{provider} machine %{name} 
+          Starting %{provider} machine %{name}
       stop:
         start: |-
           Stopping %{provider} machine %{name}
@@ -670,4 +672,3 @@ en:
         delete_cache:
           start: |-
             Clearing CORL cache for this machine...
-            
