@@ -979,7 +979,8 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     user_home  = config[:home]
     auth_files = config.get_array(:auth_files)
 
-    reboot     = config.get(:reboot, true)
+    reboot    = config.get(:reboot, false)
+    dev_build = config.get(:dev_build, false)
 
     codes :local_path_not_found,
           :home_path_lookup_failure,
@@ -1030,11 +1031,13 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
           # Execute bootstrap process
           if status == code.success
             remote_script = File.join(remote_bootstrap_path, bootstrap_init)
+            environment   = "HOSTNAME='#{hostname}' "
+            environment  << "DEVELOPMENT_BUILD=1 " if dev_build
             script_names  = bootstrap_scripts.empty? ? '' : bootstrap_scripts.join(' ')
 
             myself.bootstrap_script = remote_script
 
-            result = command("HOSTNAME='#{hostname}' #{remote_script} #{script_names}", { :as_admin => true }) do |op, data|
+            result = command("#{environment} #{remote_script} #{script_names}", { :as_admin => true }) do |op, data|
               yield("exec_#{op}".to_sym, data) if block_given?
               data
             end

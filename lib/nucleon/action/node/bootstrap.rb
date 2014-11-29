@@ -20,6 +20,7 @@ class Bootstrap < Nucleon.plugin_class(:nucleon, :cloud_action)
       register_files :auth_files
 
       register_bool :reboot, false
+      register_bool :dev_build, false
 
       register_str :home_env_var, 'HOME'
       register_str :home, nil

@@ -488,6 +488,8 @@ en:
               Home directory environment variable on remote server (default %{default_value})
             reboot: |-
               Reboot machine after bootstrap complete if successful (default %{default_value})
+            dev_build: |-
+              Build development version of Nucleon and CORL on machine (default %{default_value})
             home: |-
               Specified home directory on remote server (default %{default_value})
             bootstrap_nodes: |-
