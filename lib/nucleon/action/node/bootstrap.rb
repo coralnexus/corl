@@ -19,6 +19,8 @@ class Bootstrap < Nucleon.plugin_class(:nucleon, :cloud_action)
       register_directory :bootstrap_path, File.join(CORL.lib_path, '..', 'bootstrap')
       register_files :auth_files
 
+      register_bool :reboot, false
+
       register_str :home_env_var, 'HOME'
       register_str :home, nil
 

@@ -979,6 +979,8 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     user_home  = config[:home]
     auth_files = config.get_array(:auth_files)
 
+    reboot     = config.get(:reboot, true)
+
     codes :local_path_not_found,
           :home_path_lookup_failure,
           :auth_upload_failure,
@@ -1039,7 +1041,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
             if result.status == code.success
               # Reboot the machine
-              unless reload
+              if reboot && ! reload
                 warn('corl.core.node.bootstrap.reload')
                 myself.status = code.reload_failure
               end
