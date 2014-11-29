@@ -970,10 +970,11 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     config      = Config.ensure(options)
     myself.status = code.unknown_status
 
-    bootstrap_name = 'bootstrap'
-    bootstrap_path = config.get(:bootstrap_path, File.join(CORL.lib_path, '..', bootstrap_name))
-    bootstrap_glob = config.get(:bootstrap_glob, '**/*.sh')
-    bootstrap_init = config.get(:bootstrap_init, 'bootstrap.sh')
+    bootstrap_name    = 'bootstrap'
+    bootstrap_path    = config.get(:bootstrap_path, File.join(CORL.lib_path, '..', bootstrap_name))
+    bootstrap_glob    = config.get(:bootstrap_glob, '**/*.sh')
+    bootstrap_init    = config.get(:bootstrap_init, 'bootstrap.sh')
+    bootstrap_scripts = config.get_array(:bootstrap_scripts)
 
     user_home  = config[:home]
     auth_files = config.get_array(:auth_files)
@@ -1027,10 +1028,11 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
           # Execute bootstrap process
           if status == code.success
             remote_script = File.join(remote_bootstrap_path, bootstrap_init)
+            script_names  = bootstrap_scripts.empty? ? '' : bootstrap_scripts.join(' ')
 
             myself.bootstrap_script = remote_script
 
-            result = command("HOSTNAME='#{hostname}' #{remote_script}", { :as_admin => true }) do |op, data|
+            result = command("HOSTNAME='#{hostname}' #{remote_script} #{script_names}", { :as_admin => true }) do |op, data|
               yield("exec_#{op}".to_sym, data) if block_given?
               data
             end
