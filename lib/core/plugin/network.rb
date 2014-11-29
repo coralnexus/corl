@@ -450,7 +450,7 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
 
   #---
 
-  def batch(node_references, default_provider = nil, parallel = true, &code)
+  def batch(node_references, default_provider = nil, parallel = true, running = true, &code)
     node_references = array(node_references.clone)
     success         = true
 
@@ -461,15 +461,19 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
       if CORL.parallel? && parallel
         values = []
         nodes.each do |node|
-          values << Celluloid::Future.new(node, &code)
+          if ! running || node.running?
+            values << Celluloid::Future.new(node, &code)
+          end
         end
         values  = values.map { |future| future.value }
         success = false if values.include?(false)
       else
         nodes.each do |node|
-          proc_success = code.call(node)
-          if proc_success == false
-            success = false
+          if ! running || node.running?
+            proc_success = code.call(node)
+            if proc_success == false
+              success = false
+            end
           end
         end
       end

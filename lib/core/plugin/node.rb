@@ -68,6 +68,13 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
   #-----------------------------------------------------------------------------
   # Checks
 
+  def running?
+    return machine.running? if machine
+    false
+  end
+
+  #---
+
   def local?
     @local_context ? true : false
   end
