@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2014-11-29"
+  s.date = "2014-12-02"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -70,7 +70,6 @@ Gem::Specification.new do |s|
     "lib/core/mixin/machine/ssh.rb",
     "lib/core/mixin/macro/network_settings.rb",
     "lib/core/mod/fog_aws_server.rb",
-    "lib/core/mod/fog_rackspace_server.rb",
     "lib/core/mod/hiera_backend.rb",
     "lib/core/plugin/agent.rb",
     "lib/core/plugin/builder.rb",
@@ -170,7 +169,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--title", "Coral Orchestration and Research Library", "--main", "README.rdoc", "--line-numbers"]
   s.required_ruby_version = Gem::Requirement.new(">= 1.9.1")
   s.rubyforge_project = "corl"
-  s.rubygems_version = "2.2.2"
+  s.rubygems_version = "2.4.2"
   s.summary = "Coral Orchestration and Research Library"
 
   if s.respond_to? :specification_version then
@@ -178,44 +177,41 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
-      s.add_runtime_dependency(%q<fog>, ["~> 1.20"])
+      s.add_runtime_dependency(%q<fog>, ["~> 1.25"])
+      s.add_runtime_dependency(%q<fog-rackspace>, ["~> 1.0"])
       s.add_runtime_dependency(%q<unf>, ["~> 0.1"])
-      s.add_runtime_dependency(%q<facter>, ["~> 2.1"])
+      s.add_runtime_dependency(%q<facter>, ["~> 2.3"])
       s.add_runtime_dependency(%q<hiera>, ["~> 1.3"])
-      s.add_runtime_dependency(%q<puppet>, ["~> 3.6"])
-      s.add_development_dependency(%q<bundler>, ["~> 1.2"])
+      s.add_runtime_dependency(%q<puppet>, ["~> 3.7"])
+      s.add_development_dependency(%q<bundler>, ["~> 1.7"])
       s.add_development_dependency(%q<jeweler>, ["~> 2.0"])
-      s.add_development_dependency(%q<rspec>, ["~> 2.10"])
-      s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_development_dependency(%q<yard>, ["~> 0.8"])
-      s.add_development_dependency(%q<vagrant>, ["~> 1.5"])
+      s.add_development_dependency(%q<rspec>, ["~> 3.1"])
+      s.add_development_dependency(%q<rdoc>, ["~> 4.1"])
     else
       s.add_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
-      s.add_dependency(%q<fog>, ["~> 1.20"])
+      s.add_dependency(%q<fog>, ["~> 1.25"])
+      s.add_dependency(%q<fog-rackspace>, ["~> 1.0"])
       s.add_dependency(%q<unf>, ["~> 0.1"])
-      s.add_dependency(%q<facter>, ["~> 2.1"])
+      s.add_dependency(%q<facter>, ["~> 2.3"])
       s.add_dependency(%q<hiera>, ["~> 1.3"])
-      s.add_dependency(%q<puppet>, ["~> 3.6"])
-      s.add_dependency(%q<bundler>, ["~> 1.2"])
+      s.add_dependency(%q<puppet>, ["~> 3.7"])
+      s.add_dependency(%q<bundler>, ["~> 1.7"])
       s.add_dependency(%q<jeweler>, ["~> 2.0"])
-      s.add_dependency(%q<rspec>, ["~> 2.10"])
-      s.add_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_dependency(%q<yard>, ["~> 0.8"])
-      s.add_dependency(%q<vagrant>, ["~> 1.5"])
+      s.add_dependency(%q<rspec>, ["~> 3.1"])
+      s.add_dependency(%q<rdoc>, ["~> 4.1"])
     end
   else
     s.add_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
-    s.add_dependency(%q<fog>, ["~> 1.20"])
+    s.add_dependency(%q<fog>, ["~> 1.25"])
+    s.add_dependency(%q<fog-rackspace>, ["~> 1.0"])
     s.add_dependency(%q<unf>, ["~> 0.1"])
-    s.add_dependency(%q<facter>, ["~> 2.1"])
+    s.add_dependency(%q<facter>, ["~> 2.3"])
     s.add_dependency(%q<hiera>, ["~> 1.3"])
-    s.add_dependency(%q<puppet>, ["~> 3.6"])
-    s.add_dependency(%q<bundler>, ["~> 1.2"])
+    s.add_dependency(%q<puppet>, ["~> 3.7"])
+    s.add_dependency(%q<bundler>, ["~> 1.7"])
     s.add_dependency(%q<jeweler>, ["~> 2.0"])
-    s.add_dependency(%q<rspec>, ["~> 2.10"])
-    s.add_dependency(%q<rdoc>, ["~> 3.12"])
-    s.add_dependency(%q<yard>, ["~> 0.8"])
-    s.add_dependency(%q<vagrant>, ["~> 1.5"])
+    s.add_dependency(%q<rspec>, ["~> 3.1"])
+    s.add_dependency(%q<rdoc>, ["~> 4.1"])
   end
 end
 
