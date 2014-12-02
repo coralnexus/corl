@@ -446,15 +446,15 @@ en:
             provision: |-
               Provision the node after the bootstrap process completes (default %{default_value})
             region: |-
-              Machine provider region in which to create the machines (defaults to first defined in provider)
+              Machine provider region in which to create the machines (default %{default_value})
             machine_type: |-
-              Provider ID of machine type to create (defaults to first defined in provider - usually smallest)
+              Provider ID of machine type to create (default %{default_value})
             provider: |-
-              Create machines with this node provider
+              Create machines with this node provider (default %{default_value})
             image: |-
-              Provider ID of operating system image on which to initialize the new machines
+              Provider ID of operating system image on which to initialize the new machines (default %{default_value})
             hostnames: |-
-              Hostnames of machines to create on provider infrastructure
+              Hostnames of machines to create on provider infrastructure (default %{default_value})
             groups: |-
               Initial settings groups this node belongs to (default %{default_value})
             user: |-
