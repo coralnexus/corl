@@ -7,8 +7,6 @@ require 'jeweler'
 require 'rspec/core/rake_task'
 require 'rdoc/task'
 
-require './lib/corl.rb'
-
 #-------------------------------------------------------------------------------
 # Dependencies
 
@@ -65,13 +63,12 @@ RSpec::Core::RakeTask.new(:spec, :tag) do |spec, task_args|
   options << "--tag #{task_args[:tag]}" if task_args.is_a?(Array) && ! task_args[:tag].to_s.empty?
   spec.rspec_opts = options.join(' ')
 end
-
 task :default => :spec
 
 #-------------------------------------------------------------------------------
 # Documentation
 
-version   = CORL.VERSION
+version   = File.read(File.join(File.dirname(__FILE__), 'VERSION'))
 doc_title = "corl #{version}"
 
 class RDoc::Options
