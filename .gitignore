@@ -48,7 +48,4 @@ pkg
 .project
 .buildpath
 .cache
-.project_cache
-build
-config/identities
-.corl
+
