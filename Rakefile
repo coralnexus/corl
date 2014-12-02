@@ -6,7 +6,6 @@ require 'bundler'
 require 'jeweler'
 require 'rspec/core/rake_task'
 require 'rdoc/task'
-require 'yard'
 
 require './lib/corl.rb'
 
@@ -54,7 +53,6 @@ Jeweler::Tasks.new do |gem|
     'VERSION',
     'Rakefile'
   ]
-
   # Dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
@@ -94,11 +92,4 @@ Rake::RDocTask.new do |rdoc|
 
   rdoc.rdoc_files.include('*.rdoc')
   rdoc.rdoc_files.include('lib/**/*.rb')
-end
-
-#---
-
-YARD::Rake::YardocTask.new do |ydoc|
-  ydoc.files   = [ '*.rdoc', 'lib/**/*.rb' ]
-  ydoc.options = [ "--output-dir yardoc", "--title '#{doc_title}'" ]
 end
