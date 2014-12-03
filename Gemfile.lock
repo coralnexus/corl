@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: 115b889653b0166fbfc61b7bf73d47237f076943
+  revision: d6848f16f76b9cdd6fb6737bdac6b13f40d9e36e
   branch: 0.2
   specs:
     nucleon (0.2.3)
@@ -162,7 +162,7 @@ GEM
       builder
       nokogiri (>= 1.4.1)
       trollop
-    rdoc (4.1.2)
+    rdoc (3.12.2)
       json (~> 1.4)
     rspec (3.1.0)
       rspec-core (~> 3.1.0)
@@ -201,6 +201,6 @@ DEPENDENCIES
   jeweler (~> 2.0)
   nucleon (~> 0.2, >= 0.2.2)!
   puppet (~> 3.7)
-  rdoc (~> 4.1)
+  rdoc (~> 3.12)
   rspec (~> 3.1)
   unf (~> 0.1)

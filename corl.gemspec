@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2014-12-02"
+  s.date = "2014-12-03"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -186,7 +186,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<bundler>, ["~> 1.7"])
       s.add_development_dependency(%q<jeweler>, ["~> 2.0"])
       s.add_development_dependency(%q<rspec>, ["~> 3.1"])
-      s.add_development_dependency(%q<rdoc>, ["~> 4.1"])
+      s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
     else
       s.add_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
       s.add_dependency(%q<fog>, ["~> 1.25"])
@@ -198,7 +198,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<bundler>, ["~> 1.7"])
       s.add_dependency(%q<jeweler>, ["~> 2.0"])
       s.add_dependency(%q<rspec>, ["~> 3.1"])
-      s.add_dependency(%q<rdoc>, ["~> 4.1"])
+      s.add_dependency(%q<rdoc>, ["~> 3.12"])
     end
   else
     s.add_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
@@ -211,7 +211,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<bundler>, ["~> 1.7"])
     s.add_dependency(%q<jeweler>, ["~> 2.0"])
     s.add_dependency(%q<rspec>, ["~> 3.1"])
-    s.add_dependency(%q<rdoc>, ["~> 4.1"])
+    s.add_dependency(%q<rdoc>, ["~> 3.12"])
   end
 end
 
