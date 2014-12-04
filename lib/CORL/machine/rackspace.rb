@@ -1,7 +1,7 @@
 
 module CORL
 module Machine
-class Rackspace < Fog
+class Rackspace < FogBase
 
   #-----------------------------------------------------------------------------
   # Checks
@@ -10,9 +10,8 @@ class Rackspace < Fog
   # Property accessors / modifiers
 
   def set_connection
-    require 'fog-rackspace'
     super
-    #Kernel.load File.join(File.dirname(__FILE__), '..', '..', 'core', 'mod', 'fog_rackspace_server.rb')
+    Kernel.load File.join(File.dirname(__FILE__), '..', '..', 'core', 'mod', 'fog_rackspace_server.rb')
   end
 
   #-----------------------------------------------------------------------------
