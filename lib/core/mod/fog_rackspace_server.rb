@@ -2,7 +2,7 @@ module Fog
 module Compute
 class RackspaceV2
 class Server
-  
+
   def setup(credentials = {})
     requires :ssh_ip_address, :identity, :public_key, :username
 
@@ -16,13 +16,13 @@ class Server
     commands.compact
 
     @password = nil if password_lock
-    
+
     Fog::SSH.new(ssh_ip_address, username, credentials).run(commands)
-    
+
   rescue Errno::ECONNREFUSED, Net::SSH::Disconnect
     sleep(1)
     retry
-  end  
+  end
 end
 end
 end

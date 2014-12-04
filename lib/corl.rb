@@ -4,14 +4,14 @@
 #
 # built on Nucleon (github.com/coralnexus/nucleon)
 #
-# A framework that provides a simple foundation for growing organically in 
+# A framework that provides a simple foundation for growing organically in
 # the cloud.
 #
 # Author::    Adrian Webb (mailto:adrian.webb@coralnexus.com)
 # License::   GPLv3
 
 #-------------------------------------------------------------------------------
-# Top level properties 
+# Top level properties
 
 lib_dir           = File.dirname(__FILE__)
 core_dir          = File.join(lib_dir, 'core')
@@ -23,7 +23,7 @@ macro_dir         = File.join(mixin_dir, 'macro')
 util_dir          = File.join(core_dir, 'util')
 mod_dir           = File.join(core_dir, 'mod')
 vagrant_dir       = File.join(core_dir, 'vagrant')
- 
+
 #-------------------------------------------------------------------------------
 # CORL requirements
 
@@ -69,7 +69,7 @@ end
 #---
 
 # Include CORL utilities
-[ :puppet ].each do |name| 
+[ :puppet ].each do |name|
   nucleon_require(util_dir, name)
 end
 
@@ -82,14 +82,14 @@ nucleon_require(core_dir, :errors)
 module Nucleon
   class Config
     extend Mixin::Lookup
-    include Mixin::Lookup  
+    include Mixin::Lookup
   end
-  
+
   #---
-  
+
   module Plugin
     class Base
-      extend Mixin::Macro::NetworkSettings    
+      extend Mixin::Macro::NetworkSettings
     end
   end
 end
@@ -115,19 +115,19 @@ end
 # CORL interface
 
 module CORL
- 
+
   def self.VERSION
-    File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))  
+    File.read(File.join(File.dirname(__FILE__), '..', 'VERSION'))
   end
-  
+
   #-----------------------------------------------------------------------------
   # CORL initialization
-  
+
   def self.lib_path
     File.dirname(__FILE__)
   end
-  
-  #---  
+
+  #---
 
   reload(true, :corl) do |op, manager|
     if op == :define
