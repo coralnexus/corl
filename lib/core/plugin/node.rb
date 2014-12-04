@@ -888,7 +888,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     admin_command = ''
     if as_admin
-      admin_command = 'sudo' if user.to_s != 'root'
+      admin_command = 'sudo -i' if user.to_s != 'root'
       admin_command = extension_set(:admin_command, admin_command, config)
     end
 
