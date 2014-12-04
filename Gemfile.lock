@@ -1,9 +1,9 @@
 GIT
   remote: git://github.com/coralnexus/nucleon.git
-  revision: d6848f16f76b9cdd6fb6737bdac6b13f40d9e36e
+  revision: 49e01c377d42b1656181b34904f6d7927ecdace4
   branch: 0.2
   specs:
-    nucleon (0.2.3)
+    nucleon (0.2.4)
       celluloid (~> 0.16)
       childprocess (~> 0.5)
       deep_merge (~> 1.0)
@@ -72,10 +72,6 @@ GEM
       fog-core
       fog-xml
       nokogiri
-    fog-rackspace (1.0.4)
-      addressable
-      fog-core
-      fog-json
     fog-radosgw (0.0.3)
       fog-core (>= 1.21.0)
       fog-json
@@ -146,7 +142,7 @@ GEM
       multi_json (~> 1.3)
       multi_xml (~> 0.5)
       rack (~> 1.2)
-    octokit (3.6.0)
+    octokit (3.7.0)
       sawyer (~> 0.6.0, >= 0.5.3)
     opennebula (4.10.1)
       json
@@ -157,7 +153,7 @@ GEM
       hiera (~> 1.0)
       json_pure
     rack (1.5.2)
-    rake (10.4.1)
+    rake (10.4.2)
     rbvmomi (1.8.2)
       builder
       nokogiri (>= 1.4.1)
@@ -195,8 +191,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.7)
   facter (~> 2.3)
-  fog (~> 1.25)
-  fog-rackspace (~> 1.0)
+  fog (~> 1.23)
   hiera (~> 1.3)
   jeweler (~> 2.0)
   nucleon (~> 0.2, >= 0.2.2)!
