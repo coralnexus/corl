@@ -986,7 +986,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     user_home  = config[:home]
     auth_files = config.get_array(:auth_files)
 
-    reboot    = config.get(:reboot, false)
+    reboot    = config.get(:reboot, true)
     dev_build = config.get(:dev_build, false)
 
     codes :local_path_not_found,
