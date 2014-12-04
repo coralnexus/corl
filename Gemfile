@@ -2,8 +2,7 @@ source "http://rubygems.org"
 
 gem "nucleon", "~> 0.2", ">= 0.2.2", :github => 'coralnexus/nucleon', :branch => '0.2'
 
-gem "fog", "~> 1.25"
-gem "fog-rackspace", "~> 1.0"
+gem "fog", "~> 1.23"
 gem "unf", "~> 0.1"
 
 gem "facter", "~> 2.3"
