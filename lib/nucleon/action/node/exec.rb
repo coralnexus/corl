@@ -44,8 +44,7 @@ class Exec < Nucleon.plugin_class(:nucleon, :cloud_action)
       if node
         result = node.exec({ :commands => [ command_str ] }).first
       else
-        ui.resource = purple('not in network')
-        result      = CORL.cli_run(command_str, config) do |type, command, data|
+        result = CORL.cli_run(command_str, config) do |type, command, data|
           unless data.empty?
             if type == :error
               warn(data, { :i18n => false })
