@@ -827,10 +827,14 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
             test = active_machine.exec(commands, config.export) do |type, command, data|
               unless quiet
                 unless local?
-                  if type == :error
-                    warn(filter_output(type, data), { :i18n => false })
-                  else
-                    info(filter_output(type, data), { :i18n => false })
+                  text_output = filter_output(type, data)
+
+                  unless text_output.empty?
+                    if type == :error
+                      warn(text_output, { :i18n => false })
+                    else
+                      info(text_output, { :i18n => false })
+                    end
                   end
                 end
                 yield(:progress, { :type => type, :command => command, :data => data }) if block_given?
@@ -888,8 +892,10 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     admin_command = ''
     if as_admin
-      admin_command = 'sudo -i' if user.to_s != 'root'
+      admin_command = config.delete(:admin_command, 'sudo -i') if user.to_s != 'root'
       admin_command = extension_set(:admin_command, admin_command, config)
+    else
+      config.delete(:admin_command)
     end
 
     config[:commands] = [ "#{admin_command} #{command.to_s}".strip ]
@@ -1018,7 +1024,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
           auth_files     = package_files.collect { |path| "'#{path}'"}
           root_home_path = config.get(:root_home, '/root')
 
-          result        = command("cp #{auth_files.join(' ')} #{root_home_path}", { :as_admin => true })
+          result        = command("cp #{auth_files.join(' ')} #{root_home_path}", { :as_admin => true, :admin_command => 'sudo' })
           myself.status = code.root_auth_copy_failure unless result.status == code.success
         end
 
