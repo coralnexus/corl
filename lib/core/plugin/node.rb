@@ -827,7 +827,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
             test = active_machine.exec(commands, config.export) do |type, command, data|
               unless quiet
                 unless local?
-                  text_output = filter_output(type, data)
+                  text_output = filter_output(type, data).rstrip
 
                   unless text_output.empty?
                     if type == :error
