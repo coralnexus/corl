@@ -44,15 +44,7 @@ class Exec < Nucleon.plugin_class(:nucleon, :cloud_action)
       if node
         result = node.exec({ :commands => [ command_str ] }).first
       else
-        result = CORL.cli_run(command_str, config) do |type, command, data|
-          unless data.empty?
-            if type == :error
-              warn(data, { :i18n => false })
-            else
-              info(data, { :i18n => false })
-            end
-          end
-        end
+        result = CORL.cli_run(command_str)
       end
       myself.status = result.status
     end
