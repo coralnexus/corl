@@ -1,13 +1,13 @@
 
 module CORL
-class Build < Core
+class Build
 
   #-----------------------------------------------------------------------------
   # Constructor / destructor
 
   def initialize
-    @config    = Config.new
-    @locations = Config.new
+    @config    = Config.new({}, {}, true, false)
+    @locations = Config.new({}, {}, true, false)
 
     @plurals   = {}
     @types     = {}
