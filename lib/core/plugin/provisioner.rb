@@ -251,7 +251,7 @@ class Provisioner < Nucleon.plugin_class(:nucleon, :base)
 
     success = yield(profiles, config) if block_given?
 
-    Config.save_properties(Config.get_options(:corl_log)) if success
+    Config.save_properties(Config.get_options(:corl_log))
     success
   end
 
