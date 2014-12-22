@@ -1380,6 +1380,11 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
       if data =~ /^Already evaluated [a-z]+ at [^,]+, reevaluating anyways$/
         data = ''
       end
+    elsif type == :error
+      # Hide Rubinius SAFE warning
+      if data == 'WARNING: $SAFE is not supported on Rubinius.'
+        data = ''
+      end
     end
     data
   end
