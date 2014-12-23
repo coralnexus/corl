@@ -409,7 +409,7 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
 
         if success && seed_project
           # Seed machine with remote project reference
-          result = node.node_seed({
+          result = node.action(:node_seed, {
             :project_reference => seed_project,
             :project_branch    => seed_branch
           }) do |op, data|
@@ -423,7 +423,7 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
 
       if success && provision
         # Run configured provisioners on machine
-        result = node.node_provision(config) do |op, data|
+        result = node.action(:node_provision, config) do |op, data|
           yield("provision_#{op}".to_sym, data)
         end
         success = result.status == code.success
