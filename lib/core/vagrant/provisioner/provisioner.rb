@@ -3,20 +3,20 @@ module VagrantPlugins
 module CORL
 module Provisioner
 class CORL < ::Vagrant.plugin("2", :provisioner)
- 
+
   #-----------------------------------------------------------------------------
   # Constructor / Destructor
- 
+
   def initialize(machine, config)
     super
   end
-  
+
   #-----------------------------------------------------------------------------
   # Operations
 
   def configure(root_config)
   end
-  
+
   #---
 
   def provision
@@ -26,10 +26,10 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
         # This serves as a Vagrant VM manager.
         ::CORL::Vagrant.command = Command::Launcher.new([], @machine.env)
       end
-    
+
       network = config.network
       node    = config.node
-      
+
       if network && node
         # Provision the server
         success = network.init_node(node, clean(::CORL.config(:vagrant_node_init, {
@@ -42,6 +42,12 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
           :bootstrap_path    => config.bootstrap_path,
           :bootstrap_glob    => config.bootstrap_glob,
           :bootstrap_init    => config.bootstrap_init,
+          :bootstrap_scripts => config.bootstrap_scripts,
+          :reboot            => config.reboot,
+          :dev_build         => config.dev_build,
+          :home_env_var      => config.home_env_var,
+          :root_user         => config.root_user,
+          :root_home         => config.root_home,
           :auth_files        => config.auth_files,
           :seed              => config.seed,
           :project_reference => config.project_reference,
@@ -49,23 +55,23 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
           :provision         => config.provision,
           :dry_run           => config.dry_run
         }).export))
-        
+
         node.warn("CORL provisioner failed", { :i18n => false }) unless success
       end
     end
   end
-  
+
   #-----------------------------------------------------------------------------
   # Utilities
-  
+
   def clean(options)
     options.keys.each do |key|
       value = options[key]
       if value.nil?
         options.delete(key)
-      end  
+      end
     end
-    options  
+    options
   end
   protected :clean
 end
