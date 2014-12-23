@@ -66,7 +66,7 @@ class CORL < ::Vagrant.plugin("2", :config)
   attr_accessor :network, :node
   attr_accessor :force_updates, :user_home, :user_home_env_var, :root_user, :root_home
 
-  attr_accessor :bootstrap, :bootstrap_path, :bootstrap_glob, :bootstrap_init, :bootstrap_scripts,
+  attr_accessor :bootstrap, :bootstrap_path, :bootstrap_glob, :bootstrap_init, :bootstrap_scripts
   attr_accessor :reboot, :dev_build, :auth_files
   attr_accessor :seed, :project_reference, :project_branch
   attr_accessor :provision, :dry_run
