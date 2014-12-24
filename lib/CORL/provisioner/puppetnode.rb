@@ -213,9 +213,10 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
       include_location = lambda do |type, parameters = {}, add_search_path = false|
         classes = {}
 
-        locations[:package].each do |name, package_directory|
-          type_gateway = File.join(network.directory, package_directory, "#{type}.pp")
-          resource_name = resource([ name, type ])
+        locations[:package].keys.reverse.each do |name|
+          package_directory = locations[:package][name]
+          type_gateway      = File.join(network.directory, package_directory, "#{type}.pp")
+          resource_name     = resource([ name, type ])
 
           add_search_path(type, resource_name) if add_search_path
 
