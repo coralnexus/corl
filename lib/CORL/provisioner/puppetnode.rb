@@ -28,7 +28,7 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
 
   def normalize(reload)
     super do
-      if CORL.log_level == :warn
+      if [ :debug, :info, :warn ].include? CORL.log_level
         Puppet.debug = true
       end
       unless reload
@@ -55,6 +55,7 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
             CORL.ui_group("puppetnode::#{name}(#{CORL.yellow(level[:name])})", :cyan) do |ui|
               ui.send(level[:send], str)
             end
+            puts caller if level[:send] == :error && [ :warn, :error ].include?(CORL.log_level)
           end
         end
       end
