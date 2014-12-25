@@ -103,8 +103,10 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
 
     unless profiles.empty?
       modulepath = profiles.collect do |profile|
-        profile_directory = File.join(network.directory, locations[:puppet_module][profile.to_sym])
-        File.directory?(profile_directory) ? profile_directory : nil
+        profile_path      = locations[:puppet_module][profile.to_sym]
+        profile_directory = nil
+        profile_directory = File.join(network.directory, profile_path) if profile_path
+        profile_directory && File.directory?(profile_directory) ? profile_directory : nil
       end.compact
     end
 
