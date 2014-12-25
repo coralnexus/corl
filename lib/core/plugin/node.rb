@@ -546,9 +546,11 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     status  = parallel(:build_provider, network.builders, config)
     success = false if status.values.include?(false)
 
-    if success && ! config[:providers]
-      status  = parallel(:build_provisioners, provisioners, config)
-      success = false if status.values.include?(false)
+    if success
+      if ! config[:providers] || array(config[:providers]).include?("package")
+        status  = parallel(:build_provisioners, provisioners, config)
+        success = false if status.values.include?(false)
+      end
 
       if success
         myself.build_time = Time.now.to_s if success
