@@ -27,7 +27,7 @@ class Project < Nucleon.plugin_class(:CORL, :builder)
       success = false
     end
     if success
-      success("Build of project #{blue(path)} finished", { :i18n => false })
+      #success("Build of project #{blue(path)} finished", { :i18n => false })
       network.ignore(path)
     end
     success

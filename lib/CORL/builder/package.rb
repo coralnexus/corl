@@ -67,7 +67,7 @@ class Package < Nucleon.plugin_class(:CORL, :builder)
         end
       end
     end
-    success("Build of package #{blue(name)} finished", { :i18n => false }) if success
+    #success("Build of package #{blue(name)} finished", { :i18n => false }) if success
     success
   end
 end

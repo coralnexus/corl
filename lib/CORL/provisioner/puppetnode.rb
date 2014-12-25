@@ -145,7 +145,7 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
       directory  = File.join(internal_path(build_directory), package_id.to_s, name.to_s)
       success    = true
 
-      info("Building CORL profile #{blue(name)} modules into #{green(directory)}", { :i18n => false })
+      #info("Building CORL profile #{blue(name)} modules into #{green(directory)}", { :i18n => false })
 
       if processed_info.has_key?(:modules)
         status  = parallel(:build_module, hash(processed_info[:modules]), directory, name, environment)
@@ -153,7 +153,7 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
 
         build_config.set_location(:puppet_module, profile_id(package, name), directory) if success
       end
-      success("Build of profile #{blue(name)} finished", { :i18n => false }) if success
+      #success("Build of profile #{blue(name)} finished", { :i18n => false }) if success
       success
     end
   end
@@ -178,7 +178,7 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
       warn("Puppet module #{cyan(name)} failed to initialize", { :i18n => false })
       success = false
     end
-    success("Build of #{blue(profile)} #{blue(name)} finished", { :i18n => false }) if success
+    #success("Build of #{blue(profile)} #{blue(name)} finished", { :i18n => false }) if success
     success
   end
 

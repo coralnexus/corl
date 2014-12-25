@@ -572,19 +572,19 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
   def build_provider(provider, plugin, config)
     if ! config[:providers] || array(config[:providers]).include?(provider.to_s)
-      info("Building #{provider} components", { :i18n => false })
+      #info("Building #{provider} components", { :i18n => false })
       plugin.build(myself, config)
     end
   end
 
   def build_provisioners(provider, collection, config)
-    info("Building #{provider} provisioner collection", { :i18n => false })
+    #info("Building #{provider} provisioner collection", { :i18n => false })
     status = parallel(:build_provisioner, collection, provider, config)
     status.values.include?(false) ? false : true
   end
 
   def build_provisioner(name, plugin, provider, config)
-    info("Building #{provider} #{name} provisioner components", { :i18n => false })
+    #info("Building #{provider} #{name} provisioner components", { :i18n => false })
     plugin.build(myself, config)
   end
 
