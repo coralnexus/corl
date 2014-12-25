@@ -26,7 +26,10 @@ class Project < Nucleon.plugin_class(:CORL, :builder)
       warn("Project #{cyan(path)} failed to initialize", { :i18n => false })
       success = false
     end
-    success("Build of project #{blue(path)} finished", { :i18n => false }) if success
+    if success
+      success("Build of project #{blue(path)} finished", { :i18n => false })
+      network.ignore(path)
+    end
     success
   end
 end
