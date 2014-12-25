@@ -927,8 +927,13 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
       :data    => { :encoded => encoded_config }
     })
 
-    quiet  = config.get(:quiet, false)
-    result = command(:corl, { :subcommand => action_config, :as_admin => true, :quiet => quiet }) do |op, data|
+    quiet    = config.get(:quiet, false)
+    parallel = config.get(:parallel, true)
+
+    command_base  = 'corl'
+    command_base  = "NUCLEON_NO_PARALLEL=1 #{command_base}" unless parallel
+
+    result = command(command_base, { :subcommand => action_config, :as_admin => true, :quiet => quiet }) do |op, data|
       yield(op, data) if block_given?
     end
 
