@@ -546,7 +546,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     status  = parallel(:build_provider, network.builders, config)
     success = false if status.values.include?(false)
 
-    if success
+    if success && ! config[:providers]
       status  = parallel(:build_provisioners, provisioners, config)
       success = false if status.values.include?(false)
 
@@ -569,8 +569,10 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
   end
 
   def build_provider(provider, plugin, config)
-    info("Building #{provider} components", { :i18n => false })
-    plugin.build(myself, config)
+    if ! config[:providers] || array(config[:providers]).include?(provider.to_s)
+      info("Building #{provider} components", { :i18n => false })
+      plugin.build(myself, config)
+    end
   end
 
   def build_provisioners(provider, collection, config)

@@ -17,6 +17,7 @@ class Build < Nucleon.plugin_class(:nucleon, :cloud_action)
   def configure
     super do
       register_str :environment
+      register_array :providers
     end
   end
 
@@ -32,6 +33,7 @@ class Build < Nucleon.plugin_class(:nucleon, :cloud_action)
   def execute
     super do |node|
       info('start')
+
       ensure_node(node) do
         settings.delete(:environment) if settings[:environment] == ''
 
