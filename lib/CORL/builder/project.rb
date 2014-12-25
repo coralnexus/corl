@@ -17,6 +17,8 @@ class Project < Nucleon.plugin_class(:CORL, :builder)
       :directory     => full_directory,
       :url           => project_reference,
       :create        => File.directory?(full_directory) ? false : true,
+      :pull          => true,
+      :internal_ip   => CORL.public_ip, # Needed for seeding Vagrant VMs
       :manage_ignore => false,
       :corl_file     => false
     }))
