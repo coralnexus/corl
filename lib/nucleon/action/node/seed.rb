@@ -26,6 +26,8 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
       register_project :project_reference
       register_str :project_branch, 'master'
     end
+
+    config[:parallel].default = false
   end
 
   #---
