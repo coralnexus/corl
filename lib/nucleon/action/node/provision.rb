@@ -42,7 +42,7 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
         settings.delete(:environment) if settings[:environment] == ''
 
         if settings.has_key?(:environment)
-          node.create_fact(:corl_environment, settings[:environment])
+          CORL.create_fact(:corl_environment, settings[:environment])
         end
 
         if CORL.admin?
