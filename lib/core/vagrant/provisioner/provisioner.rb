@@ -45,6 +45,7 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
           :bootstrap_scripts => config.bootstrap_scripts,
           :reboot            => config.reboot,
           :dev_build         => config.dev_build,
+          :ruby_version      => config.ruby_version,
           :auth_files        => config.auth_files,
           :seed              => config.seed,
           :project_reference => config.project_reference,

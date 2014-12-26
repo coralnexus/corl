@@ -494,6 +494,8 @@ en:
               Specified home directory on remote server (default %{default_value})
             bootstrap_nodes: |-
               Node references to bootstrap
+            ruby_version: |-
+              RVM Ruby version to bootstrap onto node (default %{default_value})
           warn:
             bootstrap_nodes_empty: |-
               Nodes must be specified in order to run the bootstrap action

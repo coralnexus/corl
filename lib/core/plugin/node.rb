@@ -1001,8 +1001,9 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     user_home  = config[:home]
     auth_files = config.get_array(:auth_files)
 
-    reboot    = config.get(:reboot, true)
-    dev_build = config.get(:dev_build, false)
+    reboot       = config.get(:reboot, true)
+    dev_build    = config.get(:dev_build, false)
+    ruby_version = config.get(:ruby_version, nil)
 
     codes :local_path_not_found,
           :home_path_lookup_failure,
@@ -1055,6 +1056,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
             remote_script = File.join(remote_bootstrap_path, bootstrap_init)
             environment   = "HOSTNAME='#{hostname}' "
             environment  << "DEVELOPMENT_BUILD=1 " if dev_build
+            environment  << "RUBY_RVM_VERSION='#{ruby_version}' " if ruby_version
             script_names  = bootstrap_scripts.empty? ? '' : bootstrap_scripts.join(' ')
 
             myself.bootstrap_script = remote_script

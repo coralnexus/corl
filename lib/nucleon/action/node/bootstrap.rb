@@ -25,6 +25,8 @@ class Bootstrap < Nucleon.plugin_class(:nucleon, :cloud_action)
       register_str :home_env_var, 'HOME'
       register_str :home, nil
 
+      register_str :ruby_version, nil
+
       register_str :bootstrap_glob, '**/*.sh'
       register_str :bootstrap_init, 'bootstrap.sh'
 
