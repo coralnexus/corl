@@ -300,6 +300,8 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
               info("Starting configuration run", { :i18n => false })
 
               # Configure the machine
+              Puppet.push_context({ :current_environment => apply_environment }, "CORL environment for configurer transaction")
+
               configurer = Puppet::Configurer.new
               if ! configurer.run(:catalog => catalog, :pluginsync => false)
                 success = false
