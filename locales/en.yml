@@ -537,7 +537,31 @@ en:
               Updating node network configurations
         build:
           description: |-
-            Build packages on nodes
+            Build projects into the network project or global filesystem
+          help: |-
+            Build various kinds of projects into the network project or across the filesystem.
+            You can think of the build process as an easy way to bundle sub projects that are only
+            relevant on some environments.
+
+            Two plugin types currently implement the builder API
+
+            1. Builders
+               - General projects or specialized projects like packages and identities with specific
+                 internally defined function.  The project builder provider is a great way to bundle
+                 development dependencies into the project.
+
+            2. Provisioners
+               - Provisioners have their own projects (Puppet modules) that need to be built on the
+                 machine in order for the provisioning process to take place.  This is a subsystem
+                 of the package management system.
+          options:
+            environment: |-
+              Environment to build (default %{default_value})
+            providers: |-
+              List of builder plugin providers to run build process for (default %{default_value})
+          info:
+            start: |-
+              Building network dependencies
         provision:
           description: |-
             Provision nodes
