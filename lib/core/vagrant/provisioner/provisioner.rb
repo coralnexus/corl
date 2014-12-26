@@ -50,6 +50,8 @@ class CORL < ::Vagrant.plugin("2", :provisioner)
           :seed              => config.seed,
           :project_reference => config.project_reference,
           :project_branch    => config.project_branch,
+          :environment       => config.environment,
+          :build             => config.build,
           :provision         => config.provision,
           :dry_run           => config.dry_run
         }).export))

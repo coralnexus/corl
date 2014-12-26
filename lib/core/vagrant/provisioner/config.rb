@@ -34,6 +34,8 @@ class CORL < ::Vagrant.plugin("2", :config)
     @project_reference = UNSET_VALUE
     @project_branch    = UNSET_VALUE
 
+    @environment       = UNSET_VALUE
+    @build             = true
     @provision         = false
     @dry_run           = false
   end
@@ -60,6 +62,8 @@ class CORL < ::Vagrant.plugin("2", :config)
     @seed              = nil if @seed == UNSET_VALUE
     @project_reference = nil if @project_reference == UNSET_VALUE
     @project_branch    = nil if @project_branch == UNSET_VALUE
+
+    @environment       = nil if @environment == UNSET_VALUE
   end
 
   #-----------------------------------------------------------------------------
@@ -71,7 +75,7 @@ class CORL < ::Vagrant.plugin("2", :config)
   attr_accessor :bootstrap, :bootstrap_path, :bootstrap_glob, :bootstrap_init, :bootstrap_scripts
   attr_accessor :reboot, :dev_build, :ruby_version, :auth_files
   attr_accessor :seed, :project_reference, :project_branch
-  attr_accessor :provision, :dry_run
+  attr_accessor :environment, :build, :provision, :dry_run
 
   #-----------------------------------------------------------------------------
   # Validation
