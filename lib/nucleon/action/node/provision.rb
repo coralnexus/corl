@@ -63,10 +63,8 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
 
               collection.each do |name, provisioner|
                 if supported_profiles = provisioner.supported_profiles(node, profiles)
-                  Nucleon.dump_enabled=true
-                  dbg(supported_profiles, 'profiles')
-                  #profile_success = provisioner.provision(node, supported_profiles, settings)
-                  #success         = false unless profile_success
+                  profile_success = provisioner.provision(node, supported_profiles, settings)
+                  success         = false unless profile_success
                 end
               end
             end
