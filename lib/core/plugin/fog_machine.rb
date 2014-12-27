@@ -40,6 +40,8 @@ class FogBase < Nucleon.plugin_class(:CORL, :machine)
     ENV['DEBUG'] = 'true' if CORL.log_level == :debug
 
     require 'fog'
+    Fog.timeout = 1000
+
     yield if block_given?
 
     myself.compute = ::Fog::Compute.new(export)
