@@ -567,6 +567,14 @@ en:
         provision:
           description: |-
             Provision nodes
+          info:
+            start: |-
+              Provisioning %{provider} machine %{name}
+            build: |-
+              Building projects on %{provider} machine %{name}
+          success:
+            complete: |-
+              Provisioning of %{provider} machine %{name} successfull
         status:
           description: |-
             Check and save the current status of nodes in the network

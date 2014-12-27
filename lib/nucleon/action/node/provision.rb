@@ -35,8 +35,6 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
 
   def execute
     super do |node|
-      info('start')
-
       ensure_node(node) do
         success = true
 
@@ -47,10 +45,13 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
         end
 
         if CORL.admin?
+          info('start', { :provider => node.plugin_provider, :name => node.plugin_name })
+
           if settings[:build] ||
-            ! settings.has_key?(:environment) ||
+            settings.has_key?(:environment) ||
             ! ( node.build_time && File.directory?(network.build_directory) )
 
+            info('build', { :provider => node.plugin_provider, :name => node.plugin_name })
             success = node.build(settings)
           end
 
@@ -68,6 +69,7 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
                 end
               end
             end
+            success('complete', { :provider => node.plugin_provider, :name => node.plugin_name }) if success
             myself.status = code.provision_failure unless success
           end
         end
