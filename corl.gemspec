@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2014-12-19"
+  s.date = "2014-12-27"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -43,11 +43,13 @@ Gem::Specification.new do |s|
     "bootstrap/os/ubuntu/01_git.sh",
     "bootstrap/os/ubuntu/02_editor.sh",
     "bootstrap/os/ubuntu/05_ruby.sh",
+    "bootstrap/os/ubuntu/06_puppet.sh",
     "bootstrap/os/ubuntu/09_nucleon.sh",
     "bootstrap/os/ubuntu/10_corl.sh",
     "corl.gemspec",
     "lib/CORL/builder/identity.rb",
     "lib/CORL/builder/package.rb",
+    "lib/CORL/builder/project.rb",
     "lib/CORL/configuration/file.rb",
     "lib/CORL/machine/AWS.rb",
     "lib/CORL/machine/physical.rb",
