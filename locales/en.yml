@@ -582,6 +582,19 @@ en:
         image:
           description: |-
             Create images of existing nodes
+          help: |-
+            Create and save an image of the specified network nodes
+
+            This action can take a while depending on the type of server and cloud provider you are using.
+          options:
+            image_nodes: |-
+              Nodes of which to create new images (default %{default_value})
+          info:
+            start: |-
+              Starting image of %{provider} machine %{name}
+          success:
+            complete: |-
+              Image of %{provider} machine %{name} successfully created
         exec:
           description: |-
             Execute CLI commands across nodes
