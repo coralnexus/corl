@@ -123,7 +123,7 @@ module Puppet
         CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
           rendered_title    = Util::Console.blue(title)
           rendered_resource = Util::Console.green("#{type_name(type[:name])}[#{rendered_title}]")
-          ui.info("Adding #{rendered_resource}")
+          ui.info("Adding #{type[:type]} #{rendered_resource}")
         end
       end
       add_definition(type, title, properties, config)
@@ -132,7 +132,7 @@ module Puppet
         CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
           rendered_title    = Util::Console.blue(title)
           rendered_resource = Util::Console.green("Class[#{rendered_title}]")
-          ui.info("Adding #{rendered_resource}")
+          ui.info("Adding class #{rendered_resource}")
         end
       end
       add_class(title, properties, config)
