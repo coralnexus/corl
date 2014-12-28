@@ -574,7 +574,7 @@ en:
               Building projects on %{provider} machine %{name}
           success:
             complete: |-
-              Provisioning of %{provider} machine %{name} successful
+              Provisioning of %{provider} machine %{name} completed at %{time}
         status:
           description: |-
             Check and save the current status of nodes in the network

@@ -260,7 +260,7 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
 
       @@puppet_lock.synchronize do
         begin
-          info("Starting catalog generation", { :i18n => false })
+          info("Starting catalog generation at #{Time.now.to_s}", { :i18n => false })
 
           @@status[id] = code.success
           @@network    = network
@@ -297,7 +297,7 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
 
             unless config.get(:dry_run, false)
               info("\n", { :prefix => false, :i18n => false })
-              info("Starting configuration run", { :i18n => false })
+              info("Starting configuration run at #{Time.now.to_s}", { :i18n => false })
 
               # Configure the machine
               Puppet.push_context({ :current_environment => apply_environment }, "CORL environment for configurer transaction")
