@@ -69,7 +69,7 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
                 end
               end
             end
-            success('complete', { :provider => node.plugin_provider, :name => node.plugin_name }) if success
+            success('complete', { :provider => node.plugin_provider, :name => node.plugin_name, :time => Time.now.to_s }) if success
             myself.status = code.provision_failure unless success
           end
         end
