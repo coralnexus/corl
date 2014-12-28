@@ -115,20 +115,25 @@ module Puppet
     end
 
     display_name = puppet_scope.parent_module_name ? puppet_scope.parent_module_name : 'toplevel'
+    display      = [ :debug, :info, :warn, :error ].include? CORL.log_level
 
     case type[:type]
     when :type, :define
-      CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
-        rendered_title    = Util::Console.blue(title)
-        rendered_resource = Util::Console.green("#{type_name(type[:name])}[#{rendered_title}]")
-        ui.info("Adding #{rendered_resource}")
+      if display
+        CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
+          rendered_title    = Util::Console.blue(title)
+          rendered_resource = Util::Console.green("#{type_name(type[:name])}[#{rendered_title}]")
+          ui.info("Adding #{rendered_resource}")
+        end
       end
       add_definition(type, title, properties, config)
     when :class
-      CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
-        rendered_title    = Util::Console.blue(title)
-        rendered_resource = Util::Console.green("Class[#{rendered_title}]")
-        ui.info("Adding #{rendered_resource}")
+      if display
+        CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
+          rendered_title    = Util::Console.blue(title)
+          rendered_resource = Util::Console.green("Class[#{rendered_title}]")
+          ui.info("Adding #{rendered_resource}")
+        end
       end
       add_class(title, properties, config)
     end
@@ -204,6 +209,7 @@ module Puppet
     return false unless puppet_scope
 
     display_name = puppet_scope.parent_module_name ? puppet_scope.parent_module_name : 'toplevel'
+    display      = [ :debug, :info, :warn, :error ].include? CORL.log_level
 
     if resource_name.is_a?(Array)
       resource_name = resource_name.flatten
@@ -215,10 +221,12 @@ module Puppet
       classes = Config.lookup(name, nil, config)
       if classes.is_a?(Array)
         classes.each do |klass|
-          CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
-            rendered_klass    = Util::Console.blue(klass)
-            rendered_resource = Util::Console.green("Class[#{rendered_klass}]")
-            ui.info("Including #{rendered_resource}")
+          if display
+            CORL.ui_group(Util::Console.cyan(display_name)) do |ui|
+              rendered_klass    = Util::Console.blue(klass)
+              rendered_resource = Util::Console.green("Class[#{rendered_klass}]")
+              ui.info("Including #{rendered_resource}")
+            end
           end
           class_data[klass] = properties
         end
