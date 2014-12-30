@@ -18,7 +18,16 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
 
     unless reload
       @build = Build.new
-      ignore([ 'build', File.join('config', 'identities') ])
+
+      config_identities_glob  = File.join('config', 'identities', '*')
+      vagrant_identities_path = File.join('config', 'identities', 'vagrant')
+
+      ignore([
+        'build',
+        config_identities_glob,
+        config_identities_glob + File::SEPARATOR,
+        "!#{vagrant_identities_path}"
+      ])
     end
   end
 
