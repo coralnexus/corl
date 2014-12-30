@@ -105,10 +105,8 @@ nucleon_require(core_dir, :build)
 nucleon_require(core_dir, :plugin)
 
 # Include Vagrant plugins (only include if running inside Vagrant)
-begin
-  require "vagrant"
+if defined?(Vagrant) == 'constant' && Vagrant.class == Module
   nucleon_require(vagrant_dir, :plugins)
-rescue LoadError
 end
 
 #-------------------------------------------------------------------------------
