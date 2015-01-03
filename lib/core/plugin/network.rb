@@ -192,11 +192,11 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
 
   #---
 
-  def node_by_ip(public_ip, require_new = false)
+  def node_lookup(public_ip, hostname, require_new = false)
     matches = {}
 
     each_node_config do |provider, name, info|
-      matches[provider] = name if info[:public_ip] == public_ip
+      matches[provider] = name if info[:public_ip] == public_ip && name.to_s == hostname.to_s
     end
 
     unless matches.empty?
@@ -212,11 +212,12 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
   #---
 
   def local_node(require_new = false)
+    hostname   = lookup(:fqdn)
     ip_address = CORL.public_ip
-    local_node = node_by_ip(ip_address, require_new)
+    local_node = node_lookup(ip_address, hostname, require_new)
 
     if local_node.nil?
-      name       = Util::Data.ensure_value(lookup(:fqdn), ip_address)
+      name       = Util::Data.ensure_value(hostname, ip_address)
       local_node = CORL.node(name, extended_config(:local_node).import({ :meta => { :parent => myself }}), :local)
     else
       local_node.network = myself
@@ -266,6 +267,10 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
 
   def package_builder(name, options = {})
     create_builder(:network_package_builder, :package, options)
+  end
+
+  def project_builder(name, options = {})
+    create_builder(:network_project_builder, :project, options)
   end
 
   #-----------------------------------------------------------------------------
