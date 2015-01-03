@@ -348,6 +348,8 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
       end
     end
 
+    env_directory = File.join(base_directory, environment)
+
     FileUtils.mkdir_p(env_directory)
     FileUtils.mkdir_p(File.join(env_directory, 'manifests'))
     FileUtils.mkdir_p(File.join(env_directory, 'modules'))
