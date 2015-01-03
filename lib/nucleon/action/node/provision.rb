@@ -20,6 +20,8 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
 
       register_bool :build, false
       register_bool :dry_run, false
+      register_bool :check_profiles, false
+
       register_str :environment
     end
   end
@@ -45,7 +47,9 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
         end
 
         if CORL.admin?
-          info('start', { :provider => node.plugin_provider, :name => node.plugin_name })
+          unless settings[:check_profiles]
+            info('start', { :provider => node.plugin_provider, :name => node.plugin_name })
+          end
 
           if settings[:build] ||
             settings.has_key?(:environment) ||
@@ -64,12 +68,19 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
 
               collection.each do |name, provisioner|
                 if supported_profiles = provisioner.supported_profiles(node, profiles)
-                  profile_success = provisioner.provision(node, supported_profiles, settings)
-                  success         = false unless profile_success
+                  supported_profiles.each do |profile|
+                    info('profile', { :provider => yellow(provider), :profile => green(profile.to_s) })
+                  end
+                  unless settings[:check_profiles]
+                    profile_success = provisioner.provision(node, supported_profiles, settings)
+                    success         = false unless profile_success
+                  end
                 end
               end
             end
-            success('complete', { :provider => node.plugin_provider, :name => node.plugin_name, :time => Time.now.to_s }) if success
+            unless settings[:check_profiles]
+              success('complete', { :provider => node.plugin_provider, :name => node.plugin_name, :time => Time.now.to_s }) if success
+            end
             myself.status = code.provision_failure unless success
           end
         end

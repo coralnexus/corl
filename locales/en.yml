@@ -572,6 +572,8 @@ en:
               Provisioning %{provider} machine %{name}
             build: |-
               Building projects on %{provider} machine %{name}
+            profile: |-
+              Configured profile: %{provider}:::%{profile}
           success:
             complete: |-
               Provisioning of %{provider} machine %{name} completed at %{time}
