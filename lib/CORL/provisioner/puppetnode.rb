@@ -93,6 +93,8 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
 
     environment, environment_directory = ensure_environment(node)
 
+    return nil unless environment
+
     Puppet::Util::Log.newdestination(id)
     Puppet::Transaction::Report.indirection.cache_class = :yaml
 
@@ -269,47 +271,57 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
           start_time        = Time.now
           apply_environment = init_puppet(node, processed_profiles)
 
-          Puppet.override(:environments => Puppet::Environments::Static.new(apply_environment)) do
-            puppet_node = get_puppet_node(apply_environment.name)
-            @compiler   = Puppet::Parser::Compiler.new(puppet_node)
+          if apply_environment.nil?
+            success = false
+          else
+            Puppet.override(:environments => Puppet::Environments::Static.new(apply_environment)) do
+              puppet_node = get_puppet_node(apply_environment.name)
+              @compiler   = Puppet::Parser::Compiler.new(puppet_node)
 
-            # Register Puppet module plugins
-            register
+              # Register Puppet module plugins
+              register
 
-            # Include defaults
-            classes = include_location.call(:default, {}, true)
+              # Include defaults
+              classes = include_location.call(:default, {}, true)
 
-            # Import needed profiles
-            include_location.call(:profiles, {}, false)
+              # Import needed profiles
+              include_location.call(:profiles, {}, false)
 
-            processed_profiles.each do |profile|
-              classes[profile.to_s] = { :require => 'Anchor[profile_start]' }
-            end
+              processed_profiles.each do |profile|
+                classes[profile.to_s] = { :require => 'Anchor[profile_start]' }
+              end
 
-            puppet_node.classes = classes
+              puppet_node.classes = classes
 
-            # Compile catalog
-            compiler.compile
+              # Compile catalog
+              compiler.compile
 
-            catalog = compiler.catalog.to_ral
-            catalog.finalize
-            catalog.retrieval_duration = Time.now - start_time
+              catalog = compiler.catalog.to_ral
+              catalog.finalize
+              catalog.retrieval_duration = Time.now - start_time
 
-            unless config.get(:dry_run, false)
-              info("\n", { :prefix => false, :i18n => false })
-              info("Starting configuration run at #{Time.now.to_s}", { :i18n => false })
+              unless config.get(:dry_run, false)
+                info("\n", { :prefix => false, :i18n => false })
+                info("Starting configuration run at #{Time.now.to_s}", { :i18n => false })
 
-              # Configure the machine
-              Puppet.push_context({ :current_environment => apply_environment }, "CORL environment for configurer transaction")
+                # Configure the machine
+                Puppet.push_context({ :current_environment => apply_environment }, "CORL environment for configurer transaction")
 
-              configurer = Puppet::Configurer.new
-              if ! configurer.run(:catalog => catalog, :pluginsync => false)
-                success = false
+                configurer = Puppet::Configurer.new
+                if ! configurer.run(:catalog => catalog, :pluginsync => false)
+                  success = false
+                end
               end
             end
           end
 
         rescue Exception => error
+          if [ :debug, :info, :warn, :error ].include? CORL.log_level
+            logger.error("Puppetnode provisioner experienced an error:")
+            logger.error(error.inspect)
+            logger.error(error.message)
+            logger.error(Util::Data.to_yaml(error.backtrace))
+          end
           Puppet.log_exception(error)
           success = false
         end
@@ -326,7 +338,15 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
   def ensure_environment(node)
     base_directory = Puppet[:environmentpath]
     environment    = node.lookup(:corl_environment)
-    env_directory  = File.join(base_directory, environment)
+
+    if environment.nil?
+      environment = node.lookup(:environment)
+
+      if environment.nil?
+        error("Environment facts 'corl_environment' or 'environment' must be set to provision", { :i18n => false })
+        return []
+      end
+    end
 
     FileUtils.mkdir_p(env_directory)
     FileUtils.mkdir_p(File.join(env_directory, 'manifests'))
