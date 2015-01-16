@@ -35,7 +35,6 @@ Vagrant.configure('2') do |config|
   # Default CORL development machine
   #
   # - should work on any platform Vagrant supports
-  # - always proxies through virtualbox docker host when using docker provider
   #
   config.vm.define :corl do |node|
     # One directional pushes
