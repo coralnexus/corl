@@ -1,6 +1,6 @@
 
 #*******************************************************************************
-# CORL (Cluster Orchestration and Research Library)
+# CORL (Coral Orchestration and Research Library)
 #
 # built on Nucleon (github.com/coralnexus/nucleon)
 #
@@ -8,7 +8,7 @@
 # the cloud.
 #
 # Author::    Adrian Webb (mailto:adrian.webb@coralnexus.com)
-# License::   GPLv3
+# License::   Apache License v2
 
 #-------------------------------------------------------------------------------
 # Top level properties
@@ -34,8 +34,6 @@ CORL = Nucleon
 
 require 'hiera'
 require 'facter'
-require 'puppet'
-require 'puppet/configurer'
 
 #-------------------------------------------------------------------------------
 # Localization

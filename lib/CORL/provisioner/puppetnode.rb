@@ -86,6 +86,9 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
   # Puppet initialization
 
   def init_puppet(node, profiles)
+    require 'puppet'
+    require 'puppet/configurer'
+
     Puppet.initialize_settings
 
     apply_environment = nil
