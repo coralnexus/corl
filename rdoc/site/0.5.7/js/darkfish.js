@@ -1,9 +1,8 @@
 /**
  *
- * Darkfish Page Functions
- * $Id: darkfish.js 53 2009-01-07 02:52:03Z deveiant $
+ * Darkfish derivative JS.
  *
- * Author: Michael Granger <mgranger@laika.com>
+ * Original author: Michael Granger <mgranger@laika.com>
  *
  */
 
@@ -28,6 +27,18 @@ $.fn.unwrap = function( expr ) {
 };
 
 
+function showDescription( e ) {
+  var target = e.target;
+  var codeSections = $(target).
+    parents('.method-detail').
+    find('.method-doc');
+
+  $(target).
+    parents('.method-detail').
+    find('.method-doc').
+    slideToggle();
+};
+
 function showSource( e ) {
   var target = e.target;
   var codeSections = $(target).
@@ -38,6 +49,10 @@ function showSource( e ) {
     parents('.method-detail').
     find('.method-source-code').
     slideToggle();
+};
+
+function hookDescriptionViews() {
+  $('.method-heading').click( showDescription );
 };
 
 function hookSourceViews() {
@@ -145,6 +160,7 @@ function highlightClickTarget( event ) {
 
 
 $(document).ready( function() {
+  hookDescriptionViews();
   hookSourceViews();
   hookDebuggingToggle();
   hookSearch();

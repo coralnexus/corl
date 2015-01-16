@@ -432,9 +432,11 @@
         
 
         <div class="method-description">
-          
-          
-          
+          <div class="method-doc" id="call-doc">
+            
+            
+            
+          </div><!-- call-doc -->
 
           
           <div class="method-source-code" id="call-source">
@@ -447,15 +449,9 @@
       <span class="ruby-identifier">ssh_key</span> = <span class="ruby-operator">::</span><span class="ruby-constant">CORL</span><span class="ruby-operator">::</span><span class="ruby-constant">Util</span><span class="ruby-operator">::</span><span class="ruby-constant">Disk</span>.<span class="ruby-identifier">read</span>(<span class="ruby-identifier">node</span>.<span class="ruby-identifier">public_key</span>)
 
       <span class="ruby-keyword">if</span> <span class="ruby-identifier">ssh_key</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span> <span class="ruby-identifier">ssh_key</span>.<span class="ruby-identifier">empty?</span>
-        <span class="ruby-identifier">dbg</span>(<span class="ruby-identifier">env</span>[<span class="ruby-value">:machine</span>].<span class="ruby-identifier">ssh_info</span>, <span class="ruby-string">&#39;ssh info&#39;</span>)
-
-        <span class="ruby-constant">Vagrant</span>.<span class="ruby-identifier">plugin</span>(<span class="ruby-string">&quot;2&quot;</span>).<span class="ruby-identifier">manager</span>.<span class="ruby-identifier">communicators</span>[<span class="ruby-value">:ssh</span>].<span class="ruby-identifier">new</span>(<span class="ruby-identifier">env</span>[<span class="ruby-value">:machine</span>]).<span class="ruby-identifier">tap</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">comm</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">env</span>[<span class="ruby-value">:machine</span>].<span class="ruby-identifier">communicate</span>.<span class="ruby-identifier">tap</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">comm</span><span class="ruby-operator">|</span>
           <span class="ruby-identifier">comm</span>.<span class="ruby-identifier">execute</span>(<span class="ruby-node">&quot;echo &#39;#{ssh_key}&#39; &gt; \$HOME/.ssh/authorized_keys&quot;</span>)
         <span class="ruby-keyword">end</span>
-
-        <span class="ruby-comment">#env[:machine].communicate.tap do |comm|</span>
-        <span class="ruby-comment">#  comm.execute(&quot;echo &#39;#{ssh_key}&#39; &gt; \$HOME/.ssh/authorized_keys&quot;)</span>
-        <span class="ruby-comment">#end</span>
         <span class="ruby-identifier">node</span>.<span class="ruby-identifier">set_cache_setting</span>(<span class="ruby-value">:use_private_key</span>, <span class="ruby-keyword">true</span>)
         <span class="ruby-identifier">env</span>[<span class="ruby-value">:machine</span>].<span class="ruby-identifier">config</span>.<span class="ruby-identifier">ssh</span>.<span class="ruby-identifier">private_key_path</span> = <span class="ruby-identifier">node</span>.<span class="ruby-identifier">private_key</span>
 

@@ -21,8 +21,13 @@ h1 {
   font-size: 300%;
   text-shadow: rgba(135,145,135,0.65) 2px 2px 3px;
   color: #6C8C22;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
-h2,h3,h4 { margin-top: 1.5em; }
+h2,h3,h4 {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
 
 :link,
 :visited {
@@ -252,23 +257,25 @@ ul.link-list .type {
 .description {
   font-size: 100%;
   color: #333;
+  margin: 1em;
 }
 
 .description p {
-  margin: 1em 0.4em;
+  margin: 0.5em 0.5em 1.5em 0.5em;
 }
 
 .description li p {
-  margin: 0;
+  margin: 0.1em 0.1em 0.5em 0.1em;
 }
 
 .description ol,
 .description ul {
-  margin-left: 1.5em;
+  margin: 0.5em 0.5em 1.5em 0.5em;
 }
 .description ol li,
 .description ul li {
   line-height: 1.4em;
+  margin-left: 1.5em;
 }
 
 .note-list {
@@ -336,8 +343,8 @@ ul.link-list .type {
 }
 
 #documentation h3.section-header {
-  margin-top: 1em;
-  padding: 0.25em 0.5em;
+  margin-top: 2em;
+  padding: 1em;
   background-color: #dedede;
   color: #333;
   font-size: 150%;
@@ -394,13 +401,11 @@ ul.link-list .type {
 
 /* @group Method Details */
 
-#documentation .method-source-code {
-  display: none;
-}
-
 #documentation .method-detail {
-  margin: 0.5em 0;
-  padding: 0.5em 0;
+  margin: 0.5em;
+  padding-left: 1.5em;
+  padding-bottom: 1.5em;
+  line-height: 40px;
   cursor: pointer;
 }
 #documentation .method-detail:hover {
@@ -420,7 +425,7 @@ ul.link-list .type {
 }
 #documentation .method-click-advice {
   position: absolute;
-  top: 2px;
+  top: 3px;
   right: 5px;
   font-size: 10px;
   color: #9b9877;
@@ -437,10 +442,12 @@ ul.link-list .type {
   color: #666;
   background: url(images/brick_link.png) no-repeat left bottom;
 }
-
+#documentation .method-description {
+  margin: 1em;
+}
 #documentation .method-description,
 #documentation .aliases {
-  margin: 0 20px;
+  margin: 0.5em;
   color: #666;
 }
 
@@ -460,8 +467,16 @@ ul.link-list .type {
 #documentation .method-description ul {
   margin-left: 1.5em;
 }
-pre {
-  margin: 0.5em 0;
+#documentation .method-description .method-doc {
+  margin: 0.5em;
+  padding-left: 3em;
+  line-height: 25px;
+}
+
+#documentation .method-source-code {
+  margin: 0.5em;
+  display: none;
+  line-height: 25px;
 }
 
 #documentation .attribute-method-heading {
@@ -488,7 +503,8 @@ pre {
   background: #262626;
   color: white;
   border: 1px dashed #999;
-  padding: 0.5em;
+  margin: 0.25em;
+  padding: 0.25em;
 }
 
 .description pre {
