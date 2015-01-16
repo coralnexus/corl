@@ -398,7 +398,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
   def machine_config
     name   = setting(:id)
     name   = nil if name.nil? || name.empty?
-    config = Config.new({ :name => name })
+    config = Config.new({ :name => name }, {}, true, false)
 
     yield(config) if block_given?
     config
@@ -436,7 +436,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
         node_facts = local? ? Util::Data.merge([ CORL.facts, custom_facts ]) : custom_facts
       end
 
-      self.fact_var = Config.new(node_facts).defaults(default_facts).export
+      self.fact_var = Config.new(node_facts, {}, true, false).defaults(default_facts).export
     end
     return fact_var.clone if clone
     fact_var
@@ -700,7 +700,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     if machine && machine.running?
       config      = Config.ensure(options)
-      hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config })
+      hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config }, {}, true, false)
       quiet       = config.get(:quiet, false)
 
       if extension_check(:download, hook_config)
@@ -739,7 +739,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     if machine && machine.running?
       config      = Config.ensure(options)
-      hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config })
+      hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config }, {}, true, false)
       quiet       = config.get(:quiet, false)
 
       if extension_check(:upload, hook_config)
@@ -828,7 +828,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
           quiet = config.get(:quiet, false)
 
           begin
-            test = active_machine.exec(commands, config.export) do |type, command, data|
+            test = active_machine.exec(Util::Data.array(commands), config.export) do |type, command, data|
               unless quiet
                 unless local?
                   text_output = filter_output(type, data).rstrip
@@ -890,7 +890,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     remove_command = false
 
     unless command.is_a?(CORL::Plugin::Command)
-      command        = CORL.command(Config.new({ :command => command }).import(config), :bash)
+      command        = CORL.command(Config.new({ :command => command }, {}, true, false).import(config), :bash)
       remove_command = true
     end
 
@@ -1107,11 +1107,14 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
       image(false)
     end
 
+    remote = config.get(:remote, :edit)
+    remote = nil unless network.remote(remote)
+
     network.save(config.import({
       :commit      => true,
       :allow_empty => true,
       :message     => config.get(:message, "Saving #{plugin_provider} node #{plugin_name}"),
-      :remote      => config.get(:remote, :edit)
+      :remote      => remote
     }))
   end
 

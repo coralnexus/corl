@@ -53,9 +53,9 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
 
         if keys = Util::SSH.generate.store
           if @project_info = project_class.translate_reference(settings[:project_reference], true)
-            project_info = Config.new(@project_info)
+            project_info = Config.new(@project_info, {}, true, false)
           else
-            project_info = Config.new({ :provider => :git })
+            project_info = Config.new({ :provider => :git }, {}, true, false)
           end
 
           project_class.clear_provider(network_path)

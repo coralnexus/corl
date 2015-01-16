@@ -178,10 +178,10 @@ class Provisioner < Nucleon.plugin_class(:nucleon, :base)
     config        = Config.ensure(options)
     environment   = Util::Data.ensure_value(config[:environment], node.lookup(:corl_environment))
     provider_info = network.build.config.get_hash([ :provisioners, plugin_provider ])
-    combined_info = Config.new
+    combined_info = Config.new({}, {}, true, false)
 
     provider_info.each do |package, info|
-      package_info = Config.new(info)
+      package_info = Config.new(info, {}, true, false)
       profiles     = {}
 
       hash(package_info[:profiles]).each do |name, profile_info|
@@ -217,7 +217,7 @@ class Provisioner < Nucleon.plugin_class(:nucleon, :base)
 
   def build_profile(name, info, package, environment, profiles)
     parents = []
-    config  = Config.new(info)
+    config  = Config.new(info, {}, true, false)
     success = true
 
     while config.has_key?(:extend) do

@@ -120,7 +120,7 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
     if network && network.has_nodes? && ! settings[:nodes].empty?
       # Execute action on remote nodes
       success = network.batch(settings[:nodes], settings[:node_provider], settings[:parallel]) do |node|
-        exec_config = Config.new(settings)
+        exec_config = Config.new(settings, {}, true, false)
         exec_config.delete(:nodes)
 
         result = node.action(plugin_provider, exec_config) do |op, data|
