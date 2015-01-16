@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2014-12-29"
+  s.date = "2015-01-16"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -27,7 +27,6 @@ Gem::Specification.new do |s|
     "LICENSE.txt",
     "README.rdoc",
     "Rakefile",
-    "TODO.rdoc",
     "VERSION",
     "bin/corl",
     "bootstrap/bootstrap.sh",
@@ -47,16 +46,23 @@ Gem::Specification.new do |s|
     "bootstrap/os/ubuntu/09_nucleon.sh",
     "bootstrap/os/ubuntu/10_corl.sh",
     "corl.gemspec",
+    "info/AUTOMATION.rdoc",
+    "info/INSTALLATION.rdoc",
+    "info/PACKAGING.rdoc",
+    "info/PLUGINS.rdoc",
+    "info/TODO.rdoc",
     "lib/CORL/builder/identity.rb",
     "lib/CORL/builder/package.rb",
     "lib/CORL/builder/project.rb",
     "lib/CORL/configuration/file.rb",
     "lib/CORL/machine/AWS.rb",
+    "lib/CORL/machine/docker.rb",
     "lib/CORL/machine/physical.rb",
     "lib/CORL/machine/rackspace.rb",
     "lib/CORL/machine/vagrant.rb",
     "lib/CORL/network/CORL.rb",
     "lib/CORL/node/AWS.rb",
+    "lib/CORL/node/docker.rb",
     "lib/CORL/node/local.rb",
     "lib/CORL/node/rackspace.rb",
     "lib/CORL/node/vagrant.rb",
@@ -73,6 +79,7 @@ Gem::Specification.new do |s|
     "lib/core/mod/fog_aws_server.rb",
     "lib/core/mod/fog_rackspace_server.rb",
     "lib/core/mod/hiera_backend.rb",
+    "lib/core/mod/vagrant.rb",
     "lib/core/plugin/agent.rb",
     "lib/core/plugin/builder.rb",
     "lib/core/plugin/cloud_action.rb",
@@ -88,6 +95,7 @@ Gem::Specification.new do |s|
     "lib/core/util/puppet/resource_group.rb",
     "lib/core/vagrant/action.rb",
     "lib/core/vagrant/actions/delete_cache.rb",
+    "lib/core/vagrant/actions/include_overrides.rb",
     "lib/core/vagrant/actions/init_keys.rb",
     "lib/core/vagrant/actions/link_network.rb",
     "lib/core/vagrant/commands/launcher.rb",
@@ -140,6 +148,7 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/plugins.rb",
     "lib/nucleon/event/puppet.rb",
     "lib/nucleon/extension/corl_config.rb",
+    "lib/nucleon/extension/vagrant.rb",
     "lib/nucleon/template/environment.rb",
     "lib/puppet/indirector/corl.rb",
     "lib/puppet/indirector/data_binding/corl.rb",
@@ -164,7 +173,22 @@ Gem::Specification.new do |s|
     "lib/puppet/parser/functions/render.rb",
     "lib/puppet/parser/functions/value.rb",
     "locales/en.yml",
-    "spec/spec_helper.rb"
+    "rdoc/site/0.5.7/README.rdoc",
+    "rdoc/site/0.5.7/info/AUTOMATION.rdoc",
+    "rdoc/site/0.5.7/info/INSTALLATION.rdoc",
+    "rdoc/site/0.5.7/info/PACKAGES.rdoc",
+    "rdoc/site/0.5.7/info/PACKAGING.rdoc",
+    "rdoc/site/0.5.7/info/PLUGINS.rdoc",
+    "rdoc/site/0.5.7/info/TODO.rdoc",
+    "spec/spec_helper.rb",
+    "tmp/README.rdoc",
+    "tmp/info/AUTOMATION.rdoc",
+    "tmp/info/INSTALLATION.rdoc",
+    "tmp/info/PACKAGES.rdoc",
+    "tmp/info/PACKAGING.rdoc",
+    "tmp/info/PLUGINS.rdoc",
+    "tmp/info/README.rdoc",
+    "tmp/info/TODO.rdoc"
   ]
   s.homepage = "http://github.com/coralnexus/corl"
   s.licenses = ["Apache License, Version 2.0"]
@@ -188,6 +212,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<jeweler>, ["~> 2.0"])
       s.add_development_dependency(%q<rspec>, ["~> 3.1"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
+      s.add_development_dependency(%q<github-markup>, ["~> 1.3"])
     else
       s.add_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
       s.add_dependency(%q<fog>, ["~> 1.23"])
@@ -199,6 +224,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<jeweler>, ["~> 2.0"])
       s.add_dependency(%q<rspec>, ["~> 3.1"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
+      s.add_dependency(%q<github-markup>, ["~> 1.3"])
     end
   else
     s.add_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
@@ -211,6 +237,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, ["~> 2.0"])
     s.add_dependency(%q<rspec>, ["~> 3.1"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
+    s.add_dependency(%q<github-markup>, ["~> 1.3"])
   end
 end
 
