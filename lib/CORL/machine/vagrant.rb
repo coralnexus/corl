@@ -2,97 +2,127 @@
 module CORL
 module Machine
 class Vagrant < Nucleon.plugin_class(:CORL, :machine)
-  
+
   include Mixin::Machine::SSH
-  
+
   #---
-  
+
   @@lock = Mutex.new
 
   #-----------------------------------------------------------------------------
   # Machine plugin interface
-  
+
   def normalize(reload)
     super
     myself.plugin_name = node.plugin_name if node
   end
-     
+
   #-----------------------------------------------------------------------------
   # Checks
-  
+
   def created?
     server && state != :not_created
   end
-  
+
   #---
-  
+
   def running?
     server && state == :running
   end
-   
+
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
-  
+
+  def public_ip
+    ip_address = nil
+    if server
+      ip_address = server.ssh_info[:host]
+
+      if ip_address == '127.0.0.1'
+        ip_address = node.vm[:providers][machine_type][:private_network]
+        ip_address = ip_address[:ip] if ip_address.is_a?(Hash) && ip_address.has_key?(:ip)
+        ip_address = node[:public_ip] unless ip_address
+      end
+    end
+    ip_address
+  end
+
+  #---
+
   def set_command
     @command = nil
-    
+
     begin
       # Ensure we are running within Vagrant from the corl base command
       require 'vagrant'
-      
+
       logger.info("Setting up Vagrant for machine")
-      @command = CORL::Vagrant.command 
-      
+      @command = CORL::Vagrant.command
+
     rescue LoadError
     end
   end
   protected :set_command
-  
+
   #---
-  
+
   def command
     set_command unless @command
     @command
   end
-  
+
   #---
-  
+
   def env
     return command.env if command
     nil
   end
-  
+
   #---
-  
+
   def server=id
     @server = nil
-    
+
     if id.is_a?(String)
       @server = new_machine(id)
     elsif ! id.nil?
       @server = id
     end
   end
-  
+
   def server
     command
     load unless @server
     @server
   end
-  
+
   #---
-  
+
   def state
     return server.state.id if server
     :not_loaded
   end
-  
+
   #---
-    
+
   def machine_types
-    [ :virtualbox, :vmware_fusion, :hyperv ]
+    [ :virtualbox, :vmware_fusion, :hyperv, :docker ]
   end
-        
+
+  #---
+
+  def machine_type
+    return server.provider_name if server
+    nil
+  end
+
+  #---
+
+  def image
+    return server.config.vm.box if server
+    nil
+  end
+
   #-----------------------------------------------------------------------------
   # Management
 
@@ -100,51 +130,51 @@ class Vagrant < Nucleon.plugin_class(:CORL, :machine)
     super do
       myself.server = plugin_name if command && plugin_name
       ! plugin_name && @server.nil? ? false : true
-    end    
+    end
   end
-  
+
   #---
-  
+
   def create(options = {})
     super do |config|
       start_machine(config)
     end
   end
-  
+
   #---
-  
+
   def download(remote_path, local_path, options = {}, &code)
     super do |config, success|
       ssh_download(remote_path, local_path, config, &code)
-    end  
+    end
   end
-  
+
   #---
-  
+
   def upload(local_path, remote_path, options = {}, &code)
     super do |config, success|
       ssh_upload(local_path, remote_path, config, &code)
-    end  
+    end
   end
-  
+
   #---
-  
+
   def exec(commands, options = {}, &code)
     super do |config|
       ssh_exec(commands, config, &code)
     end
   end
-  
+
   #---
-  
+
   def terminal(user, options = {})
     super do |config|
       ssh_terminal(user, config)
     end
   end
-  
+
   #---
-  
+
   def reload(options = {})
     super do |config|
       success = run(:reload, config)
@@ -153,93 +183,98 @@ class Vagrant < Nucleon.plugin_class(:CORL, :machine)
   end
 
   #---
- 
+
   def create_image(options = {})
     super do |config|
-      stop = config.delete(:stop, false)
-      
-      # TODO: Decide how to handle versions??  
-      # Timestamps stink since these things are huge (>600MB)
-      box_name = sprintf("%s", node.id).gsub(/\s+/, '-')
-      box_path = File.join(node.network.directory, 'boxes', "#{box_name}.box")
-      box_url  = "file://#{box_path}"
-      FileUtils.mkdir_p(File.dirname(box_path))
-      FileUtils.rm_f(box_path)
-      
-      begin
-        close_ssh_session
-        success = run(:package, config.defaults({ 'package.output' => box_path }), false)
-      
-        node.set_cache_setting(:box, box_name)
-        node.set_cache_setting(:box_url, box_url)
-        
-        if success    
-          env.action_runner.run(::Vagrant::Action.action_box_add, {
-            :box_name  => box_name,
-            :box_url   => box_url,          
-            :box_clean => false,
-            :box_force => true,
-            :ui        => ::Vagrant::UI::Prefixed.new(env.ui, "box")
-          })
-          load
+      success = true
+      if server && server.provider.action(:package) && machine_type.to_sym != :docker
+        stop = config.delete(:stop, false)
+
+        # TODO: Decide how to handle versions??
+        # Timestamps stink since these things are huge (>600MB)
+        box_name = sprintf("%s", node.id).gsub(/\s+/, '-')
+        box_path = File.join(node.network.directory, 'boxes', "#{box_name}.box")
+        box_url  = "file://#{box_path}"
+        FileUtils.mkdir_p(File.dirname(box_path))
+        FileUtils.rm_f(box_path)
+
+        begin
+          close_ssh_session
+          success = run(:package, config.defaults({ 'package.output' => box_path }), false)
+
+          node.set_cache_setting(:box, box_name)
+          node.set_cache_setting(:box_url, box_url)
+
+          if success
+            env.action_runner.run(::Vagrant::Action.action_box_add, {
+              :box_name  => box_name,
+              :box_url   => box_url,
+              :box_clean => false,
+              :box_force => true,
+              :ui        => ::Vagrant::UI::Prefixed.new(env.ui, "box")
+            })
+            load
+          end
+
+        rescue => error
+          error(error.message, { :i18n => false })
+          success = false
         end
-        
-      rescue => error
-        error(error.message, { :i18n => false })
-        success = false
+
+        success = run(:up, config) if success && ! stop
+      else
+        warn("Packaging images not supported on Vagrant provider #{machine_type}", { :i18n => false })
       end
-      
-      success = run(:up, config) if success && ! stop
       success
     end
   end
-  
+
   #---
-  
+
   def stop(options = {})
     super do |config|
       create_image(config.import({ :stop => true }))
     end
   end
-  
+
   #---
-  
+
   def start(options = {})
     super do |config|
-      start_machine(config)  
+      start_machine(config)
     end
   end
- 
+
   #---
 
   def destroy(options = {})
     super do |config|
       # We should handle prompting internally to keep it consistent
       success = run(:destroy, config.defaults({ :force_confirm_destroy => true }))
-      
+
       if success
         box_name = sprintf("%s", node.id).gsub(/\s+/, '-')
         found    = false
-        
+
         # TODO: Figure out box versions.
-        
+
         env.boxes.all.each do |info|
           registered_box_name     = info[0]
           registered_box_version  = info[1]
           registered_box_provider = info[2]
-          
+
           if box_name == registered_box_name
             found = true
             break
           end
-        end        
-        
+        end
+
         if found
           env.action_runner.run(::Vagrant::Action.action_box_remove, {
             :box_name     => box_name,
             :box_provider => node.machine_type
           })
-          
+
           box_name = sprintf("%s", node.id).gsub(/\s+/, '-')
           box_path = File.join(node.network.directory, 'boxes', "#{box_name}.box")
           Util::Disk.delete(box_path)
@@ -249,10 +284,10 @@ class Vagrant < Nucleon.plugin_class(:CORL, :machine)
       success
     end
   end
-  
+
   #-----------------------------------------------------------------------------
   # Utilities
-  
+
   def refresh_config
     if env
       @@lock.synchronize do
@@ -266,58 +301,58 @@ class Vagrant < Nucleon.plugin_class(:CORL, :machine)
     end
   end
   protected :refresh_config
-  
+
   #---
-  
+
   def new_machine(id)
     server = nil
     if command && ! id.empty?
       refresh_config
-      if env.vagrantfile.machine_names.include?(id.to_sym)        
-        server = command.vm_machine(id.to_sym, node.machine_type, true)
+      if env.vagrantfile.machine_names.include?(id.to_sym)
+        server = command.vm_machine(id.to_sym, nil, true)
       end
     end
     server
   end
   protected :new_machine
-  
+
   #---
-  
+
   def start_machine(options)
     success = false
-    
+
     if server
       load
       success = run(:up, options)
-      
+
       # Make sure provisioner changes (key changes) are accounted for
       # TODO: Is there a better way?
       load if success
     end
-    success  
+    success
   end
   protected :start_machine
-  
+
   #---
-  
+
   def run(action, options = {}, symbolize_keys = true)
     config = Config.ensure(options)
-    
+
     if server
       logger.debug("Running Vagrant action #{action} on machine #{node.id}")
-    
+
       success = true
       begin
         params = config.export
         params = string_map(params) unless symbolize_keys
-        
+
         server.send(:action, action.to_sym, params)
-        
+
       rescue => error
         error(error.message, { :i18n => false })
         error(Util::Data.to_yaml(error.backtrace), { :i18n => false })
         success = false
-      end      
+      end
     end
     success
   end

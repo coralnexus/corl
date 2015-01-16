@@ -12,7 +12,7 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
     super
 
     logger.info("Initializing network: reloading? #{reload}")
-    myself.config = CORL.configuration(Config.new(myself._export).import({ :autosave => false, :create => false, :new => true })) unless reload
+    myself.config = CORL.configuration(Config.new(myself._export, {}, true, false).import({ :autosave => false, :create => false, :new => true })) unless reload
 
     config.delete(:directory) # TODO: Figure out what to do with this??
 
@@ -330,7 +330,7 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
 
     remote_name = config.delete(:remote, :edit)
 
-    node_options = Util::Data.clean({
+    node_config = extended_config(:network_new_node, Config.new(Util::Data.clean({
       :settings     => array(config.delete(:groups, [])) | [ "server" ],
       :region       => config.delete(:region, nil),
       :machine_type => config.delete(:machine_type, nil),
@@ -338,10 +338,10 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
       :image        => config.delete(:image, nil),
       :user         => config.delete(:user, :root),
       :hostname     => name
-    })
+    })))
 
     # Set node data
-    node        = set_node(provider, name, node_options)
+    node        = set_node(provider, name, node_config.export)
     hook_config = { :node => node, :remote => remote_name, :config => config }
     success     = true
 

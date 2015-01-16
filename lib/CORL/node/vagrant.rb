@@ -32,6 +32,18 @@ class Vagrant < Nucleon.plugin_class(:CORL, :node)
 
   #---
 
+  def public_ip(reset = false)
+    return machine.public_ip if machine
+    nil
+  end
+
+  def private_ip(reset = false)
+    return machine.private_ip if machine
+    nil
+  end
+
+  #---
+
   def vm=vm
     myself[:vm] = vm
   end
@@ -48,6 +60,17 @@ class Vagrant < Nucleon.plugin_class(:CORL, :node)
 
   def ssh
     hash(myself[:ssh])
+  end
+
+  #---
+
+  def image=image
+    # Images can not be set
+  end
+
+  def image(reset = false)
+    return machine.image if machine
+    nil
   end
 
   #---

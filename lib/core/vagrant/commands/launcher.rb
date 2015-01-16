@@ -56,8 +56,8 @@ class Launcher < ::Vagrant.plugin("2", :command)
     provider ||= env.default_provider
 
     machine = env.machine(name, provider, refresh)
-    machine.ui.opts[:color] = :default # TODO: Something better??
 
+    machine.ui.opts[:color] = :default # TODO: Something better??
     machine
   end
 end
