@@ -8,8 +8,8 @@ class File < Nucleon.plugin_class(:CORL, :configuration)
 
   def normalize(reload)
     super do
-      _set(:search, Config.new)
-      _set(:router, Config.new)
+      _set(:search, Config.new({}, {}, true, false))
+      _set(:router, Config.new({}, {}, true, false))
     end
   end
 
