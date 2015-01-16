@@ -6,10 +6,19 @@ coverage.data
 .bundle
 
 # jeweler generated
-pkg
+pkg/
 
 # Gem builds
 *.gem
+
+# Vagrant related
+.vagrant/
+
+# Shared files
+share/*
+
+# Temporary files
+tmp/
 
 # Have editor/IDE/OS specific files you need to ignore? Consider using a global gitignore: 
 #
