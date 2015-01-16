@@ -67,8 +67,6 @@ module Config
   def self.register(directory, config, &code)
     ::Vagrant.require_version ">= 1.5.0"
 
-    Nucleon.dump_enabled=true
-
     config_network = network
     config_network = load_network(directory) unless config_network
 
