@@ -118,11 +118,13 @@ Rake::RDocTask.new do |rdoc|
   end
 
   create_rdoc_link = lambda do |source|
-    rdoc_readme = File.join(Dir.pwd, rdoc.rdoc_dir, "#{source.gsub('.', '_')}.html")
-    rdoc_link   = File.join(Dir.pwd, rdoc.rdoc_dir, source)
+    rdoc_html = File.join(Dir.pwd, rdoc.rdoc_dir, "#{source.gsub('.', '_')}.html")
+    rdoc_link = File.join(Dir.pwd, rdoc.rdoc_dir, source)
 
-    FileUtils.rm_f(rdoc_link)
-    FileUtils.ln_s(rdoc_readme, rdoc_link)
+    if File.exists?(rdoc_html)
+      FileUtils.rm_f(rdoc_link)
+      FileUtils.ln_s(rdoc_html, rdoc_link)
+    end
   end
 
   tmp_readme         = File.join(Dir.pwd, 'tmp', rdoc.main)
