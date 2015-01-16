@@ -1,0 +1,57 @@
+= CORL supported plugin types and providers
+
+
+The CORL framework implements pluggable interfaces, designed to grow in the future,
+but we have only implemented providers for technologies and services we use 
+currently.  
+
+Below is a list of current plugin types and supported providers:
+
+* <b>CORL::Plugin::Configuration</b> - Project based configuration pool and synchronization
+  * <b>CORL::Configuration::File</b> - File based data objects (JSON / YAML / ... files)
+* <b>CORL::Plugin::Network</b> - Network configuration, management, and action implementation
+  * <b>CORL::Network::CORL</b> - Default
+* <b>CORL::Plugin::Node</b> - Network and machine interface configuration bridge
+  * <b>CORL::Node::Local</b> - Local physical machine (registers development machines)
+  * <b>CORL::Node::Vagrant</b> - Manage Vagrant development machines
+  * <b>CORL::Node::Rackspace</b> - Manage Rackspace compute instances
+  * <b>CORL::Node::AWS</b> - Manage Amazon Web Services compute instances
+* <b>CORL::Plugin::Machine</b> - Machine interfaces
+  * <b>CORL::Machine::Physical</b> - Physical machine interface (limited functionality)
+  * <b>CORL::Machine::Vagrant</b> - Vagrant machine interface (only *virtualbox* and *docker* providers tested)
+  * <b>CORL::Machine::Rackspace</b> - Rackspace compute interface
+  * <b>CORL::Machine::AWS</b> - Amazon Web Service compute interface
+* <b>CORL::Plugin::Builder</b> - Build processors
+  * <b>CORL::Builder::Identity</b> - Isolated or private identity related node configurations
+  * <b>CORL::Builder::Package</b> - Fetch packages connected to network and other packages
+  * <b>CORL::Builder::Project</b> - Fetch version controlled projects into system locations
+* <b>CORL::Plugin::Provisioner</b> - Provisioning processes that utilize configuration management tools
+  * <b>CORL::Provisioner::Puppetnode</b> - Simple (non agent) Puppet provisioner that configures system based on group profiles
+
+Plugin types inherited from Nucleon:
+
+* <b>Nucleon::Plugin::Command</b> - Shell command translators / executors
+  * <b>Nucleon::Command::Bash</b>
+* <b>Nucleon::Plugin::Event</b> - Reusable conditional checks
+  * <b>Nucleon::Event::Regex</b>
+* <b>Nucleon::Plugin::Project</b> - Version controlled projects
+  * <b>Nucleon::Project::Git</b>
+  * <b>Nucleon::Project::Github</b> - Extends Git but adds GitHub API support
+* <b>Nucleon::Plugin::Template</b> - One way data object to text rendering
+  * <b>Nucleon::Template::JSON</b>
+  * <b>Nucleon::Template::YAML</b>
+  * <b>Nucleon::Template::Wrapper</b> - Wraps stringified data in prefix and suffix
+  * <b>Nucleon::Template::Environment</b> - Renders data object as environment variables
+* <b>Nucleon::Plugin::Translator</b> - Two way data object to text translation
+  * <b>Nucleon::Template::JSON</b>
+  * <b>Nucleon::Template::YAML</b>
+
+Action interface: (Around 42 core actions currently implemented that build on the above plugins)
+  
+* <b>Nucleon::Plugin::Action</b> - Portable action framework and execution environment
+* <b>Nucleon::Plugin::CloudAction</b> - Distributed actions across a network (extends <b>Nucleon::Plugin::Action</b>)
+* <b>Nucleon::Plugin::Agent</b> - Continuously running managed agents (extends <b>Nucleon::Plugin::CloudAction</b>)
+
+
+---
+{Click here to return to the README}[link:README.rdoc]

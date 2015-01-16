@@ -1,27 +1,200 @@
-=== CORL (Coral Orchestration and Research Library)
+= CORL - Coral Orchestration and Research Library
 
-Coming soon!
 
-Note:  This library is still very early in development!
+{Nucleon}[https://github.com/coralnexus/nucleon] plugin library and framework 
+for building, synchronizing, and executing distributed actions and agents 
+across heterogeneous networks of machines.
 
-==== Contributing to CORL
- 
-* Check out the latest {major}.{minor} branch to make sure the feature hasn't 
-  been implemented or the bug hasn't been fixed yet.
-* Check out the issue tracker to make sure someone already hasn't requested 
-  it and/or contributed it.
-* Fork the project.
-* Start a feature/bugfix branch.
-* Commit and push until you are happy with your contribution.
-* If possible, add tests for it. This is important so I don't break it in a 
-  future version unintentionally.
-* Please try not to mess with the Rakefile, version, or history. If you want 
-  to have your own version, or is otherwise necessary, that is fine, but 
-  please isolate to its own commit so I can cherry-pick around it.
 
-==== Copyright
+== Origin and philosophy  (aka: Why is this project being developed?)
 
-Licensed under Apache License 2.0.  See LICENSE.txt for further details.
 
-Copyright (c) 2013-2014  Adrian Webb <adrian.webb@coralnexus.com>
-Coral Technology Group LLC
+This project began with the need to automate the management of our own 
+infrastructure architecture starting in mid 2012.  In early 2013 the initial 
+work towards this goal was merged into two projects; Nucleon (general plugin 
+management framework and execution environment), and CORL (this project).
+
+We believe in the future, as machines become more connected and integrated,
+there will be profound need for frameworks that allow for the creation of semi
+or fully autonomous cyber entities that evolve across the cloud. These software 
+entities will have varying capabilities and objectives but all will be capable 
+of managing their machines, communicating with others in their network, and 
+reproducing when neccessary.  We want to help further a new era of smart 
+infrastructure by providing an open source framework for developing such 
+entities and their requisite environments.
+
+Treating machines as autonomous software entities that can self manage allows
+for the agile and adaptive evolution of the computer systems we rely on to make
+our lives easier.  Management dashboards and user controls are great but the 
+future of the web belongs to the machines acting in our interests.  CORL is
+being developed to help bring the machines to life (in a manner of speaking).
+
+
+== State of the project
+
+
+CORL, and its parent {Nucleon}[https://github.com/coralnexus/nucleon]
+are still in alpha development and not yet ready for production unless you know 
+how to develop with it and fix bugs.  We use it for our infrastructure 
+architecture internally, but there are kinks we still have to work out to meet 
+the full set of intended architectual objectives.  We are currently finalizing 
+the acquarium, next comes the fish.
+
+If you are a tinkerer and are passionate about machine managed systems or 
+organically inspired software systems we invite your contributions in whatever
+form you wish to provide.  Contact Adrian Webb ( adrian.webb@coralnexus.com ) 
+with questions or feedback or just post an issue.
+
+<b>Note that all development and testing has been on Ubuntu (12.04/14.04) so 
+far.</b>
+
+To review tasks needing completion before first production release, {see the TODO}[link:info/TODO.rdoc].
+
+To get an overview of what plugins are currently provided, go {here}[link:info/PLUGINS.rdoc].
+
+
+== CORL architecture
+
+
+CORL is a <b>programming framework</b> and <b>execution environment</b> intended for:
+
+  1. Management of reusable high availability platforms across cloud providers 
+  
+  2. Distributed programming or script execution across dynamically managed nodes
+  
+  3. Decentralized networking and provisioning of heterogeneous machines
+  
+  4. Cloud based evolutionary multi-agent simulations and processing
+
+
+=== Key design requirements:
+
+
+* Lightweight programming framework for executing actions and managing agents
+  across dynamically evolving networks of nodes
+* Pluggable data driven integration capabilities
+* Portable actions and packages that can be searched and aggregated from across
+  the system
+* Network projects that connect nodes, architecture, and resources as 
+  decentralized revision controlled projects, not centralized hosted databases
+* CLI action interface
+* REST action host (not implemented yet)
+
+
+=== Things CORL is NOT meant to be:
+
+
+* A dashboard or UI driven application (we are focused solely on machines)
+* A continuously running agent or hosted application 
+  (we need to minimize system resource usage)
+* A bloated platform that requires a multi-system platform or dedicated 
+  servers to operate
+* A virtualization system (although it uses them)
+
+Care to {walk through the CORL architecture on Prezi}[https://prezi.com/enwlxtfhdqoq/corl]?
+
+
+== CORL focus areas
+
+
+Our ultimate goal is the scalable application of our resources, time, and 
+workflows, while allowing for evolutionary and adaptive growth of our IT 
+infrastructure.
+
+{<img src="https://raw.githubusercontent.com/coralnexus/corl/0.5/images/purpose.png" align="right">}[link:README.rdoc]
+
+<b>Packaging</b> serves as a foundation for an automated architecture by
+providing reusable configuration managed images that can be easily launched
+across local and remote virtual machine and container providers.  Our goal with
+packaging is to turn machines into programmable data objects which can be easily
+automated through diverse software systems.
+
+<b>Automation</b> builds on packaged data and systems, and allows for reusable 
+development of flexible integrated workflows.  Automation capabilities depend
+on the degree to which machine inspection and management has been abstracted 
+from the various configuration files, system services, and operating system 
+nuances.  CORL tries to bridge technologies that abstract the relevant data
+from the machine and various applications so we can more easily monitor and 
+automate.  Two modes of automation are possible; actions (fire and forget), and
+agents (managed services that utilize actions).
+
+<b>Scaling</b> of infrastructure resources and workflows becomes easier when we 
+have a flexible automation system that can work with machines as data, and 
+deeply integrate with the software, services, and workflows we already employ.
+
+
+=== Packaging system
+
+
+To build adaptive infrastructure we treat each machine as a programmable data 
+model that is connected to other machines in a shared network (data pool).  
+This also helps create an entirely hands off administration process that is easy
+to query and modify through remote action execution.
+
+https://raw.githubusercontent.com/coralnexus/corl/0.5/images/packaging-overview.png
+
+To read more on the CORL packaging system, {see the packaging overview}[link:info/PACKAGING.rdoc].
+
+
+=== Automation system
+
+
+The ability to create, reuse, and extend integrated development and 
+administration workflows across standardized plugin interfaces gives us the 
+ability to focus on the task at hand while allowing for the creation of 
+different interface implementations when needed.
+
+
+https://raw.githubusercontent.com/coralnexus/corl/0.5/images/automation-overview.png
+
+
+== CORL installation and setup
+
+CORL is designed so it requires few dependencies outside of the Ruby language
+and some useful Gems.
+
+See the {installation instructions}[link:info/INSTALLATION.rdoc] for information on requirements and getting
+CORL installed on your machines.
+
+
+
+== Ruby Versions
+
+
+This library has been developed with and should support MRI Ruby versions:
+
+* <b>Ruby 1.9.2</b>
+* <b>Ruby 1.9.3</b>
+* <b>Ruby 2.0.0</b>
+* <b>Ruby 2.1.0</b>
+
+If something doesn't work on one of these Ruby versions, it's a bug.
+
+This library may inadvertently work (or seem to work) on other Ruby
+implementations, but support will only be provided for the versions listed
+above.  *Rubinius* is being tested and will ultimately be supported.
+
+This library currently does not work on *JRuby* due to CORL gem dependencies, 
+such as Rugged, that provide C Ruby extensions (which JRuby does not support).
+
+We have developed this so far pretty much entirely on Ubuntu but the core 
+framework should work with other Linux distributions.  There are known issues
+with Windows when executed through Vagrant and Cygwin.
+
+
+== Versioning
+
+
+This framework should be considered unstable and likely to break as remaining
+bugs and unit testing are completed going forward.  When we reach version 1.0.0 
+full {semantic versioning}[http://semver.org] will be ahered to. Until then
+the minor version specifies a major architectural change, and patch versions
+could fix bugs and revise features that could break backward compatibility.
+
+
+== License
+
+
+Licensed under Apache License 2.0. See LICENSE.txt for further details.
+
+Copyright © 2013-2015 Adrian Webb ( mailto:adrian.webb@coraltech.net ) <b>Coral Technology Group LLC</b>

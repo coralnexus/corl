@@ -6,6 +6,7 @@ require 'bundler'
 require 'jeweler'
 require 'rspec/core/rake_task'
 require 'rdoc/task'
+require 'github/markup'
 
 #-------------------------------------------------------------------------------
 # Dependencies
@@ -88,5 +89,61 @@ Rake::RDocTask.new do |rdoc|
   rdoc.options << '-w' << '2'
 
   rdoc.rdoc_files.include('*.rdoc')
+  rdoc.rdoc_files.include('info/*.rdoc')
   rdoc.rdoc_files.include('lib/**/*.rb')
+
+  #
+  # [link:info/*.rdoc]
+  #
+  # Doc viewers
+  #
+  # Github.com (no control) & Generated RDoc site (limited control)
+  #      README.rdoc
+  #      info/*.rdoc
+  # Local Github render (full control)
+  #      tmp/README.rdoc
+  #      tmp/info/*.rdoc
+  #
+
+  FileUtils.mkdir_p('tmp')
+
+  html_prefix = "<!DOCTYPE html><html lang='en' class=''><head><title>Test Github markup</title>"
+  html_prefix << '<link href="https://assets-cdn.github.com/assets/github-07ee5f9b28252daadba7750d43951602b35cdaa9dc19b5aff2eececebd6b6627.css" media="all" rel="stylesheet" type="text/css" />'
+  html_prefix << '<link href="https://assets-cdn.github.com/assets/github2-13950c15da59f6c02f99ce11c07b93342a063458ce7ab72e243013dd9729008e.css" media="all" rel="stylesheet" type="text/css" />'
+  html_prefix << "</head><body style='padding: 30px'><div class='site' itemscope itemtype='http://schema.org/WebPage'><article class='markdown-body entry-content' itemprop='mainContentOfPage'>"
+  html_suffix = "</article></div></body></html>"
+
+  embedded_html = lambda do |html_body|
+    "#{html_prefix}#{html_body}#{html_suffix}"
+  end
+
+  create_rdoc_link = lambda do |source|
+    rdoc_readme = File.join(Dir.pwd, rdoc.rdoc_dir, "#{source.gsub('.', '_')}.html")
+    rdoc_link   = File.join(Dir.pwd, rdoc.rdoc_dir, source)
+
+    FileUtils.rm_f(rdoc_link)
+    FileUtils.ln_s(rdoc_readme, rdoc_link)
+  end
+
+  tmp_readme         = File.join(Dir.pwd, 'tmp', rdoc.main)
+  readme_github_html = embedded_html.call(GitHub::Markup.render(rdoc.main, File.read(rdoc.main)))
+  File.write(tmp_readme, readme_github_html)
+
+  create_rdoc_link.call(rdoc.main)
+
+  Dir.glob('info/*.rdoc') do |rdoc_file|
+    tmp_dir     = File.join(Dir.pwd, 'tmp', File.dirname(rdoc_file))
+    tmp_file    = File.join(Dir.pwd, 'tmp', rdoc_file)
+    readme_file = File.join(tmp_dir, rdoc.main)
+
+    FileUtils.mkdir_p(tmp_dir)
+
+    FileUtils.rm_f(readme_file)
+    FileUtils.ln_s(tmp_readme, readme_file)
+
+    github_html = embedded_html.call(GitHub::Markup.render(rdoc_file, File.read(rdoc_file)))
+    File.write(tmp_file, github_html)
+
+    create_rdoc_link.call(rdoc_file)
+  end
 end

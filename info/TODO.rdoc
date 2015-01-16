@@ -1,0 +1,27 @@
+= CORL tasks to be completed before 1.0.0 release
+
+
+This framework should be considered unstable and likely to break as remaining
+bugs and unit testing are completed going forward.  When we reach version 1.0.0 
+full {semantic versioning}[http://semver.org] will be ahered to. Until then
+the minor version specifies a major architectural change, and patch versions
+could fix bugs and revise features that could break backward compatibility.
+
+
+== TODO:
+
+
+* Default action arguments and options for networks
+* Error handling improvements
+* Full code documentation
+* Full coverage unit tests
+* Test on Windows, Mac, Linux (Debian, Ubuntu, CentOS, Redhat, Suse)
+* Performance improvements
+* Google node and machine providers
+* Localization improvements
+* Logging consolidation (eliminate redundant log information)
+* Fix bugs :-(
+
+
+---
+{Click here to return to the README}[link:README.rdoc]

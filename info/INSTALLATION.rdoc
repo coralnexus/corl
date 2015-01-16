@@ -1,0 +1,163 @@
+= CORL installation
+
+
+== Requirements
+
+
+CORL and Nucleon are available as Ruby Gems, which can easily be included in 
+other projects. They are ultimately destined for compatibility with any Linux, 
+Mac, and Windows machines, but due to early development resource limitations 
+we started with what we use internally.
+
+This means they have currently been tested on:
+
+    Ubuntu (12.04 / 14.04)
+    Ruby versions from 1.8 to 2.1 (>= 1.9 highly recommended due to ordered hash capabilities)
+
+For information on the various ways to install Ruby, see the {Ruby installation 
+instructions}[https://www.ruby-lang.org/en/documentation/installation].  We highly recommend {RVM}[https://rvm.io].
+
+If using the Git or Github project plugin providers, Git will need to be 
+installed on the system and accessible in the execution search path. See the 
+{Git home}[http://git-scm.com/downloads] for more information.
+
+
+== Vagrant development environment
+
+
+The easiest way to get up and running with CORL from a number of operating
+systems is to use {Vagrant}[http://vagrantup.com].  Included in this repository
+is a Vagrantfile that can launch a Virtualbox VM or Docker container that 
+installs CORL on an Ubuntu base image.  Make sure that Vagrant (> 1.6.5) is 
+installed on your system and fetch the CORL project into a local directory.
+
+  git clone -b 0.5 https://github.com/coralnexus/corl.git {corl/dev/path}
+  cd {corl/dev/path}
+  git submodule update --init --recursive
+  
+To launch CORL in a local Virtualbox machine:
+
+  vagrant up corl
+  
+To launch CORL in a local Docker container you must be running a Docker supported
+Linux version and have the Docker server running on the local host.
+
+  vagrant up corl_linux
+  
+The CORL bootstrap process will initialize the operating environment and install
+CORL onto the VM or container.
+
+  vagrant ssh corl | corl_linux
+  # Play around...
+  
+When your done:
+
+  vagrant destroy --force
+  
+Three directories are shared with the VM/container to make development and 
+testing easier.
+
+  {corl repo}/share/network  ->  /var/corl         # Two way share of root level network project
+  {corl repo}/share/home     ->  /home/vagrant     # One way RSync push to home (no delete)  
+  {corl repo}                -> {remote gem path}  # One way RSync push to the remote CORL gem code
+
+
+== Automated bootstrap (for images)
+
+
+If you are installing CORL outside of Vagrant, we provide an internal CORL
+bootstrap script package that automates the installation (currently on Ubuntu
+only).
+
+See the {CORL bootstrap project on GitHub}[https://github.com/coralnexus/corl-bootstrap] to review
+the installation process and dependencies in our automated Ubuntu installation scripts.
+
+Here is an example CORL install script (<b>for Ubuntu</b>)
+
+  #!/bin/bash
+  #-----------------------------------------------------------------------------
+  echo "1. Initializing Git"
+  apt-get -y install git || exit 1
+  
+  echo "2. Fetching CORL bootstrap source repository"
+  rm -Rf /tmp/corl-bootstrap
+  git clone https://github.com/coralnexus/corl-bootstrap.git /tmp/corl-bootstrap >/tmp/corl.bootstrap.log 2>&1 || exit 2
+  cd /tmp/corl-bootstrap
+  git submodule update --init --recursive >>/tmp/corl.bootstrap.log 2>&1 || exit 3
+  
+  echo "3. Executing CORL bootstrap process..."
+  chmod 755 /tmp/corl-bootstrap/bootstrap.sh
+  sudo /tmp/corl-bootstrap/bootstrap.sh || exit $?
+
+
+== Manual installation
+
+
+<b>As a standalone system</b>
+
+  $> gem install corl  # add sudo if not running RVM
+  $> corl -h
+
+<b>As a Vagrant plugin</b>
+
+  $> vagrant plugin install corl
+  $> vagrant corl -h
+
+<b>For Ruby applications</b>, include in your {Gemfile}[http://bundler.io/gemfile.html]:
+
+  gem "corl", "~> 0.5"
+
+
+== Checking loaded plugins and providers
+
+
+  $> corl plugins
+
+
+== API keys
+
+
+CORL encapsulates everything needed to manage networks as pluggable version 
+controlled projects, except API keys and remote service authorizations. 
+
+<b>IMPORTANT</b>: For security reasons cloud service provider API keys are not, 
+and should not be, versioned!
+
+Valid API keys are required to connect to network servers through the CORL 
+system.  We recommend storing your various API keys in an encrypted archive
+and locking down SSH access, as API keys are transferred to the root of new
+network nodes to allow for service oriented operations from that node.
+
+In CORL core, as of January 2015, there are two kinds of API keys used:
+
+<b>Cloud service providers</b>:
+
+  Rackspace
+  Amazon
+  Google (in the works)
+
+<b>Project hosting providers</b>:
+
+  GitHub
+
+
+Create a <b>~/.fog</b> file with cloud service keys**
+
+  default:
+    rackspace_username: {username}
+    rackspace_api_key: {api_key}
+    aws_access_key_id: {key_id}
+    aws_secret_access_key: {secret_access_key}
+
+Create a <b>~/.netrc</b> file**
+
+  machine api.github.com
+    login {github_username}
+    password {api_key}
+
+
+** An upcoming stable release will merge these two into a single authorisation file.
+
+
+---
+{Click here to return to the README}[link:README.rdoc]

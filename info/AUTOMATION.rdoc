@@ -1,0 +1,5 @@
+= CORL automation system
+
+
+---
+{Click here to return to the README}[link:README.rdoc]

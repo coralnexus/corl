@@ -1,0 +1,171 @@
+= CORL packaging system
+
+
+CORL provides a middle layer between configuration management tools like Puppet
+and automation systems and processes.  CORL can be extended in individual 
+projects and easily merge libraries of bundled plugin interfaces and providers.
+
+
+==== Networks
+
+
+At the very top level in CORL there is a network project.  Think of it as a 
+parent container for everything necessary to grow a network of machines.  By 
+default the network is a shared Git repository but the project interface is 
+pluggable for individual needs.
+
+The default plugin implementation of the CORL network maintains the following
+project directory structure.
+
+  {network project directory}
+    |-> config           # Contextually searched provisioner configurations
+    |-> 
+
+Networks bundle:
+
+* Network and node group settings
+* Contexual configurations
+* Build definitions (packages, identities, projects, etc...)
+* Node data objects
+* Shared authentication information
+* CORL plugin interface implementations
+* Any other shared files
+
+
+
+To see an example of a network project, {checkout our starter template}[https://github.com/coralnexus/network-template].
+
+
+==== Packages
+
+
+Packages are revision controlled projects (Git) that contain reusable 
+infrastructure components.  Packages are like lego blocks and can be derived from
+combinations of other packages.
+
+https://raw.githubusercontent.com/coralnexus/corl/0.5/images/package.png
+
+Packages define a corl.{json|yaml} file in the root directory that contains 
+build directives targeted at various environments, like development, staging, 
+qa, and production.  We internally lock qa and production build revisions so we
+get standardized environments.
+
+
+Packages bundle:
+
+* Build definitions (packages, provisioner modules, projects, identities, etc...)
+* Default configurations (Puppet by default)
+* Provisioner gateways (Puppet by default)
+* Provisioner profiles (Puppet by default)
+
+
+Example build directive: (tracks *master* by default)
+
+> {package directory}/<b>corl.json</b>
+
+  {
+    "builders": {
+      "package": {
+        "environment": {
+          "production": {
+            "coralnexus__core": "github:::coralnexus/corl-package-core[04eaa0f855c7824c58d43f0dd7b1370fa16157d6]"
+          },
+          "qa": {
+            "use": "production"
+          },
+          "default": {
+            "coralnexus__core": "github:::coralnexus/corl-package-core"
+          }
+        }
+      }
+    }
+  }
+  
+This directive basically defines a dependency on the coralnexus core package so
+that when this package is built on a system and profiles are loaded the 
+dependency and it's profiles are loaded first.  Different environments can 
+track different branches of the same projects or include different projects 
+based on the state of the environment.  Above we just lock in a constant 
+revision when in a production or QA environment.
+
+
+Example Puppet node profile: (Varnish proxy server)
+
+> {package directory}/<b>profiles/varnish_server.pp</b>
+
+  class vendor_name::package_namespace::profile::varnish_server {
+    $base_name = 'coralnexus_varnish_server'
+    anchor { $base_name: }
+    #---------------------------------------------------------------------------
+    # Required systems
+    class { 'varnish': require => Anchor[$base_name] }
+    class { 'varnish::vcl': require => Class['varnish'] }
+    #---------------------------------------------------------------------------
+    # Optional systems
+    corl::include { 'varnish_server_classes': require => Class['varnish::vcl'] }
+    #---------------------------------------------------------------------------
+    # Resources
+    corl_resources('varnish::acl', 'varnish_server::acl', 'varnish_server::acl_defaults')
+    corl_resources('varnish::probe', 'varnish_server::probe', 'varnish_server::probe_defaults')
+    corl_resources('varnish::backend', 'varnish_server::backend', 'varnish_server::backend_defaults')
+    corl_resources('varnish::director', 'varnish_server::director', 'varnish_server::director_defaults')
+    corl_resources('varnish::selector', 'varnish_server::selector', 'varnish_server::selector_defaults')
+  }
+  
+Example provisioner directive: (tracks *master* by default)
+
+> {package directory}/<b>corl.json</b>
+
+  {
+    "provisioners": {
+      "puppetnode": {
+        "vendor_name::package_namespace": {
+          "varnish_server": {
+            "environment": {
+              "production": {
+                "modules": {
+                  "varnish": "github:::maxchk/puppet-varnish[b9846d1b35e87a45c98213fddfe71fa0a6f3b31c]",
+                  "varnish_drupal": "github:::coralnexus/puppet-varnish_drupal[b1f8ecd9be5144d642d7717429a3652234b5f0d9]"
+                }
+              },
+              "qa": {
+                "use": "production"
+              },
+              "default": {
+                "modules": {
+                  "varnish": "github:::maxchk/puppet-varnish[develop]",
+                  "varnish_drupal": "github:::coralnexus/puppet-varnish_drupal"
+                }
+              }
+            }
+          }        
+        }
+      }
+    }
+  }
+  
+The above provisioner directive tells CORL to 
+
+
+To see an example of a package, {checkout our core package}[https://github.com/coralnexus/network-template].
+
+
+==== Profiles
+
+
+Node profiles are packaged systems and default configurations meant to run as
+standalone server images or combined to create meta server images.  The CORL
+provisioner plugin defines an interface for creating, linking, and provisioning
+profiles.  Currently only Puppet is supported, but more provisioners are on the
+way in the future.
+
+https://raw.githubusercontent.com/coralnexus/corl/0.5/images/profile.png
+
+Profiles are created in the native file format of the configuration management
+system being used.  For instance in our default Puppetnode provisioner
+
+https://raw.githubusercontent.com/coralnexus/corl/0.5/images/example-network-architecture.png
+
+
+---
+{Click here to return to the README}[link:README.rdoc]

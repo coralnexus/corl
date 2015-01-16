@@ -15,4 +15,5 @@ group :development do
   gem "jeweler", "~> 2.0"
   gem "rspec", "~> 3.1"
   gem "rdoc", "~> 3.12"
+  gem "github-markup", "~> 1.3"
 end
