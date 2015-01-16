@@ -716,6 +716,9 @@ en:
           Starting provision run
     vagrant:
       actions:
+        init_command:
+          start: |-
+            Initializing CORL command reference...
         init_keys:
           start: |-
             Initializing CORL development keys...
