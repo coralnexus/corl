@@ -196,7 +196,12 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
     matches = {}
 
     each_node_config do |provider, name, info|
-      matches[provider] = name if info[:public_ip] == public_ip && name.to_s == hostname.to_s
+      # TODO: Abstract this out... (extension hook)
+      if provider == :vagrant && fact(:vagrant_exists)
+        matches[provider] = name if name.to_s == hostname.to_s
+      else
+        matches[provider] = name if info[:public_ip] == public_ip && name.to_s == hostname.to_s
+      end
     end
 
     unless matches.empty?
