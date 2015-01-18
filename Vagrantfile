@@ -41,7 +41,6 @@ Vagrant.configure('2') do |config|
     synced_folders.call node
 
     node.vm.provider :virtualbox do |provider, override|
-      provider.gui    = true
       override.vm.box = "coralnexus/vagrant-ubuntu"
 
       override.vm.network :private_network, :ip => "172.100.100.92"
