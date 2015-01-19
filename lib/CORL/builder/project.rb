@@ -20,7 +20,7 @@ class Project < Nucleon.plugin_class(:CORL, :builder)
       :pull          => true,
       :internal_ip   => CORL.public_ip, # Needed for seeding Vagrant VMs
       :manage_ignore => false,
-      :corl_file     => false
+      :nucleon_file  => false
     }))
     unless project
       warn("Project #{cyan(path)} failed to initialize", { :i18n => false })

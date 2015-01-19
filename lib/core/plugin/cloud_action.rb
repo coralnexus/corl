@@ -158,7 +158,7 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
       network_path = ( path.nil? ? Dir.pwd : File.expand_path(path) )
     end
 
-    if File.exists?(File.join(network_path, '.corl'))
+    if File.exists?(File.join(network_path, '.nucleon'))
       # Load network if it exists
       network_config = extended_config(:network, { :directory => network_path, :new => true })
       @network       = CORL.network(network_path, network_config, provider)

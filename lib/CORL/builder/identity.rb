@@ -43,12 +43,13 @@ class Identity < Nucleon.plugin_class(:CORL, :builder)
 
     unless identities.has_key?(provider_id)
       project = build_config.manage(:project, extended_config(:identity, {
-        :directory     => full_directory,
-        :url           => project_reference,
-        :create        => File.directory?(full_directory) ? false : true,
-        :pull          => true,
-        :internal_ip   => CORL.public_ip, # Needed for seeding Vagrant VMs
-        :manage_ignore => false
+        :directory      => full_directory,
+        :url            => project_reference,
+        :create         => File.directory?(full_directory) ? false : true,
+        :pull           => true,
+        :internal_ip    => CORL.public_ip, # Needed for seeding Vagrant VMs
+        :manage_ignore  => false,
+        :nucleon_resave => true
       }))
       unless project
         warn("Identity #{cyan(name)} failed to initialize", { :i18n => false })
