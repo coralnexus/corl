@@ -485,7 +485,8 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
       result = run.node_lookup(config)
 
       if result.status == code.success
-        return Util::Data.value(Util::Data.parse_json(result.errors), default)
+        result_data = Util::Data.parse_json(result.errors)
+        return Util::Data.value(result_data[property], default)
       end
       return default
     end
