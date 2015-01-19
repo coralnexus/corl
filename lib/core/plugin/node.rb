@@ -481,8 +481,10 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
   def lookup(property, default = nil, options = {})
     unless local?
-      config = Config.ensure(options).import({ :property => property, :quiet => true })
+      config = Config.ensure(options).import({ :properties => [ property ], :quiet => true })
       result = run.node_lookup(config)
+
+      dbg()
 
       if result.status == code.success
         return Util::Data.value(Util::Data.parse_json(result.errors), default)
