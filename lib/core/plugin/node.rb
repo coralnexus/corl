@@ -486,7 +486,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
       if result.status == code.success
         result_data = Util::Data.parse_json(result.errors)
-        return Util::Data.value(result_data[property], default)
+        return Util::Data.value(result_data[property.to_s], default)
       end
       return default
     end
