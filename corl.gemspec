@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2015-01-18"
+  s.date = "2015-01-19"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -106,15 +106,15 @@ Gem::Specification.new do |s|
     "lib/facter/custom_facts.rb",
     "lib/facter/vagrant_exists.rb",
     "lib/hiera/corl_logger.rb",
-    "lib/nucleon/action/cloud/config.rb",
-    "lib/nucleon/action/cloud/create.rb",
-    "lib/nucleon/action/cloud/images.rb",
-    "lib/nucleon/action/cloud/inspect.rb",
-    "lib/nucleon/action/cloud/machines.rb",
-    "lib/nucleon/action/cloud/regions.rb",
-    "lib/nucleon/action/cloud/remote.rb",
-    "lib/nucleon/action/cloud/settings.rb",
-    "lib/nucleon/action/cloud/vagrantfile.rb",
+    "lib/nucleon/action/network/config.rb",
+    "lib/nucleon/action/network/create.rb",
+    "lib/nucleon/action/network/images.rb",
+    "lib/nucleon/action/network/inspect.rb",
+    "lib/nucleon/action/network/machines.rb",
+    "lib/nucleon/action/network/regions.rb",
+    "lib/nucleon/action/network/remote.rb",
+    "lib/nucleon/action/network/settings.rb",
+    "lib/nucleon/action/network/vagrantfile.rb",
     "lib/nucleon/action/node/IP.rb",
     "lib/nucleon/action/node/SSH.rb",
     "lib/nucleon/action/node/authorize.rb",
