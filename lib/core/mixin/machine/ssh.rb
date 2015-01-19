@@ -44,7 +44,23 @@ module SSH
       end
 
     rescue => error
-      warn(error, { :i18n => false })
+      if error.is_a?(Net::SSH::AuthenticationFailed) && ssh_config[:keypair]
+        key_file_base = File.join(ssh_config[:key_dir], "#{ssh_config[:key_name]}_#{ssh_config[:keypair].type}")
+
+        Util::Disk.delete(key_file_base)
+        Util::Disk.delete("#{key_file_base}.pub")
+
+        node.keypair            = nil
+        ssh_config[:keypair]    = nil
+        ssh_config[:reset_conn] = true
+        retry
+      else
+        message = error.message
+        if message.include?("Neither PUB key nor PRIV key")
+          message = "Authentication failed for #{user}@#{public_ip} on port #{ssh_port} (most likely wrong password entered)"
+        end
+        warn(message, { :i18n => false })
+      end
       success = false
     end
     success
