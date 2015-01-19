@@ -537,6 +537,19 @@ en:
               Reinitializing network
             updating: |-
               Updating node network configurations
+        identity:
+          warn:
+            identity_required: |-
+              Identity option `--identity` required or identity needs to exist locally when adding identities to the network
+          info:
+            using_identity: |-
+              Using local identity %{identity} at %{directory}
+            start_add: |-
+              Setting identity on %{provider} machine %{name}
+            start_delete: |-
+              Removing identity from %{provider} machine %{name}
+            local_delete: |-
+              Removing the local identity from %{directory}
         build:
           description: |-
             Build projects into the network project or global filesystem
