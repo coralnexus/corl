@@ -121,7 +121,7 @@ en:
           success:
             saved: |-
               Plugin successfully saved to %{file}
-      cloud:
+      network:
         create:
           description: |-
             Create a new network project
@@ -159,7 +159,7 @@ en:
           help: |-
             Inspect any defined network configuration.  It is not intended to access or
             set the node configurations defined in the config directory, which you can use the `node lookup` and
-            `cloud config` actions.
+            `network config` actions.
 
             Nested configurations can be accessed by specifying the nested keys in sequence in the arguments.
 

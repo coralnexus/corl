@@ -1,41 +1,41 @@
 
 module Nucleon
 module Action
-module Cloud
+module Network
 class Inspect < Nucleon.plugin_class(:nucleon, :cloud_action)
-  
+
   #-----------------------------------------------------------------------------
   # Info
-  
+
   def self.describe
-    super(:cloud, :inspect, 955)
+    super(:network, :inspect, 955)
   end
- 
+
   #-----------------------------------------------------------------------------
   # Settings
- 
+
   def configure
     super do
       codes :configuration_parse_failed
-      
+
       register_array :elements
       register_translator :format, :json
     end
   end
-  
+
   #---
-  
+
   def ignore
     node_ignore
   end
-   
+
   def arguments
     [ :elements ]
   end
-  
+
   #-----------------------------------------------------------------------------
   # Operations
-   
+
   def execute
     super do |node|
       ensure_network do
