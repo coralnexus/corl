@@ -484,8 +484,6 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
       config = Config.ensure(options).import({ :properties => [ property ], :quiet => true })
       result = run.node_lookup(config)
 
-      dbg()
-
       if result.status == code.success
         return Util::Data.value(Util::Data.parse_json(result.errors), default)
       end
