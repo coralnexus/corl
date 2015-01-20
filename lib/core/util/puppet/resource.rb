@@ -134,7 +134,9 @@ class Resource < Core
         config.set(:interpolate_template, config.get("interpolate_#{target}", true))
 
         input_data       = resource[target]
-        resource[target] = CORL.template(config, resource[name]).render(input_data)
+        plugin           = CORL.template(config.import({ :new => true }), resource[name])
+        resource[target] = plugin.render(input_data)
+        CORL.remove_plugin(plugin)
 
         if config.get(:debug, false)
           CORL.ui.info("\n", { :prefix => false })
