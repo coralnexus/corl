@@ -54,7 +54,6 @@ class Remote < CORL.plugin_class(:nucleon, :cloud_action)
             provider = $1
           end
 
-          Nucleon::Plugin::Project.store_provider(project.directory, provider)
           myself.status = code.push_failure unless push(project)
         else
           myself.status = code.project_failure
