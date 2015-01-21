@@ -18,6 +18,7 @@ class Build < Nucleon.plugin_class(:nucleon, :cloud_action)
     super do
       register_str :environment
       register_array :providers
+      register_bool :clean
     end
   end
 

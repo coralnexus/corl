@@ -574,6 +574,8 @@ en:
               Environment to build (default %{default_value})
             providers: |-
               List of builder plugin providers to run build process for (default %{default_value})
+            clean: |-
+              Wipe build directories before building and start fresh (default %{default_value})
           info:
             start: |-
               Building network dependencies
