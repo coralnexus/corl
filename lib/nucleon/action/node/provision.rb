@@ -68,7 +68,7 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
 
               collection.each do |name, provisioner|
                 if supported_profiles = provisioner.supported_profiles(node, profiles)
-                  supported_profiles.each do |profile|
+                  provisioner.profile_dependencies(node, supported_profiles).each do |profile|
                     info('profile', { :provider => yellow(provider), :profile => green(profile.to_s) })
                   end
                   unless settings[:check_profiles]
