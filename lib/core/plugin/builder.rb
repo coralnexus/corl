@@ -32,16 +32,15 @@ class Builder < Nucleon.plugin_class(:nucleon, :base)
     environment   = Util::Data.ensure_value(config[:environment], node.lookup(:corl_environment))
     configuration = process_environment(export, environment)
 
-    FileUtils.rm_rf(build_directory) if config.get(:clean, false)
     FileUtils.mkdir_p(build_directory)
 
-    status = parallel(:build_provider, configuration, environment)
+    status = parallel(:build_provider, configuration, environment, config)
     status.values.include?(false) ? false : true
   end
 
   #---
 
-  def build_provider(name, project_reference, environment)
+  def build_provider(name, project_reference, environment, config)
     # Implement in sub classes
     true
   end

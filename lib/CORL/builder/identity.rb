@@ -32,14 +32,16 @@ class Identity < Nucleon.plugin_class(:CORL, :builder)
   #-----------------------------------------------------------------------------
   # Identity interface operations
 
-  def build_provider(name, project_reference, environment)
+  def build_provider(name, project_reference, environment, options = {})
     provider_id = id(name)
     directory   = File.join(internal_path(build_directory), provider_id.to_s)
+    config      = Config.ensure(options)
     success     = true
 
     info("Building identity #{blue(name)} at #{purple(project_reference)} into #{green(directory)}", { :i18n => false })
 
     full_directory = File.join(network.directory, directory)
+    FileUtils.rm_rf(full_directory) if config.get(:clean, false)
 
     unless identities.has_key?(provider_id)
       project = build_config.manage(:project, extended_config(:identity, {
