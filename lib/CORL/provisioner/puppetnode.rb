@@ -32,7 +32,6 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
         Puppet.debug = true
       end
       unless reload
-        Puppet::Util::Log.level = CORL.log_level if CORL.log_level
         Puppet::Util::Log.newdesttype id do
           def handle(msg)
             levels = {
