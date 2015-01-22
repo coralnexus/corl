@@ -58,7 +58,7 @@ class Seed < Nucleon.plugin_class(:nucleon, :cloud_action)
             project_info = Config.new({ :provider => :git }, {}, true, false)
           end
 
-          project_class.clear_provider(network_path)
+          project_class.clear_project_info(network_path)
 
           info('backup')
           FileUtils.rm_rf(backup_path)
