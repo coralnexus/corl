@@ -65,7 +65,7 @@ class Package < Nucleon.plugin_class(:CORL, :builder)
         if project.get([ :builders, plugin_provider ], false)
           sub_packages = process_environment(project.get_hash([ :builders, plugin_provider ]), environment)
 
-          status  = parallel(:build_provider, sub_packages, environment)
+          status  = parallel(:build_provider, sub_packages, environment, config)
           success = false if status.values.include?(false)
         end
       end
