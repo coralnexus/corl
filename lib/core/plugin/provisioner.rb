@@ -220,9 +220,17 @@ class Provisioner < Nucleon.plugin_class(:nucleon, :base)
     config  = Config.new(info, {}, true, false)
     success = true
 
+    while config.has_key?(:extend) do
+      array(config.delete(:extend)).each do |parent|
+        parent = profile_id(package, parent) unless parent.match('::')
+        parents << parent
+        config.defaults(profiles[parent.to_sym])
+      end
+    end
+
     build_config.set_dependency(:profile, profile_id(package, name), parents)
 
-    success = yield(process_environment(config, environment), options) if block_given?
+    success = yield(process_environment(info, environment), options) if block_given?
     success
   end
 
