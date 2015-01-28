@@ -46,43 +46,41 @@ class Provision < Nucleon.plugin_class(:nucleon, :cloud_action)
           CORL.create_fact(:corl_environment, settings[:environment])
         end
 
-        if CORL.admin?
-          unless settings[:check_profiles]
-            info('start', { :provider => node.plugin_provider, :name => node.plugin_name })
-          end
+        unless settings[:check_profiles]
+          info('start', { :provider => node.plugin_provider, :name => node.plugin_name })
+        end
 
-          if settings[:build] ||
-            settings.has_key?(:environment) ||
-            ! ( node.build_time && File.directory?(network.build_directory) )
+        if settings[:build] ||
+          settings.has_key?(:environment) ||
+          ! ( node.build_time && File.directory?(network.build_directory) )
 
-            info('build', { :provider => node.plugin_provider, :name => node.plugin_name })
-            success = node.build(settings)
-          end
+          info('build', { :provider => node.plugin_provider, :name => node.plugin_name })
+          success = node.build(settings)
+        end
 
-          if success
-            provisioner_info = node.provisioner_info
+        if success
+          provisioner_info = node.provisioner_info
 
-            node.provisioners.each do |provider, collection|
-              provider_info = provisioner_info[provider]
-              profiles      = provider_info[:profiles]
+          node.provisioners.each do |provider, collection|
+            provider_info = provisioner_info[provider]
+            profiles      = provider_info[:profiles]
 
-              collection.each do |name, provisioner|
-                if supported_profiles = provisioner.supported_profiles(node, profiles)
-                  provisioner.profile_dependencies(node, supported_profiles).each do |profile|
-                    info('profile', { :provider => yellow(provider), :profile => green(profile.to_s) })
-                  end
-                  unless settings[:check_profiles]
-                    profile_success = provisioner.provision(node, supported_profiles, settings)
-                    success         = false unless profile_success
-                  end
+            collection.each do |name, provisioner|
+              if supported_profiles = provisioner.supported_profiles(node, profiles)
+                provisioner.profile_dependencies(node, supported_profiles).each do |profile|
+                  info('profile', { :provider => yellow(provider), :profile => green(profile.to_s) })
+                end
+                if CORL.admin? && ! settings[:check_profiles]
+                  profile_success = provisioner.provision(node, supported_profiles, settings)
+                  success         = false unless profile_success
                 end
               end
             end
-            unless settings[:check_profiles]
-              success('complete', { :provider => node.plugin_provider, :name => node.plugin_name, :time => Time.now.to_s }) if success
-            end
-            myself.status = code.provision_failure unless success
           end
+          unless settings[:check_profiles]
+            success('complete', { :provider => node.plugin_provider, :name => node.plugin_name, :time => Time.now.to_s }) if success
+          end
+          myself.status = code.provision_failure unless success
         end
       end
     end
