@@ -194,7 +194,7 @@ class Provisioner < Nucleon.plugin_class(:nucleon, :base)
 
     FileUtils.mkdir_p(build_directory)
 
-    status  = parallel(:build_provider, provider_info, environment, combined_info)
+    status  = parallel(:build_provider, provider_info, environment, combined_info, config)
     success = status.values.include?(false) ? false : true
 
     if success
@@ -209,29 +209,20 @@ class Provisioner < Nucleon.plugin_class(:nucleon, :base)
 
   #---
 
-  def build_provider(package, info, environment, combined_info)
+  def build_provider(package, info, environment, combined_info, options = {})
     profiles = hash(info[:profiles])
-    status = parallel(:build_profile, profiles, id(package), environment, hash(combined_info[:profiles]))
+    status   = parallel(:build_profile, profiles, id(package), environment, hash(combined_info[:profiles]), options)
     status.values.include?(false) ? false : true
   end
 
-  def build_profile(name, info, package, environment, profiles)
+  def build_profile(name, info, package, environment, profiles, options = {})
     parents = []
     config  = Config.new(info, {}, true, false)
     success = true
 
-    while config.has_key?(:extend) do
-      array(config.delete(:extend)).each do |parent|
-        parent = profile_id(package, parent) unless parent.match('::')
-
-        parents << parent
-        config.defaults(profiles[parent.to_sym])
-      end
-    end
-
     build_config.set_dependency(:profile, profile_id(package, name), parents)
 
-    success = yield(process_environment(config, environment)) if block_given?
+    success = yield(process_environment(config, environment), options) if block_given?
     success
   end
 

@@ -144,7 +144,7 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
   #-----------------------------------------------------------------------------
   # Provisioner interface operations
 
-  def build_profile(name, info, package, environment, profiles)
+  def build_profile(name, info, package, environment, profiles, options = {})
     super do |processed_info|
       package_id = id(package)
       directory  = File.join(internal_path(build_directory), package_id.to_s, name.to_s)
@@ -153,7 +153,7 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
       #info("Building CORL profile #{blue(name)} modules into #{green(directory)}", { :i18n => false })
 
       if processed_info.has_key?(:modules)
-        status  = parallel(:build_module, hash(processed_info[:modules]), directory, name, environment)
+        status  = parallel(:build_module, hash(processed_info[:modules]), directory, name, environment, options)
         success = status.values.include?(false) ? false : true
 
         build_config.set_location(:puppet_module, profile_id(package, name), directory) if success
@@ -163,11 +163,14 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
     end
   end
 
-  def build_module(name, project_reference, directory, profile, environment)
+  def build_module(name, project_reference, directory, profile, environment, options = {})
+    config                = Config.ensure(options)
     module_directory      = File.join(directory, name.to_s)
     full_module_directory = File.join(network.directory, module_directory)
     module_project        = nil
     success               = true
+
+    FileUtils.rm_rf(full_module_directory) if config.get(:clean, false)
 
     info("Building #{blue(profile)} Puppet module #{blue(name)} at #{purple(project_reference)} into #{green(module_directory)}", { :i18n => false })
 
