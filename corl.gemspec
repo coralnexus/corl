@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2015-01-28"
+  s.date = "2015-02-03"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -176,7 +176,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--title", "Coral Orchestration and Research Library", "--main", "README.rdoc", "--line-numbers"]
   s.required_ruby_version = Gem::Requirement.new(">= 1.9.1")
   s.rubyforge_project = "corl"
-  s.rubygems_version = "2.4.3"
+  s.rubygems_version = "2.4.5"
   s.summary = "Coral Orchestration and Research Library"
 
   if s.respond_to? :specification_version then
