@@ -48,7 +48,6 @@ class Package < Nucleon.plugin_class(:CORL, :builder)
         :directory     => full_directory,
         :url           => project_reference,
         :create        => File.directory?(full_directory) ? false : true,
-        :pull          => true,
         :manage_ignore => false
       }))
       unless project
