@@ -269,27 +269,6 @@ module Config
           machine.vm.provider provider do |interface, override|
             render("  node.vm.provider '#{provider}' do |provider, override|  # for #{node.hostname}") unless already_processed[provider]
 
-            if box || box_url
-              if provider != :docker
-                if box && box_url
-                  render("    override.vm.box = %property", { :property => box }) unless already_processed[provider]
-                  override.vm.box = box
-
-                  render("    override.vm.box_url = %property", { :property => box_url }) unless already_processed[provider]
-                  override.vm.box_url = box_url
-                end
-              else
-                if box_file
-                  render("    provider.build_dir = %property", { :property => box_file }) unless already_processed[provider]
-                  interface.build_dir = box_file
-                else
-                  render("    provider.image = %property", { :property => box }) unless already_processed[provider]
-                  interface.image = box
-                end
-              end
-              render("\n")
-            end
-
             if info.has_key?(:private_network)
               network_options = info[:private_network].is_a?(Hash) ? info[:private_network] : { :ip => info[:private_network] }
 
@@ -336,6 +315,27 @@ module Config
                   interface.send(property, params)
                 end
               end
+            end
+
+            if box || box_url
+              if provider != :docker
+                if box && box_url
+                  render("    override.vm.box = %property", { :property => box }) unless already_processed[provider]
+                  override.vm.box = box
+
+                  render("    override.vm.box_url = %property", { :property => box_url }) unless already_processed[provider]
+                  override.vm.box_url = box_url
+                end
+              else
+                if box_file
+                  render("    provider.build_dir = %property", { :property => box_file }) unless already_processed[provider]
+                  interface.build_dir = box_file
+                else
+                  render("    provider.image = %property", { :property => box }) unless already_processed[provider]
+                  interface.image = box
+                end
+              end
+              render("\n")
             end
 
             # Server shares
