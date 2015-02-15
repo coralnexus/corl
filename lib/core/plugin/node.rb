@@ -919,7 +919,6 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     codes :network_load_error
 
     config = Config.ensure(options).defaults({
-      :log_level    => Nucleon.log_level,
       :net_remote   => :edit,
       :net_provider => network.plugin_provider
     })
@@ -929,7 +928,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     encoded_config = Util::CLI.encode(Util::Data.clean(config.export))
     action_config  = extended_config(:action, {
       :command => provider.to_s.gsub('_', ' '),
-      :data    => { :encoded => encoded_config }
+      :data    => { :log_level => Nucleon.log_level, :encoded  => encoded_config }
     })
 
     quiet    = config.get(:quiet, false)
