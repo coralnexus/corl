@@ -21,7 +21,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     ui.resource = Util::Console.colorize(hostname, @class_color)
     logger      = hostname
 
-    add_groups([ "all", plugin_provider.to_s, plugin_name.to_s ])
+    myself[:settings] = [ "all", plugin_provider.to_s, plugin_name.to_s ] | array(setting(:settings))
 
     unless reload
       @cli_interface = Util::Liquid.new do |method, args, &code|

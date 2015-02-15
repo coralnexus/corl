@@ -336,7 +336,7 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
     remote_name = config.delete(:remote, :edit)
 
     node_config = extended_config(:network_new_node, Config.new(Util::Data.clean({
-      :settings     => array(config.delete(:groups, [])) | [ "server" ],
+      :settings     => [ "server" ] | array(config.delete(:groups, [])),
       :region       => config.delete(:region, nil),
       :machine_type => config.delete(:machine_type, nil),
       :public_ip    => config.delete(:public_ip, nil),
