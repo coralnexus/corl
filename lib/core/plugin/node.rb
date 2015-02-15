@@ -830,20 +830,21 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
           begin
             test = active_machine.exec(Util::Data.array(commands), config.export) do |type, command, data|
+              data = filter_output(type, data).rstrip
+
               unless quiet
                 unless local?
-                  text_output = filter_output(type, data).rstrip
-
-                  unless text_output.empty?
+                  unless data.empty?
                     if type == :error
-                      warn(text_output, { :i18n => false })
+                      warn(data, { :i18n => false })
                     else
-                      info(text_output, { :i18n => false })
+                      info(data, { :i18n => false })
                     end
                   end
                 end
                 yield(:progress, { :type => type, :command => command, :data => data }) if block_given?
               end
+              data
             end
             results = test if test
 
