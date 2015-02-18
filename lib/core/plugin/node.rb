@@ -926,9 +926,11 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     logger.info("Executing remote action #{provider} with encoded arguments: #{config.export.inspect}")
 
+    provider       = provider.to_s.gsub('_', ' ')
+    action_agent   = !!(provider =~ /^agent\s/)
     encoded_config = Util::CLI.encode(Util::Data.clean(config.export))
     action_config  = extended_config(:action, {
-      :command => provider.to_s.gsub('_', ' '),
+      :command => provider,
       :data    => { :encoded  => encoded_config }
     })
     action_config[:data][:log_level] = Nucleon.log_level if Nucleon.log_level
@@ -938,14 +940,17 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     command_base  = 'corl'
     command_base  = "NUCLEON_NO_PARALLEL=1 #{command_base}" unless parallel
+    command_base  = "NUCLEON_NO_COLOR=1 #{command_base}" if action_agent
 
     result = command(command_base, { :subcommand => action_config, :as_admin => true, :quiet => quiet }) do |op, data|
       yield(op, data) if block_given?
     end
 
     # Update local network configuration so we capture any updates
-    if result.status == code.success && ! network.load({ :remote => config[:net_remote], :pull => true })
-      result.status = code.network_load_error
+    unless action_agent
+      if result.status == code.success && ! network.load({ :remote => config[:net_remote], :pull => true })
+        result.status = code.network_load_error
+      end
     end
     result
   end
