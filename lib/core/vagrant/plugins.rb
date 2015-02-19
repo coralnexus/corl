@@ -1,6 +1,6 @@
 
-if Vagrant::VERSION < "1.2.0"
-  raise "The Vagrant CORL plugin is only compatible with Vagrant 1.2+"
+if Vagrant::VERSION < "1.5.0"
+  raise "The Vagrant CORL plugin is only compatible with Vagrant 1.5+"
 end
 
 module VagrantPlugins
