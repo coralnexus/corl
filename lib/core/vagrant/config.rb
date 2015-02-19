@@ -375,8 +375,11 @@ module Config
 
     if use_nfs && bindfs_installed
       machine.vm.synced_folder ".", "/vagrant", disabled: true
-      machine.vm.synced_folder ".", "/tmp/vagrant", :type => "nfs"
-      machine.bindfs.bind_folder "/tmp/vagrant", "/vagrant"
+
+      unless ENV['CORL_NO_NETWORK_SHARE']
+        machine.vm.synced_folder ".", "/tmp/vagrant", :type => "nfs"
+        machine.bindfs.bind_folder "/tmp/vagrant", "/vagrant"
+      end
     end
 
     render("\n") unless already_processed
