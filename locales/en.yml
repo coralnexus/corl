@@ -23,6 +23,14 @@ en:
             Node plugin provider %{value} is not loaded >> Pick from the following: %{choices}
           nodes: |-
             Node reference %{value} failed to parse or provider %{provider} isn't loaded (%{name})
+        agent:
+          options:
+            log: |-
+              Whether or not to render agent stdout and stderr to a log file (default %{default_value})
+            truncate_log: |-
+              Truncate log file before writing any more output (default %{default_value})
+            log_file: |-
+              Log file to route agent output (default %{default_value})
       node:
         bootstrap:
           status: |-

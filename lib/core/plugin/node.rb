@@ -386,10 +386,22 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
   def add_agent(provider, settings)
     set_setting([ :agents, provider ], Config.new(settings).export)
+
+    save({
+      :message => "Agent #{provider} starting up on #{plugin_provider} #{plugin_name}",
+      :remote  => extension_set(:add_agent_remote, :edit),
+      :push    => true
+    })
   end
 
   def remove_agent(provider)
     delete_setting([ :agents, provider ])
+
+    save({
+      :message => "Agent #{provider} shutting down on #{plugin_provider} #{plugin_name}",
+      :remote => extension_set(:remove_agent_remote, :edit),
+      :push => true
+    })
   end
 
   #-----------------------------------------------------------------------------

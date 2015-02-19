@@ -8,6 +8,15 @@ module Plugin
 class Agent < Nucleon.plugin_class(:nucleon, :cloud_action)
 
   #-----------------------------------------------------------------------------
+  # Info
+
+  def self.describe_base(group = nil, action = 'unknown', weight = -1000, description = nil, help = nil, provider_override = nil)
+    group = array(group).collect! {|item| item.to_sym }
+    group = [ :agent ] | group
+    super(group.uniq, action, weight, description, help, provider_override)
+  end
+
+  #-----------------------------------------------------------------------------
   # Property accessor / modifiers
 
   def configure
@@ -19,9 +28,13 @@ class Agent < Nucleon.plugin_class(:nucleon, :cloud_action)
 
   #---
 
-  def help
-    # TODO:  Localization
-    'AGENT ' + super
+  def arguments
+    # Don't use or the default log file naming will screw up due to having to
+    # move daemonization to the corl loader.
+    #
+    # See: lib/corl.rb
+    #
+    []
   end
 
   #-----------------------------------------------------------------------------
@@ -34,100 +47,49 @@ class Agent < Nucleon.plugin_class(:nucleon, :cloud_action)
   #---
 
   def agent_config
+    register_bool :log, true, 'corl.core.action.agent.options.log'
+    register_bool :truncate_log, true, 'corl.core.action.agent.options.truncate_log'
+
+    register_str :log_file, "/var/log/corl/#{plugin_provider}.log", 'corl.core.action.agent.options.log_file'
   end
 
   #-----------------------------------------------------------------------------
   # Operations
 
-  def execute(use_network = true, &code)
+  def execute(use_network = true, &block)
     super do |node|
       ensure_network do
-        daemonize(node)
-        yield node
+        add_agent(node)
+
+        trap(:INT) do
+          safe_exit
+        end
+
+        block.call(node)
+        remove_agent(node) if myself.status == code.success
       end
     end
   end
 
-  #---
-
-  def daemonize(node)
-    # Mostly derived from rack gem implementation
-    #
-    # https://github.com/rack/rack/blob/master/lib/rack/server.rb
-    # http://www.jstorimer.com/blogs/workingwithcode/7766093-daemon-processes-in-ruby
-    #
-    if RUBY_VERSION < "1.9"
-      exit if fork
-      Process.setsid
-      safe_exit if fork
-
-      Dir.chdir network.directory
-
-      STDIN.reopen "/dev/null"
-      STDOUT.reopen "/dev/null", "a"
-      STDERR.reopen "/dev/null", "a"
-    else
-      Process.daemon
-    end
-
-    #---
-
-    save_process(node)
-
-    at_exit do
-      shutdown_process(node)
-    end
-
-    trap(:INT) do
-      safe_exit
-    end
-  end
-  protected :daemonize
-
   #-----------------------------------------------------------------------------
   # Utilities
 
-  def process_status(node)
-    agent_settings = node.agent(plugin_provider)
-
-    return :not_running unless agent_settings && agent_settings.has_key?(:pid)
-    return :dead if agent_settings[:pid] == 0
-
-    Process.kill(0, agent_settings[:pid])
-    :running
-
-    rescue Errno::ESRCH
-      :dead
-    rescue Errno::EPERM
-      :not_owned
-  end
-  protected :process_status
-
-  #---
-
-  def save_process(node)
+  def add_agent(node)
     settings[:pid] = Process.pid
 
-    node.add_agent(plugin_provider, settings)
-    node.save({
-      :message => "Agent #{plugin_provider} starting up on #{node.plugin_name}",
-      :remote => extension_set(:write_process_remote, :edit),
-      :push => true
-    })
+    stored_config = Util::Data.clean(settings.export)
+    stored_config = Util::Data.rm_keys(stored_config, [ :node_provider, :nodes, :color, :version ])
+
+    node.add_agent(plugin_provider, stored_config)
   end
-  protected :save_process
+  protected :add_agent
 
   #---
 
-  def shutdown_process(node)
+  def remove_agent(node)
     node.remove_agent(plugin_provider)
-    node.save({
-      :message => "Agent #{plugin_provider} shutting down on #{node.plugin_name}",
-      :remote => extension_set(:shutdown_handler_remote, :edit),
-      :push => true
-    })
   end
-  protected :shutdown_process
+  protected :remove_agent
 
   #---
 
