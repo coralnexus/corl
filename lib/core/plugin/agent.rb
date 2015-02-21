@@ -59,12 +59,11 @@ class Agent < Nucleon.plugin_class(:nucleon, :cloud_action)
   def execute(use_network = true, &block)
     super do |node|
       ensure_network do
-        add_agent(node)
-
         trap(:INT) do
           safe_exit
         end
 
+        add_agent(node)
         block.call(node)
         remove_agent(node) if myself.status == code.success
       end
