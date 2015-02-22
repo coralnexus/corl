@@ -39,7 +39,7 @@ class Status < Nucleon.plugin_class(:nucleon, :cloud_action)
         agent_provider = "agent_#{settings[:provider].join('_')}"
         agent_record   = node.agent(agent_provider)
 
-        agent_record[:running] = node.agent_running(agent_provider)
+        agent_record[:running] = node.agent_running(agent_provider) unless agent_record.empty?
 
         myself.result = agent_record
         $stderr.puts translator.generate(result) unless result.empty?
