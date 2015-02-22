@@ -377,31 +377,62 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
   #---
 
   def agents
-    hash(myself[:agents])
+    if local?
+      agents = cache_setting([ :agents ], {}, :hash)
+    else
+      agents = remote_cache_setting([ :agents ], {}, :hash)
+    end
+    Util::Data.symbol_map(agents)
   end
 
   def agent(provider)
-    search([ :agents, provider ], {}, :hash)
+    if local?
+      agent = cache_setting([ :agents, provider ], {}, :hash)
+    else
+      agent = remote_cache_setting([ :agents, provider ], {}, :hash)
+    end
+    Util::Data.symbol_map(agent)
   end
 
-  def add_agent(provider, settings)
-    set_setting([ :agents, provider ], Config.new(settings).export)
+  def agent_running(provider)
+    if local?
+      agent_options = agent(provider)
+      return false unless agent_options.has_key?(:pid)
 
-    save({
-      :message => "Agent #{provider} starting up on #{plugin_provider} #{plugin_name}",
-      :remote  => extension_set(:add_agent_remote, :edit),
-      :push    => true
-    })
+      Process.kill(0, agent_options[:pid].to_i)
+      true
+    else
+      result = run.node_agents
+
+      if result.status == code.success
+        result_data = Util::Data.parse_json(result.errors)
+        running     = Util::Data.value(result_data[provider.to_s]["running"], false)
+      end
+      return running
+    end
+  rescue Errno::ESRCH # No process (local)
+    false
+  rescue Errno::EPERM # The process exists, but no permission to send signal to it (local)
+    true
+  end
+
+  def add_agent(provider, options)
+    if local?
+      set_cache_setting([ :agents, provider ], Config.new(options).export)
+    else
+      remote_set_cache_setting([ :agents, provider ], Config.new(options).export)
+    end
   end
 
   def remove_agent(provider)
-    delete_setting([ :agents, provider ])
-
-    save({
-      :message => "Agent #{provider} shutting down on #{plugin_provider} #{plugin_name}",
-      :remote => extension_set(:remove_agent_remote, :edit),
-      :push => true
-    })
+    if local?
+      if agent_options = agent(provider) && agent_running(provider)
+        Process.kill("SIGINT",  agent_options[:pid].to_i)
+      end
+      delete_cache_setting([ :agents, provider ])
+    else
+      remote_delete_cache_setting([ :agents, provider ])
+    end
   end
 
   #-----------------------------------------------------------------------------
