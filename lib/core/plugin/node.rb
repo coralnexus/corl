@@ -426,7 +426,8 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
   def remove_agent(provider)
     if local?
-      if agent_options = agent(provider) && agent_running(provider)
+      agent_options = agent(provider)
+      if agent_options && agent_running(provider)
         Process.kill("SIGINT",  agent_options[:pid].to_i)
       end
       delete_cache_setting([ :agents, provider ])
