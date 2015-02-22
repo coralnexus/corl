@@ -34,7 +34,7 @@ class Agents < Nucleon.plugin_class(:nucleon, :cloud_action)
         end
 
         myself.result = agent_records
-        $stderr.puts translator.generate(result)
+        $stderr.puts translator.generate(result) unless result.empty?
       end
     end
   end
