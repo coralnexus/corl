@@ -74,12 +74,19 @@ class Agent < Nucleon.plugin_class(:nucleon, :cloud_action)
   # Utilities
 
   def add_agent(node)
-    settings[:pid] = Process.pid
+    args = []
 
-    stored_config = Util::Data.clean(settings.export)
-    stored_config = Util::Data.rm_keys(stored_config, [ :node_provider, :nodes, :color, :version ])
+    ARGV.each do |arg|
+      args << ( arg =~ /^\-/ ? arg : "'#{arg}'" )
+    end
 
-    node.add_agent(plugin_provider, stored_config)
+    agent_config = Config.new({
+      :pid  => Process.pid,
+      :args => args.join(' ')
+    }).import(Util::Data.clean(settings.export))
+
+    agent_config = Util::Data.rm_keys(agent_config.export, [ :node_provider, :nodes, :color, :version ])
+    node.add_agent(plugin_provider, agent_config)
   end
   protected :add_agent
 
