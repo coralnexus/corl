@@ -176,6 +176,7 @@ class Configuration < Nucleon.plugin_class(:nucleon, :base)
           config.import(properties, method_config)
         end
       end
+      success = cache.load if success
     else
       logger.warn("Loading of source configuration failed")
     end
@@ -195,6 +196,7 @@ class Configuration < Nucleon.plugin_class(:nucleon, :base)
 
         success = yield(method_config) if block_given?
       end
+      success = cache.save if success
     else
       logger.warn("Can not save source configuration")
     end
