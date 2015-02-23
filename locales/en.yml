@@ -667,6 +667,36 @@ en:
           info:
             start: |-
               Destroying %{provider} machine %{name}
+        upload:
+          description: |-
+            Upload a file or directory to a specified location on remote nodes
+          help: |-
+            Upload a file or directory to a specified location on remote nodes
+          options:
+            upload_nodes: |-
+              Nodes to upload file or directory to
+            local_path: |-
+              Local file or directory to upload to nodes (default %{default_value})
+            remote_path: |-
+              Remote path to upload local file or directory to (default %{default_value})
+            file_mode: |-
+              File mode to set for remote file or directory uploaded (default %{default_value})
+            progress: |-
+              Show upload progress (default %{default_value})
+          info:
+            start: |-
+              Starting upload of %{local_path} to %{remote_path} on %{hostname} (id %{id})
+          success:
+            complete: |-
+              Upload completed
+          warn:
+            upload_nodes_empty: |-
+              Nodes must be specified in order to run the upload action
+            upload_nodes: |-
+              Provider %{node_provider} node %{name} is not a valid node to upload (%{value} given)
+          error:
+            failure: |-
+              Upload failed
         ip:
           description: |-
             Return the public IP address for nodes
