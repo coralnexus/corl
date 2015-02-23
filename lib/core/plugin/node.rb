@@ -786,6 +786,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
       config      = Config.ensure(options)
       hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config }, {}, true, false)
       quiet       = config.get(:quiet, false)
+      progress    = config.get(:progress, true)
 
       if extension_check(:upload, hook_config)
         logger.info("Uploading to #{plugin_name}")
@@ -796,7 +797,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
         active_machine = local? ? local_machine : machine
 
         success = active_machine.upload(local_path, remote_path, config.export) do |name, sent, total|
-          info("#{name}: Sent #{sent} of #{total}", { :i18n => false }) unless quiet
+          info("#{name}: Sent #{sent} of #{total}", { :i18n => false }) if progress && ! quiet
           yield(:progress, { :name => name, :sent => sent, :total => total })
         end
 
@@ -820,7 +821,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
   def send_files(local_path, remote_path, files = nil, permission = '0644', options = {}, &code)
     local_path = File.expand_path(local_path)
-    return false unless File.directory?(local_path)
+    return false unless File.directory?(local_path) || File.exists?(local_path)
 
     success = true
 
