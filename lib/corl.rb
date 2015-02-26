@@ -42,59 +42,61 @@ vagrant_exists    = defined?(Vagrant) == 'constant' && Vagrant.class == Module
 #
 # For agent options processed here, see lib/core/plugin/agent.rb
 #
-action_start_index = vagrant_exists ? 1 : 0
+unless vagrant_exists
+  action_start_index = 0
 
-if ARGV[action_start_index].to_sym == :agent
-  remote_exec            = false
+  if ARGV[action_start_index].to_sym == :agent
+    remote_exec            = false
 
-  log                    = true
-  truncate_log           = true
+    log                    = true
+    truncate_log           = true
 
-  log_file               = nil
-  agent_provider         = []
-  process_log_file_value = false
+    log_file               = nil
+    agent_provider         = []
+    process_log_file_value = false
 
-  first_option_found     = false
+    first_option_found     = false
 
-  # Argument processing
-  ARGV[(action_start_index + 1)..-1].each do |arg|
-    first_option_found = true if arg[0] == '-'
+    # Argument processing
+    ARGV[(action_start_index + 1)..-1].each do |arg|
+      first_option_found = true if arg[0] == '-'
 
-    if arg =~ /^\-\-nodes\=?/
-      remote_exec = true
-    elsif arg == "--no-log"
-      log = false
-    elsif arg == "--no-truncate_log"
-      truncate_log = false
-    elsif arg =~ /^\-\-log_file(?=\=(.*))?/
-      if $1
-        log_file = $1
-      else
-        process_log_file_value = true
+      if arg =~ /^\-\-nodes\=?/
+        remote_exec = true
+      elsif arg == "--no-log"
+        log = false
+      elsif arg == "--no-truncate_log"
+        truncate_log = false
+      elsif arg =~ /^\-\-log_file(?=\=(.*))?/
+        if $1
+          log_file = $1
+        else
+          process_log_file_value = true
+        end
+      elsif process_log_file_value
+        log_file               = arg
+        process_log_file_value = false
+      elsif ! first_option_found
+        agent_provider << arg
       end
-    elsif process_log_file_value
-      log_file               = arg
-      process_log_file_value = false
-    elsif ! first_option_found
-      agent_provider << arg
     end
-  end
 
-  # TODO: Need better way to share with base agent default log file. (mixin?)
-  log_file = "/var/log/corl/agent_#{agent_provider.join('_')}.log" unless log_file
+    # TODO: Need better way to share with base agent default log file. (mixin?)
+    log_file = "/var/log/corl/agent_#{agent_provider.join('_')}.log" unless log_file
 
-  unless remote_exec || vagrant_exists
-    # Daemonize process
-    Process.daemon
+    unless remote_exec
+      # Daemonize process
+      Process.daemon
 
-    # Log all output, or not
-    if log
-      FileUtils.mkdir_p('/var/log/corl')
-      File.write(log_file, '') if truncate_log
+      # Log all output, or not
+      if log
+        FileUtils.mkdir_p('/var/log/corl')
+        File.write(log_file, '') if truncate_log
 
-      $stderr.reopen(log_file, 'a')
-      $stdout.reopen($stderr)
-      $stdout.sync = $stderr.sync = true
+        $stderr.reopen(log_file, 'a')
+        $stdout.reopen($stderr)
+        $stdout.sync = $stderr.sync = true
+      end
     end
   end
 end
