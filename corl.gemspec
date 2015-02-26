@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2015-02-19"
+  s.date = "2015-02-26"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -78,8 +78,10 @@ Gem::Specification.new do |s|
     "lib/core/mod/fog_rackspace_server.rb",
     "lib/core/mod/hiera_backend.rb",
     "lib/core/plugin/agent.rb",
+    "lib/core/plugin/agent_wrapper.rb",
     "lib/core/plugin/builder.rb",
     "lib/core/plugin/cloud_action.rb",
+    "lib/core/plugin/cloud_action_wrapper.rb",
     "lib/core/plugin/configuration.rb",
     "lib/core/plugin/fog_machine.rb",
     "lib/core/plugin/fog_node.rb",
@@ -106,6 +108,7 @@ Gem::Specification.new do |s|
     "lib/facter/custom_facts.rb",
     "lib/facter/vagrant_exists.rb",
     "lib/hiera/corl_logger.rb",
+    "lib/nucleon/action/agent/manager.rb",
     "lib/nucleon/action/network/config.rb",
     "lib/nucleon/action/network/create.rb",
     "lib/nucleon/action/network/images.rb",
@@ -117,11 +120,15 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/network/vagrantfile.rb",
     "lib/nucleon/action/node/IP.rb",
     "lib/nucleon/action/node/SSH.rb",
+    "lib/nucleon/action/node/agent/status.rb",
+    "lib/nucleon/action/node/agent/stop.rb",
+    "lib/nucleon/action/node/agents.rb",
     "lib/nucleon/action/node/authorize.rb",
     "lib/nucleon/action/node/bootstrap.rb",
     "lib/nucleon/action/node/build.rb",
     "lib/nucleon/action/node/cache.rb",
     "lib/nucleon/action/node/destroy.rb",
+    "lib/nucleon/action/node/download.rb",
     "lib/nucleon/action/node/exec.rb",
     "lib/nucleon/action/node/fact.rb",
     "lib/nucleon/action/node/facts.rb",
@@ -139,6 +146,7 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/node/start.rb",
     "lib/nucleon/action/node/status.rb",
     "lib/nucleon/action/node/stop.rb",
+    "lib/nucleon/action/node/upload.rb",
     "lib/nucleon/action/plugin/create.rb",
     "lib/nucleon/action/plugin/list.rb",
     "lib/nucleon/action/plugins.rb",
