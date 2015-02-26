@@ -747,6 +747,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
       config      = Config.ensure(options)
       hook_config = Config.new({ :local_path => local_path, :remote_path => remote_path, :config => config }, {}, true, false)
       quiet       = config.get(:quiet, false)
+      progress    = config.get(:progress, true)
 
       if extension_check(:download, hook_config)
         logger.info("Downloading from #{plugin_name}")
@@ -757,7 +758,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
         active_machine = local? ? local_machine : machine
 
         success = active_machine.download(remote_path, local_path, config.export) do |name, received, total|
-          info("#{name}: Sent #{received} of #{total}", { :i18n => false }) unless quiet
+          info("#{name}: Sent #{received} of #{total}", { :i18n => false }) if progress && ! quiet
           yield(:progress, { :name => name, :received => received, :total => total })
         end
 
