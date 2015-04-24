@@ -28,6 +28,9 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
 
   def normalize(reload)
     super do
+      require 'puppet'
+      require 'puppet/configurer'
+
       if [ :debug, :info, :warn ].include? CORL.log_level
         Puppet.debug = true
       end
@@ -86,9 +89,6 @@ class Puppetnode < Nucleon.plugin_class(:CORL, :provisioner)
   # Puppet initialization
 
   def init_puppet(node, profiles)
-    require 'puppet'
-    require 'puppet/configurer'
-
     Puppet.initialize_settings
 
     apply_environment = nil
