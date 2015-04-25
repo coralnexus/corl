@@ -944,7 +944,12 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     admin_command = ''
     if as_admin
-      admin_command = config.delete(:admin_command, 'sudo -i')
+      if user_password = config.delete(:user_password)
+        default_admin_command = "echo '#{user_password}' | sudo -i -S"
+      else
+        default_admin_command = 'sudo -i'
+      end
+      admin_command = config.delete(:admin_command, default_admin_command)
       admin_command = extension_set(:admin_command, admin_command, config)
     else
       config.delete(:admin_command)
@@ -952,6 +957,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     config[:commands] = [ "#{admin_command} #{command.to_s}".strip ]
 
+    dbg(config, 'command config')
     results = exec(config) do |op, data|
       yield(op, data) if block_given?
     end
@@ -988,7 +994,13 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     command_base  = "NUCLEON_NO_PARALLEL=1 #{command_base}" unless parallel
     command_base  = "NUCLEON_NO_COLOR=1 #{command_base}" if action_agent
 
-    result = command(command_base, { :subcommand => action_config, :as_admin => true, :quiet => quiet }) do |op, data|
+    result = command(command_base, Util::Data.clean({
+      :subcommand    => action_config,
+      :as_admin      => true,
+      :admin_command => config.get(:admin_command, nil),
+      :user_password => config.get(:user_password, nil),
+      :quiet         => quiet
+    })) do |op, data|
       yield(op, data) if block_given?
     end
 
@@ -1448,8 +1460,10 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
         data = ''
       end
     elsif type == :error
-      # Hide Rubinius SAFE warning
-      if data == 'WARNING: $SAFE is not supported on Rubinius.'
+      if data.include?('stdin: is not a tty') ||
+         data.include?('unable to re-open stdin') ||
+         data.include?('[sudo] password for') ||
+         data == 'WARNING: $SAFE is not supported on Rubinius.'
         data = ''
       end
     end
