@@ -957,7 +957,6 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     config[:commands] = [ "#{admin_command} #{command.to_s}".strip ]
 
-    dbg(config, 'command config')
     results = exec(config) do |op, data|
       yield(op, data) if block_given?
     end
