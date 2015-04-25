@@ -16,6 +16,8 @@ en:
             Default to using a specific node provider but individual node references can override (default %{default_value})
           nodes: |-
             Optional nodes on which to execute this action
+          user_password: |-
+            Optional user password for SSH login and password required sudo operations
         errors:
           network_provider: |-
             Network plugin provider %{value} is not loaded >> Pick from the following: %{choices}

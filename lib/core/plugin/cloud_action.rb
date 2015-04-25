@@ -70,6 +70,8 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
   # Settings
 
   def node_config
+    register_str :user_password, nil, 'corl.core.action.options.user_password'
+
     register_str :net_remote, :edit, 'corl.core.action.options.net_remote'
     register_network_provider :net_provider, :corl, [ 'corl.core.action.options.net_provider', 'corl.core.action.errors.network_provider' ]
 
