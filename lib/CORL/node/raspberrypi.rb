@@ -21,6 +21,9 @@ class Raspberrypi < Nucleon.plugin_class(:CORL, :node)
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
 
+  #-----------------------------------------------------------------------------
+  # Utilities
+
 end
 end
 end
