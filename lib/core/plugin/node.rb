@@ -954,11 +954,9 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     admin_command = ''
     if as_admin
-      if user_password = config.get(:user_password)
-        default_admin_command = "echo '#{user_password}' | sudo -i -S"
-      else
-        default_admin_command = 'sudo -i'
-      end
+      admin_options         = config.delete(:admin_options, '-i')
+      default_admin_command = password ? "echo '#{password}' | sudo -S #{admin_options}" : "sudo #{admin_options}"
+
       admin_command = config.delete(:admin_command, default_admin_command)
       admin_command = extension_set(:admin_command, admin_command, config)
     else
@@ -999,10 +997,6 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     quiet    = config.get(:quiet, false)
     parallel = config.get(:parallel, true)
 
-    if password = config.get(:user_password)
-      self.password = password
-    end
-
     command_base  = 'corl'
     command_base  = "NUCLEON_NO_PARALLEL=1 #{command_base}" unless parallel
     command_base  = "NUCLEON_NO_COLOR=1 #{command_base}" if action_agent
@@ -1010,8 +1004,8 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     result = command(command_base, Util::Data.clean({
       :subcommand    => action_config,
       :as_admin      => true,
+      :admin_options => config.get(:admin_options, nil),
       :admin_command => config.get(:admin_command, nil),
-      :user_password => config.get(:user_password, nil),
       :quiet         => quiet
     })) do |op, data|
       yield(op, data) if block_given?
@@ -1112,7 +1106,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
           auth_files     = package_files.collect { |path| "'#{path}'"}
           root_home_path = config.get(:root_home, '/root')
 
-          result        = command("cp #{auth_files.join(' ')} #{root_home_path}", { :as_admin => true, :admin_command => 'sudo' })
+          result        = command("cp #{auth_files.join(' ')} #{root_home_path}", { :as_admin => true, :admin_options => '' })
           myself.status = code.root_auth_copy_failure unless result.status == code.success
         end
 
