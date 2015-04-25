@@ -131,6 +131,16 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
 
   #---
 
+  def node_password=password
+    @node_password = password
+  end
+
+  def node_password
+    @node_password
+  end
+
+  #---
+
   def node_groups
     groups = {}
 
@@ -480,6 +490,7 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
       if CORL.parallel? && parallel
         values = []
         nodes.each do |node|
+          node.password = node_password
           if ! running || node.running?
             values << Celluloid::Future.new(node, &code)
           end
@@ -488,6 +499,7 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
         success = false if values.include?(false)
       else
         nodes.each do |node|
+          node.password = node_password
           if ! running || node.running?
             proc_success = code.call(node)
             if proc_success == false
