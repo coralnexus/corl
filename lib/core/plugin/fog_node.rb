@@ -220,16 +220,6 @@ class FogBase < Nucleon.plugin_class(:CORL, :node)
   #-----------------------------------------------------------------------------
   # Utilities
 
-  def filter_output(type, data)
-    data = super
-
-    if type == :error
-      if data.include?('stdin: is not a tty') || data.include?('unable to re-open stdin')
-        data = ''
-      end
-    end
-    data
-  end
 end
 end
 end
