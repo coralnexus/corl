@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2015-02-26"
+  s.date = "2015-04-25"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -58,11 +58,13 @@ Gem::Specification.new do |s|
     "lib/CORL/machine/AWS.rb",
     "lib/CORL/machine/physical.rb",
     "lib/CORL/machine/rackspace.rb",
+    "lib/CORL/machine/raspberrypi.rb",
     "lib/CORL/machine/vagrant.rb",
     "lib/CORL/network/CORL.rb",
     "lib/CORL/node/AWS.rb",
     "lib/CORL/node/local.rb",
     "lib/CORL/node/rackspace.rb",
+    "lib/CORL/node/raspberrypi.rb",
     "lib/CORL/node/vagrant.rb",
     "lib/CORL/provisioner/puppetnode.rb",
     "lib/core/build.rb",
@@ -128,7 +130,6 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/node/build.rb",
     "lib/nucleon/action/node/cache.rb",
     "lib/nucleon/action/node/destroy.rb",
-    "lib/nucleon/action/node/download.rb",
     "lib/nucleon/action/node/exec.rb",
     "lib/nucleon/action/node/fact.rb",
     "lib/nucleon/action/node/facts.rb",
@@ -193,6 +194,7 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
+      s.add_runtime_dependency(%q<net-ping>, ["~> 1.7"])
       s.add_runtime_dependency(%q<fog>, ["~> 1.23"])
       s.add_runtime_dependency(%q<unf>, ["~> 0.1"])
       s.add_runtime_dependency(%q<facter>, ["~> 2.3"])
@@ -205,6 +207,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<github-markup>, ["~> 1.3"])
     else
       s.add_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
+      s.add_dependency(%q<net-ping>, ["~> 1.7"])
       s.add_dependency(%q<fog>, ["~> 1.23"])
       s.add_dependency(%q<unf>, ["~> 0.1"])
       s.add_dependency(%q<facter>, ["~> 2.3"])
@@ -218,6 +221,7 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<nucleon>, [">= 0.2.2", "~> 0.2"])
+    s.add_dependency(%q<net-ping>, ["~> 1.7"])
     s.add_dependency(%q<fog>, ["~> 1.23"])
     s.add_dependency(%q<unf>, ["~> 0.1"])
     s.add_dependency(%q<facter>, ["~> 2.3"])
