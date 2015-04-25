@@ -174,6 +174,16 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
   #---
 
+  def password=password
+    @password = password
+  end
+
+  def password
+    @password
+  end
+
+  #---
+
   def ssh_port=ssh_port
     myself[:ssh_port] = ssh_port
     machine.init_ssh(ssh_port) if machine
@@ -944,7 +954,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     admin_command = ''
     if as_admin
-      if user_password = config.delete(:user_password)
+      if user_password = config.get(:user_password)
         default_admin_command = "echo '#{user_password}' | sudo -i -S"
       else
         default_admin_command = 'sudo -i'
@@ -988,6 +998,10 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     quiet    = config.get(:quiet, false)
     parallel = config.get(:parallel, true)
+
+    if password = config.get(:user_password)
+      self.password = password
+    end
 
     command_base  = 'corl'
     command_base  = "NUCLEON_NO_PARALLEL=1 #{command_base}" unless parallel

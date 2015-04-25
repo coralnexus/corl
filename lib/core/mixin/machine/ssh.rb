@@ -19,7 +19,8 @@ module SSH
     ssh_config  = Config.new({
       :keypair  => node.keypair,
       :key_dir  => node.network.key_cache_directory,
-      :key_name => node.plugin_name
+      :key_name => node.plugin_name,
+      :password => node.password
     })
 
     begin
