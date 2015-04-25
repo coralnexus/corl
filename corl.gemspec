@@ -130,6 +130,7 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/node/build.rb",
     "lib/nucleon/action/node/cache.rb",
     "lib/nucleon/action/node/destroy.rb",
+    "lib/nucleon/action/node/download.rb",
     "lib/nucleon/action/node/exec.rb",
     "lib/nucleon/action/node/fact.rb",
     "lib/nucleon/action/node/facts.rb",
