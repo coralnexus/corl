@@ -44,6 +44,9 @@ module Facade
       ip_address = Config.fact(:ipaddress_eth1)
       ip_address = Config.fact(:ipaddress_eth0) unless ip_address
       ip_address
+    elsif Config.fact(:raspberry_pi)
+      ip_address = Config.fact(:ipaddress_eth0)
+      ip_address
     else
       CORL.ip_address
     end
