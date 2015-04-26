@@ -116,7 +116,7 @@ class CloudAction < Nucleon.plugin_class(:nucleon, :action)
   def node_exec
     init_network(settings[:net_provider]) unless network && settings[:net_provider].to_sym == network.plugin_provider
 
-    network.node_password = settings[:user_password] if settings[:user_password]
+    network.node_password = settings[:user_password] if network && settings[:user_password]
 
     #
     # A fork in the road...
