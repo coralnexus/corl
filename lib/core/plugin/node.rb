@@ -1470,6 +1470,7 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
       if data.include?('stdin: is not a tty') ||
          data.include?('unable to re-open stdin') ||
          data.include?('[sudo] password for') ||
+         data.include?('sudo: unable to resolve host') ||
          data == 'WARNING: $SAFE is not supported on Rubinius.'
         data = ''
       end
