@@ -20,7 +20,7 @@ class Authorize < Nucleon.plugin_class(:nucleon, :cloud_action)
 
       register_bool :reset, false
       register_str :public_key, nil
-      register_str :ssh_user, nil
+      register_str :ssh_user, ''
     end
   end
 
@@ -38,7 +38,8 @@ class Authorize < Nucleon.plugin_class(:nucleon, :cloud_action)
       info('start', { :public_key => settings[:public_key] })
 
       ensure_node(node) do
-        ssh_path        = Util::SSH.key_path(settings[:ssh_user])
+        ssh_user        = settings[:ssh_user].empty? ? nil : settings[:ssh_user]
+        ssh_path        = Util::SSH.key_path(ssh_user)
         authorized_keys = File.join(ssh_path, 'authorized_keys')
         public_key      = settings[:public_key].strip
         key_found       = false

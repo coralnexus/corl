@@ -653,10 +653,10 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
       :message => "Updating SSH keys for node #{plugin_provider} (#{plugin_name})"
     }
 
-    active  = machine && machine.running?
-    user    = node.user ? node.user : 'root'
-    result  = run.authorize({ :public_key => keypair.ssh_key, :ssh_user => user }) if active
-    success = false
+    active   = machine && machine.running?
+    ssh_user = user ? user : 'root'
+    result   = run.node_authorize({ :public_key => keypair.ssh_key, :ssh_user => ssh_user }) if active
+    success  = false
 
     if ! active || result.status == code.success
       private_key = network.attach_data(:keys, "#{base_name}-id_#{keypair.type}", keypair.encrypted_key)
