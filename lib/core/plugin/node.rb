@@ -654,7 +654,8 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
     }
 
     active  = machine && machine.running?
-    result  = run.authorize({ :public_key => keypair.ssh_key }) if active
+    user    = node.user ? node.user : 'root'
+    result  = run.authorize({ :public_key => keypair.ssh_key, :ssh_user => user }) if active
     success = false
 
     if ! active || result.status == code.success
