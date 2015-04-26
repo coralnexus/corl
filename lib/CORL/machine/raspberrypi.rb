@@ -107,8 +107,7 @@ class Raspberrypi < Nucleon.plugin_class(:CORL, :machine)
 
   def reload(options = {})
     super do
-      logger.warn("Reloading not currently supported on Raspberry Pi machines")
-      true
+      node.command('reboot', { :as_admin => true })
     end
   end
 
