@@ -1044,6 +1044,8 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
           active_machine = machine
         end
 
+        config[:key_dir]      = network.key_cache_directory
+        config[:key_name]     = plugin_name
         config[:private_keys] = private_key
         config[:port]         = ssh_port
 
