@@ -239,6 +239,8 @@ class Network < Nucleon.plugin_class(:nucleon, :base)
       local_node.normalize(true)
       local_node.localize
     end
+
+    local_node.password = node_password
     local_node
   end
 
