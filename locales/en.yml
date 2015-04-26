@@ -714,9 +714,18 @@ en:
         authorize:
           description: |-
             Authorize a public key for node access
+          info:
+            start: |-
+              Authorizing public SSH key: %{public_key}
         revoke:
           description: |-
             Revoke a public keys access to nodes
+        devkey:
+          description: |-
+            Generate a new development SSH keypair and authorize on servers
+          info:
+            start: |-
+              Generating and authorizing keypair for machine %{hostname} (%{id})
         keypair:
           description: |-
             Generate a new SSH keypair
