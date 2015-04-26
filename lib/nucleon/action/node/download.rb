@@ -50,7 +50,7 @@ class Download < Nucleon.plugin_class(:nucleon, :cloud_action)
   end
 
   def arguments
-    [ :remote_path, :local_path, :upload_nodes ]
+    [ :remote_path, :local_path, :download_nodes ]
   end
 
   #-----------------------------------------------------------------------------
