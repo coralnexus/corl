@@ -48,7 +48,7 @@ class Devkey < Nucleon.plugin_class(:nucleon, :cloud_action)
   #---
 
   def ignore
-    [ :nodes ]
+    [ :nodes, :parallel ]
   end
 
   def arguments
@@ -66,7 +66,7 @@ class Devkey < Nucleon.plugin_class(:nucleon, :cloud_action)
         if keypair.nil?
           myself.status = code.no_password_given
         else
-          batch_success = network.batch(settings[:key_nodes], settings[:node_provider], settings[:parallel]) do |node|
+          batch_success = network.batch(settings[:key_nodes], settings[:node_provider], false) do |node|
             render_options = { :id => node.id, :hostname => node.hostname }
 
             info('start', render_options)
