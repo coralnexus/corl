@@ -28,7 +28,8 @@ class Configuration < Nucleon.plugin_class(:nucleon, :base)
       :revision      => _delete(:revision),
       :create        => _delete(:create, false),
       :pull          => true,
-      :internal_ip   => CORL.public_ip, # Needed for seeding Vagrant VMs
+      :external_ip   => _delete(:external_ip, nil),
+      :internal_ip   => _delete(:internal_ip, CORL.public_ip), # Needed for seeding Vagrant VMs
       :manage_ignore => _delete(:manage_ignore, true),
       :new           => true
     }), _delete(:project_provider, nil)) unless reload
