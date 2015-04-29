@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Adrian Webb"]
-  s.date = "2015-04-25"
+  s.date = "2015-04-29"
   s.description = "Framework that provides a simple foundation for growing organically in the cloud"
   s.email = "adrian.webb@coralnexus.com"
   s.executables = ["corl"]
@@ -108,6 +108,7 @@ Gem::Specification.new do |s|
     "lib/facter/corl_config_ready.rb",
     "lib/facter/corl_network.rb",
     "lib/facter/custom_facts.rb",
+    "lib/facter/raspberry_pi.rb",
     "lib/facter/vagrant_exists.rb",
     "lib/hiera/corl_logger.rb",
     "lib/nucleon/action/agent/manager.rb",
@@ -130,6 +131,7 @@ Gem::Specification.new do |s|
     "lib/nucleon/action/node/build.rb",
     "lib/nucleon/action/node/cache.rb",
     "lib/nucleon/action/node/destroy.rb",
+    "lib/nucleon/action/node/devkey.rb",
     "lib/nucleon/action/node/download.rb",
     "lib/nucleon/action/node/exec.rb",
     "lib/nucleon/action/node/fact.rb",
