@@ -14,10 +14,6 @@ class Raspberrypi < Nucleon.plugin_class(:CORL, :node)
   #-----------------------------------------------------------------------------
   # Checks
 
-  def local?
-    false
-  end
-
   #-----------------------------------------------------------------------------
   # Property accessors / modifiers
 
