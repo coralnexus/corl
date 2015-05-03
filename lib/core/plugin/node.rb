@@ -25,11 +25,10 @@ class Node < Nucleon.plugin_class(:nucleon, :base)
 
     unless reload
       @cli_interface = Util::Liquid.new do |method, args, &code|
-        result = exec({ :commands => [ [ method, args ].flatten.join(' ') ] }) do |op, data|
+        result = command([ method, args ].flatten.join(' '), { :as_admin => true }) do |op, data|
           code.call(op, data) if code
         end
         if result
-          result = result.first
           warn(result.errors, { :i18n => false }) unless result.errors.empty?
         end
         result
