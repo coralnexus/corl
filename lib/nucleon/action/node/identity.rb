@@ -93,12 +93,26 @@ class Identity < Nucleon.plugin_class(:nucleon, :cloud_action)
             result  = node.cli.mkdir('-p', remote_identity_base_directory)
             success = false unless result.status == code.success
 
+            success = node.cli.chmod('-R', 'go-rwx', remote_config_directory) if success
+
             if success
               result  = node.cli.rm('-Rf', remote_identity_directory)
               success = false unless result.status == code.success
 
               # Send identity through SCP to remote machine
-              success = node.send_files(identity_directory, remote_identity_directory, nil, '0700') if success && ! settings[:delete]
+              if success && !settings[:delete]
+                if node.user == 'root'
+                  success = node.send_files(identity_directory, remote_identity_directory, nil, '0700')
+                else
+                  tmp_identity_directory = File.join('/', 'home', node.user, 'identity')
+
+                  success = node.send_files(identity_directory, tmp_identity_directory, nil, '0700') if success
+
+                  success = node.cli.mv(tmp_identity_directory, remote_identity_directory) if success
+                  success = node.cli.chown('-R', 'root:root', remote_identity_directory) if success
+                  success = node.cli.chmod('-R', 'go-rwx', remote_identity_directory) if success
+                end
+              end
             end
             success
           end
