@@ -2,26 +2,26 @@
 require 'puppet/indirector/terminus'
 
 class Puppet::Indirector::Corl < Puppet::Indirector::Terminus
-  
+
   def initialize(*args)
     node = CORL::Provisioner::Puppetnode.node
-    
+
     unless node.config_initialized?
       raise "CORL terminus not supported without the CORL library"
     end
     super
   end
-  
+
   #---
 
   def find(request)
     node         = CORL::Provisioner::Puppetnode.node
-        
+
     puppet_scope = request.options[:variables]
     module_name  = nil
     module_name  = puppet_scope.source.module_name if puppet_scope.source
     contexts     = [ :param, :data_binding, request.key ]
-    
+
     default_options = {
       :provisioner     => :puppetnode,
       :hiera_scope     => puppet_scope,
@@ -32,9 +32,9 @@ class Puppet::Indirector::Corl < Puppet::Indirector::Terminus
       :merge           => true,
       :undefined_value => :undef
     }
-    
+
     if module_name
-      config = CORL::Config.init({}, contexts, module_name, default_options)  
+      config = CORL::Config.init({}, contexts, module_name, default_options)
     else
       config = CORL::Config.init_flat({}, contexts, default_options)
     end

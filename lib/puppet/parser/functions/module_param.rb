@@ -18,22 +18,22 @@ This function performs a lookup for a variable value in various locations follow
 If no value is found in the defined sources, it returns an empty string ('')
     EOS
 ) do |args|
-    
+
     value = nil
     CORL.run do
       raise(Puppet::ParseError, "module_param(): Define at least the variable name " +
         "given (#{args.size} for 1)") if args.size < 1
-      
+
       var_name = args[0]
       default  = ( args.size > 1 ? args[1] : '' )
       options  = ( args.size > 2 ? args[2] : {} )
-    
+
       module_name = parent_module_name
       node        = CORL::Provisioner::Puppetnode.node
-      
+
       if module_name
         module_var_name = "#{module_name}::#{var_name}"
-        
+
         config = CORL::Config.init(options, [ :param, :module_param, var_name ], module_name, {
           :provisioner     => :puppetnode,
           :hiera_scope     => self,
