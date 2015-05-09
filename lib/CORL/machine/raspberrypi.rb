@@ -107,7 +107,10 @@ class Raspberrypi < Nucleon.plugin_class(:CORL, :machine)
 
   def reload(options = {})
     super do
-      node.command('reboot', { :as_admin => true })
+      success = node.command('reboot', { :as_admin => true })
+      sleep 5
+      sleep 1 until running?
+      success
     end
   end
 
