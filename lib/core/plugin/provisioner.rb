@@ -222,8 +222,21 @@ class Provisioner < Nucleon.plugin_class(:nucleon, :base)
 
     while config.has_key?(:extend) do
       array(config.delete(:extend)).each do |parent|
-        parent = profile_id(package, parent) unless parent.match('::')
+        parent      = profile_id(package, parent) unless parent.match('::')
+        parent_base = parent.sub(/::[^:]+$/, '')
         parents << parent
+
+        if profiles[parent.to_sym].has_key?(:extend)
+          extends = []
+          array(profiles[parent.to_sym][:extend]).each do |extend|
+            if extend.include?('::')
+              extends << extend
+            else
+              extends << "#{parent_base}::#{extend}"
+            end
+          end
+          profiles[parent.to_sym][:extend] = extends
+        end
         config.defaults(profiles[parent.to_sym])
       end
     end
